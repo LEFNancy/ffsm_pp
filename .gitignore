@@ -1,7 +1,7 @@
 # ignoring all object files, the pythia executable, qmake/compilation temporary files and any backup files left by editors
 
 *.o
-*.~
+*~
 pythia
 pythia.exe
 *.pro.user
