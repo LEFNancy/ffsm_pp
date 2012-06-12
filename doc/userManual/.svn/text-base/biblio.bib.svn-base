@@ -1,0 +1,860 @@
+
+
+
+
+
+
+
+
+% Extracted from http://regmas.org/doc/doku.php?id=project:bibliographic_papers
+% on 2007.12.12
+% Updated 2008.07.24
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Agent-based modeling in the social sciences
+
+@incollection{Arthur:2006,
+	author = {Arthur, W. B.},
+	title = {Out-of-Equilibrium Economics and Agent-Based Modeling},
+	chapter={32},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1551-1564},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-R/2/08cef511afcd9a4b6a6b548cd7cd093b},
+	keywords = {Keywords: agent-based ; out-of-equilibrium economics ; evolutionary economics ; indeterminacy ; complexity}
+}
+@incollection{Axelrod:2006,
+	author = {Axelrod, R.},
+	title = {Agent-based Modeling as a Bridge Between Disciplines},
+	chapter={33},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1565-1584},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-S/2/348b166bdfe6fcb9d4fcb30803354162},
+	keywords = {Keywords: interdisciplinary research ; agent-based models ; evolutionary biology ; prisoner's dilemma}
+}
+@incollection{Axelrod:2006b,
+	author = {Axelrod, R. and Tesfatsion, L.},
+	title = {A Guide for Newcomers to Agent-Based Modeling in the Social Sciences},
+	chapter={Appendix A},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1647-1659},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {www.econ.iastate.edu/tesfatsi/GuidetoABM.pdf},
+	keywords = {Keywords: agent-based modeling ; complexity ; emergence ; collective behavior ; evolution ; learning ; norms ; markets ; institutional design ; networks}
+}
+@incollection{Brenner:2006,
+	author = {Brenner, T.},
+	title = {Agent Learning Representation: Advice on Modelling Economic Learning},
+	chapter={18},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {895-947},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-7/2/ed71a255aabd7d9a8701ec85f3b92c38},
+	keywords = {Keywords: economic learning ; modelling}
+}
+@incollection{Chang:2006,
+	author = {Chang, M. and Harrington, Jr., J. E.},
+	title = {Agent-Based Models of Organizations},
+	chapter={26},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1273-1337},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-H/2/900379035d37365e352b1a18e278a14d},
+	keywords = {Keywords: agent-based models ; organizations ; organizational structure ; organizational search ; organizational learning ; complexity ; exploration ; exploitation ; centralization ; decentralization ; coordination ; information processing ; hierarchy ; networks ; coevolution ; organizational norms ; endogenous hierarchies}
+}
+@incollection{Dawid:2006,
+	author = {Dawid, H.},
+	title = {Agent-based Models of Innovation and Technological Change},
+	chapter={25},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1235-1272},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-G/2/272bdf3edae02baf6e1e29c07ea75af9},
+	keywords = {Keywords: agent-based computational economics ; innovation ; technological change ; evolutionary economics}
+}
+@incollection{Duffy:2006,
+	author = {Duffy, J.},
+	title = {Agent-Based Models and Human Subject Experiments},
+	chapter={19},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {949-1011},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-8/2/fa81b2c6268a5c59eec10342a5939bc8},
+	keywords = {Keywords: agent-based modeling ; human subject experiments}
+}
+@incollection{Epstein:2006,
+	author = {Epstein, J. M.},
+	title = {Remarks on the Foundations of Agent-Based Generative Social Science},
+	chapter={34},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1585-1604},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-T/2/48ba7cb4bc73777204311257c55e6aa6},
+	keywords = {Keywords: generative social science ; agent-based modeling ; philosophy of social science}
+}
+@incollection{Hommes:2006,
+	author = {Hommes, C. H.},
+	title = {Heterogeneous Agent Models in Economics and Finance},
+	chapter={23},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1109-1186},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-D/2/209e0da7469593ec39298059d3f97cac},
+	keywords = {Keywords: interacting agents ; behavioral economics ; evolutionary finance ; complex adaptive systems ; nonlinear dynamics ; numerical simulation}
+}
+@incollection{Howitt:2006,
+	author = {Howitt, P.},
+	title = {Coordination Issues in Long-Run Growth},
+	chapter={35},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1605-1624},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-V/2/65a0ef772dbb1b729ff135de412ba060},
+	keywords = {Keywords: growth ; coordination ; innovation ; stability ; agent-based systems}
+}
+@incollection{Janssen:2006,
+	author = {Janssen, M. A. and Ostrom, E.},
+	title = {Governing Social-Ecological Systems},
+	chapter={30},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1465-1509},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-N/2/c6f487256f72fe8753e9015f2b2145c1},
+	keywords = {Keywords: social-ecological systems ; agent-based computational models ; commons dilemma ; cooperation ; non-convex ecosystem dynamics}
+}
+@incollection{Judd:2006,
+	author = {Judd, K. L.},
+	title = {Computationally Intensive Analyses in Economics},
+	chapter={17},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {881-893},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-6/2/d3a05eabf4fbca2148a664c365b0347c},
+	keywords = {Keywords: computational economics ; economic methodology}
+}
+@incollection{Kollman:2006,
+	author = {Kollman, K. and Page, S. E.},
+	title = {Computational Methods and Models of Politics},
+	chapter={29},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1433-1463},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-M/2/5c052efa9a3f3a2c72da01dd76ee44c4},
+	keywords = {Keywords: agent based models ; political economy ; spatial voting ; collective action ; complexity}
+}
+@incollection{Leijonhufvud:2006,
+	author = {Leijonhufvud, A.},
+	title = {Agent-Based Macro},
+	chapter={36},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1625-1637},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-W/2/680ea58ee2dd4f7d9007698b9561b799},
+	keywords = {Keywords: adaptive behavior ; market processes ; effective demand failure ; stability of equilibrium ; Say's Law ; natural rate of unemployment ; Marshall ; Keynes}
+}
+@incollection{Schelling:2006,
+	author = {Schelling, T. C.},
+	title = {Some Fun, Thirty-Five Years Ago},
+	chapter={37},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1639-1644},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-X/2/27e15b61104f6feda61404c857b2ed4b},
+	keywords = {Keywords: segregation ; integration ; neighbor ; neighborhood ; majority ; minority}
+}
+@incollection{Tesfatsion:2006,
+	author = {Tesfatsion, L.},
+	title = {Agent-Based Computational Economics: A Constructive Approach to Economic Theory},
+	chapter={16},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {831-880},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-5/2/78baae6f3ea5e7104b2b590b48264d1f},
+	keywords = {Keywords: agent-based computational economics ; complex adaptive systems ; endogenous interactions ; decentralized market processes ; strategic rivalry ; behavioral uncertainty ; learning ; institutions ; agent-oriented programming}
+}
+@Book{Tesfatsion:2006c,
+	editor = {Tesfatsion, Leigh and Kenneth, L. Judd},
+	title = {Handbook of Computational Economics. Agent-Based Computational Economics},
+	publisher = {Elsevier},
+	year = {2006},
+	volume = {2}
+}
+@incollection{Vriend:2006,
+	author = {Vriend, N. J.},
+	title = {ACE Models of Endogenous Interactions},
+	chapter={21},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1047-1079},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-B/2/9f1803a2cc540b7d0fd459b36fd3bc83},
+	keywords = {Keywords: endogenous interaction ; Agent-based Computational Economics (ACE)}
+}
+@incollection{Wilhite:2006,
+	author = {Wilhite, A.},
+	title = {Economic Activity on Fixed Networks},
+	chapter={20},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1013-1045},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-9/2/0a94aef05f5bd58e983539fa6683890b},
+	keywords = {Keywords: networks ; games on networks ; exchange on networks ; small worlds ; power networks}
+}
+@incollection{Young:2006,
+	author = {Young, H. P.},
+	title = {Social Dynamics: Theory and Applications},
+	chapter={22},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1081-1108},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-C/2/2aaeec1f0d9dfae372e5dde78e19a755},
+	keywords = {Keywords: bounded rationality ; social norms ; Markov chains ; random perturbations ; stochastic stability ; punctuated equilibrium ; local conformity ; global diversity}
+}
+@Article{Casti:1997,
+	author = {J. L. Casti},
+	title = {Can you trust it?},
+	journal = {Complexity},
+	year = {1997},
+	volume = {2},
+	number = {5},
+	pages = {8-11},
+	month = {May/June},
+	doi = {10.1002/(SICI)1099-0526(199705/06)2:5<8::AID-CPLX2>3.0.CO;2-3}
+}
+@Book{Schelling:1978,
+	author = {T. C. Schelling},
+	title = {Micromotives and macrobehavior},
+	publisher = {W. W. Norton \& Company},
+	year = {1978}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Agent-based models, space and land use
+
+@Article{Matthews:2007,
+	author = {Robin B. Matthews},
+        author = {Nigel G. Gilbert},
+        author = {Alan Roach},
+        author = {J. Gary Polhill},
+        author = {Nick M. Gotts},
+	title = {Agent-based land-use models: a review of applications},
+	journal = {Landscape Ecology},
+	year = {2007},
+	volume = {22},
+	number = {10},
+	month = {December},
+        %url={http://www.springerlink.com/content/3266272078436kv7},
+        doi={10.1007/s10980-007-9135-1}
+}
+
+@Article{Boero:2006,
+	author = {R. Boero},
+	title = {The Spatial Dimension and Social Simulations: A Review of Three Books},
+	journal = {JASSS, Journal of Artificial Societies and Social Simulation},
+	url = {http://jasss.soc.surrey.ac.uk/9/4/reviews/boero.html},
+	year = {2006},
+	volume = {9},
+	number = {4},
+	month = {October}
+}
+@Unpublished{Boero:2006b,
+	author = {R. Boero},
+	title = {Un modello dell'economia piemontese come sistema complesso: interdipendenze economiche e territoriali tra centro e periferia.},
+	note = {Torino, Manuscript},
+	year = {2006}
+}
+@Misc{Castle:2006,
+	author = {C. Castle and A. Crooks},
+	title = {Principles and Concepts of Agent-Based Modelling for Developing Geospatial Simulations},
+	howpublished = {CASA Working Paper Series},
+	month = {September},
+	year = {2006},
+	url = {http://www.casa.ucl.ac.uk/working_papers/paper110.pdf}
+}
+@incollection{Dibble:2006,
+	author = {Dibble, C.},
+	title = {Computational Laboratories for Spatial Agent-Based Models},
+	chapter={31},
+	booktitle = {Handbook of Computational Economics},
+	volume = {2},
+	pages = {1511-1548},
+	publisher = {Elsevier},
+	year = {2006},
+	url = {http://www.sciencedirect.com/science/article/B7P5C-4JR414P-P/2/88067a30a2c48cf8e1d3c882dce6f459},
+	keywords = {Keywords: agent-based simulation ; computational laboratory ; computational social science ; computational economics ; spatial economics ; spatial social science ; spatial networks ; small-world networks ; scale-free networks ; synthetic landscape ; inference}
+}
+@article{An:2005,
+	author = {An,L.},
+	author = {Linderman,M.},
+	author = {Qi,J.},
+	author = {Shortridge,A.},
+	author = {Liu,J.},
+	title = {Exploring Complexity in a Human-Environment System: An Agent-Based Spatial Model for Multidisciplinary and Multiscale Integration},
+	journal = {Annals of the Association of American Geographers},
+	volume = {95},
+	number = {1},
+	pages = {54-79},
+	year = {2005},
+	doi = {10.1111/j.1467-8306.2005.00450.x},
+	URL = {http://www.blackwell-synergy.com/doi/abs/10.1111/j.1467-8306.2005.00450.x},
+	eprint = {http://www.blackwell-synergy.com/doi/pdf/10.1111/j.1467-8306.2005.00450.x}
+}
+@Article{Castella:2005,
+	author = {J. Castella and S. Boissau and T.N. Trung and D.D. Quang},
+	title = {Agrarian transition and lowland-upland interactions in mountain areas in northern Vietnam: application of multi-agent simulation model},
+	journal = {Agricultural systems},
+	year = {2005},
+	url = {http://www.sciencedirect.com/science/article/B6T3W-4F29HSM-1/2/5d018e2f9b940709e3857c26d8d1f86d},
+	volume = {86},
+	number = {3},
+	month = {December}
+} 
+@Article{Paassen:2007,
+	author = {A. Van Paassen and R.P. Roetter and H. Van Keulen and C.T. Hoanh},
+	title = {Can computer models stimulate learning about sustainable land use? Experience with LUPAS in the humid (sub-)tropics of Asia},
+	journal = {Agricultural systems},
+	year = {2007},
+	url = {http://www.sciencedirect.com/science/article/B6T3W-4MSY8PC-6/2/e9b452247cc77f18ce1f8e9395857b52},
+	volume = {94},
+	number = {3},
+	month = {June}
+} 
+@Misc{Parker:2004,
+	author = {D. C. Parker},
+	title = {Multi-Agent System Models of Land-Use: What are they, Why use them, and What can we learn?},
+	howpublished = {Class material},
+	month = {April},
+	year = {2004},
+	url = {http://classweb.gmu.edu/dparker3/lumta\_present/ABM\_LUCC\_overview.pdf}
+}
+@article{Parker:2003,
+	author = {D. C. Parker},
+	author = {Manson,Steven M.},
+	author = {Janssen,Marco A.},
+	author = {Hoffmann,Matthew J.},
+	author = {Deadman,Peter},
+	title = {Multi-Agent Systems for the Simulation of Land-Use and Land-Cover Change: A Review},
+	journal = {Annals of the Association of American Geographers},
+	volume = {93},
+	number = {2},
+	pages = {314-337},
+	year = {2003},
+	doi = {10.1111/1467-8306.9302004},
+	URL = {http://www.blackwell-synergy.com/doi/abs/10.1111/1467-8306.9302004},
+	eprint = {http://www.blackwell-synergy.com/doi/pdf/10.1111/1467-8306.9302004}
+}
+@article{Teran:2007,
+	author = {Ter\'{a}n, Oswaldo and Alvarez, Johanna and Ablan, Magdiel and Jaimes, Manuel},
+	title = {Characterising Emergence of Landowners in a Forest Reserve},
+	journal = {Journal of Artificial Societies and Social Simulation},
+	ISSN = {1460-7425},
+	volume = {10},
+	number = {3},
+	pages = {6},
+	year = {2007},
+	URL = {http://jasss.soc.surrey.ac.uk/10/3/6.html},
+	keywords = {Land-Use Modelling, Leptokurtic Distributions, Forest Reserves, MABS Applications},
+}
+
+% Cellula automata and complexity in general
+
+@misc{ wiki:cellularAutomata,
+	author = "Wikipedia",
+	title = "Cellular automaton --- Wikipedia{,} The Free Encyclopedia",
+	year= "2006",
+	url="http://en.wikipedia.org/w/index.php?title=Cellular_automaton&oldid=88542137",
+	lastchecked ="29-November-2006"
+}
+@misc{ wiki:chaosTheory,
+	author = "Wikipedia",
+	title = "Chaos theory --- Wikipedia{,} The Free Encyclopedia",
+	year= "2006",
+	url="http://en.wikipedia.org/w/index.php?title=Chaos_theory&oldid=90838367",
+	lastchecked ="29-November-2006"
+}
+@misc{ wiki:complexAdaptiveSystem,
+	author = "Wikipedia",
+	title = "Complex adaptive system --- Wikipedia{,} The Free Encyclopedia",
+	year= "2006",
+	url="http://en.wikipedia.org/w/index.php?title=Complex_adaptive_system&oldid=84025726",
+	lastchecked ="29-November-2006"
+}
+@misc{ wiki:complexSystem,
+	author = "Wikipedia",
+	title = "Complex system --- Wikipedia{,} The Free Encyclopedia",
+	year= "2006",
+	url="http://en.wikipedia.org/w/index.php?title=Complex_system&oldid=86227478",
+	lastchecked ="29-November-2006"
+}
+@misc{ wiki:gameOfLife,
+	author = "Wikipedia",
+	title = "Conway's Game of Life --- Wikipedia{,} The Free Encyclopedia",
+	year= "2006",
+	url="http://en.wikipedia.org/w/index.php?title=Conway%27s_Game_of_Life&oldid=89009573",
+	lastchecked = "29-November-2006"
+}
+@InProceedings{Avolio:2004,
+	key = {Avolio:2004},
+	author = {Maria Vittoria Avolio and Salvatore Di Gregorio},
+	title = {A Cellular 'Blocks' Model for Large Surface Flows and Applications to Lava Flows},
+	booktitle = {Cellular Automata: 6th International Conference On Cellular Automata For Research And Industry, ACRI 2004},
+	pages = {415-424},
+	year = {2004},
+	publisher = {Springer},
+	%url = {http://www.springerlink.com/content/3uy83urqa5k2n0x8}
+}
+@Proceedings{Sloot:2004,
+	key = {Sloot:2004},
+	title = {Cellular Automata: 6th International Conference On Cellular Automata For Research And Industry, ACRI 2004},
+	year = {2004},
+	editor = {P.M.A. Sloot, B. Chopard, A.G. Hoekstra},
+	month = {September},
+	publisher = {Springer},
+	%url={http://www.springerlink.com/content/69f4jx69my3d}
+}
+@InProceedings{Trunfio:2004,
+	key = {Trunfio:2004},
+	author = {G.A.Trunfio},
+	title = {Predicting wildfire spreading through a hexagonal callular automata model},
+	booktitle = {Cellular Automata: 6th International Conference On Cellular Automata For Research And Industry, ACRI 2004},
+	pages = {385},
+	year = {2004},
+	publisher = {Springer},
+	%url = {http://www.springerlink.com/content/kybl6x2n2p160bmr}
+}
+@Article{Arthur:1999,
+	key = {Arthur:1999},
+	author = {W. Brian Arthur},
+	title = {Complexity and the Economy},
+	journal = {Science},
+	volume = {284},
+	number = {5411},
+	pages = {107},
+	year = {1999}
+}
+@Article{Goldenfeld:1999,
+	key = {Goldenfeld:1999},
+	author = {N. Goldenfeld and L.P. Kadanoff},
+	title = {Simple lessons fom complexity},
+	journal = {Science},
+	volume = {284},
+	number = {5411},
+	pages = {87},
+	year = {1999}
+}
+@Article{Gosper:1984,
+	author = {R. Wm. Gosper},
+	title = {Exploiting regularities in large cellular spaces},
+	journal = {Physica D: Nonlinear Phenomena},
+	year = {1984},
+	volume = {10},
+	number = {1-2},
+	pages = {75-80},
+	month = {January},
+	doi= {10.1016/0167-2789(84)90251-3},
+	%url= {http://dx.doi.org/10.1016/0167-2789(84)90251-3}
+}
+
+% ABM frameworks and tools
+
+@Misc{Axtell:2006,
+	author = {R. Axtell},
+	title = {Platforms for Agent-Based Computational Economics},
+	howpublished = {Document presented at the VII Trento Summer School},
+	month = {July},
+	year = {2006},
+	url = {http://www.econ.iastate.edu/tesfatsi/AgentModelingPlatforms.RAxtell.pdf}
+}
+@Misc{Collier:2003,
+	author = {N. Collier},
+	title = {RePast: An Extensible Framework for Agent Simulation},
+	year = {2003},
+	url = {http://www.econ.iastate.edu/tesfatsi/RepastTutorial.Collier.pdf}
+}
+@InProceedings{Bousquet:1998,
+	author = {F. Bousquet and I. Bakam and H. Proton and C. Le Page},
+	title = {Cormas: Common-pool resources and multi-agent systems},
+	booktitle = {Tasks and Methods in Applied Artificial Intelligence},
+	pages = {826-837},
+	year = {1998},
+	editor = {A. P. del Pobil and J. M. and M. Ali},
+	volume = {1416},
+	series = {Lecture Notes in Computer Science},
+	publisher = {Springer},
+	%url = {http://www.springerlink.com/content/6xqj44773631652l},
+	doi = {10.1007/3-540-64574-8\_469}
+}
+@Misc{Minar:1996,
+	author = {N. Minar and R. Burkhart and Chris Langton and Manor Askenazi},
+	title = {The Swarm Simulation System: A Toolkit for Building Multi-agent Simulations},
+	year = {1996},
+	url = {http://swarm.org/images/b/bb/MinarEtAl96.pdf}
+}
+@article{Polhill:2007,
+	author = {Polhill, J. Gary and Pignotti, Edoardo and Gotts, Nicholas M. and Edwards, Pete and Preece, Alun},
+	title = {A Semantic Grid Service for Experimentation with an Agent-Based Model of Land-Use Change},
+	journal = {Journal of Artificial Societies and Social Simulation},
+	ISSN = {1460-7425},
+	volume = {10},
+	number = {2},
+	pages = {2},
+	year = {2007},
+	URL = {http://jasss.soc.surrey.ac.uk/10/2/2.html},
+	keywords = {Agent-Based Social Simulation, Experiments, Ontologies, Replication, Semantic Grid},
+	abstract = {Agent-based models, perhaps more than other models, feature large numbers of parameters and potentially generate vast quantities of results data. This paper shows through the FEARLUS-G project (an ESRC e-Social Science Initiative Pilot Demonstrator Project) how deploying an agent-based model on the Semantic Grid facilitates international collaboration on investigations using such a model, and contributes to establishing rigorous working practices with agent-based models as part of good science in social simulation. The experimental workflow is described explicitly using an ontology, and a Semantic Grid service with a web interface implements the workflow. Users are able to compare their parameter settings and results, and relate their work with the model to wider scientific debate.},
+}
+
+% ABM validation
+
+@Unpublished{Fagiolo:2006,
+	author = {Giorgio Fagiolo and Paul Windrum and Alessio Moneta},
+	title = {Empirical Validation of Agent-Based Models: A Critical Survey },
+	note = {LEM Working Paper Series, 14/2006},
+	month = {May},
+	year = {2006},
+	url = {http://www.lem.sssup.it/WPLem/files/2006-14.pdf}
+}
+@Article{Brown:2005,
+	author = {Daniel G. Brown and Scott Page and Rick Riolo and Moira Zellner and William Rand},
+	title = {Path Dependence and the Validation of Agent-Based Spatial Models of Land Use},
+	journal = {International Journal of Geographical Information Science},
+	year = {2005},
+	volume = {19},
+	number = {2},
+	pages = {153-174},
+	month = {February},
+	url = {http://www.econ.iastate.edu/tesfatsi/EmpValidCaseStudy.Brown.pdf}
+}
+
+% Computer programming
+
+@Misc{Tesfatsion:2006b,
+	author = {L. Tesfatsion},
+	title = {Introduction to Agent-Oriented Programming},
+	howpublished = {Course material},
+	year = {2006},
+	url = {http://www.econ.iastate.edu/tesfatsi/AOPRePast.pdf}
+}
+@Book{Eckel:2000,
+	author = {Bruce Eckel},
+	title = {Thinking in C++},
+	publisher = {MindView},
+	year = {2000},
+	url = {http://www.planetpdf.com/developer/article.asp?ContentID=6634}
+}
+@Book{Stroustrup:1997,
+	key = {Stroustrup:1997},
+	author = {B. Stroustrup},
+	title = {The C++ Programming language},
+	publisher = {Addison-Wesley},
+	year = {1997},
+	edition = {3rd},
+	note = {ISBN 0-201-88954-4},
+}
+
+% Mathematical programming
+
+@Misc{Makhorin:2007,
+	author = {Andrew Makhorin},
+	title = {GNU Linear Programming Kit. Reference Manual},
+	year = {2007},
+	url = {http://www.gnu.org/software/glpk/}
+}
+@Misc{Frontline:2006,
+	author = {Frontline},
+	title = {Solver Platform SDK V7.0 API Reference Guide},
+	year = {2006},
+	url= {http://www.solver.com/suppsdkguide.htm}
+}
+@InProceedings{Heckelei:2005,
+	author = {Thomas Heckelei and Wolfgang Britz},
+	title = {Models based on Positive Mathematical Programming: state of the art and further extensions},
+	booktitle = {Modelling agricultural policies: state of the art and new challenges. Proceddings of the 89th European seminar of the European Association of Agricultural Economics},
+	year = {2005},
+	pages = {48-73},
+	editor = {Filippo Arfini},
+	publisher = {Monte Università Parma},
+}
+@Unpublished{Mccarl:2003,
+	key = {Mccarl:2003},
+	author = {B. A. McCarl and T. H. Spreen},
+	title = {Applied mathematical programming using algebraic systems},
+	url = {http://agecon2.tamu.edu/people/faculty/mccarl-bruce},
+	year = {2003}
+}
+@Book{Paris:1991,
+	author = {Quirino Paris},
+	title = {An economic interpretation of Linear Programming},
+	publisher = {Iowa State University Press},
+	year = {1991},
+	note = {Also available in Italian with title \textit{Programmazione lineare. Un'interpretazione economica}}
+}
+@Book{Hazell:1986,
+	key = {Hazell:1986},
+	author = {P. B.R. Hazell and R. D. Norton},
+	title = {Mathematical Programming for Economic Analysis in Agriculture},
+	publisher = {Macmillan},
+	year = {1986},
+	address = {New York}
+}
+
+% AgriPoliS
+
+@InProceedings{Kellermann:2008,
+	author = {K. Kellermann and C. Sahrbacher and A. Balmann},
+	title = {Land markets in agent based models of structural change},
+	booktitle = {Modelling Agricultural and Rural Development Policies. 107th EAAE Seminar, Sevilla},
+	year = {2008},
+	url = {http://agecon.lib.umn.edu/cgi-bin/pdf_view.pl?paperid=29447&ftype=.pdf}
+}
+
+@Misc{Kellermann:2007,
+	key = {Kellermann:2007},
+	author = {K. Kellermann and K. Happe and C. Sahrbacher and M. Brady},
+	title = {AgriPoliS 2.0 – Documentation of the extended model},
+	howpublished = {IDEMA working paper 20},
+	year = {2007},
+	url = {http://www.sli.lu.se/IDEMA/WPs/IDEMA_deliverable_20.pdf}
+	% Details of AgriPoliS
+}
+@PhdThesis{Lobianco:2007,
+	key = {Lobianco:2007},
+	author = {Antonello Lobianco},
+	title = {The effects of decoupling on two Italian regions. An agent-based model.},
+	school = {Università Della Tuscia},
+	year = {2007},
+	month = {April},
+	url = {http://associazionebartola.univpm.it/pubblicazioni/phdstudies/phdstudies2.pdf},
+	% Antonello Lobianco PhD Thesis.
+}
+@Article{Happe:2006,
+	key = {Happe:2006},
+	author = {K. Happe, K. Kellermann, and A. Balmann},
+	title = {Agent-based analysis of agricultural policies: an illustration of the agricultural policy simulator AgriPoliS, its adaptation, and behavior.},
+	journal = {Ecology and Society},
+	volume = {11},
+	number = {1},
+	pages = {49},
+	year = {2006},
+	url = {http://www.ecologyandsociety.org/vol11/iss1/art49/ES-2006-1741.pdf},
+}
+@Misc{Lobianco:2006,
+	key = {Lobianco:2006},
+	author = {Antonello Lobianco and Roberto Esposti},
+	title = {The regional model for Mediterranean agriculture},
+	howpublished = {IDEMA Working Paper 17},
+	year = {2006},
+	month = {January}
+	url = {http://www.sli.lu.se/IDEMA/WPs/IDEMA_deliverable_17.pdf},
+	% Our working paper
+}
+@Misc{Lobianco:2006c,
+	key = {Lobianco:2006},
+	author = {Antonello Lobianco and Roberto Esposti},
+	title = {Analysis of the impact of decoupling on two Mediterranean regions},
+	howpublished = {IDEMA Working Paper 25},
+	year = {2006},
+	month = {September}
+	url = {http://www.sli.lu.se/IDEMA/WPs/IDEMA_deliverable_25.pdf},
+	% Our working paper 25
+}
+@Misc{Balmann:2005,
+	key = {Balmann:2005},
+	author = {K. Happe and A. Balmann},
+	title = {Challenges for using agent-based models for applied agricultural policy analysis: The case of AgriPoliS},
+	year = {2005},
+	note = {Workshop on Empirically based Agent-based modeling Indiana University, Bloomington June 2-4 2005},
+	% Presenta in generale quello che AgriPoliS può fare, come si può adattare.
+}
+@Misc{Sahrbacher:2005,
+	key = {Sahrbacher:2005},
+	author = {Christoph Sahrbacher and Hauke Schnicke and Kathrin Happe and Marten Graubner},
+	title = {Adaptation of agent-based model AgriPoliS to 11 study regions in the enlarged European Union},
+	howpublished = {IDEMA working paper 10},
+	year = {2005},
+	url = {http://www.sli.lu.se/IDEMA/WPs/IDEMA_deliverable_10.pdf}
+	% Questo paper presenta l'adattamento di AgriPoliS alle regioni per IDEMA
+}
+@Misc{Happe:2004,
+	key = {Happe:2004},
+	author = {K. Happe and A. Balmann and K. Kellermann},
+	title = {The Agricultural Policy Simulator (AgriPoliS) - An agent-based model to study structural change in agriculture},
+	howpublished = {IAMO discussion paper 71},
+	year = {2004},
+	url = {http://www.iamo.de/dok/dp71.pdf},
+	% Il più teorico. La tesi di Happe. Presenta nel dettaglio AgriPoliS ed i modelli multi-agente.
+}
+@MastersThesis{Kellermann:2002,
+	author = {Konrad Kellermann},
+	title = {PlayAgriPoliS - Ein agentenbasiertes Politikplanspiel},
+	school = {Humboldt-Universitat zu Berlin},
+	year = {2002},
+	month = {May},
+	url = {http://www.iamo.de/PlayAgriPoliS/playagripolis_start.html}
+}
+@Article{Berger:2001,
+	author = {T. Berger},
+	title = {Agent-based spatial models applied to agricolture: a simulation tool for technology diffusion, resource use changes and policy analysis},
+	journal = {Agricultural economics},
+	year = {2001},
+	%url = {http://www.sciencedirect.com/science/article/B6T3V-44B1YWN-D/2/52ea13193b34d970af8c9ff32bb972be},
+	volume = {25},
+	number = {2-3},
+	month = {September},
+}
+@InProceedings{Balmann:2000,
+	author = {A. Balmann and K. Happe},
+	title = {Applying Parallel Genetic Algorithms to Economic Problems: The Case of Agricultural Land Markets},
+	booktitle = {IIFET Conference "Microbehavior and Macroresults". Proceedings.},
+	year = {2000},
+	url = {http://oregonstate.edu/dept/IIFET/2000/papers/balmann2.pdf}
+}
+@article{Balmann:1997,
+	author = {A. Balmann},
+	title = {Farm-based modelling of regional structural change: A cellular automata approach},
+	journal = {European Review of Agricultural Economics},
+	volume = {24},
+	number = {1-2},
+	pages = {85-108},
+	doi = {10.1093/erae/24.1-2.85},
+	year = {1997},
+	abstract = {This paper presents a new type of spatial and dynamic model for analysing structural change in agriculture. The model is based on a number of individually acting farms located at different points in an agricultural region. Like a cellular automaton, the region is subdivided into a number of spatially ordered plots. The farms compete for these plots and compete on different markets. Farms are allowed to engage in different production possibilities and they can use several investment alternatives. They optimise their activities with respect to their objective function by considering their expectations, financial state and existing assets.
+	},
+	%url = {http://erae.oxfordjournals.org/cgi/content/abstract/24/1-2/85}
+}
+
+% Agricultural policy
+
+@TechReport{Bonfiglio:2006,
+	author = {Andrea Bonfiglio},
+	title = {Comparing environmental impact of alternative CAP scenarios estimated through an artificial neural network},
+	institution = {UNIVPM},
+	year = {2006},
+	month = {October},
+	url= {http://dea.univpm.it/quaderni/pdf/269.pdf}
+}
+@TechReport{Dewbre:2006,
+	author = {J. Dewbre and J. Brooks},
+	title = {Agricultural Policy and Trade Reform: Potential Effects At Global, National and Households Levels},
+	institution = {OECD},
+	year = {2006},
+	month = {June},
+	%url={http://www.sourceoecd.org/9264025731}
+}
+@Article{Finizia:2006,
+	author = {Antonella Finizia and Riccardo Magnani and Federico Perali},
+	title = {Impatti della Riforma PAC e scenari futuri per l'agroalimentare italiano: alcune simulazioni con il MEG-D ISMEA},
+	journal = {AgriRegioniEuropa},
+	year = {2006},
+	volume = {2},
+	number = {7},
+	month = {December},
+	url={http://agriregionieuropa.univpm.it/dettart.php?id_articolo=158}
+}
+@InBook{Lobianco:2006b,
+	author = {Antonello Lobianco},
+	editor = {Andrea Arzeni},
+	title = {Il sistema agricolo ed alimentare nelle Marche. Rapporto 2005},
+	chapter = {2.1},
+	publisher = {Edizioni Scientifiche Italiane},
+	year = {2006},
+	pages = {71-81},
+}
+@Article{Meijl:2006,
+	author = {H. van Meijl and T. van Rheenen and A. Tabeau and B. Eickhout},
+	title = {The impact of different policy environments on agricultural land use in Europe },
+	journal = {Agriculture, Ecosystems \& Environment  },
+	year = {2006},
+	volume = {114},
+	number = {1},
+	pages = {21-38},
+	month = {January},
+	%http://dx.doi.org/10.1016/j.agee.2005.11.006
+}
+@InProceedings{Arfini:2005,
+	author = {Filippo Arfini and Michele Donati and Marco Zuppiroli and Quintino Paris},
+	title = {Positive Mathematical Programming Approach for ex-post evaluation of set-aside in {I}taly},
+	booktitle = {Modelling agricultural policies: state of the art and new challenges. Proceddings of the 89th European seminar of the European Association of Agricultural Economics},
+	year = {2005},
+	pages = {188-206},
+	editor = {Filippo Arfini},
+	publisher = {Monte Università Parma},
+}
+@TechReport{Manfredi:2005,
+	author = {Gabriella Manfredi},
+	title = {La riforma della {PAC}: previsioni di impatto sul settore agricolo},
+	institution = {ISMEA},
+	year = {2005},
+	month = {May},
+	url={www.emersionelavorononregolare.it/doc/riformaPacISME.pdf}
+}
+@Unpublished{Severini:2005,
+	author = {Simone Severini and Stefano Valle},
+	title = {The Single Payment Scheme of the {CAP}: entitlements availability and farmer behavior},
+	note = {Paper prepared for presentation at the 11th Congress of the EAAE},
+	month = {August},
+	year = {2005},
+	url = {http://www.eaae2005.dk/CONTRIBUTED_PAPERS/S7_919_Severini&Valle.pdf}
+}
+@Misc{INEA:2004,
+	author = {INEA},
+	title = {L'impatto della riforma {Fischler} della {PAC} sull'agricoltura marchigiana},
+	month = {December},
+	year = {2004},
+	url={www.agri.marche.it/Osservatorio/studi\%20specifici}
+}
+@Unpublished{Cembalo:2002,
+	author = {Luigi Cembalo},
+	title = {Methodological Issues in Modeling Fruit Tree Production},
+	note = {WP 6/2002 Dipartimento di economia e politica agraria, Università di Napoli Federico II},
+	month = {June},
+	year = {2002},
+	url = {http://www.depa.unina.it/depa/wpcembalo.pdf}
+}
+@Misc{Arfini:2000,
+	author = {Filippo Arfini},
+	title = {I modelli di programmazione matematica per l'analisi della politica agricola comune},
+	month = {October},
+	year = {2000},
+	note = {INEA seminar \textit{Valutare gli effetti della Politica Agricola Comune}, Rome, 24 October 2000},
+	url = {http://web.archive.org/web/20041024164241/http://www.inea.it/opaue/pac/arfini.PDF}
+} 

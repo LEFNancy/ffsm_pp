@@ -1,0 +1,13 @@
+projection: 1 (UTM)
+zone:       33n
+datum:      wgs84
+ellipsoid:  a=6378137 es=0.006694379990141316
+north:      4834905.84237231 (approx. to 4834906)
+south:      4804798.20261391 (calculated to 4804806)
+west:       327979.71336618  (approx. to 327980)
+east:       367554.08805352  (calculated to 367580)
+nsres:      100.02538126     (approx. to 100)
+ewres:      99.93528961      (approx. to 100)
+rows:       301
+cols:       396
+cells:      119196

@@ -1,0 +1,85 @@
+RegMAS - Regional Multi Agent Simulator
+Info: http://regmas.org/doc
+
+
+***** NEWS *****
+
+20091022
+Noversion
+Added possibility to load farmers on specific sub-regions
+
+20080930
+Version 1.3.0
+Introduced option for stochastic simulations
+Premium decoupled from activities (each activity can have nn premium associated, each one with its own reference period and contribution to SFP calculation)
+healthCheck scenario refers now to the Health Check as in the 20 May 2008 EU Commission Comunication
+
+20080731
+Repository moved from CVS to Subversion
+
+20080520
+Version 1.2.0
+New data loading method. Now data is loaded directly from the OpenDocument Spreadsheet file, without needs of first exporting in CSV/XML.
+Scenario is not choosed in the GUI trough a pop-up menu.
+Add options (-hcis) to the command line version.
+
+20080216
+Version 1.1.0
+New policy options (regionalisation and more modulation classes)
+New command line version (as the GUI change the seed of the random numbers)
+Corrected spatial object initialisation (now by plot and no longer by agent, when plots not owned or rented by an agent were not initialised)
+
+20080117
+Version 1.0.0
+Corrected various bugs in visualisation, input data, effects of leaving farms.
+
+200801XX
+Version 0.9.3 (Release Candidate 3)
+GUI enchangments: zoom/pan, handle between GUI elements
+In subregion mode, shown and saved only the subregion
+
+20071225
+Version 0.9.1 (Release Candidate 2)
+Option to export maps as images
+
+20071127
+Version 0.9.0 (Release Candidate 1)
+Added policy variables and scenarios switch.
+Agents seems to behave like expected, all (discovered) bugs fixed.
+
+20071005
+Version 0.5.1
+The model "scheleton" is now complete: agents are initialized and correctly act in the model (eventually leaving if not competitive enought).
+The licence is upgraded to GPL V.3.
+
+20070707
+Version 0.4.0
+Agents are now able to "think" solving a MIP problem using glpk.
+New server and some CVS history losted (about one month)
+
+20070423
+Version 0.13:
+GUI switched to Qt, as it include XML support and easy txt I/O.
+Get rids also of gdal requirement.. now needed only Qt and GLPK as external libraries.
+
+20061023
+Version 0.12:
+Introduced the GUI (wxWidgets). Up to now just a log window.
+
+20060800
+New CVS server:
+cvs -d :pserver:anonymous@regmas.org/home/cvsroot checkout regmas
+
+
+20060513
+Imported in regmas website
+
+
+
+
+
+
+
+
+
+

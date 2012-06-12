@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<gis>
+	<layer>
+		<name>landUse</name>
+		<label>Land use</label>
+		<isInteger>true</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
+		<readAtStart>true</readAtStart><!-- bool -->
+		<dynamicContent>false</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->		
+		<dirName>gis/colliEsini/</dirName>
+		<fileName>c00_100m.grd</fileName>
+		<legendItems>
+			<legendItem label="Continuous urban fabric" rColor="230" gColor="000" bColor="077">111</legendItem>
+			<legendItem label="Discontinuous urban fabric" rColor="255" gColor="000" bColor="000">112</legendItem>
+			<legendItem label="Industrial or commercial units" rColor="204" gColor="077" bColor="242">121</legendItem>
+			<legendItem label="Road and rail networks and associated land" rColor="204" gColor="000" bColor="000">122</legendItem>
+			<legendItem label="Port areas" rColor="230" gColor="204" bColor="204">123</legendItem>
+			<legendItem label="Airports" rColor="230" gColor="204" bColor="230">124</legendItem>
+			<legendItem label="Mineral extraction sites" rColor="166" gColor="000" bColor="204">131</legendItem>
+			<legendItem label="Dump sites" rColor="166" gColor="077" bColor="000">132</legendItem>
+			<legendItem label="Construction sites" rColor="255" gColor="077" bColor="255">133</legendItem>
+			<legendItem label="Green urban areas" rColor="255" gColor="166" bColor="255">141</legendItem>
+			<legendItem label="Sport and leisure facilities" rColor="255" gColor="230" bColor="255">142</legendItem>
+			<legendItem label="Non-irrigated arable land" rColor="255" gColor="255" bColor="168">211</legendItem>
+			<legendItem label="Irrigable land (original CLU: Permanently irrigated land)" rColor="255" gColor="255" bColor="000">212</legendItem>
+			<legendItem label="Rice fields" rColor="230" gColor="230" bColor="000">213</legendItem>
+			<legendItem label="Vineyards" rColor="230" gColor="128" bColor="000">221</legendItem>
+			<legendItem label="Fruit trees and berry plantations" rColor="242" gColor="166" bColor="077">222</legendItem>
+			<legendItem label="Olive groves" rColor="230" gColor="166" bColor="000">223</legendItem>
+			<legendItem label="Pastures" rColor="230" gColor="230" bColor="077">231</legendItem>
+			<legendItem label="Annual crops associated with permanent crops" rColor="255" gColor="230" bColor="166">241</legendItem>
+			<legendItem label="Complex cultivation patterns" rColor="255" gColor="230" bColor="077">242</legendItem>
+			<legendItem label="Land principally occupied by agriculture, with significant areas of natural vegetation" rColor="230" gColor="204" bColor="077">243</legendItem>
+			<legendItem label="Agro-forestry areas" rColor="242" gColor="204" bColor="166">244</legendItem>
+			<legendItem label="Broad-leaved forest" rColor="128" gColor="255" bColor="000">311</legendItem>
+			<legendItem label="Coniferous forest" rColor="000" gColor="166" bColor="000">312</legendItem>
+			<legendItem label="Mixed forest" rColor="077" gColor="255" bColor="000">313</legendItem>
+			<legendItem label="Natural grasslands" rColor="204" gColor="242" bColor="077">321</legendItem>
+			<legendItem label="Moors and heathland" rColor="166" gColor="255" bColor="128">322</legendItem>
+			<legendItem label="Sclerophyllous vegetation" rColor="166" gColor="230" bColor="077">323</legendItem>
+			<legendItem label="Transitional woodland-shrub" rColor="166" gColor="242" bColor="000">324</legendItem>
+			<legendItem label="Beaches, dunes, sands" rColor="230" gColor="230" bColor="230">331</legendItem>
+			<legendItem label="Bare rocks" rColor="204" gColor="204" bColor="204">332</legendItem>
+			<legendItem label="Sparsely vegetated areas" rColor="204" gColor="255" bColor="204">333</legendItem>
+			<legendItem label="Burnt areas" rColor="000" gColor="000" bColor="000">334</legendItem>
+			<legendItem label="Glaciers and perpetual snow" rColor="166" gColor="230" bColor="204">335</legendItem>
+			<legendItem label="Inland marshes" rColor="166" gColor="166" bColor="255">411</legendItem>
+			<legendItem label="Peat bogs" rColor="077" gColor="077" bColor="255">412</legendItem>
+			<legendItem label="Salt marshes" rColor="204" gColor="204" bColor="255">421</legendItem>
+			<legendItem label="Salines" rColor="230" gColor="230" bColor="255">422</legendItem>
+			<legendItem labelLevel1="Wetlands" labelLevel2="Maritime wetlands" label="Intertidal flats" rColor="166" gColor="166" bColor="230">423</legendItem>
+			<legendItem label="Water courses" rColor="000" gColor="204" bColor="242">511</legendItem>
+			<legendItem label="Water bodies" rColor="128" gColor="242" bColor="230">512</legendItem>
+			<legendItem label="Coastal lagoons" rColor="000" gColor="255" bColor="166">521</legendItem>
+			<legendItem label="Estuaries" rColor="166" gColor="255" bColor="230">522</legendItem>
+			<legendItem label="Sea and ocean" rColor="230" gColor="242" bColor="255">523</legendItem>
+		</legendItems>
+		<reclassRules>
+			<!--  Rules to reclass an input category to an output category according to a certain probability
+				  You should assure that the sum of p for each input code is "1" -->
+			<!-- Reconverting 4th levels corine land cover to the corresponding third ones - agricultural land -->
+			<reclassRule outCode="211" p="1">2111</reclassRule> 
+			<reclassRule outCode="211" p="1">2112</reclassRule> 
+			<!-- Reconverting 4th and 5th levels corine land cover to the corresponding third ones - other land -->
+			<reclassRule outCode="311" p="1">3111</reclassRule> 
+			<reclassRule outCode="311" p="1">3112</reclassRule> 
+			<reclassRule outCode="311" p="1">3113</reclassRule> 
+			<reclassRule outCode="311" p="1">3114</reclassRule> 
+			<reclassRule outCode="311" p="1">3115</reclassRule> 
+			<reclassRule outCode="311" p="1">3116</reclassRule> 
+			<reclassRule outCode="311" p="1">3117</reclassRule> 
+			<reclassRule outCode="312" p="1">3121</reclassRule> 
+			<reclassRule outCode="312" p="1">3122</reclassRule>
+			<reclassRule outCode="312" p="1">3123</reclassRule>
+			<reclassRule outCode="312" p="1">3124</reclassRule>
+			<reclassRule outCode="312" p="1">3125</reclassRule>
+			<reclassRule outCode="313" p="1">31311</reclassRule>
+			<reclassRule outCode="313" p="1">31312</reclassRule>
+			<reclassRule outCode="313" p="1">31313</reclassRule>
+			<reclassRule outCode="313" p="1">31314</reclassRule>
+			<reclassRule outCode="313" p="1">31315</reclassRule>
+			<reclassRule outCode="313" p="1">31316</reclassRule>
+			<reclassRule outCode="313" p="1">31321</reclassRule>
+			<reclassRule outCode="313" p="1">31322</reclassRule>
+			<reclassRule outCode="313" p="1">31323</reclassRule>
+			<reclassRule outCode="313" p="1">31324</reclassRule>
+			<reclassRule outCode="313" p="1">31325</reclassRule>
+			<reclassRule outCode="321" p="1">3211</reclassRule>
+			<reclassRule outCode="321" p="1">3212</reclassRule>
+			<reclassRule outCode="323" p="1">3231</reclassRule>
+			<reclassRule outCode="323" p="1">3232</reclassRule>
+
+			<reclassRule outCode="222" p="0.41">241</reclassRule>
+			<reclassRule outCode="223" p="0.59">241</reclassRule>
+			<reclassRule outCode="211" p="0.3">242</reclassRule>
+			<reclassRule outCode="212" p="0.15">242</reclassRule>
+			<reclassRule outCode="221" p="0.12">242</reclassRule>
+			<reclassRule outCode="223" p="0.04">242</reclassRule>
+			<reclassRule outCode="231" p="0.027">242</reclassRule>
+			<reclassRule outCode="324" p="0.363">242</reclassRule>
+			<reclassRule outCode="311" p="1">243</reclassRule>
+		</reclassRules>	
+	</layer>
+	<layer>
+		<name>adminBorders</name>
+		<label>Administrative borders</label>
+		<isInteger>true</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
+		<readAtStart>true</readAtStart><!-- bool -->
+		<dynamicContent>false</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->
+		<dirName>gis/colliEsini/</dirName>
+		<fileName>adminBorders_100m.grd</fileName>
+		<legendItems>
+			<legendItem label="Arcevia" rColor="230" gColor="010" bColor="077">42003</legendItem>
+			<legendItem label="Barbara" rColor="230" gColor="020" bColor="077">42004</legendItem>
+			<legendItem label="Belvedere Ostrense" rColor="230" gColor="030" bColor="077">42005</legendItem>
+			<legendItem label="Castelbellino" rColor="230" gColor="040" bColor="077">42008</legendItem>
+			<legendItem label="Castelleone di Suasa" rColor="230" gColor="050" bColor="077">42011</legendItem>
+			<legendItem label="Castelplanio" rColor="230" gColor="060" bColor="077">42012</legendItem>
+			<legendItem label="Cupramontana" rColor="230" gColor="070" bColor="077">42016</legendItem>
+			<legendItem label="Jesi" rColor="230" gColor="080" bColor="077">42021</legendItem>
+			<legendItem label="Maiolati Spontini" rColor="230" gColor="090" bColor="077">42023</legendItem>
+			<legendItem label="Mergo" rColor="230" gColor="100" bColor="077">42024</legendItem>
+			<legendItem label="Monsano" rColor="230" gColor="110" bColor="077">42025</legendItem>
+			<legendItem label="Montecarotto" rColor="230" gColor="120" bColor="077">42026</legendItem>
+			<legendItem label="Monte Roberto" rColor="230" gColor="130" bColor="077">42029</legendItem>
+			<legendItem label="Morro d'Alba" rColor="230" gColor="140" bColor="077">42031</legendItem>
+			<legendItem label="Ostra" rColor="230" gColor="150" bColor="077">42035</legendItem>
+			<legendItem label="Ostra Vetere" rColor="230" gColor="160" bColor="077">42036</legendItem>
+			<legendItem label="Poggio San Marcello" rColor="230" gColor="170" bColor="077">42037</legendItem>
+			<legendItem label="Rosora" rColor="230" gColor="180" bColor="077">42040</legendItem>
+			<legendItem label="San Marcello" rColor="230" gColor="190" bColor="077">42041</legendItem>
+			<legendItem label="San Paolo di Jesi" rColor="230" gColor="200" bColor="077">42042</legendItem>
+			<legendItem label="Santa Maria Nuova" rColor="230" gColor="210" bColor="077">42043</legendItem>
+			<legendItem label="Serra de' Conti" rColor="230" gColor="220" bColor="077">42046</legendItem>
+			<legendItem label="Serra San Quirico" rColor="230" gColor="230" bColor="077">42047</legendItem>
+			<legendItem label="Staffolo" rColor="230" gColor="240" bColor="077">42049</legendItem>
+		</legendItems>
+	</layer>
+	<layer>
+		<name>dtm</name>
+		<label>Digital Terrain Model</label>
+		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
+		<readAtStart>true</readAtStart><!-- bool -->
+		<dynamicContent>false</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->
+		<dirName>gis/colliEsini/</dirName>
+		<fileName>dtm10m_100m.grd</fileName>
+		<legendItems>
+			<legendItem label="0 - 100 m" rColor="255" gColor="255" bColor="255" minValue="0" maxValue="100">0</legendItem>
+			<legendItem label="100 - 200 m" rColor="240" gColor="240" bColor="240" minValue="100" maxValue="200">100</legendItem>
+			<legendItem label="200 - 300 m" rColor="220" gColor="220" bColor="220" minValue="200" maxValue="300">200</legendItem>
+			<legendItem label="300 - 400 m" rColor="200" gColor="200" bColor="200" minValue="300" maxValue="400">300</legendItem>
+			<legendItem label="400 - 500 m" rColor="175" gColor="175" bColor="175" minValue="400" maxValue="500">400</legendItem>
+			<legendItem label="500 - 600 m" rColor="150" gColor="150" bColor="150" minValue="500" maxValue="600">500</legendItem>
+			<legendItem label="600 - 700 m" rColor="125" gColor="125" bColor="125" minValue="600" maxValue="700">600</legendItem>
+			<legendItem label="700 - 800 m" rColor="100" gColor="100" bColor="100" minValue="700" maxValue="800">700</legendItem>
+			<legendItem label="800 - 900 m" rColor="075" gColor="075" bColor="075" minValue="800" maxValue="900">800</legendItem>
+			<legendItem label="900 - 1000 m" rColor="050" gColor="050" bColor="050" minValue="900" maxValue="1000">900</legendItem>
+			<legendItem label="over 1000 m" rColor="025" gColor="025" bColor="025" minValue="1000" maxValue="10000">1000</legendItem>
+		</legendItems>
+	</layer>
+</gis>

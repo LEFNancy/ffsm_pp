@@ -1,0 +1,4 @@
+# Common GRASS GIS commands for various usage
+
+# create a report of each activity by each dtm_classes
+r.report farmActivities_2011_healthCheck,dtm_classes units=h > report_farmActivities_by_altimetry.txt

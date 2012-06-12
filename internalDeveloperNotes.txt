@@ -1,0 +1,76 @@
+Only for internal developing.. lang=it, sorry ;-)
+
+**** XML ****
+
+Un documento XML deve presentare sempre tag di chiusura correttamente nidificati.
+La grammatica può essere personalizzata.
+
+I tag possono contenere:
+	- simple ->solo testo (es. <par>Questo è un paragrafo</par> )
+	- elements ->altri tags: (es. <capitolo><par>Questo è un paragrafo</par><par>Secondo par</par></capitolo>)
+	- mixed ->altri tags e testo
+	- empty ->nessun testo o tag in mezzo (es. <par></par> o <par title="First par"></par>)
+	- attributes/value -> l'info in dentro al tag, come nell'esempio precedente
+
+Documenti XML corretti sono quelli:
+- "well formed" -> che rispettano le regole dell'XML (chiusura tags, ecc...)
+- "valid" -> che seguono le regole di grammatica stabilite dal programmatore (a Document Type Definition - DTD)
+
+Related:
+
+XML DOM:
+	The XML DOM defines a standard way for accessing and manipulating XML documents.
+	The XML DOM is platform and language independent and can be used by any programming language like Java, JavaScript, and VBScript.
+
+DTD:
+	The purpose of a DTD is to define what elements, attributes and entities is legal in an XML document.
+	With DTD, each of your XML files can carry a description of its own format with it.
+	DTD can be used to verify that the data you receive, and your own data, is valid.
+
+XML Schema Definition (XSD):
+	XML Schema will replace DTD.
+	XML Schema is an XML based alternative to DTD.
+	Unlike DTD, XML Schemas has support for datatypes, and XML Schema use XML Syntax.
+
+
+**** DTD ****
+Document Type Definition
+
+I children devono apparire nel documento nello stesso ordine con il quale sono dichiarati
+
+**** VETTORI DI OGGETTI Vs. VETTORI DI PUNTATORI ****
+
+I vettori di oggetti (composizione) vanno usati quando A è il tutto e B è una parte... B non può esistere senza A.
+
+class A:  vector <B> nome_vettore;
+A::function {
+  B nome_oggetto;
+  [...];
+  nome_vettore.push_back(nome_oggetto);
+}
+nome_vettore[i].metodo_di_B();
+
+I vettori di puntatori (AGGREGAZIONE) si possono usare quando la relazione è di tipo debole, ad es. A è un comitato e B è una persona.
+
+class A:  vector <B*> nome_vettore;
+A::function {
+  B* nome_oggetto = new B;
+  [...];
+  nome_vettore.push_back(nome_oggetto);
+  // non delete nome_oggetto qui !!!
+}
+nome_vettore[i]->metodo_di_B();
+
+ATTENZIONE: essendo copiato solo il riferimento di memoria (copio il puntatore, non il contenuto) se poi distruggo nome_oggetto sono guai quando ci faccio riferimento tramite nome_vettore!!!
+
+
+**** USO DI REPLACE ****
+Per sostituire AAA con BBB:
+rpl -R "AAA" "BBB" /fullPath/
+http://rpl.sf.net
+
+
+
+
+
+
