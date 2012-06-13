@@ -27,7 +27,7 @@
 #include <sstream>
 
 // RegMAS include stuff..
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 #include "RegData.h"
 #include "Gis.h"
 #include "SuperAgentManager.h"
@@ -41,7 +41,7 @@ The Init class is responsable to ask to the various objects to Init themself, in
 <br>Then objects and agents are mould up, objects are assigned to agents and finally agents and objects are collocated in the space.
 @author Antonello Lobianco
 */
-class Init: public BaseRegmas{
+class Init: public BaseClass{
 	
 public:
 	

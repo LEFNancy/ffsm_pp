@@ -24,7 +24,7 @@
 #include <QMutexLocker>
 
 #include "ThreadManager.h"
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 #include "MainProgram.h"
 #include "MainWindow.h"
 

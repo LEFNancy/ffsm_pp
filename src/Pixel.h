@@ -27,7 +27,7 @@
 #include <sstream>
 
 // regmas headers...
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 #include "RegData.h"
 #include "Gis.h"
 #include "ModelObject.h"
@@ -41,7 +41,7 @@ class Gis;        //forward declaration
 This class manage the info at the pixel level. A vector of pixel objects is owned by the class Gis.
 @author Antonello Lobianco
 */
-class Pixel: public BaseRegmas{
+class Pixel: public BaseClass{
 	
 public:
 	                    Pixel(double ID_h, ThreadManager* MTHREAD_h);

@@ -24,7 +24,7 @@
 #include <QThread>
 #include <QString>
 
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 
 
 /**
@@ -35,7 +35,7 @@ This is a test class used when I need to test some C++ or other library function
 
 struct TestStructure;
 
-class Sandbox : public BaseRegmas {
+class Sandbox : public BaseClass {
 
 public:
                              Sandbox(ThreadManager* MTHREAD_h);

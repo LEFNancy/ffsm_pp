@@ -58,12 +58,12 @@ OBJECTS_DIR = ../bin
 
 # Input
 HEADERS += Agent_base.h \
-           ipopt_nlp_problem.h \
            Agent_space.h \
-           BaseRegmas.h \
+           BaseClass.h \
            Gis.h \
            Init.h \
            InputNode.h \
+           Ipopt_nlp_problem_debugtest.h \
            MainProgram.h \
            MainWindow.h \
            Manager_base.h \
@@ -87,15 +87,16 @@ HEADERS += Agent_base.h \
            zip_p.h \
            zipentry_p.h \
            anyoption.h \
-           ScenarioSelectionWidget.h
+           ScenarioSelectionWidget.h \
+    ModelRegion.h
 
 FORMS += MainWindow.ui
 SOURCES += Agent_base.cpp \
-           ipopt_nlp_problem.cpp \
            Agent_space.cpp \
-           BaseRegmas.cpp \
+           BaseClass.cpp \
            Gis.cpp \
            Init.cpp \
+           Ipopt_nlp_problem_debugtest.cpp\
            InputNode.cpp \
            main.cpp \
            MainProgram.cpp \
@@ -118,6 +119,7 @@ SOURCES += Agent_base.cpp \
            unzip.cpp \
            zip.cpp \
            anyoption.cpp \
-           ScenarioSelectionWidget.cpp
+           ScenarioSelectionWidget.cpp \
+    ModelRegion.cpp
 
 RESOURCES += resources.qrc

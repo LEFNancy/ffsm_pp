@@ -27,7 +27,7 @@
 #include <sstream>
 
 // regmas headers..
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 //#include "RegData.h"
 
 /// Manage the yearly loops
@@ -37,7 +37,7 @@ This class is responsable to manage the time-dimension of the program.
 <br>It start its job when Init has ended and schedule the various operation to be done during the year loops.
 @author Antonello Lobianco
 */
-class Scheduler: public BaseRegmas{
+class Scheduler: public BaseClass{
 
 public:
 	                    Scheduler(ThreadManager* MTHREAD_h);

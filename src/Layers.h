@@ -28,7 +28,7 @@
 #include <QColor>
 
 // regmas headers...
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 
 using namespace std;
 
@@ -44,7 +44,7 @@ Layer class (setting, legend...)
  - a vector of reclassification rule, when we need to work with a level of depth different of those coming with the dataset
 @author Antonello Lobianco <antonello@regmas.org>
 */
-class Layers : public BaseRegmas{
+class Layers : public BaseClass{
 
 public:
 	/// In the constructor we set the main layer properties

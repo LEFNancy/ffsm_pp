@@ -17,19 +17,19 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 #include "ThreadManager.h"
 #include <algorithm>
 
 
 using namespace std;
 
-BaseRegmas::BaseRegmas()
+BaseClass::BaseClass()
 {
 	MTHREAD=NULL;
 }
 
-BaseRegmas::~BaseRegmas()
+BaseClass::~BaseClass()
 {
 }
 
@@ -42,7 +42,7 @@ Overloaded method for the output log:
 
 */
 void
-BaseRegmas::msgOut(int msgCode_h, string msg_h, bool refreshGUI_h) const {
+BaseClass::msgOut(int msgCode_h, string msg_h, bool refreshGUI_h) const {
 
 	msgOut2(msgCode_h, msg_h, refreshGUI_h);
 
@@ -57,7 +57,7 @@ Overloaded method for the output log:
 
 */
 void
-BaseRegmas::msgOut(int msgCode_h, int msg_h, bool refreshGUI_h) const {
+BaseClass::msgOut(int msgCode_h, int msg_h, bool refreshGUI_h) const {
 	ostringstream out;
 	out<<msg_h;
 	msgOut2(msgCode_h, out.str(), refreshGUI_h);
@@ -72,7 +72,7 @@ Overloaded method for the output log:
 
 */
 void
-BaseRegmas::msgOut(int msgCode_h, double msg_h, bool refreshGUI_h) const {
+BaseClass::msgOut(int msgCode_h, double msg_h, bool refreshGUI_h) const {
 
 	ostringstream out;
 	out<<msg_h;
@@ -85,7 +85,7 @@ Convenient (private) function to actually do the job of the overloaded functions
 
 */
 void
-BaseRegmas::msgOut2(int msgCode_h, string msg_h, bool refreshGUI_h) const {
+BaseClass::msgOut2(int msgCode_h, string msg_h, bool refreshGUI_h) const {
 	
 	string prefix;
 	switch (msgCode_h){
@@ -134,14 +134,14 @@ BaseRegmas::msgOut2(int msgCode_h, string msg_h, bool refreshGUI_h) const {
 }
 
 void
-BaseRegmas::refreshGUI()const{
+BaseClass::refreshGUI()const{
 	if (MTHREAD && MTHREAD->usingGUI()){
 		MTHREAD->refreshGUI();
 	}
 };
 
 int
-BaseRegmas::s2i ( string string_h) const {
+BaseClass::s2i ( string string_h) const {
 	if (string_h == "") return 0;
 	int valueAsInteger;
 	string valueAsString = string_h;
@@ -152,7 +152,7 @@ BaseRegmas::s2i ( string string_h) const {
 
 /// Includes comma to dot conversion if needed.
 double
-BaseRegmas::s2d ( string string_h) const {
+BaseClass::s2d ( string string_h) const {
 	if (string_h == "") return 0;
 	double valueAsDouble;
 	string valueAsString = string_h;
@@ -165,7 +165,7 @@ BaseRegmas::s2d ( string string_h) const {
 
 /// Includes conversion checks.
 bool
-BaseRegmas::s2b ( string string_h) const {
+BaseClass::s2b ( string string_h) const {
 	if (string_h == "true" || string_h == "vero" || string_h == "TRUE" || string_h == "1")
 		return true;
 	else if (string_h == "false" || string_h == "falso" || string_h == "FALSE" || string_h == "0")
@@ -176,21 +176,21 @@ BaseRegmas::s2b ( string string_h) const {
 }
 
 string
-BaseRegmas::i2s (int int_h) const{
+BaseClass::i2s (int int_h) const{
 	ostringstream out;
 	out<<int_h;
 	return out.str();
 }
 
 string
-BaseRegmas::d2s (double double_h) const{
+BaseClass::d2s (double double_h) const{
 	ostringstream out;
 	out<<double_h;
 	return out.str();
 }
 
 string
-BaseRegmas::b2s (bool bool_h) const{
+BaseClass::b2s (bool bool_h) const{
 	string out;
 	if(bool_h)
 		out = "true";
@@ -200,7 +200,7 @@ BaseRegmas::b2s (bool bool_h) const{
 }
 
 vector <int>
-BaseRegmas::s2i( vector <string> string_h) const{
+BaseClass::s2i( vector <string> string_h) const{
 	vector <int> valuesAsInteger;
 	for (uint i=0;i<string_h.size();i++){
 		if (string_h.at(i) == "") {
@@ -217,7 +217,7 @@ BaseRegmas::s2i( vector <string> string_h) const{
 
 /// Includes comma to dot conversion if needed.
 vector <double>
-BaseRegmas::s2d (vector <string> string_h) const{
+BaseClass::s2d (vector <string> string_h) const{
 	vector <double> valuesAsDouble;
 	for (uint i=0;i<string_h.size();i++){
 		if (string_h.at(i) == "") {
@@ -236,7 +236,7 @@ BaseRegmas::s2d (vector <string> string_h) const{
 
 /// Includes conversion checks.
 vector <bool>
-BaseRegmas::s2b( vector <string> string_h) const{
+BaseClass::s2b( vector <string> string_h) const{
 	vector <bool> valuesAsBool;
 	for (uint i=0;i<string_h.size();i++){
 		valuesAsBool.push_back(s2b(string_h.at(i)));
@@ -245,7 +245,7 @@ BaseRegmas::s2b( vector <string> string_h) const{
 };
 
 vector <string>
-BaseRegmas::i2s (vector <int> int_h) const{
+BaseClass::i2s (vector <int> int_h) const{
 	vector <string> valuesAsString;
 	for (uint i=0;i<int_h.size();i++){
 		ostringstream valueAsString;
@@ -256,7 +256,7 @@ BaseRegmas::i2s (vector <int> int_h) const{
 }
 
 vector <string>
-BaseRegmas::d2s (vector <double> double_h) const{
+BaseClass::d2s (vector <double> double_h) const{
 	vector <string> valuesAsString;
 	for (uint i=0;i<double_h.size();i++){
 		ostringstream valueAsString;
@@ -267,7 +267,7 @@ BaseRegmas::d2s (vector <double> double_h) const{
 }
 
 vector <string>
-BaseRegmas::b2s (vector <bool> bool_h) const{
+BaseClass::b2s (vector <bool> bool_h) const{
 	vector <string> valuesAsString;
 	for (uint i=0;i<bool_h.size();i++){
 		string temp;
@@ -280,7 +280,7 @@ BaseRegmas::b2s (vector <bool> bool_h) const{
 
 
 int
-BaseRegmas::getType(string &type_h){
+BaseClass::getType(string &type_h){
 	int toReturn=0;
 	if (type_h == "int")         toReturn = TYPE_INT;
 	else if (type_h == "double") toReturn = TYPE_DOUBLE;
@@ -292,14 +292,14 @@ BaseRegmas::getType(string &type_h){
 
 
 template<typename T> std::string
-BaseRegmas::toString(const T& x) {
+BaseClass::toString(const T& x) {
   std::ostringstream oss;
   oss << x;
   return oss.str();
 }
 
 template<typename T> T 
-BaseRegmas::stringTo(const std::string& s) {
+BaseClass::stringTo(const std::string& s) {
   std::istringstream iss(s);
   T x;
   iss >> x;
@@ -308,7 +308,7 @@ BaseRegmas::stringTo(const std::string& s) {
 
 
 int
-BaseRegmas::iVSum (const vector<int> &intVector_h){
+BaseClass::iVSum (const vector<int> &intVector_h){
 	int toReturn=0;
 	for(uint i=0;i<intVector_h.size();i++){
 		toReturn += intVector_h[i];
@@ -317,7 +317,7 @@ BaseRegmas::iVSum (const vector<int> &intVector_h){
 }
 
 double
-BaseRegmas::dVSum (const vector<double> &doubleVector_h){
+BaseClass::dVSum (const vector<double> &doubleVector_h){
 	double toReturn=0;
 	for(uint i=0;i<doubleVector_h.size();i++){
 		toReturn += doubleVector_h[i];
@@ -327,7 +327,7 @@ BaseRegmas::dVSum (const vector<double> &doubleVector_h){
 
 
 void
-BaseRegmas::tokenize(const string& str, vector<string>& tokens, const string& delimiter){
+BaseClass::tokenize(const string& str, vector<string>& tokens, const string& delimiter){
     // Skip delimiters at beginning.
     string::size_type lastPos = str.find_first_not_of(delimiter, 0);
     // Find first "non-delimiter".

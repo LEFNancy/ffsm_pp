@@ -30,10 +30,11 @@
 #include <sstream>
 
 // regmas headers..
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 #include "RegData.h"
 #include "Layers.h"
 #include "Pixel.h"
+#include "ModelRegion.h"
 
 using namespace std;
 
@@ -61,7 +62,7 @@ Gis class is responsable to provide all methods for spatial analysis.
 @author Antonello Lobianco
 */
 
-class Gis: public BaseRegmas{
+class Gis: public BaseClass{
 
 public:
 	                    Gis(ThreadManager* MTHREAD_h); ///< Constructor
@@ -101,7 +102,9 @@ public:
 	/// Return the vector (shuffled) of all plots with specific values for a specified layer, optionally filtering only the free ones. It is also possible to specify the level in case of failure (no free plots available)
 	vector <Pixel*>     getAllPlotsByValue(string layer_h, vector<int> layerValues_h, bool onlyFreePlots=false, int outputLevel=MSG_WARNING);
 	/// Return the vector (shuffled) of all plots, optionally filtering only the free ones. It is also possible to specify the level in case of failure (no free plots available)
-	vector <Pixel*>     getAllPlots(bool onlyFreePlots=false, int outputLevel=MSG_WARNING);
+    vector <Pixel*>     getAllPlots(bool onlyFreePlots=false, int outputLevel=MSG_WARNING);
+    /// Return the vector of all plots by a specific region (main region or subregion), optionally shuffled;
+    vector <Pixel*>     getAllPlotsByRegion(ModelRegion region_h, bool shuffle=false);
 	/// Return a vector of the layer ids (as string)
 	vector <string>    getLayerNames();
 	/// Return a vector of pointers of existing layers

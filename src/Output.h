@@ -21,7 +21,7 @@
 #define STDOUTPUT_H
 
 //regmas headers
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 
 struct AgentSurvey;
 class ModelObject;
@@ -35,7 +35,7 @@ class Pixel;
 Class responsable to output the data, both as all kind of log as well as georeferenciated one.
 @author Antonello Lobianco
 */
-class Output: public BaseRegmas{
+class Output: public BaseClass{
 public:
 	                    Output(ThreadManager* MTHREAD_h); ///< Constructor
 	                   ~Output();

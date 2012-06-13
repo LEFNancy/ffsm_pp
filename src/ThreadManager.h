@@ -33,7 +33,7 @@
 
 
 // regmas includes..
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 
 class MainWindow;
 class RegData;
@@ -51,7 +51,7 @@ using namespace std;
 ThreadManager is responsable for the actions on the main thread (run/pause/resume/stop) and to speack with the GUI using the signal/slot tecniques.
 @author Antonello Lobianco
 */
-class ThreadManager : public QThread, public BaseRegmas
+class ThreadManager : public QThread, public BaseClass
 {
     Q_OBJECT
 

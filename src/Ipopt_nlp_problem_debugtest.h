@@ -1,5 +1,5 @@
-#ifndef IPOPT_NLP_PROBLEM_H
-#define IPOPT_NLP_PROBLEM_H
+#ifndef IPOPT_NLP_PROBLEM_DEBUGTEST_H
+#define IPOPT_NLP_PROBLEM_DEBUGTEST_H
 
 #include "IpTNLP.hpp"
 
@@ -26,14 +26,14 @@ using namespace Ipopt;
  *
  *
  */
-class ipopt_nlp_problem : public TNLP
+class Ipopt_nlp_problem_debugtest : public TNLP
 {
 public:
   /** default constructor */
-  ipopt_nlp_problem();
+  Ipopt_nlp_problem_debugtest();
 
   /** default destructor */
-  virtual ~ipopt_nlp_problem();
+  virtual ~Ipopt_nlp_problem_debugtest();
 
   /**@name Overloaded from TNLP */
   //@{
@@ -104,9 +104,9 @@ private:
    *
    */
   //@{
-  //  ipopt_nlp_problem();
-  ipopt_nlp_problem (const ipopt_nlp_problem&);
-  ipopt_nlp_problem& operator=(const ipopt_nlp_problem&);
+  //  Ipopt_nlp_problem_debugtest();
+  Ipopt_nlp_problem_debugtest (const Ipopt_nlp_problem_debugtest&);
+  Ipopt_nlp_problem_debugtest& operator=(const Ipopt_nlp_problem_debugtest&);
   //@}
 };
 

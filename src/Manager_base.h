@@ -44,7 +44,7 @@ coded according with the specific agent type.
 <br>Regional data is declared "const", leading to a read-only way. To write back to the environment must be used specialized functions.
 @author Antonello Lobianco
 */
-class Manager_base: public BaseRegmas{
+class Manager_base: public BaseClass{
 
 public:
 	                    Manager_base(ThreadManager* MTHREAD_h, string name_h);

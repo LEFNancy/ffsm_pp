@@ -37,14 +37,12 @@ The constructor of the GIS (unique) instance want:
 @param RD_h      Pointer to the manager of the regional data
 @param MTHREAD_h Pointer to the main thread manager
 */
-Gis::Gis(ThreadManager* MTHREAD_h)
-{
+Gis::Gis(ThreadManager* MTHREAD_h){
 	MTHREAD=MTHREAD_h;
 	subRegionMode = false;
 }
 
-Gis::~Gis()
-{
+Gis::~Gis(){
 }
 
 /**
@@ -558,6 +556,14 @@ Gis::getAllPlots(bool onlyFreePlots, int outputLevel){
 	return candidates;
 }
 
+/// Return the vector of all plots by a specific region (main region or subregion), optionally shuffled;
+vector <Pixel*>
+Gis::getAllPlotsByRegion(ModelRegion region_h, bool shuffle){
+    //ToBeImplemented
+    vector <Pixel* > regionalPixels;
+    return regionalPixels;
+
+}
 
 
 vector <string>

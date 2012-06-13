@@ -23,7 +23,7 @@
 
 
 //regmas headers
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 
 struct matrixActivities;
 class Agent_base;
@@ -44,7 +44,7 @@ Agents can decide trought comportamental functions or trought a optimization rou
 
 @author Antonello Lobianco
 */
-class Opt: public BaseRegmas{
+class Opt: public BaseClass{
 public:
 	                    Opt(ThreadManager* MTHREAD_h, Agent_base* AGENT_h); ///< Constructor
 	                   ~Opt();

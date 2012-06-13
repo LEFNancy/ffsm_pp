@@ -32,7 +32,7 @@
 #include <QDomElement>
 
 //regmas headers...
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 
 using namespace std;
 
@@ -46,7 +46,7 @@ A small wrapper class using an underlying library (currently QtXml) to read DOM 
 <br>Note: In the DOM terminology "Elements" are a subset of the more general "nodes" (that include comments and other typologies..)
 @author Antonello Lobianco
 */
-class InputNode: public BaseRegmas{
+class InputNode: public BaseClass{
 
 public:
 	                    InputNode();

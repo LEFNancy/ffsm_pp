@@ -7,6 +7,8 @@ pythia.exe
 *.pro.user
 Makefile
 src/Makefile
-src/Moc_*
+src/moc_*
 src/qrc_resources.cpp
 src/ui_MainWindow.h
+ipopt.out
+

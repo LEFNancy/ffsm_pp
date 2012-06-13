@@ -28,7 +28,7 @@
 #include <sstream>
 
 // regmas headers...
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 #include "Gis.h"
 #include "RegData.h"
 
@@ -58,7 +58,7 @@ Main class for agents. It should be an interface for the I/O with the program (p
 <p>For each new "agent type" there should so the need of only two files. The agents need to know only about their manager, and their manager need info only from their agents and the "SuperAgentManager" class.
 @author Antonello Lobianco
 */
-class SuperAgentManager: public BaseRegmas{
+class SuperAgentManager: public BaseClass{
 	
 public:
 	                    SuperAgentManager(ThreadManager* MTHREAD_h);

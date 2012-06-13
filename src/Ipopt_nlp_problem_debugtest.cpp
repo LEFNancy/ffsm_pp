@@ -1,4 +1,4 @@
-#include "ipopt_nlp_problem.h"
+#include "Ipopt_nlp_problem_debugtest.h"
 
 #include <cassert>
 #include <iostream>
@@ -6,18 +6,18 @@
 using namespace Ipopt;
 
 // constructor
-ipopt_nlp_problem::ipopt_nlp_problem()
+Ipopt_nlp_problem_debugtest::Ipopt_nlp_problem_debugtest()
 {}
 
 //destructor
-ipopt_nlp_problem::~ipopt_nlp_problem()
+Ipopt_nlp_problem_debugtest::~Ipopt_nlp_problem_debugtest()
 {}
 
 // returns the size of the problem
-bool ipopt_nlp_problem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
+bool Ipopt_nlp_problem_debugtest::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
                              Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
-  // The problem described in ipopt_nlp_problem.hpp has 4 variables, x[0] through x[3]
+  // The problem described in Ipopt_nlp_problem_debugtest.hpp has 4 variables, x[0] through x[3]
   n = 4;
 
   // one equality constraint and one inequality constraint
@@ -37,7 +37,7 @@ bool ipopt_nlp_problem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 }
 
 // returns the variable bounds
-bool ipopt_nlp_problem::get_bounds_info(Index n, Number* x_l, Number* x_u,
+bool Ipopt_nlp_problem_debugtest::get_bounds_info(Index n, Number* x_l, Number* x_u,
                                 Index m, Number* g_l, Number* g_u)
 {
   // here, the n and m we gave IPOPT in get_nlp_info are passed back to us.
@@ -71,7 +71,7 @@ bool ipopt_nlp_problem::get_bounds_info(Index n, Number* x_l, Number* x_u,
 }
 
 // returns the initial point for the problem
-bool ipopt_nlp_problem::get_starting_point(Index n, bool init_x, Number* x,
+bool Ipopt_nlp_problem_debugtest::get_starting_point(Index n, bool init_x, Number* x,
                                    bool init_z, Number* z_L, Number* z_U,
                                    Index m, bool init_lambda,
                                    Number* lambda)
@@ -93,7 +93,7 @@ bool ipopt_nlp_problem::get_starting_point(Index n, bool init_x, Number* x,
 }
 
 // returns the value of the objective function
-bool ipopt_nlp_problem::eval_f(Index n, const Number* x, bool new_x, Number& obj_value)
+bool Ipopt_nlp_problem_debugtest::eval_f(Index n, const Number* x, bool new_x, Number& obj_value)
 {
   assert(n == 4);
 
@@ -103,7 +103,7 @@ bool ipopt_nlp_problem::eval_f(Index n, const Number* x, bool new_x, Number& obj
 }
 
 // return the gradient of the objective function grad_{x} f(x)
-bool ipopt_nlp_problem::eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_f)
+bool Ipopt_nlp_problem_debugtest::eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_f)
 {
   assert(n == 4);
 
@@ -116,7 +116,7 @@ bool ipopt_nlp_problem::eval_grad_f(Index n, const Number* x, bool new_x, Number
 }
 
 // return the value of the constraints: g(x)
-bool ipopt_nlp_problem::eval_g(Index n, const Number* x, bool new_x, Index m, Number* g)
+bool Ipopt_nlp_problem_debugtest::eval_g(Index n, const Number* x, bool new_x, Index m, Number* g)
 {
   assert(n == 4);
   assert(m == 2);
@@ -128,7 +128,7 @@ bool ipopt_nlp_problem::eval_g(Index n, const Number* x, bool new_x, Index m, Nu
 }
 
 // return the structure or values of the jacobian
-bool ipopt_nlp_problem::eval_jac_g(Index n, const Number* x, bool new_x,
+bool Ipopt_nlp_problem_debugtest::eval_jac_g(Index n, const Number* x, bool new_x,
                            Index m, Index nele_jac, Index* iRow, Index *jCol,
                            Number* values)
 {
@@ -172,7 +172,7 @@ bool ipopt_nlp_problem::eval_jac_g(Index n, const Number* x, bool new_x,
 
 
 //return the structure or values of the hessian
-bool ipopt_nlp_problem::eval_h(Index n, const Number* x, bool new_x,
+bool Ipopt_nlp_problem_debugtest::eval_h(Index n, const Number* x, bool new_x,
                        Number obj_factor, Index m, const Number* lambda,
                        bool new_lambda, Index nele_hess, Index* iRow,
                        Index* jCol, Number* values)
@@ -238,7 +238,7 @@ bool ipopt_nlp_problem::eval_h(Index n, const Number* x, bool new_x,
 
 
 
-void ipopt_nlp_problem::finalize_solution(SolverReturn status,
+void Ipopt_nlp_problem_debugtest::finalize_solution(SolverReturn status,
                                   Index n, const Number* x, const Number* z_L, const Number* z_U,
                                   Index m, const Number* g, const Number* lambda,
                                   Number obj_value,

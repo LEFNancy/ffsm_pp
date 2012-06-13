@@ -32,7 +32,7 @@
 #include <QString>
 
 // RegMAS headers...
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 //#include "InputDocument.h"
 #include "InputNode.h"
 
@@ -56,7 +56,7 @@ All regional data are within this class. It may have linked other data-classes.
 @author Antonello Lobianco
 */
 
-class RegData: public BaseRegmas{
+class RegData: public BaseClass{
 
 public:
 	                    RegData(ThreadManager* MTHREAD_h);
@@ -201,7 +201,7 @@ Now the requirement can be only over ONE investment object, but it can be change
 @author Antonello Lobianco
 */
 
-class RegActivities: public BaseRegmas{
+class RegActivities: public BaseClass{
 public:
 	                    RegActivities(ThreadManager* MTHREAD_h);
 	                   ~RegActivities();
@@ -243,7 +243,7 @@ private:
 };
 
 /// Low level data. XML input is reversed here after unzipping oocalc file and parsing content.xml
-class LLData: public BaseRegmas{
+class LLData: public BaseClass{
 
 public:
 	                    LLData(ThreadManager* MTHREAD_h, string tableName_h);

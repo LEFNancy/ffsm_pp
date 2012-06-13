@@ -25,7 +25,7 @@
 #include <string>
 
 // regmas headers...
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 #include "RegData.h"
 #include "Gis.h"
 #include "SuperAgentManager.h"
@@ -40,13 +40,14 @@
 There is only one istance of this class. It is responsable to load the setting files, call the Init class, "speack" with the Scheduler and finally end the program.
 @author Antonello Lobianco
 */
-class MainProgram: public BaseRegmas {
+class MainProgram: public BaseClass {
 
 public:
 	                    MainProgram(ThreadManager* MTHREAD);
 	                   ~MainProgram();
 	void                run(); ///< Run the program
 	//void                setBaseDirectory(string baseDirectory_h){baseDirectory=baseDirectory_h;};
+    void                testIpopt();
 
 private:
 	//string                        input_filename;

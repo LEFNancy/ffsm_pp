@@ -23,7 +23,7 @@
 #include <map>
 
 // regams headers...
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 #include "RegData.h"
 
 class Pixel;
@@ -36,7 +36,7 @@ This class keeps instances of all objects of the model.
 <br>In the former case, the change on deploy them will depend on specific plots with a compatible land use type and with the absence of uncompatible objects (eg. for perennial crops, of other perennial crops).
 @author Antonello Lobianco
 */
-class ModelObject : public BaseRegmas
+class ModelObject : public BaseClass
 {
 
 public:

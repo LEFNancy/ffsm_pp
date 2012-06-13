@@ -33,7 +33,7 @@
 #include <QThread>
 
 // regmas headers..
-#include "BaseRegmas.h"
+#include "BaseClass.h"
 #include "ModelObject.h"
 #include "Opt.h"
 
@@ -54,7 +54,7 @@ class Manager_base;
  @author Antonello Lobianco
 */
 
-class Agent_base: public BaseRegmas{
+class Agent_base: public BaseClass{
 
 public:
 	                    Agent_base (ThreadManager* MTHREAD_h, Manager_base* manager_h); ///< Constructor

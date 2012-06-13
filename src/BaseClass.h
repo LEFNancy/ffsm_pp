@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef BASEREGMASBASEREGMAS_H
-#define BASEREGMASBASEREGMAS_H
+#ifndef BASECLASSBASECLASS_H
+#define BASECLASSBASECLASS_H
 
 #include <iostream>
 #include <string>
@@ -106,11 +106,11 @@ It provides common methods in all parts of the application for printing the outp
 @author Antonello Lobianco
 */
 
-class BaseRegmas{
+class BaseClass{
 
 public:
-	                    BaseRegmas();
-	                   ~BaseRegmas();
+	                    BaseClass();
+	                   ~BaseClass();
 
 	void                msgOut(int msgCode_h, string msg_h, bool refreshGUI_h=true) const; ///< Overloaded function to print the output log
 	void                msgOut(int msgCode_h, int msg_h, bool refreshGUI_h=true) const;    ///< Overloaded function to print the output log
