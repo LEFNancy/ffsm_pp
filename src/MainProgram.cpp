@@ -56,7 +56,7 @@ This is the main call of the program.
 void
 MainProgram::run(){
 
-    testIpopt(); // test ipopt is workinf fine
+    //testIpopt(); // test ipopt is working fine
 
     // GIS information and methods..
 	Gis *GIS  = new Gis(MTHREAD);

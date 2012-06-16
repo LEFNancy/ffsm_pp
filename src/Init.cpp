@@ -74,17 +74,14 @@ Init::setInitLevel0(){
 };
 
 /**
-Setting up the space, the model objects and the agents (definitions only)
+Setting up the space
 <br>Level 1 :
  - set the environment (settings, available resource name, possible activities)
- - set the object definitions
  - init the space
- - set the agent "moulds" (agent prototypes that will be used to generate the real agents)
- - populate the agents (without yet object nor space assignment)
-@see RegData::setObjectsDefinitions()
+@see RegData::setDefaultSettings();
 @see Gis::setSpace()
 @see Manager_farmers::setAgentMoulds()
-@see Manager_farmers::riseMyAgents()
+
 */
 void
 Init::setInitLevel1(){
@@ -98,27 +95,8 @@ Init::setInitLevel1(){
 	if(MTHREAD->RD->getBoolSetting("randomSimulation")){
 		srand(time(NULL));
 	}
-	MTHREAD->RD->setResources();
-	MTHREAD->RD->setDefaultActivities();
-	MTHREAD->RD->setScenarioActivities();
-	MTHREAD->RD->setObjectsDefinitions();
-	MTHREAD->RD->initializeResourcesObjectsMatch(); // cache values
-	MTHREAD->RD->initializeSpacialObjectsMatch();   // cache values
 	MTHREAD->GIS->setSpace();
 
-	/** ************************ ADD HERE YOUR MANAGERS ***************** **/
-	
-	// IMPORTANT: For each new agent_type, remember to load it in the vector of managers!!!
-	Manager_farmers* FARMERM = new Manager_farmers(MTHREAD, "farmer"); // the manager for farm agents
-	MTHREAD->SAM->addManager(FARMERM);
-
-	// ***************************************************************** //
-
-	MTHREAD->SAM->setAgentMoulds();
-	if(MTHREAD->RD->getBoolSetting("subRegionMode")){
-		MTHREAD->SAM->rescaleMoulds(MTHREAD->RD->getDoubleSetting("scaleCoeff"));
-	}
-	MTHREAD->SAM->populateAgents();
 };
 
 void
@@ -127,18 +105,16 @@ Init::setInitLevel2(){
 };
 
 /**
-Init 3 assign objects to the agents and finally locate both objects and agents along the space dimension.
+Init 3 run the simulation/assign the values for the pre-optimisation year(s)
 @see Manager_farmers::assignObjectsToAgents
 */
 void
 Init::setInitLevel3(){
 	InitState=3;
-	MTHREAD->SAM->locate();
-	MTHREAD->SAM->assignObjectsToAgents();        // this is made my manager_base
-	MTHREAD->SAM->assignSpatialObjectsToAgents(); // this is  specific of manager_space managers
-	MTHREAD->SAM->createBehaviours();             // create the farmer behaviours
-	MTHREAD->DO->initOutput();                    // initialize the output files
-	MTHREAD->SAM->endInit();                      // if u have to do something before the simulation start, do it now!
+
+    MTHREAD->DO->initOutput();       // initialize the output files
+    //MTHREAD->SAM->runInitPeriod();   // initialise the pre-optimisation year(s)
+    MTHREAD->SAM->endInit();         // if u have to do something before the simulation start, do it now!
 };
 
 void
@@ -148,17 +124,10 @@ Init::setInitLevel4(){
 
 /**
 Init level 5 pass the controll to the Scheduler object for the running of the simulations.
-
 */
 void
 Init::setInitLevel5(){
 	InitState=5;
-
-	vector<double> landStats = MTHREAD->GIS->getAgrLandStats();
-	MTHREAD->treeViewerChangeGeneralPropertyValue("total agr land", d2s(landStats.at(0)));
-	MTHREAD->treeViewerChangeGeneralPropertyValue("owned agr land", d2s(landStats.at(1)));
-	MTHREAD->treeViewerChangeGeneralPropertyValue("rented agr land", d2s(landStats.at(2)));
-
 	MTHREAD->SCD->run(); // !!!! go "bello" !!!! start the simulation !!!!!
 };
 
