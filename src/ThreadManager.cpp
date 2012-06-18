@@ -38,7 +38,6 @@ ThreadManager::ThreadManager(){
 	// initializing pointers...
 	RD = NULL;
 	GIS = NULL;
-	SAM = NULL;
 	INIT = NULL;
 	SCD = NULL;
 	DO = NULL;
@@ -149,7 +148,6 @@ Delete the pointers (e.g. GIS) eventually remained from a previous run.
 void
 ThreadManager::deleteDeadOldPointers(){
 	if (DO) {delete DO; DO=0;}
-	if (SAM) {delete SAM; SAM=0;}
 	if (INIT) {delete INIT; INIT=0;}
 	if (SCD) {delete SCD; SCD=0;}
 	if (GIS) {delete GIS; GIS=0;}

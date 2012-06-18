@@ -31,3 +31,32 @@ ModelRegion::ModelRegion(ThreadManager* MTHREAD_h){
 ModelRegion::~ModelRegion(){
 }
 
+/**
+Childrens are all the lvel-1 region that are parts of this region.
+In case that more levels will be developed in future version of this program, this still give only the direct children.
+*/
+void
+setChildren(){
+
+};
+
+double
+getVolumes(){
+	//TODO;
+	return 0;
+};
+
+vector<double>
+getVolumes(int fType_h){
+	//TODO;
+	vector<double> toReturn;
+	return toReturn;
+};
+
+vector < vector <double> >
+getVolumes(int fType_h, string dClass_h){
+	//TODO;
+	vector < vector <double> > toReturn;
+	return toReturn;
+};
+

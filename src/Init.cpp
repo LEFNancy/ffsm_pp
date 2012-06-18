@@ -24,7 +24,6 @@
 #include "Scheduler.h"
 #include "ThreadManager.h"
 #include "Output.h"
-#include "agents/Manager_farmers.h"
 
 //using namespace std;
 
@@ -113,8 +112,7 @@ Init::setInitLevel3(){
 	InitState=3;
 
     MTHREAD->DO->initOutput();       // initialize the output files
-    //MTHREAD->SAM->runInitPeriod();   // initialise the pre-optimisation year(s)
-    MTHREAD->SAM->endInit();         // if u have to do something before the simulation start, do it now!
+
 };
 
 void

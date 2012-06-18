@@ -26,8 +26,6 @@
 
 //#include "InputDocument.h"
 #include "MainWindow.h"
-#include "Agent_space.h"
-#include "SuperAgentManager.h"
 #include "Scheduler.h"
 
 using namespace std;
@@ -152,22 +150,6 @@ Gis::initLayers(){
 		}
 	}
 
-	//initializing spatial activities layer...
-	addLayer("farmActivities","Spatial farm activities",true, true);
-	vector<RegActivities*> activities = MTHREAD->RD->getRegActivities();
-	for(uint i=0; i<activities.size(); i++){
-		if(activities[i]->getSpatiallyExplicit()){
-			int lID = activities[i]->getMapCode();
-			string llabel = activities[i]->getName();
-			int rColor = activities[i]->getMapRColor();
-			int gColor = activities[i]->getMapGColor();
-			int bColor = activities[i]->getMapBColor();
-			addLegendItem("farmActivities", lID, llabel, rColor, gColor, bColor, ((double)lID), ((double)lID));
-		}
-	}
-	// adding a "mixed" activitiescategory for thos plots that are growed with several products and no-one is more than 60%
-	addLegendItem("farmActivities", 900, "Mixed farming activities", 120, 180, 30, ((double)900), ((double)900));
-
 	int mByPx;
 	if(xMetersByPixel>yMetersByPixel){
 		mByPx = xMetersByPixel;
@@ -175,12 +157,6 @@ Gis::initLayers(){
 	else {
 		mByPx = yMetersByPixel;
 	}
-	addLayer("distanceToFarm","(Experimental) Distance from the closest farm",false,true);
-	addLegendItem("distanceToFarm", 1, "0 - "+d2s(((double)1)*mByPx)+" meters", 0,0,0, 0, 1*mByPx);
-	addLegendItem("distanceToFarm", 2, d2s(((double)1)*mByPx)+" - "+d2s(((double)2)*mByPx)+" meters", 50,50,50, 1*mByPx, 2*mByPx);
-	addLegendItem("distanceToFarm", 3, d2s(((double)2)*mByPx)+" - "+d2s(((double)5)*mByPx)+" meters", 100,100,100, 2*mByPx, 5*mByPx);
-	addLegendItem("distanceToFarm", 4, d2s(((double)5)*mByPx)+" - "+d2s(((double)10)*mByPx)+" meters", 200,200,200, 5*mByPx, 10*mByPx);
-	addLegendItem("distanceToFarm", 5, "Over "+d2s(((double)10)*mByPx)+" meters", 250,250,250, 10*mByPx, 1000000*mByPx);
 
 }
 
@@ -411,27 +387,16 @@ Gis::updateImage(string layerName_h){
 }
 
 Pixel*
-Gis::getRandomPlotByValue(string layer_h, int layerValue_h, bool onlyFreePlots){
+Gis::getRandomPlotByValue(string layer_h, int layerValue_h){
 	
 	vector <Pixel* > candidates;
 	vector <uint> counts;
 	for(uint i=0;i<pxVector.size();i++) counts.push_back(i);
 	random_shuffle(counts.begin(), counts.end()); // randomize the elements of the array.
 
-	if (onlyFreePlots){
-		for (uint i=0;i<counts.size();i++){
-			if(pxVector.at(counts.at(i)).getDoubleValue(layer_h) == layerValue_h ) {
-				if (!pxVector.at(counts.at(i)).getOwner() && !pxVector.at(counts.at(i)).getTenant()) {
-					return &pxVector.at(counts.at(i));
-				}
-			}
-		}
-	}
-	else {
-		for (uint i=0;i<counts.size();i++){
-			if(pxVector.at(counts.at(i)).getDoubleValue(layer_h) == layerValue_h ) {
-					return &pxVector.at(counts.at(i));
-			}
+	for (uint i=0;i<counts.size();i++){
+		if(pxVector.at(counts.at(i)).getDoubleValue(layer_h) == layerValue_h ) {
+				return &pxVector.at(counts.at(i));
 		}
 	}
 
@@ -450,27 +415,19 @@ Gis::getRandomPlotByValue(string layer_h, int layerValue_h, bool onlyFreePlots){
 
 */
 vector <Pixel*>
-Gis::getAllPlotsByValue(string layer_h, int layerValue_h, bool onlyFreePlots, int outputLevel){
+Gis::getAllPlotsByValue(string layer_h, int layerValue_h, int outputLevel){
 	// this would be easier to mantain and cleaned code, but slighly slower:
 	//vector<int> layerValues;
 	//layerValues.push_back(layerValue_h);
 	//return getAllPlotsByValue(layer_h, layerValues, onlyFreePlots, outputLevel);
 
 	vector <Pixel* > candidates;
-	if (onlyFreePlots){
-		for (uint i=0;i<pxVector.size();i++){
-			if(pxVector.at(i).getDoubleValue(layer_h) == layerValue_h && ! pxVector.at(i).getOwner() && !pxVector.at(i).getTenant()){
-				candidates.push_back(&pxVector.at(i));
-			}
+	for (uint i=0;i<pxVector.size();i++){
+		if(pxVector.at(i).getDoubleValue(layer_h) == layerValue_h){
+			candidates.push_back(&pxVector.at(i));
 		}
 	}
-	else {
-		for (uint i=0;i<pxVector.size();i++){
-			if(pxVector.at(i).getDoubleValue(layer_h) == layerValue_h){
-				candidates.push_back(&pxVector.at(i));
-			}
-		}
-	}
+
 	if (candidates.size()>0){
 		random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
 	}
@@ -490,7 +447,7 @@ Gis::getAllPlotsByValue(string layer_h, int layerValue_h, bool onlyFreePlots, in
 
 */
 vector <Pixel*>
-Gis::getAllPlotsByValue(string layer_h, vector<int> layerValues_h, bool onlyFreePlots, int outputLevel){
+Gis::getAllPlotsByValue(string layer_h, vector<int> layerValues_h, int outputLevel){
 	vector <Pixel* > candidates;
 	string valuesToMatch;
 	unsigned int z;
@@ -500,20 +457,10 @@ Gis::getAllPlotsByValue(string layer_h, vector<int> layerValues_h, bool onlyFree
 		valuesToMatch = valuesToMatch + " " + i2s(layerValues_h.at(j));
 	}
 
-	if (onlyFreePlots){
-		for (uint i=0;i<pxVector.size();i++){
-			z = valuesToMatch.find(d2s(pxVector.at(i).getDoubleValue(layer_h))); // search if in the string of required values is included also the value of the current plot
-			if( z!=string::npos && ! pxVector.at(i).getOwner() && !pxVector.at(i).getTenant()){
-				candidates.push_back(&pxVector.at(i));
-			}
-		}
-	}
-	else {
-		for (uint i=0;i<pxVector.size();i++){
-			z = valuesToMatch.find(d2s(pxVector.at(i).getDoubleValue(layer_h))); // search if in the string of required values is included also the value of the current plot
-			if(z!=string::npos){ //z is not at the end of the string, means found!
-				candidates.push_back(&pxVector.at(i));
-			}
+	for (uint i=0;i<pxVector.size();i++){
+		z = valuesToMatch.find(d2s(pxVector.at(i).getDoubleValue(layer_h))); // search if in the string of required values is included also the value of the current plot
+		if(z!=string::npos){ //z is not at the end of the string, means found!
+			candidates.push_back(&pxVector.at(i));
 		}
 	}
 
@@ -533,19 +480,10 @@ Gis::getAllPlotsByValue(string layer_h, vector<int> layerValues_h, bool onlyFree
 
 */
 vector <Pixel*>
-Gis::getAllPlots(bool onlyFreePlots, int outputLevel){
+Gis::getAllPlots(int outputLevel){
 	vector <Pixel* > candidates;
-	if (onlyFreePlots){
-		for (uint i=0;i<pxVector.size();i++){
-			if(! pxVector.at(i).getOwner() && !pxVector.at(i).getTenant()){
-				candidates.push_back(&pxVector.at(i));
-			}
-		}
-	}
-	else {
-		for (uint i=0;i<pxVector.size();i++){
-			candidates.push_back(&pxVector.at(i));
-		}
+	for (uint i=0;i<pxVector.size();i++){
+		candidates.push_back(&pxVector.at(i));
 	}
 	if (candidates.size()>0){
 		random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
@@ -654,64 +592,6 @@ Gis::getDistance(const Pixel* px1, const Pixel* px2){
 }
 
 
-double
-Gis::getAgrDistCost(const Pixel* px1, const Pixel* px2){
-	return getDistance(px1, px2) * MTHREAD->RD->getDoubleSetting("agrDistCost");
-}
-/**
-The function return a list of all agents (if par category is empty) or of a specified agent category closest to a certain pixel
-
-@param px_h pointer to the pixel we want get the closest agents
-@param size how many agents we want return
-@param category category of agents we want (optional)
-*/
-vector <Agent_space*>
-Gis::getClosestAgents(Pixel* px_h, int size, const string &category){
-
-	map <double, Agent_space*> mapOfAgentDistance;
-	vector <Agent_space*> toReturn;
-	vector <Agent_base*> agents= MTHREAD->SAM->getAgentsByType(true, category);
-	for(uint i=0;i<agents.size();i++){
-		Agent_space* currentAgent = dynamic_cast<Agent_space*> (agents.at(i));
-		if (currentAgent){
-			double distance= currentAgent->getDistance(px_h);
-			mapOfAgentDistance.insert(pair<double, Agent_space*>(distance, currentAgent));
-		}
-	}
-
-	map<double, Agent_space*>::iterator p;
-	int counter = 0;
-	for(p=mapOfAgentDistance.begin();p!=mapOfAgentDistance.end();p++){ // loop over a map
-			toReturn.push_back(p->second);
-			counter ++;
-			if (counter >= size) break;
-	}
-	return toReturn;
-}
-
-vector<double>
-Gis::getAgrLandStats(){
-	vector<double> toReturn;
-	int totalAgrPlots=0, ownedAgrPlots=0, rentedAgrPlots=0;
-
-	for(uint i=0; i< pxVector.size(); i++){
-		if (pxVector.at(i).isAgricultural()){
-			totalAgrPlots++;
-			if (pxVector.at(i).getOwner()){
-				ownedAgrPlots++;
-			}
-			else if (pxVector.at(i).getTenant()){ // FIXME: it doesn't count plots owned by the collectorAgent and still normally rented !!!!
-				rentedAgrPlots++;
-			}
-		}
-	}
-	toReturn.push_back(totalAgrPlots*getHaByPixel());
-	toReturn.push_back(ownedAgrPlots*getHaByPixel());
-	toReturn.push_back(rentedAgrPlots*getHaByPixel());
-
-	return toReturn;
-
-}
 
 void
 Gis::printLayers(string layerName_h){
@@ -771,23 +651,3 @@ Gis::sub2realID(int id_h){
 
 }
 
-
-bool
-Gis::isAgrCode(int code_h){
-	vector<int> agrLandTypes = MTHREAD->RD->getIntVectorSetting("agrLandTypes");
-	for (uint i=0;i<agrLandTypes.size();i++){
-		if(agrLandTypes[i] == code_h) return true;
-	}
-	return false;
-}
-
-void
-Gis::calculateDistancesToClosestFarm(){
-	for (uint i=0;i<pxVector.size();i++) {
-		if(!pxVector[i].isAgricultural()) continue;
-		vector<Agent_space*> closestAgents = getClosestAgents(&pxVector[i],1,"farmer");
-		double distance = getDistance(closestAgents.at(0)->getHomePlot(),&pxVector[i]);
-		pxVector[i].changeValue("distanceToFarm",distance);
-	}
-
-}

@@ -30,9 +30,6 @@
 #include "BaseClass.h"
 #include "RegData.h"
 #include "Gis.h"
-#include "SuperAgentManager.h"
-
-class SuperAgentManager;
 
 /// %Init the environment, the objects and the agents of the model
 /**

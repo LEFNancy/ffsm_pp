@@ -11,4 +11,4 @@ src/moc_*
 src/qrc_resources.cpp
 src/ui_MainWindow.h
 ipopt.out
-
+*.~lock.*

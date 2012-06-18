@@ -22,8 +22,6 @@
 #include "IpIpoptApplication.hpp"
 
 #include "MainProgram.h"
-//#include "InputDocument.h"
-//#include "RegData.h"
 #include "ThreadManager.h"
 #include "Ipopt_nlp_problem_debugtest.h"
 
@@ -64,9 +62,6 @@ MainProgram::run(){
 	// a test object for various 0-effects tests (sandbox)..
 	Sandbox* TEST = new Sandbox(MTHREAD);
 	TEST->test();
-	// the agent super manager, will deal with all the manager objects..
-	SuperAgentManager *SAM  = new SuperAgentManager(MTHREAD);
-	MTHREAD->setSAMPointer(SAM);
 	// the Init object, it schedule the pre-simulation phase..
 	Init *INIT = new Init(MTHREAD);
 	MTHREAD->setINITPointer(INIT);
@@ -76,14 +71,6 @@ MainProgram::run(){
 	// manage the printing of data needed for scenario-analisys. The "message output" (needed to see "what is it happening?" are instead simply printed with msgOut()..
 	Output *DO = new Output(MTHREAD);
 	MTHREAD->setDOPointer(DO);
-	
-	// Creating an istance of regional data and assigning the first data (the input_file /output_directory)
-	//msgOut(MSG_DEBUG, input_filename);
-
-	//MTHREAD->RD->parseInitialConfigFile();
-
-
-
 
 	// Creating an istance of INIT and delegating to it the Initialization phase..
 	MTHREAD->INIT->setInitLevel(1); // Initial environment setting and agent rising

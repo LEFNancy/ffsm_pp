@@ -40,7 +40,7 @@ MainWindow::MainWindow() {
 
 	setupUi(this);
 	unsavedStatus=false;
-	curModelFileName="data/regmasInput.ods";
+	curModelFileName="data/pythiaInput.ods";
 	curBaseDirectory = "data/";
 	outputDirName="output/";
 	setCurrentLogFileName("");

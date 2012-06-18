@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){
 	opt->addUsage( "" );
 	opt->addUsage( " -h  --help			Prints this help " );
 	opt->addUsage( " -c  --console 			Run in console mode (no gui, default: false) " );
-	opt->addUsage( " -i  --input_file [input_file_name]	Input file (relative path, default: 'data/regmasInput.ods') " );
+	opt->addUsage( " -i  --input_file [input_file_name]	Input file (relative path, default: 'data/pythiaInput.ods') " );
 	opt->addUsage( " -s  --scenario [scenario_name]	Scenario name (default: the first defined in the input file) " );
 	opt->addUsage( "" );
 	opt->addUsage( "Notes:");
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]){
 			inputFileName = currentDir + "/" + tempdata;
 	}
 	else {
-			inputFileName = currentDir + "/data/regmasInput.ods";
+			inputFileName = currentDir + "/data/pythiaInput.ods";
 	}
 
 	if( opt->getValue( 's' ) != NULL  || opt->getValue( "scenario" ) != NULL  ){

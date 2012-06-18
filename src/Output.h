@@ -20,12 +20,18 @@
 #ifndef STDOUTPUT_H
 #define STDOUTPUT_H
 
+// Core C++ headers
+#include <string>
+#include <vector>
+#include <map>
+#include <stdexcept>
+#include <iostream>
+#include <sstream>
+
 //regmas headers
 #include "BaseClass.h"
 
-struct AgentSurvey;
-class ModelObject;
-class Agent_base;
+
 class Pixel;
 
 
@@ -44,7 +50,6 @@ public:
 		void                initOutputAggregatedData();
 		void                initOutputMaps();
 		void                initOutputDetailedData();
-		void                initOutputLeavingAgents();
 	void                collectData();
 	void                print();
 		void                printAggregatedData();
@@ -52,45 +57,10 @@ public:
 		void                printDetailedData();
 		void                printDebugMatrices();
 	char                getOutputFieldDelimiter();
-	void                printLeavingAgent(Agent_base* agent, int cause);
 	void                cleanScenario(string fileName, string scenarioName, char d);
-	double              getSurveyActivityByName(const AgentSurvey& survey, const string& actName);
-	double              getSurveyUnusedLand(const AgentSurvey& survey);
 
 private:
 	
-	vector<AgentSurvey>                  surveys;
-	vector<int>           abandonedAgrLandByType; ///< abandoned land is those land that is unowned, unrented or - even if with a possession title- unused
-	vector<int>         unpossessedAgrLandByType; ///< unpossessed land is just those unowned and unrented
-	vector<int>                idleAgrLandByType;
-};
-
-struct AgentSurvey {
-	int                                     year;
-	string                             agentType;
-	int                                  agentID;
-	int                             agentMouldID;
-	int                                managerID;
-	Agent_base*                            agent;
-	bool                                 spatial;
-	double                            hostPlotID;
-	int                                hostPlotX;
-	int                                hostPlotY;
-	double                               capital;
-	double                           landCapital;
-	double                        objectsCapital;
-	double                                labour;
-	double                             liquidity;
-	double                   netProductionProfit; ///< z of the production solve() minus the couled premium
-	double                       coupledPremiums;
-	double                      decoupledPayment;
-	double                     lastSunkCostsPaid; ///< rental costs and other sunk costs (e.g. capital depreciation)
-	vector<int>             ownedPlotsByAllTypes;
-	vector<int>            rentedPlotsByAllTypes;
-	vector<int>               ownedObjectsByType;
-	vector<int>           availableObjectsByType;
-	vector<int>      newlyAvailableObjectsByType;
-	vector<double>              activitiesByType;
 };
 
 #endif

@@ -96,21 +96,19 @@ public:
 	/// Count the pixels within each legend item for the selected layer
 	void                countItems(string layerName_h, bool debug=false);
 	/// Return a pointer to a plot with a specific value for the specified layer, optionally filtering only the free plots 
-	Pixel*              getRandomPlotByValue(string layer_h, int layerValue__h, bool onlyFreePlots=false);
+	Pixel*              getRandomPlotByValue(string layer_h, int layerValue__h);
 	/// Return the vector (shuffled) of all plots with a specific value for a specified layer, optionally filtering only the free ones. It is also possible to specify the level in case of failure (no free plots available)
-	vector <Pixel*>     getAllPlotsByValue(string layer_h, int layerValue_h, bool onlyFreePlots=false, int outputLevel=MSG_WARNING);
+	vector <Pixel*>     getAllPlotsByValue(string layer_h, int layerValue_h, int outputLevel=MSG_WARNING);
 	/// Return the vector (shuffled) of all plots with specific values for a specified layer, optionally filtering only the free ones. It is also possible to specify the level in case of failure (no free plots available)
-	vector <Pixel*>     getAllPlotsByValue(string layer_h, vector<int> layerValues_h, bool onlyFreePlots=false, int outputLevel=MSG_WARNING);
+	vector <Pixel*>     getAllPlotsByValue(string layer_h, vector<int> layerValues_h, int outputLevel=MSG_WARNING);
 	/// Return the vector (shuffled) of all plots, optionally filtering only the free ones. It is also possible to specify the level in case of failure (no free plots available)
-    vector <Pixel*>     getAllPlots(bool onlyFreePlots=false, int outputLevel=MSG_WARNING);
+	vector <Pixel*>     getAllPlots(int outputLevel=MSG_WARNING);
     /// Return the vector of all plots by a specific region (main region or subregion), optionally shuffled;
     vector <Pixel*>     getAllPlotsByRegion(ModelRegion region_h, bool shuffle=false);
 	/// Return a vector of the layer ids (as string)
 	vector <string>    getLayerNames();
 	/// Return a vector of pointers of existing layers
 	vector <Layers*>    getLayerPointers();
-	/// Fill the layer of distance with closest farms;
-	void               calculateDistancesToClosestFarm();
 	/// Print the specified layer or all layers (if param layerName_h is missing). @see Layers::print()
 	void                printLayers(string layerName_h="");
 	/// Save an image in standard png format
@@ -120,12 +118,6 @@ public:
 	///< Print debug information (for each pixel in the requested interval, their values on the specified layer)
 	void                printDebugValues (string layerName_h, int min_h=0, int max_h=0);
 	double              getDistance(const Pixel* px1, const Pixel* px2);
-	double              getAgrDistCost(const Pixel* px1, const Pixel* px2);
-	///The function return a list of all agents (if par category is empty) or of a specified agent category closest to a certain pixel
-	vector <Agent_space*> getClosestAgents(Pixel* px_h, int size, const string &category="");
-	/// Return total, owned and rented agr. land
-	vector<double>       getAgrLandStats();
-
 
 	int                 getXNPixels() const {return xNPixels;};      ///< Return the number of pixels on X
 	int                 getYNPixels() const {return yNPixels;};      ///< Return the number of pixels on Y
@@ -146,7 +138,6 @@ public:
 	int                 getSubYB() const {return subYB;};
 	/// Transform the ID of a pixel in subregion coordinates to the real (and model used) coordinates
 	int                 sub2realID(int id_h);
-	bool                isAgrCode(int code_h); ///< return true if a land use code is agricultural
 
 private:
 	void                loadLayersDataFromFile(); ///< Load the data of a layer its datafile

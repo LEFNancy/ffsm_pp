@@ -232,34 +232,6 @@ Layers::randomShuffle(){
 		}
 	}
 
-
-/*	if (!isInteger){
-		msgOut(MSG_WARNING,"I'm not gonna randomShuffle layer "+name+" as this is NOT an integer layer and this function substitute the float values with their legend ones (that are the same in integer layers)");
-	}
-	countMyPixels();
-	//vector <double> origValues;
-	int maskValue = -MTHREAD->GIS->getNoValue();
-	double totPixels = MTHREAD->GIS->getXyNPixels();
-	for (uint i=0;i<totPixels;i++){
-		double pxValue= MTHREAD->GIS->getPixel(i)->getDoubleValue(name);
-		//origValues.push_back(pxValue);
-		if(pxValue != MTHREAD->GIS->getNoValue()){
-			//cout <<"TEEEST1: " << maskValue<<endl;
-			MTHREAD->GIS->getPixel(i)->changeValue(name,maskValue);
-			//cout <<"TEEEST2: " <<MTHREAD->GIS->getPixel(i)->getDoubleValue(name) << endl;
-		}
-	}
-
-	vector<Pixel*> shufledPixels = MTHREAD->GIS->getAllPlotsByValue(name,maskValue);
-	int pxCounter = 0;
-	for (uint i=0; i<legendItems.size();i++){
-	 	for (int j=0;j<legendItems[i].cashedCount;j++){
-			shufledPixels.at(pxCounter)->changeValue(name,legendItems[i].ID);
-			pxCounter++;
-		}	
-	}
-*/
-
 }
 void
 Layers::print(){

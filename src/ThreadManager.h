@@ -38,7 +38,6 @@
 class MainWindow;
 class RegData;
 class Gis;
-class SuperAgentManager;
 class Init;
 class Scheduler;
 class Output;
@@ -60,7 +59,6 @@ public:
 	// pointers..
 	RegData*            RD;   ///< the regional data object
 	Gis*                GIS;  ///< GIS information and methods	
-	SuperAgentManager*  SAM;  ///< the agent super manager, will deal with all the manager objects
 	Init*               INIT; ///< the Init object (pre-simulation scheduler)
 	Scheduler*          SCD;  ///< the scheduler object (simulation-loops scheduler)
 	Output*             DO;   ///< data output
@@ -87,8 +85,6 @@ public:
 	void                setRDPointer(RegData *RD_h){RD=RD_h;};
 	/// GIS information and methods..
 	void                setGISPointer(Gis *GIS_h){GIS=GIS_h;};
-	/// the agent super manager, will deal with all the manager objects..
-	void                setSAMPointer(SuperAgentManager *SAM_h){SAM=SAM_h;};
 	/// the Init object, it schedule the pre-simulation phase..
 	void                setINITPointer(Init *INIT_h){INIT=INIT_h;};
 	/// the scheduler object. It manage the simulation loops..
@@ -101,6 +97,7 @@ public:
 	//void                setBaseDirectory(QString baseDirectory_h){baseDirectory =  baseDirectory_h;};
 
 	// tree viewer operations...
+	/*
 	void               treeViewerAddManager(string name){emit treeViewerAddItemToGui("Manager "+name, "manager_"+name, "managers");};
 	void               treeViewerAddAgent(int uniqueID){emit treeViewerAddItemToGui(i2s(uniqueID), "agent_"+i2s(uniqueID), "agents"); };
 	void               treeViewerAddManagerProperty(string managerName, string propertyName){
@@ -113,8 +110,10 @@ public:
 	                        emit treeViewerItemChangeValueToGui("agent_"+i2s(uniqueID)+"_"+propertyName, newValue);};
 	void               treeViewerRemoveManager(string name){emit treeViewerItemRemoveToGui("manager_"+name);};
 	void               treeViewerRemoveAgent(int uniqueID){emit treeViewerItemRemoveToGui("agent_"+i2s(uniqueID));};
+	*/
 	void               treeViewerChangeGeneralPropertyValue(string propertyName, string newValue){
 	                        emit treeViewerItemChangeValueToGui("general_"+propertyName, newValue);};
+
 
 	void               fitInWindow() {emit fitInWindowToGui();}; ///< Re-draw the map making it to fit (with the right proportions) to the widget
 	void                runFromConsole(QString inputFileName_h, QString scenarioName_h);

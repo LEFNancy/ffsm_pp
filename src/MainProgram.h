@@ -28,7 +28,6 @@
 #include "BaseClass.h"
 #include "RegData.h"
 #include "Gis.h"
-#include "SuperAgentManager.h"
 #include "Init.h"
 #include "Scheduler.h"
 #include "Sandbox.h"
@@ -44,14 +43,10 @@ class MainProgram: public BaseClass {
 
 public:
 	                    MainProgram(ThreadManager* MTHREAD);
-	                   ~MainProgram();
+						~MainProgram();
 	void                run(); ///< Run the program
-	//void                setBaseDirectory(string baseDirectory_h){baseDirectory=baseDirectory_h;};
-    void                testIpopt();
+	void                testIpopt();
 
-private:
-	//string                        input_filename;
-	//string                         baseDirectory;
 };
 
 #endif
