@@ -117,7 +117,7 @@ This function take as input the value stored in the pixel for the specific layer
 QColor
 Layers::getColor(double ID_h){
 	QColor nocolor(255,255,255);
-	if (ID_h == MTHREAD->RD->getDoubleSetting("noValue")){
+	if (ID_h == MTHREAD->MD->getDoubleSetting("noValue")){
 		return nocolor;
 	}
 	if (isInteger){
@@ -146,7 +146,7 @@ This function take as input the value stored in the pixel for the specific layer
 */
 string
 Layers::getCategory(double ID_h){
-	if (ID_h == MTHREAD->RD->getDoubleSetting("noValue")){
+	if (ID_h == MTHREAD->MD->getDoubleSetting("noValue")){
 		return "";
 	}
 	if (isInteger){
@@ -236,8 +236,8 @@ Layers::randomShuffle(){
 void
 Layers::print(){
 
-	if(MTHREAD->RD->getIntSetting("outputLevel")<OUTVL_MAPS) return;
-	string mapBaseDirectory = MTHREAD->RD->getBaseDirectory()+MTHREAD->RD->getOutputDirectory()+"maps/";
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_MAPS) return;
+	string mapBaseDirectory = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getOutputDirectory()+"maps/";
 	string mapGridOutputDirectory = mapBaseDirectory+"asciiGrids/";
 	string catsOutputDirectory = mapBaseDirectory+"cats/";
 	string coloursOutputDirectory = mapBaseDirectory+"colr/";
@@ -250,7 +250,7 @@ Layers::print(){
 
 	// printing the map...
 	string header;
-	if(MTHREAD->RD->getIntSetting("mapOutputFormat") == 1){ // GRASS ASCII Grid
+	if(MTHREAD->MD->getIntSetting("mapOutputFormat") == 1){ // GRASS ASCII Grid
 		header =      "north: " + d2s(MTHREAD->GIS->getGeoTopY()) + "\n"
 					+ "south: " + d2s(MTHREAD->GIS->getGeoBottomY()) + "\n"
 					+ "east: " + d2s(MTHREAD->GIS->getGeoRightX()) + "\n"
@@ -259,7 +259,7 @@ Layers::print(){
 					+ "cols: " + i2s(MTHREAD->GIS->getXNPixels()) + "\n"
 					+ "null: " + d2s(MTHREAD->GIS->getNoValue()) + "\n";
 
-	} else if(MTHREAD->RD->getIntSetting("mapOutputFormat") == 2){
+	} else if(MTHREAD->MD->getIntSetting("mapOutputFormat") == 2){
 		header =      "ncols: " + i2s(MTHREAD->GIS->getXNPixels()) + "\n"
 					+ "lrows: " + i2s(MTHREAD->GIS->getYNPixels()) + "\n"
 					+ "xllcornel: " + d2s(MTHREAD->GIS->getGeoLeftX()) + "\n"
@@ -344,7 +344,7 @@ Layers::printBinMap(){
 	int subYT               = MTHREAD->GIS->getSubYT();
 	int subYB               = MTHREAD->GIS->getSubYB();
 
-	string mapBaseDirectory = MTHREAD->RD->getBaseDirectory()+MTHREAD->RD->getOutputDirectory()+"maps/bitmaps/";
+	string mapBaseDirectory = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getOutputDirectory()+"maps/bitmaps/";
 	string mapFilename      = mapBaseDirectory +name+ "_" +i2s(MTHREAD->SCD->getYear()) +"_" +MTHREAD->getScenarioName()+".png";
 
 	QImage image = QImage(subXR-subXL+1, subYB-subYT+1, QImage::Format_RGB32);

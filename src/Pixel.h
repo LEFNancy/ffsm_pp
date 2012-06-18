@@ -28,7 +28,7 @@
 
 // regmas headers...
 #include "BaseClass.h"
-#include "RegData.h"
+#include "ModelData.h"
 #include "Gis.h"
 
 class Gis;        //forward declaration

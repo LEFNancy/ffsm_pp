@@ -20,7 +20,7 @@
 #include "Scheduler.h"
 #include "ThreadManager.h"
 #include "Output.h"
-#include "RegData.h"
+#include "ModelData.h"
 #include "Gis.h"
 
 Scheduler::Scheduler(ThreadManager* MTHREAD_h){
@@ -34,12 +34,12 @@ Scheduler::~Scheduler(){
 void
 Scheduler::run(){
 
-	for (int it=0;it<MTHREAD->RD->getIntSetting("simulationYears");it++){
+	for (int it=0;it<MTHREAD->MD->getIntSetting("simulationYears");it++){
 		iteration = it;
 		MTHREAD->upgradeMainSBLabel("New year started..");
 		msgOut(MSG_INFO, "### "+i2s(getYear())+ " year started.. ####");
-		MTHREAD->upgradeYearSBLabel(iteration+ MTHREAD->RD->getIntSetting("initialYear"));
-		MTHREAD->treeViewerChangeGeneralPropertyValue("year",i2s(iteration+ MTHREAD->RD->getIntSetting("initialYear")));
+		MTHREAD->upgradeYearSBLabel(iteration+ MTHREAD->MD->getIntSetting("initialYear"));
+		MTHREAD->treeViewerChangeGeneralPropertyValue("year",i2s(iteration+ MTHREAD->MD->getIntSetting("initialYear")));
 
 
 
@@ -56,5 +56,5 @@ Scheduler::run(){
 
 int
 Scheduler::getYear(){
-	return (iteration+MTHREAD->RD->getIntSetting("initialYear"));
+	return (iteration+MTHREAD->MD->getIntSetting("initialYear"));
 }

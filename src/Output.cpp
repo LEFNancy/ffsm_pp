@@ -22,7 +22,7 @@
 #include "Output.h"
 #include "ThreadManager.h"
 #include "Scheduler.h"
-#include "RegData.h"
+#include "ModelData.h"
 #include "Gis.h"
 
 
@@ -49,7 +49,7 @@ Output::initOutput(){
 
 void
 Output::initOutputAggregatedData(){
-	if(MTHREAD->RD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
 
 
 	char                 d               = getOutputFieldDelimiter();
@@ -57,21 +57,21 @@ Output::initOutputAggregatedData(){
 	string outFileName;
 
 
-	if(MTHREAD->RD->getBoolSetting("outputAgentAggregatedHumanReadable")) {	
-		outFileName = MTHREAD->RD->getBaseDirectory() 
-		              + MTHREAD->RD->getOutputDirectory()
+	if(MTHREAD->MD->getBoolSetting("outputAgentAggregatedHumanReadable")) {
+		outFileName = MTHREAD->MD->getBaseDirectory()
+					  + MTHREAD->MD->getOutputDirectory()
 		              + "results/aggregatedOutput_"
 		              + MTHREAD->getScenarioName()
-		              + MTHREAD->RD->getStringSetting("outputFileExtension");
+					  + MTHREAD->MD->getStringSetting("outputFileExtension");
 		ofstream out(outFileName.c_str(), ios::out);
 		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
 		out << "YEAR"                << d << "\n";
 		out.close();	
 	} else { // output is for database processing...
-		outFileName = MTHREAD->RD->getBaseDirectory() 
-		              + MTHREAD->RD->getOutputDirectory()
+		outFileName = MTHREAD->MD->getBaseDirectory()
+					  + MTHREAD->MD->getOutputDirectory()
 		              + "results/aggregatedOutput"
-		              + MTHREAD->RD->getStringSetting("outputFileExtension");
+					  + MTHREAD->MD->getStringSetting("outputFileExtension");
 		ifstream in(outFileName.c_str(), ios::in);
 		if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
 			in.close();
@@ -99,8 +99,8 @@ Resetting the list of printed layers and the scenario name..
 */
 void
 Output::initOutputMaps(){
-	if(MTHREAD->RD->getIntSetting("outputLevel")<OUTVL_MAPS) return;
-	string mapBaseDirectory = MTHREAD->RD->getBaseDirectory()+MTHREAD->RD->getOutputDirectory()+"maps/";	
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_MAPS) return;
+	string mapBaseDirectory = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getOutputDirectory()+"maps/";
 	string filenameToSaveScenarioName = mapBaseDirectory+"scenarioName";
 	string filenameListIntLayers = mapBaseDirectory+"integerListLayers";
 	string filenameListFloatLayers = mapBaseDirectory+"floatListLayers";
@@ -126,30 +126,30 @@ Output::initOutputMaps(){
 
 void
 Output::initOutputDetailedData(){
-	if(MTHREAD->RD->getIntSetting("outputLevel")<OUTVL_DETAILED) return;
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_DETAILED) return;
 
 	char d = getOutputFieldDelimiter();
 	vector<int> landTypes;
 
 
-	if(MTHREAD->RD->getBoolSetting("outputAgentDetailsHumanReadable")){
-		string outFileName =     MTHREAD->RD->getBaseDirectory()
-							   + MTHREAD->RD->getOutputDirectory()
+	if(MTHREAD->MD->getBoolSetting("outputAgentDetailsHumanReadable")){
+		string outFileName =     MTHREAD->MD->getBaseDirectory()
+							   + MTHREAD->MD->getOutputDirectory()
 							   + "results/ag_"
 							   + "detailID"
 							   + "_"
 							   + MTHREAD->getScenarioName()
-							   + MTHREAD->RD->getStringSetting("outputFileExtension");
+							   + MTHREAD->MD->getStringSetting("outputFileExtension");
 		ofstream out(outFileName.c_str(), ios::out);
 		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+".");}
 		out << "RECORDID"             << d << "\n"
 			<< "YEAR"                 << d << "\n";
 		    out.close();
 	} else { // output is on one big file....
-		string outFileName =     MTHREAD->RD->getBaseDirectory() 
-			                       + MTHREAD->RD->getOutputDirectory()
+		string outFileName =     MTHREAD->MD->getBaseDirectory()
+								   + MTHREAD->MD->getOutputDirectory()
 			                       + "results/agentsDetails"
-			                       + MTHREAD->RD->getStringSetting("outputFileExtension");
+								   + MTHREAD->MD->getStringSetting("outputFileExtension");
 		ifstream in(outFileName.c_str(), ios::in);
 		if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
 			in.close();
@@ -182,7 +182,7 @@ Output::print(){
 
 void
 Output::printAggregatedData(){
-	if(MTHREAD->RD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
 
 	string inOutFileName;
 
@@ -196,12 +196,12 @@ Output::printAggregatedData(){
 	data.push_back(i2s(MTHREAD->SCD->getYear()));
 
 
-	if (MTHREAD->RD->getBoolSetting("outputAgentAggregatedHumanReadable")){
-		inOutFileName = MTHREAD->RD->getBaseDirectory() 
-		                + MTHREAD->RD->getOutputDirectory()
+	if (MTHREAD->MD->getBoolSetting("outputAgentAggregatedHumanReadable")){
+		inOutFileName = MTHREAD->MD->getBaseDirectory()
+						+ MTHREAD->MD->getOutputDirectory()
 		                + "results/aggregatedOutput_"
 		                + MTHREAD->getScenarioName()
-		                + MTHREAD->RD->getStringSetting("outputFileExtension");
+						+ MTHREAD->MD->getStringSetting("outputFileExtension");
 		ifstream inFile (inOutFileName.c_str(), ios::in);
 		if (!inFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for reading.");}
 		for(uint i=0;i<data.size();i++) {
@@ -219,11 +219,11 @@ Output::printAggregatedData(){
 		outFile.close();
 	} else { // outpout for DB...
 
-		inOutFileName = MTHREAD->RD->getBaseDirectory() 
-		                + MTHREAD->RD->getOutputDirectory()
+		inOutFileName = MTHREAD->MD->getBaseDirectory()
+						+ MTHREAD->MD->getOutputDirectory()
 		                + "results/aggregatedOutput"
 		                //+ MTHREAD->getScenarioName()
-		                + MTHREAD->RD->getStringSetting("outputFileExtension");
+						+ MTHREAD->MD->getStringSetting("outputFileExtension");
 
 		ofstream outFile (inOutFileName.c_str(), ios::app);
 		if (!outFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for writing.");}
@@ -238,16 +238,16 @@ Output::printAggregatedData(){
 
 void
 Output::printMaps(){
-	if(MTHREAD->RD->getIntSetting("outputLevel")<OUTVL_MAPS) return;
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_MAPS) return;
 	MTHREAD->GIS->printLayers();
-	if(MTHREAD->RD->getIntSetting("outputLevel")<OUTVL_BINMAPS) return;
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_BINMAPS) return;
 	MTHREAD->GIS->printBinMaps();
 	
 }
 
 void
 Output::printDetailedData(){
-	if(MTHREAD->RD->getIntSetting("outputLevel")<OUTVL_DETAILED) return;
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_DETAILED) return;
 
 	char           d         = getOutputFieldDelimiter();
 
@@ -258,14 +258,14 @@ Output::printDetailedData(){
 	//sData.push_back(i2s(surveys[i].year));
 
 
-	if(MTHREAD->RD->getBoolSetting("outputAgentDetailsHumanReadable")){
-		string inOutFileName =     MTHREAD->RD->getBaseDirectory()
-							   + MTHREAD->RD->getOutputDirectory()
+	if(MTHREAD->MD->getBoolSetting("outputAgentDetailsHumanReadable")){
+		string inOutFileName =     MTHREAD->MD->getBaseDirectory()
+							   + MTHREAD->MD->getOutputDirectory()
 							   + "results/ag_"
 							   + "agName"
 							   + "_"
 							   + MTHREAD->getScenarioName()
-							   + MTHREAD->RD->getStringSetting("outputFileExtension");
+							   + MTHREAD->MD->getStringSetting("outputFileExtension");
 
 		ifstream inFile (inOutFileName.c_str(), ios::in);
 		if (!inFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for reading.");}
@@ -283,11 +283,11 @@ Output::printDetailedData(){
 			outFile << out ;
 			outFile.close();
 	} else {  // one big file...
-		string outFileName =     MTHREAD->RD->getBaseDirectory()
-							   + MTHREAD->RD->getOutputDirectory()
+		string outFileName =     MTHREAD->MD->getBaseDirectory()
+							   + MTHREAD->MD->getOutputDirectory()
 							   + "results/agentsDetails"
 							   //+ MTHREAD->getScenarioName()
-							   + MTHREAD->RD->getStringSetting("outputFileExtension");
+							   + MTHREAD->MD->getStringSetting("outputFileExtension");
 		ofstream outFile (outFileName.c_str(), ios::app);
 		if (!outFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+".");}
 		outFile << MTHREAD->getScenarioName() << d ;
@@ -301,13 +301,13 @@ Output::printDetailedData(){
 
 void
 Output::printDebugMatrices(){
-	if(MTHREAD->RD->getIntSetting("outputLevel")<OUTVL_ALL) return;
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_ALL) return;
 }
 
 
 char
 Output::getOutputFieldDelimiter(){
-	int delimiterID = MTHREAD->RD->getIntSetting("outputFieldDelimiter");
+	int delimiterID = MTHREAD->MD->getIntSetting("outputFieldDelimiter");
 	switch (delimiterID) {
 		case 1:
 			return ',';

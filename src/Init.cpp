@@ -77,7 +77,7 @@ Setting up the space
 <br>Level 1 :
  - set the environment (settings, available resource name, possible activities)
  - init the space
-@see RegData::setDefaultSettings();
+@see ModelData::setDefaultSettings();
 @see Gis::setSpace()
 @see Manager_farmers::setAgentMoulds()
 
@@ -89,9 +89,9 @@ Init::setInitLevel1(){
 	ostringstream out;
 	out<<"OK, Entering Init state "<<InitState<<"...";
 	msgOut(MSG_DEBUG,out.str());
-	MTHREAD->RD->setDefaultSettings();
-	MTHREAD->RD->setScenarioSettings();
-	if(MTHREAD->RD->getBoolSetting("randomSimulation")){
+	MTHREAD->MD->setDefaultSettings();
+	MTHREAD->MD->setScenarioSettings();
+	if(MTHREAD->MD->getBoolSetting("randomSimulation")){
 		srand(time(NULL));
 	}
 	MTHREAD->GIS->setSpace();

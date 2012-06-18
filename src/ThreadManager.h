@@ -36,7 +36,7 @@
 #include "BaseClass.h"
 
 class MainWindow;
-class RegData;
+class ModelData;
 class Gis;
 class Init;
 class Scheduler;
@@ -57,7 +57,7 @@ class ThreadManager : public QThread, public BaseClass
 public:
 	                    ThreadManager();
 	// pointers..
-	RegData*            RD;   ///< the regional data object
+	ModelData*          MD;   ///< the model data object
 	Gis*                GIS;  ///< GIS information and methods	
 	Init*               INIT; ///< the Init object (pre-simulation scheduler)
 	Scheduler*          SCD;  ///< the scheduler object (simulation-loops scheduler)
@@ -82,7 +82,7 @@ public:
 	void                setOutputDirName(string outputDirname_h);
 
 	/// the regional data object..
-	void                setRDPointer(RegData *RD_h){RD=RD_h;};
+	void                setMDPointer(ModelData *MD_h){MD=MD_h;};
 	/// GIS information and methods..
 	void                setGISPointer(Gis *GIS_h){GIS=GIS_h;};
 	/// the Init object, it schedule the pre-simulation phase..

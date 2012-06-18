@@ -24,7 +24,7 @@
 
 //#include <typeinfo>
 
-#include "RegData.h"
+#include "ModelData.h"
 #include "Pixel.h"
 #include "ThreadManager.h"
 #include "Scheduler.h"

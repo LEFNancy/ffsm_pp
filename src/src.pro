@@ -68,7 +68,6 @@ HEADERS += BaseClass.h \
            Opt.h \
            Output.h \
            Pixel.h \
-           RegData.h \
            Sandbox.h \
            Scheduler.h \
            ThreadManager.h \
@@ -80,7 +79,8 @@ HEADERS += BaseClass.h \
            zip_p.h \
            zipentry_p.h \
            anyoption.h \
-           ScenarioSelectionWidget.h 
+           ScenarioSelectionWidget.h \ 
+    ModelData.h
 
 FORMS += MainWindow.ui
 SOURCES += BaseClass.cpp \
@@ -94,7 +94,6 @@ SOURCES += BaseClass.cpp \
            Opt.cpp \
            Output.cpp \
            Pixel.cpp \
-           RegData.cpp \
            Scheduler.cpp \
            Sandbox.cpp \
            ThreadManager.cpp \
@@ -104,6 +103,7 @@ SOURCES += BaseClass.cpp \
            unzip.cpp \
            zip.cpp \
            anyoption.cpp \
-           ScenarioSelectionWidget.cpp
+           ScenarioSelectionWidget.cpp \
+    ModelData.cpp
 
 RESOURCES += resources.qrc

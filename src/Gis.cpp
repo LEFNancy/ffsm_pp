@@ -60,13 +60,13 @@ Gis::setSpace(){
 	msgOut(MSG_INFO,"Creating the space...");
 
 	// init basic settings....
-	geoTopY = MTHREAD->RD->getDoubleSetting("geoNorthEdge");
-	geoBottomY = MTHREAD->RD->getDoubleSetting("geoSouthEdge");
-	geoLeftX = MTHREAD->RD->getDoubleSetting("geoWestEdge");
-	geoRightX = MTHREAD->RD->getDoubleSetting("geoEastEdge");
-	xNPixels = MTHREAD->RD->getIntSetting("nCols");
-	yNPixels = MTHREAD->RD->getIntSetting("nRows");
-	noValue = MTHREAD->RD->getDoubleSetting("noValue");
+	geoTopY = MTHREAD->MD->getDoubleSetting("geoNorthEdge");
+	geoBottomY = MTHREAD->MD->getDoubleSetting("geoSouthEdge");
+	geoLeftX = MTHREAD->MD->getDoubleSetting("geoWestEdge");
+	geoRightX = MTHREAD->MD->getDoubleSetting("geoEastEdge");
+	xNPixels = MTHREAD->MD->getIntSetting("nCols");
+	yNPixels = MTHREAD->MD->getIntSetting("nRows");
+	noValue = MTHREAD->MD->getDoubleSetting("noValue");
 	xyNPixels = xNPixels * yNPixels;
 	xMetersByPixel = (geoRightX - geoLeftX)/xNPixels;
 	yMetersByPixel = (geoTopY - geoBottomY)/yNPixels;
@@ -99,8 +99,8 @@ Called from setSpace(), initLayers() is responsable of:
 void
 Gis::initLayers(){
 	// setting layers...
-	//string filename_complete= MTHREAD->RD->getFilenameByType("gis");
-	string filename_complete = MTHREAD->getBaseDirectory()+MTHREAD->RD->getStringSetting("gisFilename");
+	//string filename_complete= MTHREAD->MD->getFilenameByType("gis");
+	string filename_complete = MTHREAD->getBaseDirectory()+MTHREAD->MD->getStringSetting("gisFilename");
 
 	InputNode gisDocument;
 	bool test=gisDocument.setWorkingFile(filename_complete);
@@ -116,9 +116,9 @@ Gis::initLayers(){
 		if (readAtStart != "true") continue;
 		string dirName = layerNodes.at(i).getNodeByName("dirName").getStringContent();
 		string fileName = layerNodes.at(i).getNodeByName("fileName").getStringContent();
-		//cout <<"getBaseDirectory(): " << MTHREAD->RD->getBaseDirectory() << endl;
+		//cout <<"getBaseDirectory(): " << MTHREAD->MD->getBaseDirectory() << endl;
 		
-		string fullFileName = MTHREAD->RD->getBaseDirectory()+dirName+fileName;
+		string fullFileName = MTHREAD->MD->getBaseDirectory()+dirName+fileName;
 		//cout <<"fullFileName: " << fullFileName << endl;
 		addLayer(name,label,isInteger,dynamicContent,fullFileName);
 		//legend..
@@ -341,7 +341,7 @@ Gis::loadLayersDataFromFile(){
 				countRow++;
 			}
 		}
-		if (MTHREAD->RD->getBoolSetting("initialRandomShuffle") ){
+		if (MTHREAD->MD->getBoolSetting("initialRandomShuffle") ){
 			layerVector.at(i).randomShuffle();
 		}
 		MTHREAD->updateImage(layerName,image);
@@ -529,7 +529,7 @@ Gis::printDebugValues (string layerName_h, int min_h, int max_h){
 	int ID, X, Y;
 	string out;
 	double value;
-	double noValue = MTHREAD->RD->getDoubleSetting("noValue");
+	double noValue = MTHREAD->MD->getDoubleSetting("noValue");
 	if (max_h==0){
 		max= pxVector.size();
 	}
@@ -557,12 +557,12 @@ When the subRegionMode is actived also agents mouldCoefficients are rescaled to 
 */
 void
 Gis::filterSubRegion(string layerName_h){
-	if (MTHREAD->RD->getBoolSetting("subRegionMode")){
+	if (MTHREAD->MD->getBoolSetting("subRegionMode")){
 		subRegionMode = true;
-		subXL  = MTHREAD->RD->getIntSetting("subRegionXLeft");
-		subXR   = MTHREAD->RD->getIntSetting("subRegionXRight");
-		subYT = MTHREAD->RD->getIntSetting("subRegionYTop");
-		subYB = MTHREAD->RD->getIntSetting("subRegionYBottom");
+		subXL  = MTHREAD->MD->getIntSetting("subRegionXLeft");
+		subXR   = MTHREAD->MD->getIntSetting("subRegionXRight");
+		subYT = MTHREAD->MD->getIntSetting("subRegionYTop");
+		subYB = MTHREAD->MD->getIntSetting("subRegionYBottom");
 		for (int y=0;y<yNPixels;y++){
 			for (int x=0;x<xNPixels;x++){
 				if (x>=subXL && x<= subXR && y>=subYT && y<=subYB){
@@ -635,7 +635,7 @@ Gis::printBinMaps(string layerName_h){
 int
 Gis::sub2realID(int id_h){
 	// IMPORTANT: this function is called at refreshGUI() times, so if there are output messages, call them with the option to NOT refresh the gui, otherwise we go to an infinite loop...
-	if (!MTHREAD->RD->getBoolSetting("subRegionMode")) {return id_h;}
+	if (!MTHREAD->MD->getBoolSetting("subRegionMode")) {return id_h;}
 	int subX, subY, realX, realY;
 	subX = id_h%((subXR-subXL)+1);
 	subY = id_h/((subXR-subXL)+1);

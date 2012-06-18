@@ -34,15 +34,15 @@ MainProgram::MainProgram(ThreadManager* MTHREAD_h)
 	MTHREAD = MTHREAD_h;
 	// Creating objects for the program flow:
 	// the regional data object..
-	RegData *RD   = new RegData(MTHREAD);
-	MTHREAD->setRDPointer(RD);
-	MTHREAD->RD->setBaseDiretory(MTHREAD->getBaseDirectory());	
-	MTHREAD->RD->loadInput(); // Unzip the ooffice input file and load it into memory
+	ModelData *MD   = new ModelData(MTHREAD);
+	MTHREAD->setMDPointer(MD);
+	MTHREAD->MD->setBaseDiretory(MTHREAD->getBaseDirectory());
+	MTHREAD->MD->loadInput(); // Unzip the ooffice input file and load it into memory
 }
 
 //distructor
-MainProgram::~MainProgram()
-{
+MainProgram::~MainProgram(){
+
 }
 
 /**

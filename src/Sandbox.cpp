@@ -526,7 +526,7 @@ Sandbox::testThreads(){
 				int nAgents= 50;
 				vector<TestStructure*> myAgents;
 				vector<double> myResults (nAgents, (double) 0);
-				//int nThreads = MTHREAD->RD->getIntSetting("nThreads");
+				//int nThreads = MTHREAD->MD->getIntSetting("nThreads");
 				int nThreads= 5;
 
 				for (int i=0; i < nAgents; i++){

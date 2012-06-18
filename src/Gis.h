@@ -31,7 +31,7 @@
 
 // regmas headers..
 #include "BaseClass.h"
-#include "RegData.h"
+#include "ModelData.h"
 #include "Layers.h"
 #include "Pixel.h"
 #include "ModelRegion.h"

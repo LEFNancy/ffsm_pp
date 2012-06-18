@@ -28,7 +28,7 @@
 
 // RegMAS include stuff..
 #include "BaseClass.h"
-#include "RegData.h"
+#include "ModelData.h"
 #include "Gis.h"
 
 /// %Init the environment, the objects and the agents of the model

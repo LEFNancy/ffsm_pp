@@ -36,7 +36,7 @@ ThreadManager::ThreadManager(){
 	layerQueryPos = -1;
 
 	// initializing pointers...
-	RD = NULL;
+	MD = NULL;
 	GIS = NULL;
 	INIT = NULL;
 	SCD = NULL;
@@ -77,7 +77,7 @@ void ThreadManager::run(){
 
 		//myProgram->setBaseDirectory(baseDirectory);
 	
-		vector<string> scenarios = RD->getScenarios();
+		vector<string> scenarios = MD->getScenarios();
 		QVector<QString> qscenarios;
 		for(uint i=0;i<scenarios.size();i++){
 			qscenarios.push_back(scenarios.at(i).c_str());
@@ -123,7 +123,7 @@ ThreadManager::runFromConsole(QString inputFileName_h, QString scenarioName_h){
 		MainProgram* myProgram = new MainProgram(this);
 
 		if( scenarioName_h == ""){ // if the scenario option has not been shoosed, go for the first one!
-			vector<string> scenarios = RD->getScenarios();
+			vector<string> scenarios = MD->getScenarios();
 			scenarioName = scenarios.at(0).c_str();
 		}
 
@@ -151,7 +151,7 @@ ThreadManager::deleteDeadOldPointers(){
 	if (INIT) {delete INIT; INIT=0;}
 	if (SCD) {delete SCD; SCD=0;}
 	if (GIS) {delete GIS; GIS=0;}
-	if (RD) {delete RD; RD=0;}
+	if (MD) {delete MD; MD=0;}
 }
 
 
