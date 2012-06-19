@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef REGDATA_H
-#define REGDATA_H
+#ifndef MODELDATA_H
+#define MODELDATA_H
 
 // Core C++ headers
 #include <string>
@@ -33,7 +33,6 @@
 
 // RegMAS headers...
 #include "BaseClass.h"
-//#include "InputDocument.h"
 #include "InputNode.h"
 
 using namespace std;
@@ -41,26 +40,26 @@ using namespace std;
 struct IFiles;
 struct BasicData;
 class  LLData;
-struct VectorSettings;
+class  ModelRegion;
+struct forData;
+struct prodData;
+struct forToProd;
+struct reclRule;
 
-
-
-//class InputDocument;
-//class InputNode;
 
 /// Regional data, including macros and settings
 
 /**
 All regional data are within this class. It may have linked other data-classes.
-<br>On some variables RegData has just the definition of the objects, but the values may change at the agent-level. This is why each agent has a "personal copy" of them.
+<br>On some variables ModelData has just the definition of the objects, but the values may change at the agent-level. This is why each agent has a "personal copy" of them.
 @author Antonello Lobianco
 */
 
-class RegData: public BaseClass{
+class ModelData: public BaseClass{
 
 public:
-	                    RegData(ThreadManager* MTHREAD_h);
-	                   ~RegData();
+						ModelData(ThreadManager* MTHREAD_h);
+					   ~ModelData();
 	
 
 	/// Unzip the OpenOffice input file (NEW 2008.05.13)
@@ -70,6 +69,13 @@ public:
 	bool                delDir(QString dirname); ///< Recursivelly delete a directory 
 	void                setDefaultSettings();
 	void                setScenarioSettings();
+	void                createRegions();
+	void                setDefaultForData();
+	void                setScenarioForData();
+	void                setDefaultProdData();
+	void                setScenarioProdData();
+	void                setProductResourceMatrixLink();
+	void                setReclassificationRules();
 	void                setSpace(); 
 	/// Create the vector availableObjectsBySoilType so it is faster to assign spacial objects to farmers basing on their land types
 	void                debug();
@@ -80,6 +86,7 @@ public:
 	LLData              getTable(string tableName_h, int debugLevel=MSG_CRITICAL_ERROR);
 	vector <IFiles>     getIFilesVector() const {return iFilesVector;};
 	string              getBaseDirectory() const {return baseDirectory;};
+	ModelRegion*        getRegion(int regId_h);
 
 
 	int                 getIntSetting          (const string &name_h, int position=0);
@@ -114,19 +121,24 @@ private:
 	string                                   outputDirname; // from main config files
 	string                                   baseDirectory; // from Qt fileOpen dialog
 
-	// In the following vectors, when it is stated "just the topology", it means here we have just the definition of the objects, but the values may change at the agent-level. Thi is why each agent hads a "personal copy" of them
-	vector <IFiles>                           iFilesVector;  ///< list of all input files. Simple (struct)
-	vector <BasicData>               programSettingsVector;  ///<  setting data. Simple (struct)
-	vector <LLData>                           LLDataVector;  ///< vector of Low Level Data
+	vector <forData>                         forDataVector; ///< Forestry data
+	vector <prodData>                       prodDataVector; ///< Product data
+	vector <IFiles>                           iFilesVector; ///< List of all input files. Simple (struct)
+	vector <BasicData>               programSettingsVector; ///< Setting data. Simple (struct)
+	vector <LLData>                           LLDataVector; ///< Vector of Low Level Data
+	vector <ModelRegion>                     regionsVector; ///< Vector of modelled regions
+	vector <forToProd>                     forToProdVector; ///< Vector of coefficients from forest resources to primary products
+	vector <reclRule>                            reclRules; ///< Vector of reclassification rules
+
 
 	 /// For each agricultural soil type (as defined in the setting "agrLandTypes") this list define the objects that can be placed on that soil type
-	InputNode                             mainDocument;  ///< the main input document, loaded in memory at unzipping stage
+	InputNode                                 mainDocument;  ///< the main input document, loaded in memory at unzipping stage
 };
 
 /// Input files (struct)
 /**
 Very short struct containing the input files used (one istance==one file).
-<br>A copy of each Istances is saved on vector iFilesVector in class RegData.
+<br>A copy of each Istances is saved on vector iFilesVector in class ModelData.
 <br>iFiles are defined in the main config file and parsed subsequently.
 @author Antonello Lobianco
 */
@@ -151,7 +163,50 @@ struct BasicData {
 	string                                         comment;
 };
 
+/// Forestry data (struct)
+/**
+Struct containing the forestry data. This data is stored here but also each region has a link to its own data.
+*/
 
+struct forData {
+	string                                         parName;
+	int                                             region;
+	string                                         forType;
+	string                                       diamClass;
+	vector <double>                                 values;
+};
+
+/// Product data (struct)
+/**
+Struct containing the product-based data. This data is stored here but also each region has a link to its own data.
+*/
+struct prodData {
+	string                                         parName;
+	int                                             region;
+	string                                            prod;
+	string                                         freeDim;
+	vector<double>                                  values;
+};
+/// IO production matrix between the forest resources and the primary products (struct)
+/**
+Struct containing the io matrix between the forest resources and the primary products. Not to be confunded with the IO matrix between primary products and secondary products.
+*/
+struct forToProd {
+	string                                         product;
+	string                                         forType;
+	string                                          dClass;
+};
+
+/// IO production matrix between the forest resources and the primary products (struct)
+/**
+Struct containing the io matrix between the forest resources and the primary products. Not to be confunded with the IO matrix between primary products and secondary products.
+*/
+struct reclRule {
+	int                                              regId;
+	string                                       forTypeIn;
+	string                                      forTypeOut;
+	double                                               p;
+};
 
 /// Low level data. XML input is reversed here after unzipping oocalc file and parsing content.xml
 class LLData: public BaseClass{
@@ -163,7 +218,7 @@ public:
 	string              getTableName(){return tableName;};
 	int                 nrecords(){return records.size();};
 	string              getData(int pos_h, string header_h, int debugLevel=MSG_CRITICAL_ERROR);
-	friend void RegData::loadInput();
+	friend void ModelData::loadInput();
 
 private:
 	string                             tableName;

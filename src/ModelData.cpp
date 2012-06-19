@@ -33,24 +33,25 @@
 #include "unzip.h"
 
 // RegMAS headers..
-#include "RegData.h"
+#include "ModelData.h"
 //#include "InputDocument.h"
 //#include "InputNode.h"
 #include "MainWindow.h"
 #include "Scheduler.h"
+#include "ModelRegion.h"
 
 
 
-RegData::RegData(ThreadManager* MTHREAD_h){
+ModelData::ModelData(ThreadManager* MTHREAD_h){
 	MTHREAD = MTHREAD_h;
 }
 
-RegData::~RegData(){
+ModelData::~ModelData(){
 
 }
 
 vector<string>
-RegData::getScenarios(){
+ModelData::getScenarios(){
 	vector<string> toReturn;
 	LLData table = getTable("scenarios");
 	for(int i=0;i<table.nrecords();i++){
@@ -61,7 +62,7 @@ RegData::getScenarios(){
 }
 
 int
-RegData::getScenarioIndex(){
+ModelData::getScenarioIndex(){
 	vector<string> scenarios = getScenarios(); // TODO Check that I can call this function all around the model and not only at the beginning
 	string currentScenario = MTHREAD->getScenarioName();
 	for(int i=0;i<scenarios.size();i++){
@@ -75,7 +76,7 @@ RegData::getScenarioIndex(){
 
 
 void 
-RegData::setDefaultSettings(){
+ModelData::setDefaultSettings(){
 
 	LLData table = getTable("settings");
 	for (int i=0; i< table.nrecords();i++){
@@ -97,24 +98,24 @@ RegData::setDefaultSettings(){
 	}	
 
 	// rescaling if we are in the region mode...
-	if(MTHREAD->RD->getBoolSetting("subRegionMode")){	
-		int XL  = MTHREAD->RD->getIntSetting("subRegionXLeft");
-		int XR   = MTHREAD->RD->getIntSetting("subRegionXRight");
-		int YT = MTHREAD->RD->getIntSetting("subRegionYTop");
-		int YB = MTHREAD->RD->getIntSetting("subRegionYBottom"); 
+	if(MTHREAD->MD->getBoolSetting("subRegionMode")){
+		int XL  = MTHREAD->MD->getIntSetting("subRegionXLeft");
+		int XR   = MTHREAD->MD->getIntSetting("subRegionXRight");
+		int YT = MTHREAD->MD->getIntSetting("subRegionYTop");
+		int YB = MTHREAD->MD->getIntSetting("subRegionYBottom");
 		double scaleCoeff =
             ( (double)	((XR-XL)*(YB-YT)) )
                       /
-            ( MTHREAD->RD->getIntSetting("nCols") * MTHREAD->RD->getIntSetting("nRows")) ; // ratio between npixel in the subRegion and npixels in the original region
+			( MTHREAD->MD->getIntSetting("nCols") * MTHREAD->MD->getIntSetting("nRows")) ; // ratio between npixel in the subRegion and npixels in the original region
 		vector <string> value;
 		value.push_back(d2s(scaleCoeff));
-		MTHREAD->RD->addSetting("scaleCoeff",value, TYPE_DOUBLE, "Scale coefficient used as this simulation is ran on a sub-region trial");
+		MTHREAD->MD->addSetting("scaleCoeff",value, TYPE_DOUBLE, "Scale coefficient used as this simulation is ran on a sub-region trial");
 	}
 	else {
 		double scaleCoeff = 1;
 		vector <string> value;
 		value.push_back(d2s(scaleCoeff));
-		MTHREAD->RD->addSetting("scaleCoeff",value, TYPE_DOUBLE, "Scale coefficient equal to 1 as this simulation is ran on the whole region");
+		MTHREAD->MD->addSetting("scaleCoeff",value, TYPE_DOUBLE, "Scale coefficient equal to 1 as this simulation is ran on the whole region");
 	}
 
 
@@ -142,7 +143,7 @@ RegData::setDefaultSettings(){
 };
 
 void
-RegData::setScenarioSettings(){
+ModelData::setScenarioSettings(){
 
 	string scenarioName = MTHREAD->getScenarioName();
 	LLData table = getTable(scenarioName+"_settings", MSG_WARNING); //this scenario could not have an associated setting sheet
@@ -175,15 +176,15 @@ RegData::setScenarioSettings(){
 	}
 
 	// scaling to subregionmode again as some parameters may have been changed..
-	if(MTHREAD->RD->getBoolSetting("subRegionMode")){	
-		int XL  = MTHREAD->RD->getIntSetting("subRegionXLeft");
-		int XR   = MTHREAD->RD->getIntSetting("subRegionXRight");
-		int YT = MTHREAD->RD->getIntSetting("subRegionYTop");
-		int YB = MTHREAD->RD->getIntSetting("subRegionYBottom"); 
+	if(MTHREAD->MD->getBoolSetting("subRegionMode")){
+		int XL  = MTHREAD->MD->getIntSetting("subRegionXLeft");
+		int XR   = MTHREAD->MD->getIntSetting("subRegionXRight");
+		int YT = MTHREAD->MD->getIntSetting("subRegionYTop");
+		int YB = MTHREAD->MD->getIntSetting("subRegionYBottom");
 		double scaleCoeff =
             ( (double)	((XR-XL)*(YB-YT)) )
                       /
-            ( MTHREAD->RD->getIntSetting("nCols") * MTHREAD->RD->getIntSetting("nRows")) ; // ratio between npixel in the subRegion and npixels in the original region
+			( MTHREAD->MD->getIntSetting("nCols") * MTHREAD->MD->getIntSetting("nRows")) ; // ratio between npixel in the subRegion and npixels in the original region
 		setBasicData("scaleCoeff",scaleCoeff);
 	}
 	else {
@@ -212,7 +213,7 @@ RegData::setScenarioSettings(){
 }
 
 void
-RegData::addSetting(string name_h, vector <string> values_h, int type_h, string comment_h){
+ModelData::addSetting(string name_h, vector <string> values_h, int type_h, string comment_h){
 
 	for (uint i=0;i<programSettingsVector.size();i++){
 		if (programSettingsVector.at(i).name == name_h){
@@ -229,7 +230,7 @@ RegData::addSetting(string name_h, vector <string> values_h, int type_h, string 
 }
 
 void
-RegData::addSetting(string name_h, string value_h, int type_h, string comment_h){
+ModelData::addSetting(string name_h, string value_h, int type_h, string comment_h){
 	vector <string> values;
 	values.push_back(value_h);
 	addSetting(name_h, values, type_h, comment_h);
@@ -237,8 +238,215 @@ RegData::addSetting(string name_h, string value_h, int type_h, string comment_h)
 
 
 // ###############################################################################
+
 void
-RegData::setOutputDirectory(const char* output_dirname_h){
+ModelData::createRegions(){
+	// first create regions and assign basic data...
+	LLData table = getTable("regions");
+	for (int i=0; i< table.nrecords();i++){
+		ModelRegion REGION(MTHREAD,
+						   s2i(table.getData(i,"regId")),
+						   table.getData(i,"regSName"),
+						   table.getData(i,"regLName"),
+						   s2i(table.getData(i,"regLevel")),
+						   s2i(table.getData(i,"parRegId")),
+						   s2b(table.getData(i,"isResidual")));
+		regionsVector.push_back(REGION);
+	}
+	// Now let's assign the parent/children pointers..
+	for (int i=0; i< regionsVector.size();i++){
+		// let's assign the parent:
+		regionsVector[i].setParent(this->getRegion(regionsVector[i].getParRegId()));
+		// let's assign the children:
+		vector<ModelRegion*> kids;
+		for (int y=0; y< regionsVector.size();y++){
+			if(regionsVector[y].getParRegId() == regionsVector[i].getRegId() ){
+				kids.push_back(&regionsVector[y]);
+			}
+		}
+		regionsVector[i].setChildren(kids);
+	}
+}
+
+ModelRegion*
+ModelData::getRegion(int regId_h){
+	for (int i=0; i< regionsVector.size();i++){
+		if(regionsVector[i].getRegId()==regId_h){
+			return &regionsVector[i];
+		}
+	}
+	msgOut(MSG_CRITICAL_ERROR, "Region id "+i2s(regId_h)+" not found, check your input data. Aborting simulation.");
+}
+
+void
+ModelData::setDefaultForData(){
+
+	msgOut(MSG_DEBUG,"Loading forest sector data..");
+	LLData table = getTable("forData");
+	for (int i=0; i< table.nrecords();i++){
+		forData FDATA;
+		FDATA.parName = table.getData(i,"parName");
+		FDATA.region = s2i(table.getData(i,"region"));
+		FDATA.forType = table.getData(i,"forType");
+		FDATA.diamClass = table.getData(i,"diamClass");
+		vector <double> values;
+		for (int z=0;z<100;z++){
+			string toSearch = "value_"+i2s(z);
+			string value = table.getData(i,toSearch);
+			if (value != ""){
+				values.push_back(s2d(value));
+			}
+		}
+		FDATA.values = values;
+		forDataVector.push_back(FDATA);
+		//giving a link to it to its own region:
+		getRegion(FDATA.region)->addForData(&FDATA);
+	}
+}
+
+void
+ModelData::setScenarioForData(){
+
+	string scenarioName = MTHREAD->getScenarioName();
+	LLData table = getTable(scenarioName+"_forData", MSG_NO_MSG); //this scenario could not have an associated setting sheet
+	if(table.getTableName() == "") return;
+
+	for(int i=0; i< table.nrecords(); i++){
+		forData FDATA;
+		bool found = false;
+		FDATA.parName = table.getData(i,"parName");
+		FDATA.region = s2i(table.getData(i,"region"));
+		FDATA.forType = table.getData(i,"forType");
+		FDATA.diamClass = table.getData(i,"diamClass");
+		vector <double> values;
+		for (int z=0;z<100;z++){
+			string toSearch = "value_"+i2s(z);
+			string value = table.getData(i,toSearch);
+			if (value != ""){
+				values.push_back(s2d(value));
+			}
+		}
+		FDATA.values = values;
+		for(uint i=0;i<forDataVector.size();i++){
+			if(forDataVector[i].parName == FDATA.parName
+			   && forDataVector[i].region == FDATA.region
+			   && forDataVector[i].forType == FDATA.forType
+			   && forDataVector[i].diamClass == FDATA.diamClass){
+				// existing forData..
+				forDataVector[i].values = FDATA.values;
+				found = true;
+				break;
+			}
+		}
+		if(!found){
+			// new one, adding it
+			forDataVector.push_back(FDATA);
+			//giving a link to it to its own region:
+			getRegion(FDATA.region)->addForData(&FDATA);
+		}
+	}
+}
+
+void
+ModelData::setDefaultProdData(){
+
+	msgOut(MSG_DEBUG,"Loading forest sector data..");
+	LLData table = getTable("prodData");
+	for (int i=0; i< table.nrecords();i++){
+		prodData PDATA;
+		PDATA.parName = table.getData(i,"parName");
+		PDATA.region = s2i(table.getData(i,"region"));
+		PDATA.prod = table.getData(i,"prod");
+		PDATA.freeDim = table.getData(i,"freeDim");
+		vector <double> values;
+		for (int z=0;z<100;z++){
+			string toSearch = "value_"+i2s(z);
+			string value = table.getData(i,toSearch);
+			if (value != ""){
+				values.push_back(s2d(value));
+			}
+		}
+		PDATA.values = values;
+		prodDataVector.push_back(PDATA);
+		//giving a link to it to its own region:
+		getRegion(PDATA.region)->addProdData(&PDATA);
+	}
+}
+
+void
+ModelData::setScenarioProdData(){
+
+	string scenarioName = MTHREAD->getScenarioName();
+	LLData table = getTable(scenarioName+"_prodData", MSG_NO_MSG); //this scenario could not have an associated setting sheet
+	if(table.getTableName() == "") return;
+
+	for(int i=0; i< table.nrecords(); i++){
+		prodData PDATA;
+		bool found = false;
+
+		PDATA.parName = table.getData(i,"parName");
+		PDATA.region = s2i(table.getData(i,"region"));
+		PDATA.prod = table.getData(i,"prod");
+		PDATA.freeDim = table.getData(i,"freeDim");
+		vector <double> values;
+		for (int z=0;z<100;z++){
+			string toSearch = "value_"+i2s(z);
+			string value = table.getData(i,toSearch);
+			if (value != ""){
+				values.push_back(s2d(value));
+			}
+		}
+		PDATA.values = values;
+		for(uint i=0;i<prodDataVector.size();i++){
+			if(prodDataVector[i].parName == PDATA.parName
+			   && prodDataVector[i].region == PDATA.region
+			   && prodDataVector[i].prod == PDATA.prod
+			   && prodDataVector[i].freeDim == PDATA.freeDim){
+				// existing prodData..
+				prodDataVector[i].values = PDATA.values;
+				found = true;
+				break;
+			}
+		}
+		if(!found){
+			// new one, adding it
+			prodDataVector.push_back(PDATA);
+			//giving a link to it to its own region:
+			getRegion(PDATA.region)->addProdData(&PDATA);
+		}
+	}
+}
+
+void
+ModelData::setProductResourceMatrixLink(){
+	msgOut(MSG_DEBUG,"Loading forest resource to primary products io matrix..");
+	LLData table = getTable("forToProd");
+	for (int i=0; i< table.nrecords();i++){
+		forToProd F2PDATA;
+		F2PDATA.product = table.getData(i,"product");
+		F2PDATA.forType = table.getData(i,"forType");
+		F2PDATA.dClass = table.getData(i,"dClass");
+		forToProdVector.push_back(F2PDATA);
+	}
+}
+
+void
+ModelData::setReclassificationRules(){
+
+	msgOut(MSG_DEBUG,"Loading (but not yet applying) reclassification rules..");
+	LLData table = getTable("reclRules");
+	for (int i=0; i< table.nrecords();i++){
+		reclRule RL;
+		RL.regId = s2i(table.getData(i,"regID"));
+		RL.forTypeIn = table.getData(i,"forTypeIn");
+		RL.forTypeOut = table.getData(i,"forTypeOut");
+		RL.p = s2d(table.getData(i,"p"));
+		reclRules.push_back(RL);
+	}
+}
+
+void
+ModelData::setOutputDirectory(const char* output_dirname_h){
 
 	if (strlen(output_dirname_h)==0){
 		outputDirname=baseDirectory+"output/";
@@ -250,7 +458,7 @@ RegData::setOutputDirectory(const char* output_dirname_h){
 }	
 
 string
-RegData::getBaseData (const string &name_h, int type_h, int position){
+ModelData::getBaseData (const string &name_h, int type_h, int position){
 	// If the data is called with DATA_NOW we interpret the array of values as a temporal array and we return the value at the current time.
 	if(position == DATA_NOW) {
 		position = MTHREAD->SCD->getIteration();
@@ -278,7 +486,7 @@ RegData::getBaseData (const string &name_h, int type_h, int position){
 };
 
 vector <string>
-RegData::getVectorBaseData (const string &name_h, int type_h){
+ModelData::getVectorBaseData (const string &name_h, int type_h){
 	for (uint i=0; i<programSettingsVector.size();i++){
 		if (programSettingsVector.at(i).name == name_h){
 			int type = programSettingsVector.at(i).type;
@@ -293,59 +501,59 @@ RegData::getVectorBaseData (const string &name_h, int type_h){
 
 // ------------- start getSetting() amd getMacro() functions ....... -----------------
 int
-RegData::getIntSetting(const string &name_h, int position){
-	return s2i( MTHREAD->RD->getBaseData(name_h,TYPE_INT,position) );
+ModelData::getIntSetting(const string &name_h, int position){
+	return s2i( MTHREAD->MD->getBaseData(name_h,TYPE_INT,position) );
 }
 double
-RegData::getDoubleSetting(const string &name_h, int position){
-	return s2d( MTHREAD->RD->getBaseData(name_h,TYPE_DOUBLE,position) );
+ModelData::getDoubleSetting(const string &name_h, int position){
+	return s2d( MTHREAD->MD->getBaseData(name_h,TYPE_DOUBLE,position) );
 }
 string
-RegData::getStringSetting(const string &name_h, int position){
-	return MTHREAD->RD->getBaseData(name_h,TYPE_STRING,position);
+ModelData::getStringSetting(const string &name_h, int position){
+	return MTHREAD->MD->getBaseData(name_h,TYPE_STRING,position);
 }
 bool
-RegData::getBoolSetting(const string &name_h, int position){
-	return s2b( MTHREAD->RD->getBaseData(name_h,TYPE_BOOL,position) );
+ModelData::getBoolSetting(const string &name_h, int position){
+	return s2b( MTHREAD->MD->getBaseData(name_h,TYPE_BOOL,position) );
 }
 vector<int>
-RegData::getIntVectorSetting(const string &name_h){
-	return s2i(MTHREAD->RD->getVectorBaseData(name_h,TYPE_INT));
+ModelData::getIntVectorSetting(const string &name_h){
+	return s2i(MTHREAD->MD->getVectorBaseData(name_h,TYPE_INT));
 }
 vector<double>
-RegData::getDoubleVectorSetting(const string &name_h){
-	return s2d(MTHREAD->RD->getVectorBaseData(name_h,TYPE_DOUBLE));
+ModelData::getDoubleVectorSetting(const string &name_h){
+	return s2d(MTHREAD->MD->getVectorBaseData(name_h,TYPE_DOUBLE));
 }
 vector<string>
-RegData::getStringVectorSetting(const string &name_h){
-	return MTHREAD->RD->getVectorBaseData(name_h,TYPE_STRING);
+ModelData::getStringVectorSetting(const string &name_h){
+	return MTHREAD->MD->getVectorBaseData(name_h,TYPE_STRING);
 }
 vector<bool>
-RegData::getBoolVectorSetting(const string &name_h){
-	return s2b(MTHREAD->RD->getVectorBaseData(name_h,TYPE_BOOL));
+ModelData::getBoolVectorSetting(const string &name_h){
+	return s2b(MTHREAD->MD->getVectorBaseData(name_h,TYPE_BOOL));
 }
 
 // ------ END of getSetting() functions --------------------- 
 
 void
-RegData::setBasicData(const string &name_h, int value, int position){
+ModelData::setBasicData(const string &name_h, int value, int position){
 	setBasicData(name_h, i2s(value), TYPE_INT, position);
 }
 void
-RegData::setBasicData(const string &name_h, double value, int position){
+ModelData::setBasicData(const string &name_h, double value, int position){
 	setBasicData(name_h, d2s(value), TYPE_DOUBLE, position);
 }
 void 
-RegData::setBasicData(const string &name_h, string value, int position){
+ModelData::setBasicData(const string &name_h, string value, int position){
 	setBasicData(name_h, value, TYPE_STRING, position);
 }
 void
-RegData::setBasicData(const string &name_h, bool value, int position){
+ModelData::setBasicData(const string &name_h, bool value, int position){
 	setBasicData(name_h, b2s(value), TYPE_BOOL, position);
 }
 
 void
-RegData::setBasicData(const string &name_h, string value, int type_h, int position){
+ModelData::setBasicData(const string &name_h, string value, int type_h, int position){
 	for (uint i=0; i<programSettingsVector.size();i++){
 		if (programSettingsVector.at(i).name == name_h){
 			int type = programSettingsVector.at(i).type;
@@ -362,7 +570,7 @@ RegData::setBasicData(const string &name_h, string value, int type_h, int positi
 }
 
 std::string
-RegData::getFilenameByType(std::string type_h){
+ModelData::getFilenameByType(std::string type_h){
 	std::string directory;
 	std::string filename;
 	std::string filename_complete;
@@ -380,7 +588,7 @@ RegData::getFilenameByType(std::string type_h){
 
 
 void
-RegData::debug(){
+ModelData::debug(){
 	// ********** START DEBUG CODE....... ************
 	double ddebuga=0; //20080209
 	uint idebuga=0;
@@ -406,7 +614,8 @@ RegData::debug(){
 }
 
 void
-RegData::loadInput(){
+ModelData::loadInput(){
+	msgOut(MSG_INFO, "Loading input files (this can take a few minutes)...");
 	//QString iFile("data/pythiaInput.ods");
 	QString iFile(MTHREAD->getInputFileName().c_str());
 	//cout << "PIPPO !!!!! " << MTHREAD->getInputFileName().c_str() << endl;
@@ -461,10 +670,10 @@ RegData::loadInput(){
 		string tableName = tables[i].getStringAttributeByName("name");
 		//cout <<tableName<<endl;
 		LLData data(MTHREAD,tables[i].getStringAttributeByName("name"));
-		vector <InputNode> rows = tables[i].getNodesByName("table-row");
+		vector <InputNode> rows = tables[i].getNodesByName("table-row",MSG_NO_MSG,true);
 		if(rows.size()<2) continue; //empty table or only with headers
 		// building headers..
-		vector <InputNode> cells = rows[0].getNodesByName("table-cell");
+		vector <InputNode> cells = rows[0].getNodesByName("table-cell",MSG_NO_MSG,true);
 		for (uint y=0; y<cells.size(); y++){
 			int repeated = 1;
 			if( cells[y].hasAttributeByName("number-columns-repeated")){
@@ -481,7 +690,7 @@ RegData::loadInput(){
 		// loading data...
 		for (uint j=1; j<rows.size();j++){
 			//cout << j << endl;
-			vector <InputNode> cells = rows[j].getNodesByName("table-cell");
+			vector <InputNode> cells = rows[j].getNodesByName("table-cell",MSG_NO_MSG,true);
 			if (cells.size()<1) continue;
 			vector<string> record;
 			// checking the first cell is not a comment nor is empty..
@@ -547,7 +756,7 @@ RegData::loadInput(){
 }
 
 bool
-RegData::delDir(QString dirname) {
+ModelData::delDir(QString dirname) {
         bool deleted = false;
         QDir dir(dirname);
 	//msgOut(MSG_DEBUG, dir.absolutePath().toStdString());
@@ -579,7 +788,7 @@ RegData::delDir(QString dirname) {
 }
 
 LLData
-RegData::getTable(string tableName_h, int debugLevel){
+ModelData::getTable(string tableName_h, int debugLevel){
 	LLData toReturn(MTHREAD,"");
 	for(uint i=0;i<LLDataVector.size();i++){
 		if (LLDataVector[i].getTableName() == tableName_h)return LLDataVector[i];

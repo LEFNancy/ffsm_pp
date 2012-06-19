@@ -63,7 +63,8 @@ HEADERS += BaseClass.h \
            InputNode.h \
            Ipopt_nlp_problem_debugtest.h \
            MainProgram.h \
-           MainWindow.h \
+	     MainWindow.h \
+	     ModelData.h \
            ModelRegion.h \
            Opt.h \
            Output.h \
@@ -79,9 +80,7 @@ HEADERS += BaseClass.h \
            zip_p.h \
            zipentry_p.h \
            anyoption.h \
-           ScenarioSelectionWidget.h \ 
-    ModelData.h
-
+	     ScenarioSelectionWidget.h
 FORMS += MainWindow.ui
 SOURCES += BaseClass.cpp \
            Gis.cpp \
@@ -89,7 +88,8 @@ SOURCES += BaseClass.cpp \
            Ipopt_nlp_problem_debugtest.cpp\
            InputNode.cpp \
            main.cpp \
-           MainProgram.cpp \
+	     MainProgram.cpp \
+	     ModelData.cpp \
            ModelRegion.cpp \
            Opt.cpp \
            Output.cpp \
@@ -103,7 +103,6 @@ SOURCES += BaseClass.cpp \
            unzip.cpp \
            zip.cpp \
            anyoption.cpp \
-           ScenarioSelectionWidget.cpp \
-    ModelData.cpp
+	     ScenarioSelectionWidget.cpp
 
 RESOURCES += resources.qrc

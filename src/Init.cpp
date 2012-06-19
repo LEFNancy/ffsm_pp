@@ -91,6 +91,14 @@ Init::setInitLevel1(){
 	msgOut(MSG_DEBUG,out.str());
 	MTHREAD->MD->setDefaultSettings();
 	MTHREAD->MD->setScenarioSettings();
+	MTHREAD->MD->createRegions();
+	MTHREAD->MD->setDefaultForData();
+	MTHREAD->MD->setScenarioForData();
+	MTHREAD->MD->setDefaultProdData();
+	MTHREAD->MD->setScenarioProdData();
+	MTHREAD->MD->setReclassificationRules();
+
+
 	if(MTHREAD->MD->getBoolSetting("randomSimulation")){
 		srand(time(NULL));
 	}

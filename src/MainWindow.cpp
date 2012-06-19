@@ -161,7 +161,7 @@ MainWindow::createStatusBar() {
 	statusBar()->addWidget(mainSBLabel, 1);
 
 	yearSBLabel->setText("0");
-	mainSBLabel->setText("Welcome on RegMAS!");
+	mainSBLabel->setText("Welcome to Pythia!");
 
 	connect(&modelMainThread, SIGNAL(upgradeYearSBLabelToGui(const QString&)), yearSBLabel, SLOT(setText(const QString&)));
 	connect(&modelMainThread, SIGNAL(upgradeMainSBLabelToGui(const QString&)), mainSBLabel, SLOT(setText(const QString&)));
@@ -202,7 +202,7 @@ MainWindow::setCurrentModelFileName(const QString &fileName) {
 		recentFiles.prepend(curModelFileName);
 		updateRecentFileActions();
 	}
-	setWindowTitle(tr("%2 - [%1]").arg(shownName).arg(tr("RegMAS - Regional Multi Agent Simulator")));
+	setWindowTitle(tr("%2 - [%1]").arg(shownName).arg(tr("Pythia - Forest Sector Simulator")));
 }
 
 QString
@@ -239,7 +239,7 @@ MainWindow::okToContinue() {
 	if (modelMainThread.isRunning()) {
 		int t = QMessageBox::warning(
 			this,                                       // parent
-			tr("RegMAS"),                               // title
+			tr("Pythia"),                               // title
 			tr("The model is still running.\n"    // message
 				"Do you want to stop it?"),
 			QMessageBox::Yes | QMessageBox::Default,    // 1st button
@@ -256,7 +256,7 @@ MainWindow::okToContinue() {
 	if (unsavedStatus) {
 		int r = QMessageBox::warning(
 			this,                                       // parent
-			tr("RegMAS"),                               // title
+			tr("Pythia"),                               // title
 			tr("The model log has not been saved.\n"    // message
 				"Do you want to save it?"),
 			QMessageBox::Yes ,                          // 1st button
@@ -297,7 +297,7 @@ MainWindow::open() {
 
 void
 MainWindow::readSettings() {
-	QSettings settings("UNIVPM", "RegMAS");
+	QSettings settings("LEF", "Pythia");
 	recentFiles = settings.value("recentFiles").toStringList();
 	updateRecentFileActions();
 }
@@ -371,7 +371,7 @@ MainWindow::saveLogFile(const QString &logFileName) {
 }
 
 void MainWindow::writeSettings() {
-    QSettings settings("UNIVPM", "RegMAS");
+	QSettings settings("LEF", "Pythia");
     settings.setValue("recentFiles", recentFiles);
 }
 
@@ -555,38 +555,38 @@ MainWindow::hideDebugMsgs(bool hide){
 
 void
 MainWindow::about(){
-	QMessageBox::about(this, tr("About RegMAS"),
-		tr("<h2><u>Reg</u>ional <u>M</u>ulti <u>A</u>gent <u>S</u>imulator</h2>"
-		   "<p>Copyright &copy; 2006-2008 Antonello Lobianco & contributors"
-		   "<br/>Version 1.3.0"
-		   "<p>RegMAS is a spatially explicit, multi-agent simulation framework "
+	QMessageBox::about(this, tr("About Pythia"),
+		tr("<h2>Pythia</h2>"
+		   "<p>Copyright &copy; 2012 Laboratoire d'Economie Forestière - LEF"
+		   "<br/>"
+		   "<p>Pythia is a flexible, spatially explicit, coupled resource and economic simulator of the Forest Sector, "
 		   "designed for long-term simulations of effects of government policies "
-		   "over rural and agricultural systems."
+		   "over different forest systems."
 		   "<br>It is released under the GNU GPL licence."
 		   "<p>For documentation and credits please refer to the project site:"
-		   "<br><a href=\"http://www.regmas.org\">http://www.regmas.org</a>"
+		   "<br><a href=\"http://www.pythia-project.org\">http://www.pythia-project.org</a>"
 		));
 }
 
 void
 MainWindow::showDocumentation(){
-	QMessageBox::question(this, tr("RegMAS Documentation"), // QMessageBox::information or QMessageBox::question
-		tr("<h2>RegMAS Documentation</h2>"
-		   "<p align=\"justify\">RegMAS documentation is organised in three main categories: "
-		   "<p align=\"justify\">(1) <b>official documentation</b> "
+	QMessageBox::question(this, tr("Pythia Documentation"), // QMessageBox::information or QMessageBox::question
+		tr("<h2>Pythia Documentation</h2>"
+		   "<p align=\"justify\">Pythia documentation is organised in three main categories: "
+		   "<p align=\"left\">(1) <b>official documentation</b> "
 		   "(comprising the <i>User Manual</i> and the <i>Reference Manual</i>); <br>(2) <b>contributed "
 		   "documentation</b> (<i>wiki</i>);<br>(3) <b>community project</b> (<i>forum</i> and <i>mailing list</i>). "
 		   "<p align=\"justify\">The documentation is located at "
-		   "<a href=\"http://www.regmas.org/doc\">http://www.regmas.org/doc</a>"
+		   "<a href=\"http://www.pythia-project.org/doc\">http://www.pythia-project.org/doc</a>"
 		   "<p align=\"justify\">If you have chosen to instal a local copy of the documentation, "
-		   "you can access it also from the <i>Start menu</i>-><i>Programs</i>-><i>RegMAS</i> "
+		   "you can access it also from the <i>Start menu</i>-><i>Programs</i>-><i>Pythia</i> "
 		   "(MS Windows) or directly from the following links (Linux):"
 		   "<br><a href=\"doc/userManual/regmasUserManual.pdf\">User Manual</a> "
 		   "&nbsp;-&nbsp;<a href=\"doc/referenceManual/html/index.html\">Reference Manual</a> "
 		   "<p>Tips:"
 		   "<br> - right click on a pixel to get its value across the layers;"
 		   "<br> - use the mouse and its wheel over the map to zoom/scroll it;"
-		   "<br> - use the <i>subRegionMode</i> setting within the model to select the simulation area;</p>" 
+		   "<br> - use the <i>subRegionMode</i> setting within the model to select a simulation sub-area;</p>"
 		));
 }
 

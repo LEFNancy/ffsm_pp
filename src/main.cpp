@@ -38,9 +38,9 @@ int main(int argc, char *argv[]){
 
 	cout << endl;
 	cout << "*******************************************************************" << endl;
-	cout << "*** !! Welcome to RegMAS - Regional Multi Agent Simulator !! ***" << endl;
-	cout << "***        For info & doc: http://www.regmas.org/doc                 ***" << endl;
-	cout << "***            Compiled on: " << __DATE__ << " - " << __TIME__ << "                      ***" << endl;
+	cout << "***    !! Welcome to Pythia - The Forest Sector Simulator !!    ***" << endl;
+	cout << "***      For info & doc: http://www.pythia-project.org/doc      ***" << endl;
+	cout << "***         Compiled on: " << __DATE__ << " - " << __TIME__ << "                 ***" << endl;
 	cout << "*******************************************************************" << endl<<endl;
 
 	QDir dir;
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]){
 	//opt->autoUsagePrint(true); /* print usage for bad options */
 
 	/* 3. SET THE USAGE/HELP   */
-	opt->addUsage( "*** RegMAS - Regional Multi Agent Simulator ***" );
+	opt->addUsage( "*** Pythia - Forest Sector Simulator ***" );
 	opt->addUsage( "Usage: " );
 	opt->addUsage( "" );
 	opt->addUsage( " -h  --help			Prints this help " );
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]){
 	opt->addUsage( "	- input_file and scenario options have no effect in GUI mode;" );
 	opt->addUsage( "	- the working directory is the base path relative to the input file." );
 	opt->addUsage( "" );
-	opt->addUsage( "Read installed documentation or browse it at http://www.regmas.org/doc." );
+	opt->addUsage( "Read installed documentation or browse it at http://www.pythia-project.org/doc." );
 	opt->addUsage( "" );
 
 	/* 4. SET THE OPTION STRINGS/CHARACTERS */

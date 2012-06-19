@@ -24,21 +24,21 @@
 The constructor of REGION instances want:
 @param MTHREAD_h Pointer to the main thread manager
 */
-ModelRegion::ModelRegion(ThreadManager* MTHREAD_h){
-    MTHREAD=MTHREAD_h;
+ModelRegion::ModelRegion(ThreadManager* MTHREAD_h, int regId_h, string regSName_h, string regLName_h, int regLevel_h, int parRegId_h, bool isResidual_h){
+	MTHREAD=MTHREAD_h;
+	regId = regId_h;
+	regSName = regSName_h;
+	regLName = regLName_h;
+	regLevel = regLevel_h;
+	parRegId = parRegId_h;
+	isResidual =  isResidual_h;
 }
 
 ModelRegion::~ModelRegion(){
 }
 
-/**
-Childrens are all the lvel-1 region that are parts of this region.
-In case that more levels will be developed in future version of this program, this still give only the direct children.
-*/
-void
-setChildren(){
 
-};
+
 
 double
 getVolumes(){
