@@ -80,7 +80,6 @@ Gis::setSpace(){
 			pxVector.push_back(myPixel);
 		}
 	}
-
 	initLayers();
 	loadLayersDataFromFile();
 	MTHREAD->fitInWindow(); // tell the gui to fit the map to the widget
@@ -157,6 +156,16 @@ Gis::initLayers(){
 	else {
 		mByPx = yMetersByPixel;
 	}
+
+}
+void
+ModelData:: applyForestReclassification(){
+per ogni forest type:
+ - crea i layers delle forest type nuovi
+ - riempi con zero
+ - passa le info dal layerr ereditato al nuovo
+
+
 
 }
 

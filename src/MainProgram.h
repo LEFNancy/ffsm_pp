@@ -43,7 +43,7 @@ class MainProgram: public BaseClass {
 
 public:
 	                    MainProgram(ThreadManager* MTHREAD);
-						~MainProgram();
+					   ~MainProgram();
 	void                run(); ///< Run the program
 	void                testIpopt();
 

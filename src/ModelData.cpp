@@ -350,7 +350,7 @@ ModelData::setScenarioForData(){
 void
 ModelData::setDefaultProdData(){
 
-	msgOut(MSG_DEBUG,"Loading forest sector data..");
+	msgOut(MSG_DEBUG,"Loading products data..");
 	LLData table = getTable("prodData");
 	for (int i=0; i< table.nrecords();i++){
 		prodData PDATA;
@@ -427,6 +427,20 @@ ModelData::setProductResourceMatrixLink(){
 		F2PDATA.forType = table.getData(i,"forType");
 		F2PDATA.dClass = table.getData(i,"dClass");
 		forToProdVector.push_back(F2PDATA);
+	}
+}
+
+void
+ModelData::setForestTypes(){
+	LLData table = getTable("forTypes");
+	for (int i=0; i< table.nrecords();i++){
+		forType FTYPE;
+		FTYPE.forTypeId = table.getData(i,"forTypeId");
+		FTYPE.forLabel = table.getData(i,"forLabel");
+		FTYPE.memType = s2i(table.getData(i,"memType"));
+		FTYPE.forLayer = table.getData(i,"forLayer");
+		FTYPE.ereditateFrom = table.getData(i,"ereditateFrom");
+		forTypes.push_back(FTYPE);
 	}
 }
 

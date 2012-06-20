@@ -71,8 +71,10 @@ public:
 	void                setSpace();
 	/// Init the layers
 	void                initLayers();
+	/// Apply the forest reclassification with the rules defined in reclRules sheet
+	void                applyForestReclassification();
 	/// If subregion mode is on, this function place noValues on the selected layer for all out-of-region pixels
-	void               filterSubRegion(string layerName_h);
+	void                filterSubRegion(string layerName_h);
 	///< Update the image behind a layer to the GUI;
 	void                updateImage(string layerName_h);
 	///< Add one layer to the system

@@ -41,11 +41,12 @@ struct IFiles;
 struct BasicData;
 class  LLData;
 class  ModelRegion;
+class  Layers;
 struct forData;
 struct prodData;
 struct forToProd;
 struct reclRule;
-
+struct forType;
 
 /// Regional data, including macros and settings
 
@@ -75,6 +76,7 @@ public:
 	void                setDefaultProdData();
 	void                setScenarioProdData();
 	void                setProductResourceMatrixLink();
+	void                setForestTypes();
 	void                setReclassificationRules();
 	void                setSpace(); 
 	/// Create the vector availableObjectsBySoilType so it is faster to assign spacial objects to farmers basing on their land types
@@ -128,6 +130,7 @@ private:
 	vector <LLData>                           LLDataVector; ///< Vector of Low Level Data
 	vector <ModelRegion>                     regionsVector; ///< Vector of modelled regions
 	vector <forToProd>                     forToProdVector; ///< Vector of coefficients from forest resources to primary products
+	vector <forType>                              forTypes; ///< Vector of forest types
 	vector <reclRule>                            reclRules; ///< Vector of reclassification rules
 
 
@@ -195,6 +198,20 @@ struct forToProd {
 	string                                         product;
 	string                                         forType;
 	string                                          dClass;
+};
+
+/// Forest types (struct)
+/**
+Struct containing the list of the forest types managed in the model.
+@par memType Parameter to define if this type is used only in initial data reading, then is reclassed and no more used (1) or if it is generated from the reclass rule and then used in the model (2)
+*/
+struct forType {
+	string                                        forTypeId;
+	string                                         forLabel;
+	int                                             memType;
+	string                                         forLayer;
+	string                                    ereditateFrom;
+	Layers*                                           layer;
 };
 
 /// IO production matrix between the forest resources and the primary products (struct)

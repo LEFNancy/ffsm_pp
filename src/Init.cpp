@@ -96,6 +96,7 @@ Init::setInitLevel1(){
 	MTHREAD->MD->setScenarioForData();
 	MTHREAD->MD->setDefaultProdData();
 	MTHREAD->MD->setScenarioProdData();
+	MTHREAD->MD->setForestTypes();
 	MTHREAD->MD->setReclassificationRules();
 
 

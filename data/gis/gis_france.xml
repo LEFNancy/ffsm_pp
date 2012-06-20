@@ -2,72 +2,77 @@
 
 <gis>
 	<layer>
-		<name>clc06_311area</name>
+		<!-- Keeps the names as forType_FORNAME -->
+		<name>forType_B</name>
 		<label>Broad-leaved forest areas</label>
+		<comment>Derived from clc06, theme311. The area of Broad-leaved forest areas within each cell.</comment>
 		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
 		<readAtStart>true</readAtStart><!-- bool -->
 		<dynamicContent>true</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->		
 		<dirName>gis/france/</dirName>
 		<fileName>clc_311.grd</fileName>
 		<legendItems>
-			<legendItem label="min10%" rColor="255" gColor="255" bColor="255" minValue="0" maxValue="8000000">00</legendItem>
-			<legendItem label="10-20%" rColor="240" gColor="240" bColor="240" minValue="8000000" maxValue="16000000">10</legendItem>
-			<legendItem label="20-30%" rColor="220" gColor="220" bColor="220" minValue="16000000" maxValue="24000000">20</legendItem>
-			<legendItem label="30-40%" rColor="200" gColor="200" bColor="200" minValue="24000000" maxValue="32000000">30</legendItem>
-			<legendItem label="40-50%" rColor="175" gColor="175" bColor="175" minValue="32000000" maxValue="40000000">40</legendItem>
-			<legendItem label="50-60%" rColor="150" gColor="150" bColor="150" minValue="40000000" maxValue="48000000">50</legendItem>
-			<legendItem label="60-70%" rColor="125" gColor="125" bColor="125" minValue="48000000" maxValue="56000000">60</legendItem>
-			<legendItem label="70-80%" rColor="100" gColor="100" bColor="100" minValue="56000000" maxValue="64000000">70</legendItem>
-			<legendItem label="80-90%" rColor="075" gColor="075" bColor="075" minValue="64000000" maxValue="72000000">80</legendItem>
-			<legendItem label="90-100" rColor="050" gColor="050" bColor="050" minValue="72000000" maxValue="80000000">90</legendItem>
+			<legendItem label="min10%" rColor="240" gColor="255" bColor="240" minValue="0" maxValue="8000000">00</legendItem>
+			<legendItem label="10-20%" rColor="245" gColor="245" bColor="245" minValue="8000000" maxValue="16000000">10</legendItem>
+			<legendItem label="20-30%" rColor="205" gColor="225" bColor="205" minValue="16000000" maxValue="24000000">20</legendItem>
+			<legendItem label="30-40%" rColor="185" gColor="205" bColor="185" minValue="24000000" maxValue="32000000">30</legendItem>
+			<legendItem label="40-50%" rColor="160" gColor="180" bColor="160" minValue="32000000" maxValue="40000000">40</legendItem>
+			<legendItem label="50-60%" rColor="135" gColor="155" bColor="135" minValue="40000000" maxValue="48000000">50</legendItem>
+			<legendItem label="60-70%" rColor="110" gColor="130" bColor="110" minValue="48000000" maxValue="56000000">60</legendItem>
+			<legendItem label="70-80%" rColor="085" gColor="105" bColor="085" minValue="56000000" maxValue="64000000">70</legendItem>
+			<legendItem label="80-90%" rColor="060" gColor="080" bColor="060" minValue="64000000" maxValue="72000000">80</legendItem>
+			<legendItem label="90-100" rColor="035" gColor="055" bColor="035" minValue="72000000" maxValue="80000000">90</legendItem>
 		</legendItems>
 	</layer>
 	<layer>
-		<name>clc06_312area</name>
+		<name>forType_C</name>
 		<label>Coniferous forest areas</label>
+		<comment>Derived from clc06, theme312. The area of Broad-leaved forest areas within each cell.</comment>
 		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
 		<readAtStart>true</readAtStart><!-- bool -->
 		<dynamicContent>true</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->		
 		<dirName>gis/france/</dirName>
 		<fileName>clc_312.grd</fileName>
 		<legendItems>
-			<legendItem label="min10%" rColor="255" gColor="255" bColor="255" minValue="0" maxValue="8000000">00</legendItem>
-			<legendItem label="10-20%" rColor="240" gColor="240" bColor="240" minValue="8000000" maxValue="16000000">10</legendItem>
-			<legendItem label="20-30%" rColor="220" gColor="220" bColor="220" minValue="16000000" maxValue="24000000">20</legendItem>
-			<legendItem label="30-40%" rColor="200" gColor="200" bColor="200" minValue="24000000" maxValue="32000000">30</legendItem>
-			<legendItem label="40-50%" rColor="175" gColor="175" bColor="175" minValue="32000000" maxValue="40000000">40</legendItem>
-			<legendItem label="50-60%" rColor="150" gColor="150" bColor="150" minValue="40000000" maxValue="48000000">50</legendItem>
-			<legendItem label="60-70%" rColor="125" gColor="125" bColor="125" minValue="48000000" maxValue="56000000">60</legendItem>
-			<legendItem label="70-80%" rColor="100" gColor="100" bColor="100" minValue="56000000" maxValue="64000000">70</legendItem>
-			<legendItem label="80-90%" rColor="075" gColor="075" bColor="075" minValue="64000000" maxValue="72000000">80</legendItem>
-			<legendItem label="90-100" rColor="050" gColor="050" bColor="050" minValue="72000000" maxValue="80000000">90</legendItem>
+			<legendItem label="min10%" rColor="240" gColor="255" bColor="240" minValue="0" maxValue="8000000">00</legendItem>
+			<legendItem label="10-20%" rColor="245" gColor="245" bColor="245" minValue="8000000" maxValue="16000000">10</legendItem>
+			<legendItem label="20-30%" rColor="205" gColor="225" bColor="205" minValue="16000000" maxValue="24000000">20</legendItem>
+			<legendItem label="30-40%" rColor="185" gColor="205" bColor="185" minValue="24000000" maxValue="32000000">30</legendItem>
+			<legendItem label="40-50%" rColor="160" gColor="180" bColor="160" minValue="32000000" maxValue="40000000">40</legendItem>
+			<legendItem label="50-60%" rColor="135" gColor="155" bColor="135" minValue="40000000" maxValue="48000000">50</legendItem>
+			<legendItem label="60-70%" rColor="110" gColor="130" bColor="110" minValue="48000000" maxValue="56000000">60</legendItem>
+			<legendItem label="70-80%" rColor="085" gColor="105" bColor="085" minValue="56000000" maxValue="64000000">70</legendItem>
+			<legendItem label="80-90%" rColor="060" gColor="080" bColor="060" minValue="64000000" maxValue="72000000">80</legendItem>
+			<legendItem label="90-100" rColor="035" gColor="055" bColor="035" minValue="72000000" maxValue="80000000">90</legendItem>
 		</legendItems>
-	
+
 	</layer>
 	<layer>
-		<name>clc06_313area</name>
+		<name>forType_M</name>
 		<label>Mixed forest forest areas</label>
+		<comment>Derived from clc06, theme313. The area of Mixed Broad-leaved/Coniferous forest areas within each cell.</comment>
 		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
 		<readAtStart>true</readAtStart><!-- bool -->
 		<dynamicContent>true</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->		
 		<dirName>gis/france/</dirName>
 		<fileName>clc_313.grd</fileName>
 		<legendItems>
-			<legendItem label="min10%" rColor="255" gColor="255" bColor="255" minValue="0" maxValue="8000000">00</legendItem>
-			<legendItem label="10-20%" rColor="240" gColor="240" bColor="240" minValue="8000000" maxValue="16000000">10</legendItem>
-			<legendItem label="20-30%" rColor="220" gColor="220" bColor="220" minValue="16000000" maxValue="24000000">20</legendItem>
-			<legendItem label="30-40%" rColor="200" gColor="200" bColor="200" minValue="24000000" maxValue="32000000">30</legendItem>
-			<legendItem label="40-50%" rColor="175" gColor="175" bColor="175" minValue="32000000" maxValue="40000000">40</legendItem>
-			<legendItem label="50-60%" rColor="150" gColor="150" bColor="150" minValue="40000000" maxValue="48000000">50</legendItem>
-			<legendItem label="60-70%" rColor="125" gColor="125" bColor="125" minValue="48000000" maxValue="56000000">60</legendItem>
-			<legendItem label="70-80%" rColor="100" gColor="100" bColor="100" minValue="56000000" maxValue="64000000">70</legendItem>
-			<legendItem label="80-90%" rColor="075" gColor="075" bColor="075" minValue="64000000" maxValue="72000000">80</legendItem>
-			<legendItem label="90-100" rColor="050" gColor="050" bColor="050" minValue="72000000" maxValue="80000000">90</legendItem>
+			<legendItem label="min10%" rColor="240" gColor="255" bColor="240" minValue="0" maxValue="8000000">00</legendItem>
+			<legendItem label="10-20%" rColor="245" gColor="245" bColor="245" minValue="8000000" maxValue="16000000">10</legendItem>
+			<legendItem label="20-30%" rColor="205" gColor="225" bColor="205" minValue="16000000" maxValue="24000000">20</legendItem>
+			<legendItem label="30-40%" rColor="185" gColor="205" bColor="185" minValue="24000000" maxValue="32000000">30</legendItem>
+			<legendItem label="40-50%" rColor="160" gColor="180" bColor="160" minValue="32000000" maxValue="40000000">40</legendItem>
+			<legendItem label="50-60%" rColor="135" gColor="155" bColor="135" minValue="40000000" maxValue="48000000">50</legendItem>
+			<legendItem label="60-70%" rColor="110" gColor="130" bColor="110" minValue="48000000" maxValue="56000000">60</legendItem>
+			<legendItem label="70-80%" rColor="085" gColor="105" bColor="085" minValue="56000000" maxValue="64000000">70</legendItem>
+			<legendItem label="80-90%" rColor="060" gColor="080" bColor="060" minValue="64000000" maxValue="72000000">80</legendItem>
+			<legendItem label="90-100" rColor="035" gColor="055" bColor="035" minValue="72000000" maxValue="80000000">90</legendItem>
 		</legendItems>
 	</layer>
 		<layer>
-		<name>clc06_othArea</name>
+		<name>forType_Oth</name>
 		<label>Other, non forest areas</label>
+		<comment>Derived from clc06. The area of NON forest areas within each cell.</comment>
 		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
 		<readAtStart>false</readAtStart><!-- bool -->
 		<dynamicContent>false</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->		
@@ -88,7 +93,8 @@
 		<reclassRules/>
 	</layer>	
 	<layer>
-		<name>nuts2</name>
+		<!-- Keeps the names as regLev_LEVELNUMBER -->
+		<name>regLev_2</name>
 		<label>Subregions (nuts2)</label>
 		<isInteger>true</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
 		<readAtStart>true</readAtStart><!-- bool -->
@@ -121,7 +127,7 @@
 		</legendItems>	
 	</layer>
 		<layer>
-		<name>nuts1</name>
+		<name>regLev_1</name>
 		<label>Regions (counties, nuts1)</label>
 		<isInteger>true</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
 		<readAtStart>true</readAtStart><!-- bool -->
@@ -133,3 +139,6 @@
 		</legendItems>	
 	</layer>
 </gis>
+
+
+	
