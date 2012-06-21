@@ -83,6 +83,8 @@ public:
 	void                resetLayer(string layerName_h);
 	///< Check if a layer with a certain name is loaded in the model. Used e.g. to check if the dtm layer (optional) exist.
 	bool                layerExist(string layerName_h);
+	///< Return a pointer to a layer given its name
+	Layers*              getLayer(string layerName_h);
 	///< Add a legend item to an existing layer
 	void                addLegendItem (
 	                        string       name_h,

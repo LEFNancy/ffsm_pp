@@ -50,6 +50,14 @@ ModelData::~ModelData(){
 
 }
 
+forType*
+ModelData::getForType(string forTypeId_h){
+	for(int i=0;i<forTypes.size();i++){
+		if(forTypes[i].forTypeId==forTypeId_h) return &forTypes[i];
+	}
+	msgOut(MSG_CRITICAL_ERROR,"forTypeId "+forTypeId_h+" not found. Aborting.");
+}
+
 vector<string>
 ModelData::getScenarios(){
 	vector<string> toReturn;
@@ -439,7 +447,7 @@ ModelData::setForestTypes(){
 		FTYPE.forLabel = table.getData(i,"forLabel");
 		FTYPE.memType = s2i(table.getData(i,"memType"));
 		FTYPE.forLayer = table.getData(i,"forLayer");
-		FTYPE.ereditateFrom = table.getData(i,"ereditateFrom");
+		FTYPE.ereditatedFrom = table.getData(i,"ereditatedFrom");
 		forTypes.push_back(FTYPE);
 	}
 }
@@ -454,7 +462,7 @@ ModelData::setReclassificationRules(){
 		RL.regId = s2i(table.getData(i,"regID"));
 		RL.forTypeIn = table.getData(i,"forTypeIn");
 		RL.forTypeOut = table.getData(i,"forTypeOut");
-		RL.p = s2d(table.getData(i,"p"));
+		RL.coeff = s2d(table.getData(i,"coeff"));
 		reclRules.push_back(RL);
 	}
 }

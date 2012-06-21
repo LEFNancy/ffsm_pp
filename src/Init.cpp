@@ -104,6 +104,7 @@ Init::setInitLevel1(){
 		srand(time(NULL));
 	}
 	MTHREAD->GIS->setSpace();
+	MTHREAD->GIS->applyForestReclassification();
 
 };
 

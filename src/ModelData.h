@@ -89,6 +89,11 @@ public:
 	vector <IFiles>     getIFilesVector() const {return iFilesVector;};
 	string              getBaseDirectory() const {return baseDirectory;};
 	ModelRegion*        getRegion(int regId_h);
+	int                 getNForTypes(){return forTypes.size();};
+	int                 getNReclRules(){return reclRules.size();};
+	forType*            getForType(int position){return &forTypes[position];};
+	reclRule*           getReclRule(int position){return &reclRules[position];};
+	forType*            getForType(string forTypeId_h);
 
 
 	int                 getIntSetting          (const string &name_h, int position=0);
@@ -210,7 +215,7 @@ struct forType {
 	string                                         forLabel;
 	int                                             memType;
 	string                                         forLayer;
-	string                                    ereditateFrom;
+	string                                   ereditatedFrom;
 	Layers*                                           layer;
 };
 
@@ -222,7 +227,7 @@ struct reclRule {
 	int                                              regId;
 	string                                       forTypeIn;
 	string                                      forTypeOut;
-	double                                               p;
+	double                                           coeff;
 };
 
 /// Low level data. XML input is reversed here after unzipping oocalc file and parsing content.xml

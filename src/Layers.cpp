@@ -66,6 +66,28 @@ Layers::addLegendItem(int ID_h, string label_h, int rColor_h, int gColor_h, int 
 }
 
 void
+Layers::addLegendItems(vector<LegendItems> legendItems_h){
+	vector <LegendItems> toAdd;
+	for(uint i=0; i<legendItems_h.size();i++){
+		bool existing = false;
+		for (uint j=0;j<legendItems.size();j++){
+			if(legendItems_h[i].ID == legendItems[j].ID){
+				existing = true;
+				break;
+			}
+		}
+		if(existing){
+			msgOut(MSG_WARNING, "Legend item "+i2s(legendItems_h[i].ID)+" non added on layer "+this->name+" as already existing.");
+		} else {
+			toAdd.push_back(legendItems_h[i]);
+		}
+	}
+	legendItems.insert( legendItems.end(), toAdd.begin(), toAdd.end() );
+}
+
+
+
+void
 Layers::addReclassificationRule(int inCode_h, int outCode_h, double p_h){
 
 	ReclassRules RULE;

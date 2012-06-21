@@ -83,7 +83,7 @@ Gis::setSpace(){
 	initLayers();
 	loadLayersDataFromFile();
 	MTHREAD->fitInWindow(); // tell the gui to fit the map to the widget
-	countItems("landUse",false); // count the various records assigned to each legendItem. Do not print debug infos
+//	countItems("landUse",false); // count the various records assigned to each legendItem. Do not print debug infos
 	return;
 };
 
@@ -158,14 +158,52 @@ Gis::initLayers(){
 	}
 
 }
+
+Layers*
+Gis::getLayer(string layerName_h){
+	for(uint i=0;i<layerVector.size();i++){
+		if(layerVector[i].getName() == layerName_h){
+			return &layerVector[i];
+		}
+	}
+	msgOut(MSG_CRITICAL_ERROR, "Layer "+layerName_h+" not found. Aborting.");
+}
+
 void
-ModelData:: applyForestReclassification(){
-per ogni forest type:
+Gis:: applyForestReclassification(){
+/*per ogni forest type:
  - crea i layers delle forest type nuovi
  - riempi con zero
  - passa le info dal layerr ereditato al nuovo
-
-
+ per ogni pixel
+ */
+	for (uint i=0;i< MTHREAD->MD->getNForTypes();i++){
+		forType* FT = MTHREAD->MD->getForType(i);
+		if(!layerExist(FT->forLayer)){
+			addLayer(FT->forLayer, "Are layer for forest type "+FT->forTypeId, false, true);
+			resetLayer(FT->forLayer);
+			Layers* newLayer = getLayer(FT->forLayer);
+			Layers* ereditatedLayer = getLayer(MTHREAD->MD->getForType(FT->ereditatedFrom)->forLayer);
+			newLayer->addLegendItems(ereditatedLayer->getLegendItems());
+		}
+		for(uint j=0;j<xyNPixels;j++){
+			Pixel* PX = getPixel(j);
+			int regL1 =  PX->getDoubleValue ("regLev_1");
+			int regL2 =  PX->getDoubleValue ("regLev_2");
+			double value =  PX->getDoubleValue (FT->forLayer);
+			for(uint z=0;z<MTHREAD->MD->getNReclRules();z++){
+				reclRule* RR = MTHREAD->MD->getReclRule(z);
+				if( (RR->regId == regL2 || RR->regId == regL1) && RR->forTypeOut == FT->forTypeId ){ // we found a reclassification rule for the region where is located this pixel and that output on the for type we are using
+					value += PX->getDoubleValue(MTHREAD->MD->getForType(RR->forTypeIn)->forLayer) * RR->coeff ;
+					// not breaking because we may have more than one input for the same output
+				}
+			}
+			PX->changeValue(FT->forLayer, value);
+		}
+		updateImage(FT->forLayer);
+	}
+	countItems("forType_B_HF", true);
+	refreshGUI();
 
 }
 

@@ -63,6 +63,9 @@ public:
 	                                   int         bColor_h,
 	                                   double    minValue_h,
 	                                   double    maxValue_h   );
+	void                addLegendItems(vector <LegendItems> legendItems_h);
+	vector<LegendItems> getLegendItems(){return legendItems;};
+
 	/// Evaluates all the legend items to find the one that match the input code, and return its color as a QColor
 	QColor              getColor(double ID_h);
 	/// Evaluates all the legend items to find the one that match the input code, and return its label
