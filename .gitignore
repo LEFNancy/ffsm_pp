@@ -1,4 +1,4 @@
-# ignoring all object files, the pythia executable, qmake/compilation temporary files and any backup files left by editors
+# ignoring all model results, object files, the pythia executable, qmake/compilation temporary files and any backup files left by editors
 
 *.o
 *~
@@ -12,3 +12,13 @@ src/qrc_resources.cpp
 src/ui_MainWindow.h
 ipopt.out
 *.~lock.*
+data/output/results/*
+data/output/maps/asciiGrids/*
+data/output/maps/colr/*
+data/output/maps/floatListLayers
+data/output/maps/integerListLayers
+data/output/maps/scenarioName
+data/output/maps/bitmaps/*
+data/output/maps/cats/*
+callgrind.out.*
+
