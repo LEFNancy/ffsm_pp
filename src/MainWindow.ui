@@ -1,57 +1,56 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow" >
-  <property name="windowModality" >
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
-  <property name="geometry" >
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>604</width>
-    <height>460</height>
+    <height>462</height>
    </rect>
   </property>
-  <property name="sizePolicy" >
-   <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
     <horstretch>1</horstretch>
     <verstretch>1</verstretch>
    </sizepolicy>
   </property>
-  <property name="windowTitle" >
-   <string>RegMAS - Regional Multi Agent Simulator</string>
+  <property name="windowTitle">
+   <string>Pythia - Forest Sector Simulator</string>
   </property>
-  <property name="windowIcon" >
-   <iconset resource="resources.qrc" >:/imgs/icon.png</iconset>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/imgs/icon.png</normaloff>:/imgs/icon.png</iconset>
   </property>
-  <property name="iconSize" >
+  <property name="iconSize">
    <size>
     <width>24</width>
     <height>24</height>
    </size>
   </property>
-  <widget class="QWidget" name="centralwidget" >
-   <property name="windowModality" >
-    <enum>Qt::ApplicationModal</enum>
-   </property>
-   <property name="sizePolicy" >
-    <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
      <horstretch>1</horstretch>
      <verstretch>1</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QHBoxLayout" >
+   <layout class="QHBoxLayout">
     <item>
-     <widget class="QSplitter" name="splitter" >
-      <property name="orientation" >
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QWidget" name="layoutWidget" >
-       <layout class="QVBoxLayout" >
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout">
         <item>
-         <widget class="QComboBox" name="layerSelector" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+         <widget class="QComboBox" name="layerSelector">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>1</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -60,10 +59,10 @@
         </item>
         <item>
          <spacer>
-          <property name="orientation" >
+          <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
-          <property name="sizeHint" >
+          <property name="sizeHint" stdset="0">
            <size>
             <width>200</width>
             <height>16</height>
@@ -72,14 +71,14 @@
          </spacer>
         </item>
         <item>
-         <widget class="MapBox" native="1" name="mapBox" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+         <widget class="MapBox" name="mapBox" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>2</horstretch>
             <verstretch>2</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
+          <property name="minimumSize">
            <size>
             <width>300</width>
             <height>300</height>
@@ -89,42 +88,42 @@
         </item>
        </layout>
       </widget>
-      <widget class="QTabWidget" name="tabWidget" >
-       <property name="currentIndex" >
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="log_area" >
-        <attribute name="title" >
+       <widget class="QWidget" name="log_area">
+        <attribute name="title">
          <string>Log area</string>
         </attribute>
-        <layout class="QHBoxLayout" >
+        <layout class="QHBoxLayout">
          <item>
-          <widget class="QTextEdit" name="logArea" >
-           <property name="whatsThis" >
-            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+          <widget class="QTextEdit" name="logArea">
+           <property name="whatsThis">
+            <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Run-time logs collecting area (can be saved)&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Run-time logs collecting area (can be saved)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="model_viewer" >
-        <attribute name="title" >
+       <widget class="QWidget" name="model_viewer">
+        <attribute name="title">
          <string>Model viewer</string>
         </attribute>
-        <layout class="QHBoxLayout" >
+        <layout class="QHBoxLayout">
          <item>
-          <widget class="QTreeWidget" name="statusView" >
-           <property name="whatsThis" >
-            <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+          <widget class="QTreeWidget" name="statusView">
+           <property name="whatsThis">
+            <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Run-time viewer of important model status variables&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Run-time viewer of important model status variables&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <column>
-            <property name="text" >
+            <property name="text">
              <string>1</string>
             </property>
            </column>
@@ -132,18 +131,18 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="plot_info" >
-        <attribute name="title" >
+       <widget class="QWidget" name="plot_info">
+        <attribute name="title">
          <string>Plot info</string>
         </attribute>
-        <layout class="QGridLayout" >
-         <item row="0" column="0" >
-          <widget class="QTextEdit" name="pxInfoArea" >
-           <property name="overwriteMode" >
+        <layout class="QGridLayout">
+         <item row="0" column="0">
+          <widget class="QTextEdit" name="pxInfoArea">
+           <property name="overwriteMode">
             <bool>false</bool>
            </property>
-           <property name="textInteractionFlags" >
-            <set>Qt::NoTextInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+           <property name="textInteractionFlags">
+            <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
            </property>
           </widget>
          </item>
@@ -154,8 +153,8 @@ p, li { white-space: pre-wrap; }
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar" >
-   <property name="geometry" >
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
@@ -163,158 +162,169 @@ p, li { white-space: pre-wrap; }
      <height>25</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuView" >
-    <property name="title" >
+   <widget class="QMenu" name="menuView">
+    <property name="title">
      <string>&amp;View</string>
     </property>
-    <addaction name="actionHideDebugMsgs" />
-    <addaction name="actionFitMap" />
+    <addaction name="actionHideDebugMsgs"/>
+    <addaction name="actionFitMap"/>
    </widget>
-   <widget class="QMenu" name="menuHelp" >
-    <property name="title" >
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
      <string>&amp;Help</string>
     </property>
-    <addaction name="actionRegMASDocumentation" />
-    <addaction name="actionAboutRegMAS" />
+    <addaction name="actionRegMASDocumentation"/>
+    <addaction name="actionAboutRegMAS"/>
    </widget>
-   <widget class="QMenu" name="menuAction" >
-    <property name="title" >
+   <widget class="QMenu" name="menuAction">
+    <property name="title">
      <string>&amp;Action</string>
     </property>
-    <addaction name="actionRun" />
-    <addaction name="actionPause" />
-    <addaction name="actionStop" />
+    <addaction name="actionRun"/>
+    <addaction name="actionPause"/>
+    <addaction name="actionStop"/>
    </widget>
-   <widget class="QMenu" name="menuFile" >
-    <property name="title" >
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="actionLoadConfiguration" />
-    <addaction name="actionSaveLog" />
-    <addaction name="actionSaveLogAs" />
+    <addaction name="actionLoadConfiguration"/>
+    <addaction name="actionSaveLog"/>
+    <addaction name="actionSaveLogAs"/>
    </widget>
-   <addaction name="menuFile" />
-   <addaction name="menuAction" />
-   <addaction name="menuView" />
-   <addaction name="menuHelp" />
+   <addaction name="menuFile"/>
+   <addaction name="menuAction"/>
+   <addaction name="menuView"/>
+   <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar" />
-  <widget class="QToolBar" name="modelToolBar" >
-   <property name="orientation" >
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="modelToolBar">
+   <property name="orientation">
     <enum>Qt::Horizontal</enum>
    </property>
-   <attribute name="toolBarArea" >
+   <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
-   <attribute name="toolBarBreak" >
+   <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionRun" />
-   <addaction name="actionPause" />
-   <addaction name="actionStop" />
+   <addaction name="actionRun"/>
+   <addaction name="actionPause"/>
+   <addaction name="actionStop"/>
   </widget>
-  <widget class="QToolBar" name="fileToolBar" >
-   <property name="orientation" >
+  <widget class="QToolBar" name="fileToolBar">
+   <property name="orientation">
     <enum>Qt::Horizontal</enum>
    </property>
-   <attribute name="toolBarArea" >
+   <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
-   <attribute name="toolBarBreak" >
+   <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionLoadConfiguration" />
-   <addaction name="actionSaveLog" />
-   <addaction name="actionExit" />
+   <addaction name="actionLoadConfiguration"/>
+   <addaction name="actionSaveLog"/>
+   <addaction name="actionExit"/>
   </widget>
-  <action name="actionLoadConfiguration" >
-   <property name="icon" >
-    <iconset resource="resources.qrc" >:/imgs/open.png</iconset>
+  <action name="actionLoadConfiguration">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/imgs/open.png</normaloff>:/imgs/open.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Load Configuration</string>
    </property>
   </action>
-  <action name="actionSaveLog" >
-   <property name="icon" >
-    <iconset resource="resources.qrc" >:/imgs/save.png</iconset>
+  <action name="actionSaveLog">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/imgs/save.png</normaloff>:/imgs/save.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Save log</string>
    </property>
   </action>
-  <action name="actionSaveLogAs" >
-   <property name="icon" >
-    <iconset resource="resources.qrc" >:/imgs/saveas.png</iconset>
+  <action name="actionSaveLogAs">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/imgs/saveas.png</normaloff>:/imgs/saveas.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Save log &amp;as..</string>
    </property>
   </action>
-  <action name="actionRun" >
-   <property name="icon" >
-    <iconset resource="resources.qrc" >:/imgs/play.png</iconset>
+  <action name="actionRun">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/imgs/play.png</normaloff>:/imgs/play.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Run</string>
    </property>
   </action>
-  <action name="actionPause" >
-   <property name="icon" >
-    <iconset resource="resources.qrc" >:/imgs/pause.png</iconset>
+  <action name="actionPause">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/imgs/pause.png</normaloff>:/imgs/pause.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Pause / Resume</string>
    </property>
   </action>
-  <action name="actionStop" >
-   <property name="icon" >
-    <iconset resource="resources.qrc" >:/imgs/stop.png</iconset>
+  <action name="actionStop">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/imgs/stop.png</normaloff>:/imgs/stop.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Stop</string>
    </property>
   </action>
-  <action name="actionAboutRegMAS" >
-   <property name="icon" >
-    <iconset resource="resources.qrc" >:/imgs/info.png</iconset>
+  <action name="actionAboutRegMAS">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/imgs/info.png</normaloff>:/imgs/info.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;About RegMAS</string>
    </property>
   </action>
-  <action name="actionExit" >
-   <property name="icon" >
-    <iconset resource="resources.qrc" >:/imgs/exit.png</iconset>
+  <action name="actionExit">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/imgs/exit.png</normaloff>:/imgs/exit.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Exit</string>
    </property>
   </action>
-  <action name="actionHideDebugMsgs" >
-   <property name="checkable" >
+  <action name="actionHideDebugMsgs">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="icon" >
-    <iconset resource="resources.qrc" >:/imgs/clear.png</iconset>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/imgs/clear.png</normaloff>:/imgs/clear.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Hide &amp;debug messages</string>
    </property>
   </action>
-  <action name="actionRegMASDocumentation" >
-   <property name="icon" >
-    <iconset resource="resources.qrc" >:/imgs/help.png</iconset>
+  <action name="actionRegMASDocumentation">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/imgs/help.png</normaloff>:/imgs/help.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>RegMAS &amp;documentation</string>
    </property>
   </action>
-  <action name="actionFitMap" >
-   <property name="icon" >
-    <iconset resource="resources.qrc" >:/imgs/view-refresh.png</iconset>
+  <action name="actionFitMap">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/imgs/view-refresh.png</normaloff>:/imgs/view-refresh.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Fit map in Window</string>
    </property>
   </action>
@@ -330,7 +340,7 @@ p, li { white-space: pre-wrap; }
   <tabstop>layerSelector</tabstop>
  </tabstops>
  <resources>
-  <include location="resources.qrc" />
+  <include location="resources.qrc"/>
  </resources>
  <connections/>
 </ui>

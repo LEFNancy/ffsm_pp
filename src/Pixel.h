@@ -46,7 +46,7 @@ public:
 	                   ~Pixel();
 
 	/// Return the value for a specific layer
-	double              getDoubleValue ( string layerName_h ) const;
+	double              getDoubleValue ( string layerName_h , bool returnZeroForNoValue = false) const;
 	void                newYear();
 
 
@@ -64,7 +64,7 @@ public:
 	/// Insert a new layer and its value
 	void                setValue ( string layerName_h, double value_h );
 	/// Change the value of an existing layer
-	void                changeValue ( string layerName_h, double value_h );
+	void                changeValue ( string layerName_h, double value_h, bool setNoValueForZero=false );
 	void                setCoordinates ( int x_h, int y_h ) {pxX=x_h; pxY=y_h;};;
 	void                setPxComments ( std::string pxComments_h ) {pxComments = pxComments_h;};
 	void                setCachedDouble(double cachedDouble_h){cachedDouble=cachedDouble_h;};

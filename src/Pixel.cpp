@@ -109,25 +109,39 @@ Pixel::setValue(string layerName_h, double value_h){
 }
 
 void
-Pixel::changeValue(string layerName_h, double value_h){
+Pixel::changeValue(string layerName_h, double value_h, bool setNoValueForZero){
 	map<string, double>::iterator p;
 	p=values.find(layerName_h);
-	if(p != values.end())
-		p->second = value_h;
-	else 
+	if(p != values.end()){
+		if(setNoValueForZero && value_h == 0){
+			p->second = MTHREAD->GIS->getNoValue();
+		} else {
+			p->second = value_h;
+		}
+	} else {
 		msgOut(MSG_ERROR, "Coud not change pixel value for layer "+layerName_h+". Layer don't found.");
+	}
 	return;
 }
 
 double
-Pixel::getDoubleValue(string layerName_h) const{
+Pixel::getDoubleValue(string layerName_h, bool returnZeroForNoValue) const{
 	map<string, double>::const_iterator p;
 	p=values.find(layerName_h);
-	if(p != values.end())
-		return p->second;
-	else 
+	if(p != values.end()) {
+		if(returnZeroForNoValue && p->second==MTHREAD->GIS->getNoValue()){
+			return 0.0;
+		} else {
+			return p->second;
+		}
+	} else {
 		msgOut(MSG_WARNING, "No layer \""+layerName_h+"\" found on pixel ("+i2s(getX())+","+i2s(getY())+"). Sure you didn't mispelled it?");
-		return MTHREAD->GIS->getNoValue();
+		if(returnZeroForNoValue){
+			return 0.0;
+		} else {
+			return MTHREAD->GIS->getNoValue();
+		}
+	}
 }
 
 

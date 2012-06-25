@@ -22,6 +22,7 @@
 #include "Output.h"
 #include "ModelData.h"
 #include "Gis.h"
+#include "ModelCore.h"
 
 Scheduler::Scheduler(ThreadManager* MTHREAD_h){
 	MTHREAD=MTHREAD_h;
@@ -41,7 +42,7 @@ Scheduler::run(){
 		MTHREAD->upgradeYearSBLabel(iteration+ MTHREAD->MD->getIntSetting("initialYear"));
 		MTHREAD->treeViewerChangeGeneralPropertyValue("year",i2s(iteration+ MTHREAD->MD->getIntSetting("initialYear")));
 
-
+		MTHREAD->CORE->runSimulationYear(getYear());
 
 		MTHREAD->DO->collectData();
 		MTHREAD->DO->print();

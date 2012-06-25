@@ -80,7 +80,8 @@ HEADERS += BaseClass.h \
            zip_p.h \
            zipentry_p.h \
            anyoption.h \
-	     ScenarioSelectionWidget.h
+	     ScenarioSelectionWidget.h \
+    ModelCore.h
 FORMS += MainWindow.ui
 SOURCES += BaseClass.cpp \
            Gis.cpp \
@@ -103,6 +104,7 @@ SOURCES += BaseClass.cpp \
            unzip.cpp \
            zip.cpp \
            anyoption.cpp \
-	     ScenarioSelectionWidget.cpp
+	     ScenarioSelectionWidget.cpp \
+    ModelCore.cpp
 
 RESOURCES += resources.qrc

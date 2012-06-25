@@ -186,25 +186,43 @@ Gis:: applyForestReclassification(){
 			Layers* ereditatedLayer = getLayer(MTHREAD->MD->getForType(FT->ereditatedFrom)->forLayer);
 			newLayer->addLegendItems(ereditatedLayer->getLegendItems());
 		}
+	}
+
+
+	for (uint i=0;i< MTHREAD->MD->getNForTypes();i++){
+		forType* FT = MTHREAD->MD->getForType(i);
+		string debugName = FT->forTypeId;
 		for(uint j=0;j<xyNPixels;j++){
 			Pixel* PX = getPixel(j);
 			int regL1 =  PX->getDoubleValue ("regLev_1");
 			int regL2 =  PX->getDoubleValue ("regLev_2");
-			double value =  PX->getDoubleValue (FT->forLayer);
+			double value =  PX->getDoubleValue (FT->forLayer, true);
+			if (j==8386){
+				cout << j<< endl;
+			}
 			for(uint z=0;z<MTHREAD->MD->getNReclRules();z++){
 				reclRule* RR = MTHREAD->MD->getReclRule(z);
 				if( (RR->regId == regL2 || RR->regId == regL1) && RR->forTypeOut == FT->forTypeId ){ // we found a reclassification rule for the region where is located this pixel and that output on the for type we are using
-					value += PX->getDoubleValue(MTHREAD->MD->getForType(RR->forTypeIn)->forLayer) * RR->coeff ;
+					string debugForTypeIn = RR->forTypeIn;
+					double inputValue = PX->getDoubleValue(MTHREAD->MD->getForType(RR->forTypeIn)->forLayer, true);
+					double reclassCoeff = RR->coeff;
+					value += inputValue * reclassCoeff ;
 					// not breaking because we may have more than one input for the same output
 				}
 			}
-			PX->changeValue(FT->forLayer, value);
+			PX->changeValue(FT->forLayer, value, true);
 		}
 		updateImage(FT->forLayer);
 	}
-	countItems("forType_B_HF", true);
+	//countItems("forType_B_HF", true);
 	refreshGUI();
-
+	Pixel* DP = getPixel(8386);
+	msgOut(MSG_DEBUG,"Debug info on plot 8386");
+	for (uint i=0;i< MTHREAD->MD->getNForTypes();i++){
+		forType* FT = MTHREAD->MD->getForType(i);
+		msgOut(MSG_DEBUG,FT->forTypeId+" - "+d2s(DP->getDoubleValue (FT->forLayer)));
+	}
+	//TODO: capire perchè errori marginalmente diversi
 }
 
 /**

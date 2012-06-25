@@ -41,6 +41,7 @@ ThreadManager::ThreadManager(){
 	INIT = NULL;
 	SCD = NULL;
 	DO = NULL;
+	CORE=NULL;
 	
 	GUI = false;
 
@@ -152,8 +153,8 @@ ThreadManager::deleteDeadOldPointers(){
 	if (SCD) {delete SCD; SCD=0;}
 	if (GIS) {delete GIS; GIS=0;}
 	if (MD) {delete MD; MD=0;}
+	if (CORE){delete CORE; CORE=0;}
 }
-
 
 void
 ThreadManager::stop(){

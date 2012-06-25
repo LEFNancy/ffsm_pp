@@ -68,6 +68,9 @@ MainProgram::run(){
 	// the scheduler object. It manage the simulation loops..
 	Scheduler *SCD  = new Scheduler(MTHREAD);
 	MTHREAD->setSCDPointer(SCD);
+	// the core of the model
+	ModelCore *CORE = new ModelCore(MTHREAD);
+	MTHREAD->setCOREPointer(CORE);
 	// manage the printing of data needed for scenario-analisys. The "message output" (needed to see "what is it happening?" are instead simply printed with msgOut()..
 	Output *DO = new Output(MTHREAD);
 	MTHREAD->setDOPointer(DO);

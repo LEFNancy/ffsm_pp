@@ -24,6 +24,7 @@
 #include "Scheduler.h"
 #include "ThreadManager.h"
 #include "Output.h"
+#include "ModelCore.h"
 
 //using namespace std;
 
@@ -115,12 +116,11 @@ Init::setInitLevel2(){
 
 /**
 Init 3 run the simulation/assign the values for the pre-optimisation year(s)
-@see Manager_farmers::assignObjectsToAgents
 */
 void
 Init::setInitLevel3(){
 	InitState=3;
-
+	MTHREAD->CORE->runInitYear();
     MTHREAD->DO->initOutput();       // initialize the output files
 
 };

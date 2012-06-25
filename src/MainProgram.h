@@ -32,6 +32,7 @@
 #include "Scheduler.h"
 #include "Sandbox.h"
 #include "Output.h"
+#include "ModelCore.h"
 
 /// Main program scheleton. It control the flow of the program.
 

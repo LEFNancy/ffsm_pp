@@ -41,6 +41,7 @@ class Gis;
 class Init;
 class Scheduler;
 class Output;
+class ModelCore;
 
 using namespace std;
 
@@ -62,6 +63,7 @@ public:
 	Init*               INIT; ///< the Init object (pre-simulation scheduler)
 	Scheduler*          SCD;  ///< the scheduler object (simulation-loops scheduler)
 	Output*             DO;   ///< data output
+	ModelCore*          CORE; ///< Core of the model
 
 	void                setMessage(const QString &message);
 	void                stop();
@@ -91,6 +93,8 @@ public:
 	void                setSCDPointer(Scheduler *SCD_h){SCD=SCD_h;};
 	/// manage the printing of data needed for scenario-analisys. The "message output" (needed to see "what is it happening?" are instead simply printed with msgOut()..
 	void                setDOPointer(Output *DO_h){DO=DO_h;};
+	/// Perform the algorithm of the model
+	void                setCOREPointer(ModelCore* CORE_h){CORE=CORE_h;};
 
 	//public slots:
 	void                setInputFileName(QString inputFileName_h);

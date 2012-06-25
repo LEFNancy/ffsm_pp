@@ -26,7 +26,7 @@
 #include <iostream>
 #include <sstream>
 
-// RegMAS include stuff..
+// Pythia include stuff..
 #include "BaseClass.h"
 #include "ModelData.h"
 #include "Gis.h"

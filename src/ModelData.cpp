@@ -731,7 +731,13 @@ ModelData::loadInput(){
 					if( !cells[y].hasChildNode("p") ){
 						record.push_back(""); // empty header
 					} else {
-						record.push_back(cells[y].getNodeByName("p",MSG_NO_MSG,true).getStringContent());
+						// changed 20120625 as for float values the content of p is the visualised value, not the full memorised one.
+						// this is strange because  tought I already tested it.. but maybe is changed the format??
+						if(cells[y].getStringAttributeByName("value-type")=="float"){
+							record.push_back(cells[y].getStringAttributeByName("value"));
+						} else {
+							record.push_back(cells[y].getNodeByName("p",MSG_NO_MSG,true).getStringContent());
+						}
 					}
 				}
 			}

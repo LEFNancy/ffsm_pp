@@ -282,7 +282,7 @@ MainWindow::open() {
 			tr("OpenDocument Spreadsheet (*.ods)\n" "All files (*.*)")
 		);
 		if (!fileName.isEmpty()){
-			statusBar()->showMessage(tr("Loaded new RegMAS model file"), 2000);
+			statusBar()->showMessage(tr("Loaded new Pythia model file"), 2000);
 			setCurrentModelFileName(fileName);
 			// getting the baseData path information...
 			QFileInfo info(fileName);
@@ -352,7 +352,7 @@ bool
 MainWindow::saveLogFile(const QString &logFileName) {
 	QFile file(logFileName);
 	if (!file.open(QIODevice::WriteOnly)) {
-	QMessageBox::warning(this, tr("RegMAS"),
+	QMessageBox::warning(this, tr("Pythia"),
 		 tr("Cannot write log file file %1:\n%2.")
 		.arg(file.fileName())
 		.arg(file.errorString()));
@@ -642,7 +642,7 @@ MainWindow::resetGUIForNewSimulation(){
 	logArea->clear();
 	// reset map
 
-	if (simulationCounter) logArea->append("***WARNING: You are running more simulations from the GUI without closing/reopening it. It should works, but there are no guarantees. The best way is to run only one simulation from the GUI, eventually closing and opening RegMAS again for further simulations."); 
+	if (simulationCounter) logArea->append("***WARNING: You are running more simulations from the GUI without closing/reopening it. It should works, but there are no guarantees. The best way is to run only one simulation from the GUI, eventually closing and opening Pythia again for further simulations.");
 	simulationCounter++;
 	
 };
