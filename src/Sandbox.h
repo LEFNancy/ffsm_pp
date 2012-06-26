@@ -39,6 +39,7 @@ class Sandbox : public BaseClass {
 
 public:
                              Sandbox(ThreadManager* MTHREAD_h);
+							 Sandbox();
                             ~Sandbox();
 	void                     test();
 	template <class T> T     getSetting(string name_h, int type);
@@ -47,6 +48,7 @@ public:
 	void                     printAString(string what){cout << "You printed: "<< what << endl;};
 	vector <TestStructure*>  getTestStructure();
 	void                     testThreads();
+	void                     runSimpleTests(); ///< Simple tests that doesn't require anything else (are encapsulated) and so they can be run at the beginning of the program
 
 private:
 	vector <TestStructure>  testVector;

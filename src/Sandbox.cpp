@@ -22,6 +22,7 @@
 #include "Sandbox.h"
 #include "ThreadManager.h"
 #include <cmath>
+#include <algorithm>
 
 
 
@@ -41,6 +42,10 @@ using namespace std;
 
 Sandbox::Sandbox(ThreadManager* MTHREAD_h){
 	MTHREAD=MTHREAD_h;
+}
+
+Sandbox::Sandbox(){
+
 }
 
 
@@ -85,9 +90,68 @@ struct GccTest
 };
 
 // --------------------------------------
+void
+Sandbox::runSimpleTests(){
+
+	/*
+	// -------------------------------------------------------------------
+	// Testing how to erase elements from a vector according to conditions
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	vector<string> myvector;
+	myvector.push_back("a");
+	myvector.push_back("b");
+	myvector.push_back("c");
+	myvector.push_back("d");
+	myvector.push_back("e");
+
+	for (uint i=0; i<myvector.size();i++){
+		cout << "i:" << i << " myvector[i]: " << myvector[i] << endl;
+		if(myvector[i]== "c" || myvector[i]=="d"){
+			cout << " -- TBR: " << "i:" << i << " myvector[i]: " << myvector[i] << endl;
+			myvector.erase (myvector.begin()+i);
+			i--;
+		}
+	}
+
+	cout << "Myvector now contains:" << endl;
+	for (int i=0; i<myvector.size(); i++) {
+		cout << "i: " << i << " myvector[i]: " << myvector[i] << endl;
+	}
+	exit (0);
+	*/
+
+
+}
 
 void
 Sandbox::test(){
+
+
+
+	/*
+	// testing how to search on a vector using the find algorithm
+
+	vector<string> names;
+	names.push_back("pippo");
+	names.push_back("topolino");
+	names.push_back("minni");
+	names.push_back("paperino");
+
+	string toSearch1 = "minni";
+	string toSearch2 = "zio paperone";
+
+	if( find(names.begin(), names.end(), toSearch1)!= names.end() ){
+		cout << "minni trovata" << endl;
+	}
+		if( find(names.begin(), names.end(), toSearch2)!= names.end() ){
+		cout << "zio paperone trovato" << endl;
+	}
+	cout << "test on find ended." << endl;
+	exit(0);
+	*/
+
+// ------------------------------------------------------------------
 
 
 	/*
@@ -121,6 +185,7 @@ Sandbox::test(){
 	}
 	*/
 	
+	// ------------------------------------------------------------------
 
 	/* // I learned: how to access elements - both objects and pointers - of a vector using pointers
 	// testing how to operate with iterators over a pointer element in an array:

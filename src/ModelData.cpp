@@ -286,6 +286,17 @@ ModelData::getRegion(int regId_h){
 	msgOut(MSG_CRITICAL_ERROR, "Region id "+i2s(regId_h)+" not found, check your input data. Aborting simulation.");
 }
 
+vector <int>
+ModelData::getRegionIds(int level_h){
+	vector <int> toReturn;
+	for(uint i=0;i<regionsVector.size();i++){
+		if(regionsVector[i].getRegLevel()==level_h){
+			toReturn.push_back(regionsVector[i].getRegId());
+		}
+	}
+	return toReturn;
+}
+
 void
 ModelData::setDefaultForData(){
 
@@ -468,6 +479,194 @@ ModelData::setReclassificationRules(){
 }
 
 void
+ModelData::applyOverrides(){
+
+	if(getBoolSetting("applyOverriding")) return;
+	msgOut(MSG_INFO, "Starting regional overriding analysis..");
+
+	//apply override from level 0 to level 1 for forestry data
+	for(uint i=0;i<forDataVector.size();i++){
+		if(forDataVector[i].region == 0){
+			for(uint j=0;j<getRegion(forDataVector[i].region)->getNChildren();j++){
+				vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren();
+				bool found = 0;
+				for(uint z=0;z<forDataVector.size();z++){
+					if(   forDataVector[z].parName == forDataVector[i].parName
+					   && forDataVector[z].region == childs[j]->getRegId()
+					   && forDataVector[z].forType == forDataVector[i].forType
+					   && forDataVector[z].diamClass == forDataVector[i].diamClass
+					){
+						found = true; // do nothing, this child has been already manually overritten
+						break;
+					}
+				}
+				if(!found){
+					forData FD;
+					FD.parName   = forDataVector[i].parName;
+					FD.region    = childs[j]->getRegId();
+					FD.forType   = forDataVector[i].forType;
+					FD.diamClass = forDataVector[i].diamClass;
+					FD.values    = forDataVector[i].values;
+					forDataVector.push_back(FD);
+				}
+			}
+			forDataVector.erase(forDataVector.begin()+i);
+			i--;
+		}
+	}
+	//apply override from level 1 to level 2 for forestry data
+	for(uint i=0;i<forDataVector.size();i++){
+		if(getRegion(forDataVector[i].region)->getRegLevel() == 1){
+			for(uint j=0;j<getRegion(forDataVector[i].region)->getNChildren();j++){
+				vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren();
+				bool found = 0;
+				for(uint z=0;z<forDataVector.size();z++){
+					if(   forDataVector[z].parName == forDataVector[i].parName
+					   && forDataVector[z].region == childs[j]->getRegId()
+					   && forDataVector[z].forType == forDataVector[i].forType
+					   && forDataVector[z].diamClass == forDataVector[i].diamClass
+					){
+						found = true; // do nothing, this child has been already manually overritten
+						break;
+					}
+				}
+				if(!found){
+					forData FD;
+					FD.parName   = forDataVector[i].parName;
+					FD.region    = childs[j]->getRegId();
+					FD.forType   = forDataVector[i].forType;
+					FD.diamClass = forDataVector[i].diamClass;
+					FD.values    = forDataVector[i].values;
+					forDataVector.push_back(FD);
+				}
+			}
+			forDataVector.erase(forDataVector.begin()+i);
+			i--;
+		}
+	}
+
+	//apply override from level 0 to level 1 for production data
+	for(uint i=0;i<prodDataVector.size();i++){
+		if(prodDataVector[i].region == 0){
+			for(uint j=0;j<getRegion(prodDataVector[i].region)->getNChildren();j++){
+				vector<ModelRegion*> childs = getRegion(prodDataVector[i].region)->getChildren();
+				bool found = 0;
+				for(uint z=0;z<prodDataVector.size();z++){
+					if(   prodDataVector[z].parName == prodDataVector[i].parName
+					   && prodDataVector[z].region == childs[j]->getRegId()
+					   && prodDataVector[z].prod == prodDataVector[i].prod
+					   && prodDataVector[z].freeDim == prodDataVector[i].freeDim
+					){
+						found = true; // do nothing, this child has been already manually overritten
+						break;
+					}
+				}
+				if(!found){
+					prodData PD;
+					PD.parName   = prodDataVector[i].parName;
+					PD.region    = childs[j]->getRegId();
+					PD.prod   = prodDataVector[i].prod;
+					PD.freeDim = prodDataVector[i].freeDim;
+					PD.values    = prodDataVector[i].values;
+					prodDataVector.push_back(PD);
+				}
+			}
+			prodDataVector.erase(prodDataVector.begin()+i);
+			i--;
+		}
+	}
+	//apply override from level 1 to level 2 for production data
+	for(uint i=0;i<prodDataVector.size();i++){
+		if(getRegion(prodDataVector[i].region)->getRegLevel() == 1){
+			for(uint j=0;j<getRegion(prodDataVector[i].region)->getNChildren();j++){
+				vector<ModelRegion*> childs = getRegion(prodDataVector[i].region)->getChildren();
+				bool found = 0;
+				for(uint z=0;z<prodDataVector.size();z++){
+					if(   prodDataVector[z].parName == prodDataVector[i].parName
+					   && prodDataVector[z].region == childs[j]->getRegId()
+					   && prodDataVector[z].prod == prodDataVector[i].prod
+					   && prodDataVector[z].freeDim == prodDataVector[i].freeDim
+					){
+						found = true; // do nothing, this child has been already manually overritten
+						break;
+					}
+				}
+				if(!found){
+					prodData PD;
+					PD.parName   = prodDataVector[i].parName;
+					PD.region    = childs[j]->getRegId();
+					PD.prod   = prodDataVector[i].prod;
+					PD.freeDim = prodDataVector[i].freeDim;
+					PD.values    = prodDataVector[i].values;
+					prodDataVector.push_back(PD);
+				}
+			}
+			prodDataVector.erase(prodDataVector.begin()+i);
+			i--;
+		}
+	}
+
+	//apply override from level 0 to level 1 for reclassification rules
+	for(uint i=0;i<reclRules.size();i++){
+		if(reclRules[i].regId == 0){
+			for(uint j=0;j<getRegion(reclRules[i].regId)->getNChildren();j++){
+				vector<ModelRegion*> childs = getRegion(reclRules[i].regId)->getChildren();
+				bool found = 0;
+				for(uint z=0;z<reclRules.size();z++){
+					if(   reclRules[z].regId == childs[j]->getRegId()
+					   && reclRules[z].forTypeIn == reclRules[i].forTypeIn
+					   && reclRules[z].forTypeOut == reclRules[i].forTypeOut
+					){
+						found = true; // do nothing, this child has been already manually overritten
+						break;
+					}
+				}
+				if(!found){
+					reclRule RR;
+					RR.regId      = childs[j]->getRegId();
+					RR.forTypeIn  = reclRules[i].forTypeIn;
+					RR.forTypeOut = reclRules[i].forTypeOut;
+					RR.coeff      = reclRules[i].coeff;
+					reclRules.push_back(RR);
+				}
+			}
+			reclRules.erase(reclRules.begin()+i);
+			i--;
+		}
+	}
+
+	//apply override from level 1 to level 2 for reclassification rules
+	for(uint i=0;i<reclRules.size();i++){
+		if(getRegion(reclRules[i].regId)->getRegLevel() == 1){
+			for(uint j=0;j<getRegion(reclRules[i].regId)->getNChildren();j++){
+				vector<ModelRegion*> childs = getRegion(reclRules[i].regId)->getChildren();
+				bool found = 0;
+				for(uint z=0;z<reclRules.size();z++){
+					if(   reclRules[z].regId == childs[j]->getRegId()
+					   && reclRules[z].forTypeIn == reclRules[i].forTypeIn
+					   && reclRules[z].forTypeOut == reclRules[i].forTypeOut
+					){
+						found = true; // do nothing, this child has been already manually overritten
+						break;
+					}
+				}
+				if(!found){
+					reclRule RR;
+					RR.regId      = childs[j]->getRegId();
+					RR.forTypeIn  = reclRules[i].forTypeIn;
+					RR.forTypeOut = reclRules[i].forTypeOut;
+					RR.coeff      = reclRules[i].coeff;
+					reclRules.push_back(RR);
+				}
+			}
+			reclRules.erase(reclRules.begin()+i);
+			i--;
+		}
+	}
+}
+
+
+void
 ModelData::setOutputDirectory(const char* output_dirname_h){
 
 	if (strlen(output_dirname_h)==0){
@@ -606,6 +805,67 @@ ModelData::getFilenameByType(std::string type_h){
 	filename_complete = baseDirectory+directory+filename;
 	return filename_complete;
 };
+
+/**
+Basic function to retrieve products-related data.
+It addmits the following "filters":
+@type_h Name of the specific parameter requested
+@regId_h Look for specific level 2 region. If not found, looks for level 1
+@prodId_h Product. It accept three keywords, for summing up all products, primary products or secondary products, namelly PROD_ALL, PROD_PRI, PROD_SEC.
+@year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
+@freeDim_h If specified, look exactly for it, otherwise simply doesn't filter for it.
+
+*/
+double
+ModelData::getProdData(const string &type_h, int regId_h, const string &prodId_h, int year, const string &freeDim_h){
+	vector <string> priProducts = getStringVectorSetting("priProducts");
+	vector <string> secProducts = getStringVectorSetting("secProducts");
+	if(year==DATA_NOW){
+		year=MTHREAD->SCD->getYear();
+	}
+	bool found = false;
+	double value=0;
+	for(uint i=0;i<prodDataVector.size();i++){
+		if(prodDataVector[i].parName == type_h // name of parameter filter
+		  && (prodDataVector[i].prod == prodId_h
+			|| prodId_h == PROD_ALL // product filter
+			|| (prodId_h == PROD_PRI  && find(priProducts.begin(), priProducts.end(), prodDataVector[i].prod)!= priProducts.end() )
+			|| (prodId_h == PROD_SEC  && find(secProducts.begin(), secProducts.end(), prodDataVector[i].prod)!= secProducts.end() ) )
+		 // && (regId_h == prodDataVector[i].region || prodDataVector[i].region == getRegion(regId_h)->getParRegId()) // region filter
+		  && (regId_h == prodDataVector[i].region) // region filter
+		  && (freeDim_h == "" || freeDim_h == prodDataVector[i].freeDim) // free dimension filter
+		){
+		 value += getTimedData(prodDataVector[i].values, year);
+		 found = true;
+		}
+	}
+	if(!found){
+		msgOut(MSG_ERROR, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
+	}
+	return value;
+};
+
+double
+ModelData::getTimedData(const vector<double> &dated_vector, int year_h){
+
+	int position = year_h-getIntSetting("initialYear");
+
+	if(dated_vector.size() > position) {
+		return dated_vector[position];
+	} else if (dated_vector.size() > 0 ){
+		// returning the last available value...
+		return dated_vector[dated_vector.size()-1];
+	} else {
+		msgOut(MSG_CRITICAL_ERROR, "Error in getTimedData: requested value doesn't have any value, even on the first position(year)!");
+	}
+	return 0;
+}
+
+void
+ModelData::setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year, const string &freeDim_h){
+	//TODO
+};
+
 
 
 

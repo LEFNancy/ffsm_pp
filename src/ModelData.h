@@ -78,7 +78,8 @@ public:
 	void                setProductResourceMatrixLink();
 	void                setForestTypes();
 	void                setReclassificationRules();
-	void                setSpace(); 
+	void                applyOverrides(); ///< Cancel all reg1 level and trasform them in reg2 level if not already existing
+	void                setSpace();
 	/// Create the vector availableObjectsBySoilType so it is faster to assign spacial objects to farmers basing on their land types
 	void                debug();
 
@@ -89,11 +90,13 @@ public:
 	vector <IFiles>     getIFilesVector() const {return iFilesVector;};
 	string              getBaseDirectory() const {return baseDirectory;};
 	ModelRegion*        getRegion(int regId_h);
+	vector<int>         getRegionIds(int level_h);
 	int                 getNForTypes(){return forTypes.size();};
 	int                 getNReclRules(){return reclRules.size();};
 	forType*            getForType(int position){return &forTypes[position];};
 	reclRule*           getReclRule(int position){return &reclRules[position];};
 	forType*            getForType(string forTypeId_h);
+	double              getTimedData(const vector <double> &dated_vector, int year_h); ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
 
 
 	int                 getIntSetting          (const string &name_h, int position=0);
@@ -105,6 +108,9 @@ public:
 	vector <string>     getStringVectorSetting (const string &name_h);
 	vector <bool>       getBoolVectorSetting   (const string &name_h);
 
+
+	double              getProdData(const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h="");
+	void                setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h=""); // Remember default arguments must be at the end
 
 
 	/// Retrieve the list of objects type that can be placed on the specified soil type

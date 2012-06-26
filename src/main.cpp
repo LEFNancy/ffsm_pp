@@ -25,7 +25,7 @@
 
 #include <QApplication>
 
-
+#include "Sandbox.h"
 #include "MainWindow.h"
 #include "ThreadManager.h"
 
@@ -36,12 +36,18 @@ using namespace std;
 
 int main(int argc, char *argv[]){
 
+
 	cout << endl;
 	cout << "*******************************************************************" << endl;
 	cout << "***    !! Welcome to Pythia - The Forest Sector Simulator !!    ***" << endl;
 	cout << "***      For info & doc: http://www.pythia-project.org/doc      ***" << endl;
 	cout << "***         Compiled on: " << __DATE__ << " - " << __TIME__ << "                 ***" << endl;
 	cout << "*******************************************************************" << endl<<endl;
+
+	// Running "simple testing" that can be done at this early time
+	Sandbox TEST;
+	TEST.runSimpleTests();
+
 
 	QDir dir;
 	QString currentDir = dir.currentPath();

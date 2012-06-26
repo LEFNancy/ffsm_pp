@@ -99,6 +99,7 @@ Init::setInitLevel1(){
 	MTHREAD->MD->setScenarioProdData();
 	MTHREAD->MD->setForestTypes();
 	MTHREAD->MD->setReclassificationRules();
+	MTHREAD->MD->applyOverrides();
 
 
 	if(MTHREAD->MD->getBoolSetting("randomSimulation")){
@@ -120,9 +121,8 @@ Init 3 run the simulation/assign the values for the pre-optimisation year(s)
 void
 Init::setInitLevel3(){
 	InitState=3;
-	MTHREAD->CORE->runInitYear();
-    MTHREAD->DO->initOutput();       // initialize the output files
-
+	MTHREAD->DO->initOutput();       // initialize the output files
+	MTHREAD->CORE->runInitPeriod();
 };
 
 void

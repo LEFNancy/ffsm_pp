@@ -38,7 +38,7 @@ class ModelCore : public BaseClass{
 public:
 						ModelCore(ThreadManager* MTHREAD_h);
 					   ~ModelCore();
-	void                runInitYear();
+	void                runInitPeriod();
 	void                runSimulationYear(int year_h);
 };
 

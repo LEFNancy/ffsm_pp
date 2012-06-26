@@ -78,11 +78,6 @@ enum {
 	OUTVL_BINMAPS          =6,
 	OUTVL_ALL              =7,
 
-	AGEXIT_FALSE           =0, //reason why agents leave the model
-	AGEXIT_NOCAPITAL       =1,
-	AGEXIT_DEBS            =2,
-	AGEXIT_SHPRICES        =3
-
 };
 
 // mathematical defines (not correctly implemented in some compilers, namely MS VisualStudio..)
@@ -98,6 +93,19 @@ enum {
 #ifndef M_LN10
 #define M_LN10 2.3025850929940456840179914546844
 #endif
+
+// some macro for specific keywords in the model
+#ifndef PROD_ALL
+#define PROD_ALL "PROD_ALL"
+#endif
+#ifndef PROD_PRI
+#define PROD_PRI "PROD_PRI"
+#endif
+#ifndef PROD_SEC
+#define PROD_SEC "PROD_SEC"
+#endif
+
+
 
 /// Base class for the regmas application.
 /**
