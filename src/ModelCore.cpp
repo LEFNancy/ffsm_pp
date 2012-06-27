@@ -29,9 +29,13 @@ ModelCore::runInitPeriod(){
 			}
 			value += MD->getProdData("m",regIds2[i],secProducts[sp],secondYear);
 			cout << "Value in runInitPeriod: " << value << endl;
-			MD->setProdData(value,"pl",regIds2[i],secProducts[sp],secondYear);
+			MD->setProdData(value,"pl",regIds2[i],secProducts[sp],2020); //secondYear TODO
+			double debug = MD->getProdData("pl",regIds2[i],secProducts[sp],2020);
 		}
 	}
+
+
+
 
 };
 

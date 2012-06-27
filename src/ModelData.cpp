@@ -287,11 +287,13 @@ ModelData::getRegion(int regId_h){
 }
 
 vector <int>
-ModelData::getRegionIds(int level_h){
+ModelData::getRegionIds(int level_h, bool excludeResidual){
 	vector <int> toReturn;
 	for(uint i=0;i<regionsVector.size();i++){
 		if(regionsVector[i].getRegLevel()==level_h){
-			toReturn.push_back(regionsVector[i].getRegId());
+			if( (!excludeResidual) || (!regionsVector[i].getIsResidual())){
+				toReturn.push_back(regionsVector[i].getRegId());
+			}
 		}
 	}
 	return toReturn;
@@ -487,8 +489,8 @@ ModelData::applyOverrides(){
 	//apply override from level 0 to level 1 for forestry data
 	for(uint i=0;i<forDataVector.size();i++){
 		if(forDataVector[i].region == 0){
-			for(uint j=0;j<getRegion(forDataVector[i].region)->getNChildren();j++){
-				vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren();
+			for(uint j=0;j<getRegion(forDataVector[i].region)->getNChildren(false);j++){
+				vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren(false);
 				bool found = 0;
 				for(uint z=0;z<forDataVector.size();z++){
 					if(   forDataVector[z].parName == forDataVector[i].parName
@@ -517,8 +519,8 @@ ModelData::applyOverrides(){
 	//apply override from level 1 to level 2 for forestry data
 	for(uint i=0;i<forDataVector.size();i++){
 		if(getRegion(forDataVector[i].region)->getRegLevel() == 1){
-			for(uint j=0;j<getRegion(forDataVector[i].region)->getNChildren();j++){
-				vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren();
+			for(uint j=0;j<getRegion(forDataVector[i].region)->getNChildren(false);j++){
+				vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren(false);
 				bool found = 0;
 				for(uint z=0;z<forDataVector.size();z++){
 					if(   forDataVector[z].parName == forDataVector[i].parName
@@ -548,8 +550,8 @@ ModelData::applyOverrides(){
 	//apply override from level 0 to level 1 for production data
 	for(uint i=0;i<prodDataVector.size();i++){
 		if(prodDataVector[i].region == 0){
-			for(uint j=0;j<getRegion(prodDataVector[i].region)->getNChildren();j++){
-				vector<ModelRegion*> childs = getRegion(prodDataVector[i].region)->getChildren();
+			for(uint j=0;j<getRegion(prodDataVector[i].region)->getNChildren(false);j++){
+				vector<ModelRegion*> childs = getRegion(prodDataVector[i].region)->getChildren(false);
 				bool found = 0;
 				for(uint z=0;z<prodDataVector.size();z++){
 					if(   prodDataVector[z].parName == prodDataVector[i].parName
@@ -578,8 +580,8 @@ ModelData::applyOverrides(){
 	//apply override from level 1 to level 2 for production data
 	for(uint i=0;i<prodDataVector.size();i++){
 		if(getRegion(prodDataVector[i].region)->getRegLevel() == 1){
-			for(uint j=0;j<getRegion(prodDataVector[i].region)->getNChildren();j++){
-				vector<ModelRegion*> childs = getRegion(prodDataVector[i].region)->getChildren();
+			for(uint j=0;j<getRegion(prodDataVector[i].region)->getNChildren(false);j++){
+				vector<ModelRegion*> childs = getRegion(prodDataVector[i].region)->getChildren(false);
 				bool found = 0;
 				for(uint z=0;z<prodDataVector.size();z++){
 					if(   prodDataVector[z].parName == prodDataVector[i].parName
@@ -609,8 +611,8 @@ ModelData::applyOverrides(){
 	//apply override from level 0 to level 1 for reclassification rules
 	for(uint i=0;i<reclRules.size();i++){
 		if(reclRules[i].regId == 0){
-			for(uint j=0;j<getRegion(reclRules[i].regId)->getNChildren();j++){
-				vector<ModelRegion*> childs = getRegion(reclRules[i].regId)->getChildren();
+			for(uint j=0;j<getRegion(reclRules[i].regId)->getNChildren(false);j++){
+				vector<ModelRegion*> childs = getRegion(reclRules[i].regId)->getChildren(false);
 				bool found = 0;
 				for(uint z=0;z<reclRules.size();z++){
 					if(   reclRules[z].regId == childs[j]->getRegId()
@@ -638,8 +640,8 @@ ModelData::applyOverrides(){
 	//apply override from level 1 to level 2 for reclassification rules
 	for(uint i=0;i<reclRules.size();i++){
 		if(getRegion(reclRules[i].regId)->getRegLevel() == 1){
-			for(uint j=0;j<getRegion(reclRules[i].regId)->getNChildren();j++){
-				vector<ModelRegion*> childs = getRegion(reclRules[i].regId)->getChildren();
+			for(uint j=0;j<getRegion(reclRules[i].regId)->getNChildren(false);j++){
+				vector<ModelRegion*> childs = getRegion(reclRules[i].regId)->getChildren(false);
 				bool found = 0;
 				for(uint z=0;z<reclRules.size();z++){
 					if(   reclRules[z].regId == childs[j]->getRegId()
@@ -810,7 +812,7 @@ ModelData::getFilenameByType(std::string type_h){
 Basic function to retrieve products-related data.
 It addmits the following "filters":
 @type_h Name of the specific parameter requested
-@regId_h Look for specific level 2 region. If not found, looks for level 1
+@regId_h Look for specific level 2 region.
 @prodId_h Product. It accept three keywords, for summing up all products, primary products or secondary products, namelly PROD_ALL, PROD_PRI, PROD_SEC.
 @year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
 @freeDim_h If specified, look exactly for it, otherwise simply doesn't filter for it.
@@ -845,6 +847,58 @@ ModelData::getProdData(const string &type_h, int regId_h, const string &prodId_h
 	return value;
 };
 
+/**
+Basic function to set products-related data.
+It can change an existing value or extend in time a serie, but it requires the keys (par. name/regId/prodId/freedim) to be already present in the data.
+@value_h New value to change with/add
+It addmits the following "filters":
+@type_h Name of the specific parameter requested
+@regId_h Set a specific level 2 region, or all its childred l2 region if a reg1 level is specified.
+@prodId_h Product. It accept three keywords, for changing/inserting the new value to all products, primary products or secondary products, namelly PROD_ALL, PROD_PRI, PROD_SEC.
+@year Unless specified, set the value of the current year. If array is smaller (e.g. because it is time-independent) fill all the values till the requested one.
+@freeDim_h If specified, look exactly for it, otherwise simply doesn't filter for it.
+
+*/
+void
+ModelData::setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year, const string &freeDim_h){
+	vector<int> regIds;
+	vector <string> priProducts = getStringVectorSetting("priProducts");
+	vector <string> secProducts = getStringVectorSetting("secProducts");
+
+	// Make sure to set the new value to all l2 regions if requested fora reg1 level
+	if(getRegion(regId_h)->getRegLevel()==2){
+		regIds.push_back(regId_h);
+	} else if (getRegion(regId_h)->getRegLevel()==1) {
+		for(uint i=0;i<getRegion(regId_h)->getNChildren();i++){
+			regIds.push_back(getRegion(regId_h)->getChildren()[i]->getRegId());
+		}
+	} else {
+		msgOut(MSG_CRITICAL_ERROR, "Error in setProdData(). Setting a value for the whole World is not supported.");
+	}
+
+	if(year==DATA_NOW){
+		year=MTHREAD->SCD->getYear();
+	}
+	bool found = false;
+
+	for(uint i=0;i<prodDataVector.size();i++){
+		if(prodDataVector[i].parName == type_h // name of parameter filter
+		  && (prodDataVector[i].prod == prodId_h
+			|| prodId_h == PROD_ALL // product filter
+			|| (prodId_h == PROD_PRI  && find(priProducts.begin(), priProducts.end(), prodDataVector[i].prod)!= priProducts.end() )
+			|| (prodId_h == PROD_SEC  && find(secProducts.begin(), secProducts.end(), prodDataVector[i].prod)!= secProducts.end() ) )
+		  && (find(regIds.begin(), regIds.end(), prodDataVector[i].region)!= regIds.end()) // region filter
+		  && (freeDim_h == "" || freeDim_h == prodDataVector[i].freeDim) // free dimension filter
+		){
+		 setTimedData(value_h, prodDataVector[i].values, year);
+		 found = true;
+		}
+	}
+	if(!found){
+		msgOut(MSG_ERROR, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". Double check that this is ok for your model.");
+	}
+};
+
 double
 ModelData::getTimedData(const vector<double> &dated_vector, int year_h){
 
@@ -862,11 +916,23 @@ ModelData::getTimedData(const vector<double> &dated_vector, int year_h){
 }
 
 void
-ModelData::setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year, const string &freeDim_h){
-	//TODO
-};
+ModelData::setTimedData(double value_h, vector<double> &dated_vector, int year_h){
 
+	int position = year_h-getIntSetting("initialYear");
+	int originalVectorSize = dated_vector.size();
+	if(dated_vector.size() > position) {
+		dated_vector[position]=value_h;
+	} else {
+		// extending the vector and filling it with the incoming value, but issuing a warning if done for more than one year
 
+		for(uint i=0;i<position-originalVectorSize+1;i++){
+			dated_vector.push_back(value_h);
+		}
+		if(position-dated_vector.size() > 0 ){
+			msgOut(MSG_WARNING, "setTimedData: a dated vector has been filled several years ("+i2s(1+position-dated_vector.size())+") with incoming values to reach desidered position in time.");
+		}
+	}
+}
 
 
 void

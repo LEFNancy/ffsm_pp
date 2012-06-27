@@ -28,6 +28,9 @@
 #include <iostream>
 #include <sstream>
 
+// Qt headers...
+#include <QString>
+
 // regmas headers..
 #include "BaseClass.h"
 
@@ -62,11 +65,11 @@ public:
 	int                 getParRegId() {return parRegId;};
 	bool                getIsResidual() {return isResidual;};
 	ModelRegion*        getParent(){return parRegion;}; ///< Returns a pointer to the parent regions
-	vector<ModelRegion*>getChildren(){return chRegions;}; ///< Return a vector of pointers to the direct child regions
+	vector<ModelRegion*>getChildren(bool excludeResidual = true); ///< Return a vector of pointers to the direct child regions
 	double              getVolumes();
 	vector<double>      getVolumes(int fType_h);
 	vector < vector <double> > getVolumes(int fType_h, string dClass_h);
-	int                 getNChildren(){return chRegions.size();};
+	int                 getNChildren(bool excludeResidual = true);
 
 private:
 	int                                regId; ///< Regional unique ID

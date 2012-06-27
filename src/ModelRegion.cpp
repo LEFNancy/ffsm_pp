@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "ModelRegion.h"
+//#include <sys/types.h>
 
 /**
 The constructor of REGION instances want:
@@ -37,6 +38,33 @@ ModelRegion::ModelRegion(ThreadManager* MTHREAD_h, int regId_h, string regSName_
 ModelRegion::~ModelRegion(){
 }
 
+vector<ModelRegion*>
+ModelRegion::getChildren(bool excludeResidual){
+	if(excludeResidual){
+		vector<ModelRegion*> toReturn;
+		for(uint i=0;i<chRegions.size();i++){
+			if(!chRegions[i]->getIsResidual()){
+				toReturn.push_back(chRegions[i]);
+			}
+		}
+		return toReturn;
+	}
+	return chRegions;
+};
+
+int
+ModelRegion::getNChildren(bool excludeResidual){
+	if(excludeResidual){
+		int toReturn;
+		for(uint i=0;i<chRegions.size();i++){
+			if(!chRegions[i]->getIsResidual()){
+				toReturn++;
+			}
+		}
+		return toReturn;
+	}
+	return chRegions.size();
+};
 
 
 
