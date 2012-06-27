@@ -110,7 +110,7 @@ public:
 
 
 	double              getProdData(const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h="");
-	void                setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h=""); // Remember default arguments must be at the end
+	void                setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, bool allowCreate=false, const string &freeDim_h=""); // Remember default arguments must be at the end
 
 
 	/// Retrieve the list of objects type that can be placed on the specified soil type

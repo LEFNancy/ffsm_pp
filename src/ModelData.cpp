@@ -856,11 +856,12 @@ It addmits the following "filters":
 @regId_h Set a specific level 2 region, or all its childred l2 region if a reg1 level is specified.
 @prodId_h Product. It accept three keywords, for changing/inserting the new value to all products, primary products or secondary products, namelly PROD_ALL, PROD_PRI, PROD_SEC.
 @year Unless specified, set the value of the current year. If array is smaller (e.g. because it is time-independent) fill all the values till the requested one.
+@create If true, allow creation of new data if not found. Default false (rise an error)
 @freeDim_h If specified, look exactly for it, otherwise simply doesn't filter for it.
 
 */
 void
-ModelData::setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year, const string &freeDim_h){
+ModelData::setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year, bool allowCreate, const string &freeDim_h){
 	vector<int> regIds;
 	vector <string> priProducts = getStringVectorSetting("priProducts");
 	vector <string> secProducts = getStringVectorSetting("secProducts");
@@ -895,7 +896,23 @@ ModelData::setProdData(double value_h, const string &type_h, int regId_h, const 
 		}
 	}
 	if(!found){
-		msgOut(MSG_ERROR, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". Double check that this is ok for your model.");
+		if(!allowCreate){
+			msgOut(MSG_CRITICAL_ERROR, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
+		}
+		if(prodId_h == PROD_ALL || prodId_h == PROD_SEC || prodId_h == PROD_PRI || prodId_h == ""){
+			msgOut(MSG_CRITICAL_ERROR, "Keywords for multiple products not allowed in new prodData generation.");
+		}
+		for(uint i=0; i<regIds.size(); i++){
+			prodData PD;
+			PD.parName = type_h;
+			PD.region = regIds[i];
+			PD.prod = prodId_h;
+			PD.freeDim = freeDim_h;
+			vector<double> emptyVector;
+			PD.values = emptyVector;
+			setTimedData(value_h, PD.values, year);
+			prodDataVector.push_back(PD); // TODO: testing
+		}
 	}
 };
 

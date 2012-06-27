@@ -76,7 +76,7 @@ enum {
 	OUTVL_AGGREGATED       =3,
 	OUTVL_DETAILED         =5,
 	OUTVL_BINMAPS          =6,
-	OUTVL_ALL              =7,
+	OUTVL_ALL              =7
 
 };
 
