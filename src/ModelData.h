@@ -97,7 +97,7 @@ public:
 	reclRule*           getReclRule(int position){return &reclRules[position];};
 	forType*            getForType(string forTypeId_h);
 	double              getTimedData(const vector <double> &dated_vector, int year_h); ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
-	void                setTimedData(double value_h, vector<double> &dated_vector, int year_h);
+	void                setTimedData(double value_h, vector<double> &dated_vector, int year_h, int MSG_LEVEL=MSG_WARNING);
 
 	int                 getIntSetting          (const string &name_h, int position=0);
 	double              getDoubleSetting       (const string &name_h, int position=0);

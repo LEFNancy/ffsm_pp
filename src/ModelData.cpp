@@ -483,7 +483,7 @@ ModelData::setReclassificationRules(){
 void
 ModelData::applyOverrides(){
 
-	if(getBoolSetting("applyOverriding")) return;
+	if(!getBoolSetting("applyOverriding")) return;
 	msgOut(MSG_INFO, "Starting regional overriding analysis..");
 
 	//apply override from level 0 to level 1 for forestry data
@@ -910,7 +910,7 @@ ModelData::setProdData(double value_h, const string &type_h, int regId_h, const 
 			PD.freeDim = freeDim_h;
 			vector<double> emptyVector;
 			PD.values = emptyVector;
-			setTimedData(value_h, PD.values, year);
+			setTimedData(value_h, PD.values, year, MSG_NO_MSG); // don't warning if we are making a multi-year value vector, as it is a new one
 			prodDataVector.push_back(PD); // TODO: testing
 		}
 	}
@@ -933,7 +933,7 @@ ModelData::getTimedData(const vector<double> &dated_vector, int year_h){
 }
 
 void
-ModelData::setTimedData(double value_h, vector<double> &dated_vector, int year_h){
+ModelData::setTimedData(double value_h, vector<double> &dated_vector, int year_h, int MSG_LEVEL){
 
 	int position = year_h-getIntSetting("initialYear");
 	int originalVectorSize = dated_vector.size();
@@ -945,8 +945,8 @@ ModelData::setTimedData(double value_h, vector<double> &dated_vector, int year_h
 		for(uint i=0;i<position-originalVectorSize+1;i++){
 			dated_vector.push_back(value_h);
 		}
-		if(position-dated_vector.size() > 0 ){
-			msgOut(MSG_WARNING, "setTimedData: a dated vector has been filled several years ("+i2s(1+position-dated_vector.size())+") with incoming values to reach desidered position in time.");
+		if(position-originalVectorSize > 0 ){
+			msgOut(MSG_LEVEL, "setTimedData: a dated vector has been filled several years ("+i2s(1+position-originalVectorSize)+") with incoming values to reach desidered position in time.");
 		}
 	}
 }
