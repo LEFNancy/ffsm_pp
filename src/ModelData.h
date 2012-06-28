@@ -94,8 +94,12 @@ public:
 	int                 getNForTypes(){return forTypes.size();};
 	int                 getNReclRules(){return reclRules.size();};
 	forType*            getForType(int position){return &forTypes[position];};
-	reclRule*           getReclRule(int position){return &reclRules[position];};
 	forType*            getForType(string forTypeId_h);
+	vector <string>     getForTypeIds(bool all=false); ///< By default it doesn't return forTypes used only as input
+	reclRule*           getReclRule(int position){return &reclRules[position];};
+	/// A simple function to assess if a specified product can be made by a certain forest type and diameter class
+	bool                assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
+
 	double              getTimedData(const vector <double> &dated_vector, int year_h); ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
 	void                setTimedData(double value_h, vector<double> &dated_vector, int year_h, int MSG_LEVEL=MSG_WARNING);
 
@@ -110,7 +114,11 @@ public:
 
 
 	double              getProdData(const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h="");
+	double              getForData(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW);
+
+
 	void                setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, bool allowCreate=false, const string &freeDim_h=""); // Remember default arguments must be at the end
+	void                setForData(double value_h, const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW, bool allowCreate=false); // Remember default arguments must be at the end
 
 
 	/// Retrieve the list of objects type that can be placed on the specified soil type

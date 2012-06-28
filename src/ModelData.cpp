@@ -299,6 +299,31 @@ ModelData::getRegionIds(int level_h, bool excludeResidual){
 	return toReturn;
 }
 
+vector <string>
+ModelData::getForTypeIds(bool all){
+	vector <string> toReturn;
+	for(uint i=0;i<forTypes.size();i++){
+		if(all || forTypes[i].memType==2){
+			toReturn.push_back(forTypes[i].forTypeId);
+		}
+	}
+	return toReturn;
+}
+
+bool
+ModelData::assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h){
+	bool ok=false;
+	for(uint i=0;i<forToProdVector.size();i++){
+		if(    forToProdVector[i].product == prod_h
+			&& forToProdVector[i].forType == forType_h
+			&& forToProdVector[i].dClass  == dClass_h
+		){
+			return true;
+		}
+	}
+	return false;
+};
+
 void
 ModelData::setDefaultForData(){
 
@@ -848,6 +873,47 @@ ModelData::getProdData(const string &type_h, int regId_h, const string &prodId_h
 };
 
 /**
+Basic function to retrieve forest-related data.
+It addmits the following "filters":
+@type_h Name of the specific parameter requested
+@regId_h Look for specific level 2 region.
+@forType_h If specified, look exactly for the specified forest type, otherwise simply doesn't filter for it.
+@diamClass_h Diameter class. It accept three keywords, for summing up all diameters, production-ready diamters or sub-production ones, namelly DIAM_ALL, DIAM_PROD, DIAM_FIRST.
+@year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
+*/
+
+double
+ModelData::getForData(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year){
+	vector <string> dClasses = getStringVectorSetting("dClasses");
+
+	if(year==DATA_NOW){
+		year=MTHREAD->SCD->getYear();
+	}
+	bool found = false;
+	double value=0;
+	for(uint i=0;i<forDataVector.size();i++){
+		if(forDataVector[i].parName == type_h // name of parameter filter
+		  && (regId_h == forDataVector[i].region) // region filter
+		  && (forType_h == "" || forType_h == forDataVector[i].forType) // forestry type
+		  && (forDataVector[i].diamClass == diamClass_h // diameter class filter
+			|| diamClass_h == DIAM_ALL
+			|| (diamClass_h == DIAM_PROD  && find(dClasses.begin()+1, dClasses.end(), forDataVector[i].diamClass)!= dClasses.end() )
+			|| (diamClass_h == DIAM_FIRST  && forDataVector[i].diamClass == dClasses[1]))
+		 // && (regId_h == forDataVector[i].region || forDataVector[i].region == getRegion(regId_h)->getParRegId()) // region filter
+
+		){
+		 value += getTimedData(forDataVector[i].values, year);
+		 found = true;
+		}
+	}
+	if(!found){
+		msgOut(MSG_ERROR, "Error in getForData: no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+diamClass_h+". Returning 0, but double check that this is ok for your model.");
+	}
+	return value;
+
+};
+
+/**
 Basic function to set products-related data.
 It can change an existing value or extend in time a serie, but it requires the keys (par. name/regId/prodId/freedim) to be already present in the data.
 @value_h New value to change with/add
@@ -897,7 +963,7 @@ ModelData::setProdData(double value_h, const string &type_h, int regId_h, const 
 	}
 	if(!found){
 		if(!allowCreate){
-			msgOut(MSG_CRITICAL_ERROR, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
+			msgOut(MSG_CRITICAL_ERROR, "Error in setProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
 		}
 		if(prodId_h == PROD_ALL || prodId_h == PROD_SEC || prodId_h == PROD_PRI || prodId_h == ""){
 			msgOut(MSG_CRITICAL_ERROR, "Keywords for multiple products not allowed in new prodData generation.");
@@ -915,6 +981,63 @@ ModelData::setProdData(double value_h, const string &type_h, int regId_h, const 
 		}
 	}
 };
+
+void
+ModelData::setForData(double value_h, const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year, bool allowCreate){
+
+	vector<int> regIds;
+	vector <string> dClasses = getStringVectorSetting("dClasses");
+
+	// Make sure to set the new value to all l2 regions if requested fora reg1 level
+	if(getRegion(regId_h)->getRegLevel()==2){
+		regIds.push_back(regId_h);
+	} else if (getRegion(regId_h)->getRegLevel()==1) {
+		for(uint i=0;i<getRegion(regId_h)->getNChildren();i++){
+			regIds.push_back(getRegion(regId_h)->getChildren()[i]->getRegId());
+		}
+	} else {
+		msgOut(MSG_CRITICAL_ERROR, "Error in setProdData(). Setting a value for the whole World is not supported.");
+	}
+
+	if(year==DATA_NOW){
+		year=MTHREAD->SCD->getYear();
+	}
+	bool found = false;
+
+	for(uint i=0;i<forDataVector.size();i++){
+		if(forDataVector[i].parName == type_h // name of parameter filter
+		  && (find(regIds.begin(), regIds.end(), forDataVector[i].region)!= regIds.end()) // region filter
+		  && (type_h == "" || type_h == forDataVector[i].forType) // forType dimension filter
+		  && (forDataVector[i].diamClass == diamClass_h // diameter class filter
+			|| diamClass_h == DIAM_ALL
+			|| (diamClass_h == DIAM_PROD  && find(dClasses.begin()+1, dClasses.end(), forDataVector[i].diamClass)!= dClasses.end() )
+			|| (diamClass_h == DIAM_FIRST  && forDataVector[i].diamClass == dClasses[1]))
+		){
+		 setTimedData(value_h, forDataVector[i].values, year);
+		 found = true;
+		}
+	}
+	if(!found){
+		if(!allowCreate){
+			msgOut(MSG_CRITICAL_ERROR, "Error in setForData: no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+diamClass_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
+		}
+		if(diamClass_h  == DIAM_ALL || diamClass_h  == DIAM_PROD || diamClass_h  == DIAM_FIRST || diamClass_h  == ""){
+			msgOut(MSG_CRITICAL_ERROR, "Keywords for multiple diameter classes not allowed in new forData generation.");
+		}
+		for(uint i=0; i<regIds.size(); i++){
+			forData FD;
+			FD.parName = type_h;
+			FD.region = regIds[i];
+			FD.forType = forType_h;
+			FD.diamClass = diamClass_h;
+			vector<double> emptyVector;
+			FD.values = emptyVector;
+			setTimedData(value_h, FD.values, year, MSG_NO_MSG); // don't warning if we are making a multi-year value vector, as it is a new one
+			forDataVector.push_back(FD); // TODO: testing
+		}
+	}
+};
+
 
 double
 ModelData::getTimedData(const vector<double> &dated_vector, int year_h){

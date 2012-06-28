@@ -96,15 +96,23 @@ enum {
 
 // some macro for specific keywords in the model
 #ifndef PROD_ALL
-#define PROD_ALL "PROD_ALL"
+#define PROD_ALL "PROD_ALL" //< all primary and transformed products
 #endif
 #ifndef PROD_PRI
-#define PROD_PRI "PROD_PRI"
+#define PROD_PRI "PROD_PRI" //< primary products
 #endif
 #ifndef PROD_SEC
-#define PROD_SEC "PROD_SEC"
+#define PROD_SEC "PROD_SEC" //< secondary products
 #endif
-
+#ifndef DIAM_ALL
+#define DIAM_ALL "DIAM_ALL" //< all diameter classes
+#endif
+#ifndef DIAM_PROD
+#define DIAM_PROD "DIAM_PROD" //< diameter classes used for production (e.g. excluded the first one)
+#endif
+#ifndef DIAM_FIRST
+#define DIAM_FIRST "DIAM_FIRST_CLASS" //< first diameter class (NOT used for production)
+#endif
 
 
 /// Base class for the regmas application.
