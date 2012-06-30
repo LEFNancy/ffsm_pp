@@ -100,6 +100,7 @@ Init::setInitLevel1(){
 	MTHREAD->MD->setForestTypes();
 	MTHREAD->MD->setReclassificationRules();
 	MTHREAD->MD->applyOverrides();
+	MTHREAD->MD->setProductResourceMatrixLink();
 
 
 	if(MTHREAD->MD->getBoolSetting("randomSimulation")){

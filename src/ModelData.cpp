@@ -105,6 +105,7 @@ ModelData::setDefaultSettings(){
 		programSettingsVector.push_back(SETT);
 	}	
 
+	/*
 	// rescaling if we are in the region mode...
 	if(MTHREAD->MD->getBoolSetting("subRegionMode")){
 		int XL  = MTHREAD->MD->getIntSetting("subRegionXLeft");
@@ -134,17 +135,8 @@ ModelData::setDefaultSettings(){
 	else {
 		msgOut(MSG_INFO, "The model is currently running on a the whole area (normal mode).\nYou can enable sub-region mode with the setting \"subRegionMode\"\n(useful for initial model debugging/calibration)");
 	}
-	// defining if individual agent data has to be show in the model tree Viewer (that is, if we are in the sub-mode region or if we forced to view it)
-	if ( (getBoolSetting("subRegionMode") || getBoolSetting("forceAgentsView")) &&   ! getBoolSetting("forceAgentsHide") ){
-		addSetting("agentsView", "true", TYPE_BOOL, "Define if agent data need to be view on the tree viewer");
-		if (getBoolSetting("forceAgentsView")){
-			msgOut(MSG_WARNING, "View of individual agent data on the Model Tree Viewer has been forced on.\nThis will considerably slow down the simulation.");
-		}
-	}
-	else {
-		addSetting("agentsView", "false", TYPE_BOOL, "Define if agent data need to be view on the tree viewer");
-			msgOut(MSG_INFO, "View of individual agent data on the Model Tree Viewer has been disabled for performance reasons. \nYou can force it on with the setting \"forceAgensView\".");
-	}
+	*/
+
 	msgOut(MSG_INFO,"### USING SCENARIO: "+MTHREAD->getScenarioName()+" ###");
 	
 	setOutputDirectory(getStringSetting("outputDirname").c_str());
@@ -183,6 +175,7 @@ ModelData::setScenarioSettings(){
 
 	}
 
+	/*
 	// scaling to subregionmode again as some parameters may have been changed..
 	if(MTHREAD->MD->getBoolSetting("subRegionMode")){
 		int XL  = MTHREAD->MD->getIntSetting("subRegionXLeft");
@@ -206,17 +199,7 @@ ModelData::setScenarioSettings(){
 	else {
 		msgOut(MSG_INFO, "The model is currently running on a the whole area (normal mode).\nYou can enable sub-region mode with the setting \"subRegionMode\"\n(useful for initial model debugging/calibration)");
 	}
-	// defining if individual agent data has to be show in the model tree Viewer (that is, if we are in the sub-mode region or if we forced to view it)
-	if ( (getBoolSetting("subRegionMode") || getBoolSetting("forceAgentsView")) &&   ! getBoolSetting("forceAgentsHide") ){
-		setBasicData("agentsView", true);
-		if (getBoolSetting("forceAgentsView")){
-			msgOut(MSG_WARNING, "View of individual agent data on the Model Tree Viewer has been forced on.\nThis will considerably slow down the simulation.");
-		}
-	}
-	else {
-		setBasicData("agentsView", false);
-			msgOut(MSG_INFO, "View of individual agent data on the Model Tree Viewer has been disabled for performance reasons. \nYou can force it on with the setting \"forceAgensView\".");
-	}
+	*/
 	setOutputDirectory(getStringSetting("outputDirname").c_str());
 }
 
@@ -965,7 +948,7 @@ ModelData::setProdData(double value_h, const string &type_h, int regId_h, const 
 		if(!allowCreate){
 			msgOut(MSG_CRITICAL_ERROR, "Error in setProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
 		}
-		if(prodId_h == PROD_ALL || prodId_h == PROD_SEC || prodId_h == PROD_PRI || prodId_h == ""){
+		if(prodId_h == PROD_ALL || prodId_h == PROD_SEC || prodId_h == PROD_PRI){
 			msgOut(MSG_CRITICAL_ERROR, "Keywords for multiple products not allowed in new prodData generation.");
 		}
 		for(uint i=0; i<regIds.size(); i++){
@@ -1007,7 +990,7 @@ ModelData::setForData(double value_h, const string &type_h, int regId_h, const s
 	for(uint i=0;i<forDataVector.size();i++){
 		if(forDataVector[i].parName == type_h // name of parameter filter
 		  && (find(regIds.begin(), regIds.end(), forDataVector[i].region)!= regIds.end()) // region filter
-		  && (type_h == "" || type_h == forDataVector[i].forType) // forType dimension filter
+		  && (forType_h == "" || forType_h == forDataVector[i].forType) // forType dimension filter
 		  && (forDataVector[i].diamClass == diamClass_h // diameter class filter
 			|| diamClass_h == DIAM_ALL
 			|| (diamClass_h == DIAM_PROD  && find(dClasses.begin()+1, dClasses.end(), forDataVector[i].diamClass)!= dClasses.end() )
@@ -1021,7 +1004,7 @@ ModelData::setForData(double value_h, const string &type_h, int regId_h, const s
 		if(!allowCreate){
 			msgOut(MSG_CRITICAL_ERROR, "Error in setForData: no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+diamClass_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
 		}
-		if(diamClass_h  == DIAM_ALL || diamClass_h  == DIAM_PROD || diamClass_h  == DIAM_FIRST || diamClass_h  == ""){
+		if(diamClass_h  == DIAM_ALL || diamClass_h  == DIAM_PROD || diamClass_h  == DIAM_FIRST){
 			msgOut(MSG_CRITICAL_ERROR, "Keywords for multiple diameter classes not allowed in new forData generation.");
 		}
 		for(uint i=0; i<regIds.size(); i++){

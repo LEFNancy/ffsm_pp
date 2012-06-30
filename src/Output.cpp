@@ -52,12 +52,12 @@ Output::initOutputAggregatedData(){
 	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
 
 
-	char                 d               = getOutputFieldDelimiter();
+	char d = getOutputFieldDelimiter();
 
 	string outFileName;
 
 
-	if(MTHREAD->MD->getBoolSetting("outputAgentAggregatedHumanReadable")) {
+	if(MTHREAD->MD->getBoolSetting("aggregatedOutputHumanReadable")) {
 		outFileName = MTHREAD->MD->getBaseDirectory()
 					  + MTHREAD->MD->getOutputDirectory()
 		              + "results/aggregatedOutput_"
@@ -132,7 +132,7 @@ Output::initOutputDetailedData(){
 	vector<int> landTypes;
 
 
-	if(MTHREAD->MD->getBoolSetting("outputAgentDetailsHumanReadable")){
+	if(MTHREAD->MD->getBoolSetting("detailedOutputHumanReadable")){
 		string outFileName =     MTHREAD->MD->getBaseDirectory()
 							   + MTHREAD->MD->getOutputDirectory()
 							   + "results/ag_"
@@ -196,7 +196,7 @@ Output::printAggregatedData(){
 	data.push_back(i2s(MTHREAD->SCD->getYear()));
 
 
-	if (MTHREAD->MD->getBoolSetting("outputAgentAggregatedHumanReadable")){
+	if (MTHREAD->MD->getBoolSetting("aggregatedOutputHumanReadable")){
 		inOutFileName = MTHREAD->MD->getBaseDirectory()
 						+ MTHREAD->MD->getOutputDirectory()
 		                + "results/aggregatedOutput_"
@@ -258,11 +258,11 @@ Output::printDetailedData(){
 	//sData.push_back(i2s(surveys[i].year));
 
 
-	if(MTHREAD->MD->getBoolSetting("outputAgentDetailsHumanReadable")){
+	if(MTHREAD->MD->getBoolSetting("detailedOutputHumanReadable")){
 		string inOutFileName =     MTHREAD->MD->getBaseDirectory()
 							   + MTHREAD->MD->getOutputDirectory()
 							   + "results/ag_"
-							   + "agName"
+							   + "detailID"
 							   + "_"
 							   + MTHREAD->getScenarioName()
 							   + MTHREAD->MD->getStringSetting("outputFileExtension");

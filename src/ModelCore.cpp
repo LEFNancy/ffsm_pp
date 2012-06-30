@@ -19,6 +19,7 @@ ModelCore::runInitPeriod(){
 	ModelData* MD = MTHREAD->MD;
 	int firstYear = MD->getIntSetting("initialYear");
 	int secondYear = firstYear+1;
+	int thirdYear  = firstYear+2;
 	int WL2 = MD->getIntSetting("worldCodeLev2");
 	vector <int> regIds2 = MD->getRegionIds(2);
 	vector <string> priProducts = MD->getStringVectorSetting("priProducts");
@@ -139,17 +140,86 @@ ModelCore::runInitPeriod(){
 			double in = 0;
 			for(uint ft=0;ft<fTypes.size();ft++){
 				for(uint dc=0;dc<pDClasses.size();dc++){
-					double vol = gfd("vol",r2,fTypes[ft],pDClasses[dc],secondYear);
+					double vol = gfd("vol",r2,fTypes[ft],pDClasses[dc],firstYear);
 					in += app(priProducts[pp],fTypes[ft],pDClasses[dc])*vol;
 				}
 			}
 			spd(in,"in",r2,priProducts[pp],secondYear,true);
 		}
+		for(uint j=0;j<fTypes.size();j++){
+			string ft = fTypes[j];
+				double freeArea = 0;
+				for (uint u=0; u<pDClasses.size(); u++){
+					string dc = pDClasses[u];
+					//  // ////////// harvestry rate of t-1 //////////////////////////////////////////
+					// hr(u,i,essence,lambda,t-1) = sum(p_pr, prov(u,essence,lambda,p_pr)*RPAR('st',i,p_pr,t-1)/In(i,p_pr,t-1));
+					//hV(u,i,essence,lambda,t-1) = hr(u,i,essence,lambda,t-1) * V(u,i,lambda,essence,t-2) ;
+					// ////// volumes after harvesting on t-1 ////////////////////////////////////
+					// loop(u$(ord(u)=1),
+					// first diameter class, no harvesting and fixed regenaration..
+					// V(u,i,lambda,essence,t-1)=(1-1/(tp(u,i,lambda,essence))-mort(u,i,lambda,essence) )*V(u,i,lambda,essence,t-2)
+					//                           +Vregen(i,lambda,essence,t-1);
+					// );
+					// loop(u$(ord(u)>1),
+					//    // generic case..
+					//    V(u,i,lambda,essence,t-1)=((1-1/(tp(u,i,lambda,essence))
+					//                                 -mort(u,i,lambda,essence) - hr(u,i,essence,lambda,t-1))*V(u,i,lambda,essence,t-2)
+					//                                 +(1/(tp(u-1,i,lambda,essence)))*beta(u,i,lambda,essence)*V(u-1,i,lambda,essence,t-2));
+					//
+					// ///// MANAGEMENT MODULE ///////////////////////////////////////////////////
+					// calculating the free area after t-1 harvesting - our first year we calculare regenaration area!
+					// freeArea(i,essence, lambda)   = sum(u,hv2fa(i,essence,lambda,u)*hr(u,i,essence,lambda,t-1)*V(u,i,lambda,essence,t-2)*100);
+					// regArea(i,essence,lambda,t-1) = freeArea(i,essence, lambda);
+					// );
+					double hr = 0;
+					double pastYearVol = gfd("vol",r2,ft,dc,firstYear);
+					double vol;
+					double tp          = gfd("tp",r2,ft,dc,secondYear);
+					double mort        = gfd("mortCoef",r2,ft,dc,secondYear);
+					double vReg        = gfd("vReg",r2,ft,"",secondYear);
+					double beta        = gfd("betaCoef",r2,ft,dc,secondYear);
+					double hv2fa       = gfd("hv2fa",r2,ft,dc,secondYear);
 
+					for(uint pp=0;pp<priProducts.size();pp++){
+						double st = gpd("st",r2,priProducts[pp],secondYear);
+						double in = gpd("in",r2,priProducts[pp],secondYear);
+						hr += app(priProducts[pp],ft,dc)*st/ in;
+					}
+					double hV = hr*pastYearVol;
+					if(u==0){
+						vol = (1-1/tp-mort)*pastYearVol+vReg;
+						double debug = vol;
+					} else {
+						// time of passage and volume of smaller diameter class
+						double tp_1 = gfd("tp",r2,ft,pDClasses[u-1],secondYear);
+						double pastYearVol_1 = gfd("vol",r2,ft,pDClasses[u-1],firstYear);
+						vol = (1-1/tp-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
+						double debug = vol;
+					}
 
+					freeArea += hv2fa*hr*pastYearVol*100;
+					sfd(hr,"hr",r2,ft,dc,secondYear,true);
+					sfd(hV,"hV",r2,ft,dc,secondYear,true);
+					sfd(vol,"vol",r2,ft,dc,secondYear);
+				}
+				sfd(freeArea,"regArea",r2,ft,"",secondYear,true);
 
-;
+		}
 
+		//  //// getting stocks for first simulation year /////////////////////////////
+		//  In(i,p_pr,t)             =     sum((u,lambda,essence),prov(u,essence,lambda,p_pr)*V(u,i,lambda,essence,t-1));
+		//  dc0(i,p_tr)              =     RPAR('dc',i,p_tr,t-1); // not needed
+
+		for(uint pp=0;pp<priProducts.size();pp++){
+			double in = 0;
+			for(uint ft=0;ft<fTypes.size();ft++){
+				for(uint dc=0;dc<pDClasses.size();dc++){
+					double vol = gfd("vol",r2,fTypes[ft],pDClasses[dc],secondYear);
+					in += app(priProducts[pp],fTypes[ft],pDClasses[dc])*vol;
+				}
+			}
+			spd(in,"in",r2,priProducts[pp],thirdYear);
+		}
 	} // end for each region in level 2
 
 
