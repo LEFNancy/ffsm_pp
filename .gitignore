@@ -21,4 +21,5 @@ data/output/maps/scenarioName
 data/output/maps/bitmaps/*
 data/output/maps/cats/*
 callgrind.out.*
+libadolc-1.dll
 
