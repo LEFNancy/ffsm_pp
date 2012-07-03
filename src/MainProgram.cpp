@@ -19,11 +19,9 @@
  ***************************************************************************/
 #include <iostream>
 
-#include "IpIpoptApplication.hpp"
-
 #include "MainProgram.h"
 #include "ThreadManager.h"
-#include "Ipopt_nlp_problem_debugtest.h"
+
 
 
 
@@ -53,8 +51,6 @@ This is the main call of the program.
 */
 void
 MainProgram::run(){
-
-    //testIpopt(); // test ipopt is working fine
 
     // GIS information and methods..
 	Gis *GIS  = new Gis(MTHREAD);
@@ -90,53 +86,3 @@ MainProgram::run(){
 	// 20070109: pointers (e.g. INIT) are deleted in ThreadManager when a new simulation start
 }
 
-void
-MainProgram::testIpopt(){
-
-
-    using namespace Ipopt;
-
-      // Create a new instance of your nlp
-      //  (use a SmartPtr, not raw)
-      SmartPtr<TNLP> mynlp = new Ipopt_nlp_problem_debugtest();
-
-      // Create a new instance of IpoptApplication
-      //  (use a SmartPtr, not raw)
-      // We are using the factory, since this allows us to compile this
-      // example with an Ipopt Windows DLL
-      SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
-
-      // Change some options
-      // Note: The following choices are only examples, they might not be
-      //       suitable for your optimization problem.
-      app->Options()->SetNumericValue("tol", 1e-7);
-      app->Options()->SetStringValue("mu_strategy", "adaptive");
-      app->Options()->SetStringValue("output_file", "ipopt.out");
-      //app->Options()->SetStringValue("hessian_approximation", "limited-memory");
-      //app->Options()->SetStringValue("derivative_test", "second-order");
-      //app->Options()->SetStringValue("derivative_test_print_all", "yes");
-
-
-      // The following overwrites the default name (ipopt.opt) of the
-      // options file
-      // app->Options()->SetStringValue("option_file_name", "hs071.opt");
-
-      // Intialize the IpoptApplication and process the options
-      ApplicationReturnStatus status;
-      status = app->Initialize();
-      if (status != Solve_Succeeded) {
-        std::cout << std::endl << std::endl << "*** Error during initialization!" << std::endl;
-        //return (int) status; // here the abort
-      }
-
-      // Ask Ipopt to solve the problem
-      status = app->OptimizeTNLP(mynlp);
-
-      if (status == Solve_Succeeded) {
-        std::cout << std::endl << std::endl << "*** The problem solved!" << std::endl;
-      }
-      else {
-        std::cout << std::endl << std::endl << "*** The problem FAILED!" << std::endl;
-      }
-
-}

@@ -11,8 +11,11 @@ DESTDIR = ..
 
 unix {
      LIBS += -lipopt
-     INCLUDEPATH += win32/include/coin
-     INCLUDEPATH += win32/include/coin/ThirdParty
+     LIBS += -ladolc
+     #LIBS += -lColPack
+     INCLUDEPATH += /usr/include/coin
+     INCLUDEPATH += /usr/include/coin/ThirdParty
+     INCLUDEPATH += /usr/include/adolc
      LIBS += -lcoinmetis -lcoinmumps -lblas -llapack
      LIBS += -lpthread -lgfortran -lcoinmetis -lblas
 
@@ -22,12 +25,15 @@ win32 {
 
     INCLUDEPATH += win32/include/coin
     INCLUDEPATH += win32/include/coin/ThirdParty
+    INCLUDEPATH += win32/include
+    INCLUDEPATH += win32/include/adolc
     INCLUDEPATH += $$[QT_INSTALL_DATA]/src/3rdparty/zlib
     LIBS += -L win32/lib -lipopt
     LIBS += -L win32/lib -lcoinmetis
     LIBS += -L win32/lib -lcoinmumps
     LIBS += -L win32/lib -lcoinblas
     LIBS += -L win32/lib -lcoinlapack
+    LIBS += -L win32/lib -ladolc
     LIBS += -lpthread -lgfortran -lcoinmetis -lcoinblas
 
 }
@@ -57,14 +63,15 @@ INCLUDEPATH += ". agents"
 OBJECTS_DIR = ../bin
 
 # Input
-HEADERS += BaseClass.h \
+HEADERS += Adolc_debugtest.h \
+           BaseClass.h \
            Gis.h \
            Init.h \
            InputNode.h \
            Ipopt_nlp_problem_debugtest.h \
            MainProgram.h \
-	     MainWindow.h \
-	     ModelData.h \
+           MainWindow.h \
+           ModelData.h \
            ModelRegion.h \
            Opt.h \
            Output.h \
@@ -80,17 +87,18 @@ HEADERS += BaseClass.h \
            zip_p.h \
            zipentry_p.h \
            anyoption.h \
-	     ScenarioSelectionWidget.h \
-    ModelCore.h
-FORMS += MainWindow.ui
-SOURCES += BaseClass.cpp \
+           ScenarioSelectionWidget.h \
+           ModelCore.h
+FORMS   += MainWindow.ui
+SOURCES += Adolc_debugtest.cpp \
+           BaseClass.cpp \
            Gis.cpp \
            Init.cpp \
            Ipopt_nlp_problem_debugtest.cpp\
            InputNode.cpp \
            main.cpp \
-	     MainProgram.cpp \
-	     ModelData.cpp \
+           MainProgram.cpp \
+           ModelData.cpp \
            ModelRegion.cpp \
            Opt.cpp \
            Output.cpp \
@@ -104,7 +112,7 @@ SOURCES += BaseClass.cpp \
            unzip.cpp \
            zip.cpp \
            anyoption.cpp \
-	     ScenarioSelectionWidget.cpp \
-    ModelCore.cpp
+           ScenarioSelectionWidget.cpp \
+           ModelCore.cpp
 
 RESOURCES += resources.qrc

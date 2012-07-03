@@ -46,7 +46,6 @@ public:
 	                    MainProgram(ThreadManager* MTHREAD);
 					   ~MainProgram();
 	void                run(); ///< Run the program
-	void                testIpopt();
 
 };
 

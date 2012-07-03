@@ -49,6 +49,8 @@ public:
 	vector <TestStructure*>  getTestStructure();
 	void                     testThreads();
 	void                     runSimpleTests(); ///< Simple tests that doesn't require anything else (are encapsulated) and so they can be run at the beginning of the program
+	void                testIpopt();
+	int testAdolc();
 
 private:
 	vector <TestStructure>  testVector;
