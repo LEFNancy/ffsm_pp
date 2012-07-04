@@ -1,8 +1,13 @@
 #include <cmath>
 
+#include "IpIpoptApplication.hpp"
+#include "IpSolveStatistics.hpp"
+
 #include "ModelCore.h"
 #include "ModelData.h"
 #include "ThreadManager.h"
+#include "Opt.h"
+
 
 ModelCore::ModelCore(ThreadManager* MTHREAD_h){
 	MTHREAD = MTHREAD_h;
@@ -230,6 +235,34 @@ ModelCore::runInitPeriod(){
 };
 
 void
-ModelCore::runSimulationYear(int year_h){
+ModelCore::runSimulationYear(){
+
+	using namespace Ipopt;
+ // Create an instance of your nlp...
+	SmartPtr<TNLP> OPTPROBLEM = new Opt(MTHREAD);
+
+	// Create an instance of the IpoptApplication
+	SmartPtr<IpoptApplication> app = new IpoptApplication();
+
+	// Initialize the IpoptApplication and process the options
+	ApplicationReturnStatus status;
+	status = app->Initialize();
+	if (status != Solve_Succeeded) {
+		printf("\n\n*** Error during initialization!\n");
+		return;
+	}
+
+	status = app->OptimizeTNLP(OPTPROBLEM);
+
+	if (status == Solve_Succeeded) {
+		// Retrieve some statistics about the solve
+		Index iter_count = app->Statistics()->IterationCount();
+		printf("\n\n*** The problem solved in %d iterations!\n", iter_count);
+
+		Number final_obj = app->Statistics()->FinalObjective();
+		printf("\n\n*** The final value of the objective function is %e.\n", final_obj);
+	}
+
+	return;
 
 };

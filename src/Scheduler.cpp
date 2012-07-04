@@ -42,7 +42,7 @@ Scheduler::run(){
 		MTHREAD->upgradeYearSBLabel(iteration+ MTHREAD->MD->getIntSetting("initialYear"));
 		MTHREAD->treeViewerChangeGeneralPropertyValue("year",i2s(iteration+ MTHREAD->MD->getIntSetting("initialYear")));
 
-		MTHREAD->CORE->runSimulationYear(getYear());
+		MTHREAD->CORE->runSimulationYear();
 
 		MTHREAD->DO->collectData();
 		MTHREAD->DO->print();

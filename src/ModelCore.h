@@ -41,7 +41,7 @@ public:
 						ModelCore(ThreadManager* MTHREAD_h);
 					   ~ModelCore();
 	void                runInitPeriod();
-	void                runSimulationYear(int year_h);
+	void                runSimulationYear();
 
 private:
 	// convenient handles to equivalent ModelData functions..

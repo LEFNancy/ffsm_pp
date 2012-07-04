@@ -21,6 +21,7 @@
 
 #include "MainProgram.h"
 #include "ThreadManager.h"
+#include "Opt.h"
 
 
 
@@ -67,6 +68,9 @@ MainProgram::run(){
 	// the core of the model
 	ModelCore *CORE = new ModelCore(MTHREAD);
 	MTHREAD->setCOREPointer(CORE);
+	// the market optimisation algorithm
+	Opt *OPT = new Opt(MTHREAD);
+	MTHREAD->setOPTPointer(OPT);
 	// manage the printing of data needed for scenario-analisys. The "message output" (needed to see "what is it happening?" are instead simply printed with msgOut()..
 	Output *DO = new Output(MTHREAD);
 	MTHREAD->setDOPointer(DO);

@@ -154,6 +154,7 @@ ThreadManager::deleteDeadOldPointers(){
 	if (GIS) {delete GIS; GIS=0;}
 	if (MD) {delete MD; MD=0;}
 	if (CORE){delete CORE; CORE=0;}
+	//if (OPT) {delete OPT; OPT=0;} // not needed, it's a "smart point"
 }
 
 void

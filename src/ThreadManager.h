@@ -31,6 +31,9 @@
 #include <QImage>
 #include <QMutex>
 
+#include "IpIpoptApplication.hpp"
+#include "IpSolveStatistics.hpp"
+#include "IpSmartPtr.hpp"
 
 // regmas includes..
 #include "BaseClass.h"
@@ -42,6 +45,7 @@ class Init;
 class Scheduler;
 class Output;
 class ModelCore;
+class Opt;
 
 using namespace std;
 
@@ -64,6 +68,7 @@ public:
 	Scheduler*          SCD;  ///< the scheduler object (simulation-loops scheduler)
 	Output*             DO;   ///< data output
 	ModelCore*          CORE; ///< Core of the model
+	Ipopt::SmartPtr <Ipopt::TNLP>      OPT;  ///< Market optimisation
 
 	void                setMessage(const QString &message);
 	void                stop();
@@ -95,6 +100,8 @@ public:
 	void                setDOPointer(Output *DO_h){DO=DO_h;};
 	/// Perform the algorithm of the model
 	void                setCOREPointer(ModelCore* CORE_h){CORE=CORE_h;};
+	/// Perform the market optimisation
+	void                setOPTPointer(Ipopt::SmartPtr<Ipopt::TNLP> OPT_h){OPT=OPT_h;};
 
 	//public slots:
 	void                setInputFileName(QString inputFileName_h);
