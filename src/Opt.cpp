@@ -22,41 +22,107 @@
 
 #include <cassert>
 
+#include <map>
 
 #include "Opt.h"
-
-
 
 #include "ModelData.h"
 #include "Pixel.h"
 #include "ThreadManager.h"
 #include "Scheduler.h"
+#include "ModelRegion.h"
 
 using namespace Ipopt;
 
 Opt::Opt(ThreadManager* MTHREAD_h){
-	MTHREAD=MTHREAD_h;
+	MTHREAD = MTHREAD_h;
+	nVar    = 0;
+	nCons   = 0;
 }
 
 Opt::~Opt(){
 
 }
+
+
 bool
 Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 									Index& nnz_h_lag, IndexStyleEnum& index_style){
-	n = 20;
 
-	m = n-2;
 
+	if(MTHREAD->SCD->getIteration()==0){
+		// does this cahing thing only once
+		priPr = MTHREAD->MD->getStringVectorSetting("priProducts");
+		secPr = MTHREAD->MD->getStringVectorSetting("secProducts");
+		allPr = priPr;
+		allPr.insert( allPr.end(), secPr.begin(), secPr.end() );
+		nPriPr = priPr.size();
+		nSecPr = secPr.size();
+		nAllPr = allPr.size();
+		std::vector<int> l1regIds =  MTHREAD->MD->getRegionIds(1, true);
+		nL2r =  MTHREAD->MD->getRegionIds(2, true).size();
+
+		for(uint i=0;i<l1regIds.size();i++){
+			std::vector<int> l2ChildrenIds;
+			ModelRegion* l1Region = MTHREAD->MD->getRegion(l1regIds[i]);
+			std::vector<ModelRegion*> l2Childrens = l1Region->getChildren(true);
+			for(uint j=0;j<l2Childrens.size();j++){
+				l2ChildrenIds.push_back(l2Childrens[j]->getRegId());
+			}
+			if(l2ChildrenIds.size()){
+				l2r.push_back(l2ChildrenIds);
+			}
+		}
+
+
+		// calculating the number of variables..
+		nVar = 0;
+		initPos.insert(std::pair<string, int>("pc", nVar)); nVar += nL2r*nAllPr;
+		initPos.insert(std::pair<string, int>("pl", nVar)); nVar += nL2r*nAllPr;
+		initPos.insert(std::pair<string, int>("dc", nVar)); nVar += nL2r*nSecPr;
+		initPos.insert(std::pair<string, int>("dl", nVar)); nVar += nL2r*nAllPr;
+		initPos.insert(std::pair<string, int>("da", nVar)); nVar += nL2r*nSecPr;
+		initPos.insert(std::pair<string, int>("sc", nVar)); nVar += nL2r*nPriPr;
+		initPos.insert(std::pair<string, int>("sl", nVar)); nVar += nL2r*nAllPr;
+		initPos.insert(std::pair<string, int>("sa", nVar)); nVar += nL2r*nPriPr;
+		initPos.insert(std::pair<string, int>("exp", nVar));
+		for(uint r1=0;r1<l2r.size();r1++){
+			nVar += l2r[r1].size()*l2r[r1].size()*nAllPr; // EXP(i,j,prd)
+		}
+
+		// calculating the number of constrains..
+		nCons = 0;
+		nCons += nL2r*nSecPr; // mkeq2
+		nCons += nL2r*nPriPr; // mkeq3
+		nCons += nL2r*nPriPr; // mkeq4
+		nCons += nL2r*nPriPr; // mkeq5
+		nCons += nL2r*nSecPr; // mkeq6
+		nCons += nL2r*nSecPr; // mkeq7
+		nCons += nL2r*nPriPr; // mkeq8
+		nCons += nL2r*nSecPr; // mkeq13
+		nCons += nL2r*nPriPr; // mkeq14
+		nCons += nL2r*nSecPr; // mkeq17
+		nCons += nL2r*nPriPr; // mkeq18
+		nCons += nL2r*nSecPr; // mkeq23
+		nCons += nL2r*nPriPr; // mkeq24
+		nCons += nL2r*nSecPr; // mkeq25
+		nCons += 1;           // mkeq26
+		msgOut(MSG_INFO,"The model will work with "+i2s(nVar)+" variables and "+i2s(nCons)+" constrains.");
+	}
+	n = 300; // nVar;
+
+	m = 70; // nCons;
+
+	std::cout<<"PRE MEMORY ALLOCATION"<<std::endl;
 	// in this example the jacobian is dense. Hence, it contains n*m nonzeros
 	nnz_jac_g = n*m;
 
 	// the hessian is also dense and has n*n total nonzeros, but we
 	// only need the lower left corner (since it is symmetric)
 	nnz_h_lag = n*(n-1)/2+n;
-
+	std::cout<<"PRE GENERATE TAPES ALLOCATION"<<std::endl;
 	generate_tapes(n, m);
-
+	std::cout<<"POST MEMORY ALLOCATION"<<std::endl;
 	// use the C style indexing (0-based)
 	index_style = C_STYLE;
 
@@ -67,7 +133,7 @@ bool
 Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Number* g_u){
 	// none of the variables have bounds
 	for (Index i=0; i<n; i++) {
-		x_l[i] = -1e20;
+		x_l[i] =    0.;
 		x_u[i] =  1e20;
 	}
 
@@ -91,12 +157,13 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 	assert(init_lambda == false);
 
 	// set the starting point
-	for (Index i=0; i<n/2; i++) {
-		x[2*i] = -1.2;
-		x[2*i+1] = 1.;
-	}
-	if (n != 2*(n/2)) {
-		x[n-1] = -1.2;
+	for (Index i=0; i<n; i++) {
+	//	if(i<gIP("pl")){
+
+			x[i] = 0;
+	//	} else if (){
+
+	//	}
 	}
 
 	return true;

@@ -65,6 +65,8 @@ public:
 
 	/// Unzip the OpenOffice input file (NEW 2008.05.13)
 	void                loadInput();
+
+	void                loadDataFromCache(string tablename); ///< Load data from a cached CSV instead of the openoffice file
 	vector<string>      getScenarios();
 	int                 getScenarioIndex();
 	bool                delDir(QString dirname); ///< Recursivelly delete a directory 
@@ -255,6 +257,7 @@ public:
 	int                 nrecords(){return records.size();};
 	string              getData(int pos_h, string header_h, int debugLevel=MSG_CRITICAL_ERROR);
 	friend void ModelData::loadInput();
+	friend void ModelData::loadDataFromCache(string tablename);
 
 private:
 	string                             tableName;

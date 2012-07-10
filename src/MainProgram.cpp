@@ -37,6 +37,7 @@ MainProgram::MainProgram(ThreadManager* MTHREAD_h)
 	MTHREAD->setMDPointer(MD);
 	MTHREAD->MD->setBaseDiretory(MTHREAD->getBaseDirectory());
 	MTHREAD->MD->loadInput(); // Unzip the ooffice input file and load it into memory
+
 }
 
 //distructor

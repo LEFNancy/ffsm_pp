@@ -25,6 +25,7 @@
 #include "ThreadManager.h"
 #include "Output.h"
 #include "ModelCore.h"
+#include "Opt.h"
 
 //using namespace std;
 

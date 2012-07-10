@@ -1091,6 +1091,8 @@ ModelData::loadInput(){
 	QString iFile(MTHREAD->getInputFileName().c_str());
 	//cout << "PIPPO !!!!! " << MTHREAD->getInputFileName().c_str() << endl;
 	QString oDir((MTHREAD->getBaseDirectory()+"tempInput").c_str());
+	string forDataCachedFilename = MTHREAD->getBaseDirectory()+"cachedInput/forData.csv";
+	string prodDataCachedFilename = MTHREAD->getBaseDirectory()+"cachedInput/prodData.csv";
 	
 	// removing output directory if exist..
 	QDir oQtDir(oDir);
@@ -1140,6 +1142,17 @@ ModelData::loadInput(){
 	for(uint i=0;i<tables.size();i++){
 		string tableName = tables[i].getStringAttributeByName("name");
 		//cout <<tableName<<endl;
+		if( tableName == "forData"){
+			if(QFile::exists(forDataCachedFilename.c_str())){
+				loadDataFromCache("forData");
+				continue;
+			}
+		} else if (tableName == "prodData"){
+				if (QFile::exists(prodDataCachedFilename.c_str())) {
+					loadDataFromCache("prodData");
+				continue;
+				}
+		}
 		LLData data(MTHREAD,tables[i].getStringAttributeByName("name"));
 		vector <InputNode> rows = tables[i].getNodesByName("table-row",MSG_NO_MSG,true);
 		if(rows.size()<2) continue; //empty table or only with headers
@@ -1162,6 +1175,7 @@ ModelData::loadInput(){
 		for (uint j=1; j<rows.size();j++){
 			//cout << j << endl;
 			vector <InputNode> cells = rows[j].getNodesByName("table-cell",MSG_NO_MSG,true);
+			//vector <InputNode> cells = rows[j].getChildNodes();
 			if (cells.size()<1) continue;
 			vector<string> record;
 			// checking the first cell is not a comment nor is empty..
@@ -1230,6 +1244,44 @@ ModelData::loadInput(){
 		if(deleted){msgOut(MSG_DEBUG,"Correctly deleted old temporary data");}
 		else {msgOut(MSG_WARNING, "I could not delete old temporary data dir (hopefully we'll overrite the input files)");}
 	}
+}
+
+
+
+void
+ModelData::loadDataFromCache(string tablename){
+	msgOut(MSG_INFO,"Attenction, using cached data (csv) for "+tablename);
+	string fileName = MTHREAD->getBaseDirectory()+"cachedInput/"+tablename+".csv";
+	QFile file(fileName.c_str());
+	if (!file.open(QFile::ReadOnly)) {
+			msgOut(MSG_ERROR, "Cannot open cached file "+fileName+" for reading.");
+	}
+	QTextStream in(&file);
+	LLData data(MTHREAD, tablename);
+	int countRow = 0;
+	while (!in.atEnd()) {
+		QString line = in.readLine();
+		QStringList fields = line.split(';');
+		if (countRow==0){ // building headers
+			for(uint i =0;i<fields.size();i++){
+				data.headers.push_back(fields.at(i).toStdString());
+			}
+		} else {
+			vector<string> record ; //= fields.toVector().toStdVector();
+			unsigned int z = fields[0].toStdString().find("#");
+			if( z!=string::npos && z == 0) continue; // found "#" on fist position, it's a comment!
+			for(uint i =0;i<fields.size();i++){
+				string field = fields.at(i).toStdString();
+				replace(field.begin(), field.end(), ',', '.');
+				record.push_back(field);
+			}
+			data.records.push_back(record);
+		}
+		countRow++;
+	}
+	data.clean();
+	LLDataVector.push_back(data);
+
 }
 
 bool
