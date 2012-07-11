@@ -51,7 +51,7 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 
 
 	if(MTHREAD->SCD->getIteration()==0){
-		// does this cahing thing only once
+		// does this caching thing only once
 		priPr = MTHREAD->MD->getStringVectorSetting("priProducts");
 		secPr = MTHREAD->MD->getStringVectorSetting("secProducts");
 		allPr = priPr;
@@ -61,6 +61,7 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		nAllPr = allPr.size();
 		std::vector<int> l1regIds =  MTHREAD->MD->getRegionIds(1, true);
 		nL2r =  MTHREAD->MD->getRegionIds(2, true).size();
+		previousYear = MTHREAD->SCD->getYear()-1;
 
 		for(uint i=0;i<l1regIds.size();i++){
 			std::vector<int> l2ChildrenIds;
@@ -74,24 +75,137 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 			}
 		}
 
+		// filling the list of variables and their domain
+		// if you add variables in the model that enter optimisation you'll have to add them here
+		// the map goes automatically in alphabetical order
+		// original order: pc,pl,dc,dl,da,sc,sl,sa,exp
+		vars.insert(std::pair<string, int>("da", VDOM_SEC_PR));
+		vars.insert(std::pair<string, int>("dc", VDOM_SEC_PR));
+		vars.insert(std::pair<string, int>("dl", VDOM_ALL_PR));
+		vars.insert(std::pair<string, int>("pc", VDOM_ALL_PR));
+		vars.insert(std::pair<string, int>("pl", VDOM_ALL_PR));
+		vars.insert(std::pair<string, int>("rt", VDOM_R2_ALL_PR)); // regional trade, it was exp in gams
+		vars.insert(std::pair<string, int>("sa", VDOM_PRI_PR));
+		vars.insert(std::pair<string, int>("sc", VDOM_PRI_PR));
+		vars.insert(std::pair<string, int>("sl", VDOM_ALL_PR));
 
-		// calculating the number of variables..
+
+		// calculating the number of variables and the initial positions in the concatenated array..
 		nVar = 0;
-		initPos.insert(std::pair<string, int>("pc", nVar)); nVar += nL2r*nAllPr;
-		initPos.insert(std::pair<string, int>("pl", nVar)); nVar += nL2r*nAllPr;
-		initPos.insert(std::pair<string, int>("dc", nVar)); nVar += nL2r*nSecPr;
-		initPos.insert(std::pair<string, int>("dl", nVar)); nVar += nL2r*nAllPr;
-		initPos.insert(std::pair<string, int>("da", nVar)); nVar += nL2r*nSecPr;
-		initPos.insert(std::pair<string, int>("sc", nVar)); nVar += nL2r*nPriPr;
-		initPos.insert(std::pair<string, int>("sl", nVar)); nVar += nL2r*nAllPr;
-		initPos.insert(std::pair<string, int>("sa", nVar)); nVar += nL2r*nPriPr;
-		initPos.insert(std::pair<string, int>("exp", nVar));
-		for(uint r1=0;r1<l2r.size();r1++){
-			nVar += l2r[r1].size()*l2r[r1].size()*nAllPr; // EXP(i,j,prd)
+		map<string, int>::iterator viter;
+		for (viter = vars.begin(); viter != vars.end(); ++viter) {
+			string debugs = viter->first;
+			int debugpos = nVar;
+			initPos.insert(pair<string, int>(viter->first, nVar));
+			int vdomtype = viter->second;
+			if(vdomtype==VDOM_PRI_PR){
+				nVar += nL2r*nPriPr;
+			} else if (vdomtype==VDOM_SEC_PR) {
+				nVar += nL2r*nSecPr;
+			} else if (vdomtype==VDOM_ALL_PR) {
+				nVar += nL2r*nAllPr;
+			} else if (vdomtype==VDOM_R2_ALL_PR) {
+				for(uint r1=0;r1<l2r.size();r1++){
+					nVar += l2r[r1].size()*l2r[r1].size()*nAllPr; // EXP(i,j,prd)
+				}
+			} else {
+				msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+viter->first+")");
+			}
 		}
 
+		// caching the initial positions
+		for (viter = vars.begin(); viter != vars.end(); ++viter) {
+			//string debugs = viter->first;
+			int vdomtype = viter->second;
+			vector < vector < vector < vector <int> > > > positionsToAdd;
+
+
+			if(vdomtype==VDOM_PRI_PR){
+				for(uint r1=0;r1<l2r.size();r1++){
+					vector < vector < vector <int> > > dim1;
+					for(uint r2=0;r2<l2r[r1].size();r2++){
+						vector < vector <int> > dim2;
+						for(uint p=0;p<priPr.size();p++){
+							vector <int> dim3;
+							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
+							dim2.push_back(dim3);
+						}
+						dim1.push_back(dim2);
+					}
+					positionsToAdd.push_back(dim1);
+				}
+			} else if (vdomtype==VDOM_SEC_PR) {
+				for(uint r1=0;r1<l2r.size();r1++){
+					vector < vector < vector <int> > > dim1;
+					for(uint r2=0;r2<l2r[r1].size();r2++){
+						vector < vector <int> > dim2;
+						for(uint p=0;p<secPr.size();p++){
+							vector <int> dim3;
+							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
+							dim2.push_back(dim3);
+						}
+						dim1.push_back(dim2);
+					}
+					positionsToAdd.push_back(dim1);
+				}
+			} else if (vdomtype==VDOM_ALL_PR) {
+				for(uint r1=0;r1<l2r.size();r1++){
+					vector < vector < vector <int> > > dim1;
+					for(uint r2=0;r2<l2r[r1].size();r2++){
+						vector < vector <int> > dim2;
+						for(uint p=0;p<allPr.size();p++){
+							vector <int> dim3;
+							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
+							dim2.push_back(dim3);
+						}
+						dim1.push_back(dim2);
+					}
+					positionsToAdd.push_back(dim1);
+				}
+			} else if (vdomtype==VDOM_R2_ALL_PR) {
+				for(uint r1=0;r1<l2r.size();r1++){
+					vector < vector < vector <int> > > dim1;
+					for(uint r2=0;r2<l2r[r1].size();r2++){
+						vector < vector <int> > dim2;
+						for(uint p=0;p<allPr.size();p++){
+							vector <int> dim3;
+							for(uint r2To=0;r2To<l2r[r1].size();r2To++){
+								dim3.push_back(gix_uncached(viter->first,r1,r2,p,r2To));
+							}
+							dim2.push_back(dim3);
+						}
+						dim1.push_back(dim2);
+					}
+					positionsToAdd.push_back(dim1);
+				}
+
+			} else {
+				msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+viter->first+")");
+			}
+			positions.insert(pair<string, vector < vector < vector < vector <int> > > > >(viter->first,  positionsToAdd));
+		}
+
+
+
+
+
+// some debug code
+
+/*int debug;
+debug = gip("pc"); cout << "debug: "<<debug<<endl;
+debug = gix("pc",0,0,0); cout << "debug: "<<debug<<endl;
+debug = gix("pc",0,0,2); cout << "debug: "<<debug<<endl;
+debug = gix("pc",0,2,2); cout << "debug: "<<debug<<endl;
+debug = gix("pc",0,2,2); cout << "debug: "<<debug<<endl;
+debug = gip("pl"); cout << "debug: "<<debug<<endl;
+debug = gix("pl",0,2,2); cout << "debug: "<<debug<<endl;
+debug = gip("exp"); cout << "debug: "<<debug<<endl;
+debug = gix("exp",0,2,2,2); cout << "debug: "<<debug<<endl;
+exit(0);
+*/
+
 		// calculating the number of constrains..
-		nCons = 0;
+		nCons = 0; // leave 0
 		nCons += nL2r*nSecPr; // mkeq2
 		nCons += nL2r*nPriPr; // mkeq3
 		nCons += nL2r*nPriPr; // mkeq4
@@ -108,10 +222,13 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		nCons += nL2r*nSecPr; // mkeq25
 		nCons += 1;           // mkeq26
 		msgOut(MSG_INFO,"The model will work with "+i2s(nVar)+" variables and "+i2s(nCons)+" constrains.");
-	}
-	n = 300; // nVar;
 
-	m = 70; // nCons;
+
+	} // finish initialisation things to be done only the first year
+
+	n = nVar; // 300; // nVar;
+
+	m = nCons; // 70; // nCons;
 
 	std::cout<<"PRE MEMORY ALLOCATION"<<std::endl;
 	// in this example the jacobian is dense. Hence, it contains n*m nonzeros
@@ -149,6 +266,8 @@ Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Nu
 bool
 Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_L, Number* z_U,
 												Index m, bool init_lambda, Number* lambda){
+
+	msgOut(MSG_DEBUG,"Giving optimising variables previous years value as starting point");
 	// Here, we assume we only have starting values for x, if you code
 	// your own NLP, you can provide starting values for the others if
 	// you wish.
@@ -156,15 +275,51 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 	assert(init_z == false);
 	assert(init_lambda == false);
 
-	// set the starting point
-	for (Index i=0; i<n; i++) {
-	//	if(i<gIP("pl")){
-
-			x[i] = 0;
-	//	} else if (){
-
-	//	}
+	map<string, int>::iterator viter;
+	// fixing the starting points for each variable at the level of the previous years
+	for (viter = vars.begin(); viter != vars.end(); ++viter) {
+		//string debugs = viter->first;
+		int vdomtype = viter->second;
+		if(vdomtype==VDOM_PRI_PR){
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<priPr.size();p++){
+						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],priPr[p],previousYear);
+					}
+				}
+			}
+		} else if (vdomtype==VDOM_SEC_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<secPr.size();p++){
+						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],secPr[p],previousYear);
+					}
+				}
+			}
+		} else if (vdomtype==VDOM_ALL_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<allPr.size();p++){
+						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],allPr[p],previousYear);
+					}
+				}
+			}
+		} else if (vdomtype==VDOM_R2_ALL_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<allPr.size();p++){
+						for(uint r2To=0;r2To<l2r[r1].size();r2To++){
+							x[gix(viter->first,r1,r2,p,r2To)]= gpd(viter->first,l2r[r1][r2],allPr[p],previousYear,i2s(l2r[r1][r2To]));
+						}
+					}
+				}
+			}
+		} else {
+			msgOut(MSG_CRITICAL_ERROR,"Try to setting the initial value of a variable of unknow type ("+viter->first+")");
+		}
 	}
+
+	msgOut(MSG_DEBUG,"Finisced initial value assignments");
 
 	return true;
 }
@@ -405,4 +560,80 @@ Opt::generate_tapes(Index n, Index m){
 	delete[] zl;
 
 }
+
+
+// ***************    PYTHIA OPT specific part ***********************************
+
+int
+Opt::gip(const string &varName){ // get initial position
+	map<string, int>::const_iterator p;
+	p=initPos.find(varName);
+	if(p != initPos.end()) {
+		return p->second;
+	}
+	else {
+		msgOut(MSG_CRITICAL_ERROR, "Asking the initial position in the concatenated array of a variable ("+varName+") that doesn't exist!");
+		return 0;
+	}
+};
+
+int
+Opt::gdt(const string &varName){ // get domain type
+	map<string, int>::const_iterator p;
+	p=vars.find(varName);
+	if(p != initPos.end()) {
+		return p->second;
+	}
+	else {
+		msgOut(MSG_CRITICAL_ERROR, "Asking the domain type of a variable ("+varName+") that doesn't exist!");
+		return 0;
+	}
+}
+
+int
+Opt::gix_uncached(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo){
+
+	// attenction, for computational reason we are not checking the call is within vectors limits!!!
+
+	int vdtype = gdt(varName);
+	int othCountriesRegions = 0;
+	for (uint i=0;i<r1Ix;i++){
+		othCountriesRegions += l2r[i].size();
+	}
+
+	if(vdtype == VDOM_PRI_PR){
+		return gip(varName)+(othCountriesRegions+r2Ix)*nPriPr+prIx;
+	} else if (vdtype == VDOM_SEC_PR){
+		return gip(varName)+(othCountriesRegions+r2Ix)*nSecPr+prIx;
+	} else if (vdtype == VDOM_ALL_PR){
+		return gip(varName)+(othCountriesRegions+r2Ix)*nAllPr+prIx;
+	} else if (vdtype == VDOM_R2_ALL_PR){
+		int othCountrReg = 0;
+		for (uint i=0;i<r1Ix;i++){
+			othCountrReg +=l2r[i].size()*l2r[i].size();
+		}
+		// initial position + (other countries region pairs + same country other regions from pair + regions to)* number of all products+product
+		return gip(varName)+(othCountrReg+r2Ix*l2r[r1Ix].size()+r2IxTo)*nAllPr+prIx;
+
+	} else {
+		msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+varName+")");
+		return 0;
+	}
+
+}
+
+int
+Opt::gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo){
+	// attenction, for computational reasons we are not checking the call is within vectors limits!!!
+	map <string, vector < vector < vector < vector <int> > > > >::const_iterator p;
+	p=positions.find(varName);
+	if(p != positions.end()) {
+		return p->second[r1Ix][r2Ix][prIx][r2IxTo];
+	}
+	else {
+		msgOut(MSG_CRITICAL_ERROR, "Asking the position of a variable ("+varName+") that doesn't exist!");
+		return 0;
+	}
+}
+
 

@@ -76,7 +76,12 @@ enum {
 	OUTVL_AGGREGATED       =3,
 	OUTVL_DETAILED         =5,
 	OUTVL_BINMAPS          =6,
-	OUTVL_ALL              =7
+	OUTVL_ALL              =7,
+
+	VDOM_PRI_PR                 =1, // domain of the variable: primary, secondary, all products or all products over r2 couple regions (in-country commercial flows)
+	VDOM_SEC_PR                 =2,
+	VDOM_ALL_PR                 =3,
+	VDOM_R2_ALL_PR              =4
 
 };
 

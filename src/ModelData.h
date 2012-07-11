@@ -93,6 +93,7 @@ public:
 	string              getBaseDirectory() const {return baseDirectory;};
 	ModelRegion*        getRegion(int regId_h);
 	vector<int>         getRegionIds(int level_h, bool excludeResidual=true);
+	vector < vector <int> > getRegionIds( bool excludeResidual=true);
 	int                 getNForTypes(){return forTypes.size();};
 	int                 getNReclRules(){return reclRules.size();};
 	forType*            getForType(int position){return &forTypes[position];};
@@ -153,6 +154,7 @@ private:
 	vector <forToProd>                     forToProdVector; ///< Vector of coefficients from forest resources to primary products
 	vector <forType>                              forTypes; ///< Vector of forest types
 	vector <reclRule>                            reclRules; ///< Vector of reclassification rules
+	vector < vector <int> >                            l2r; ///< Region2 ids
 
 
 	 /// For each agricultural soil type (as defined in the setting "agrLandTypes") this list define the objects that can be placed on that soil type

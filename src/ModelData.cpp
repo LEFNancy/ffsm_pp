@@ -282,6 +282,24 @@ ModelData::getRegionIds(int level_h, bool excludeResidual){
 	return toReturn;
 }
 
+vector < vector <int> >
+ModelData::getRegionIds( bool excludeResidual){
+	vector < vector <int> > toReturn;
+	vector <int> l1regIds =  MTHREAD->MD->getRegionIds(1, excludeResidual);
+	for(uint i=0;i<l1regIds.size();i++){
+		vector<int> l2ChildrenIds;
+		ModelRegion* l1Region = MTHREAD->MD->getRegion(l1regIds[i]);
+		vector<ModelRegion*> l2Childrens = l1Region->getChildren(excludeResidual);
+		for(uint j=0;j<l2Childrens.size();j++){
+			l2ChildrenIds.push_back(l2Childrens[j]->getRegId());
+		}
+		if(l2ChildrenIds.size()){
+			toReturn.push_back(l2ChildrenIds);
+		}
+	}
+	return toReturn;
+}
+
 vector <string>
 ModelData::getForTypeIds(bool all){
 	vector <string> toReturn;

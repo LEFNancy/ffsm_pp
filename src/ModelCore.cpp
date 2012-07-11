@@ -36,7 +36,7 @@ ModelCore::runInitPeriod(){
 	vector <string> pDClasses; // production diameter classes: exclude the fist diameter class below 15 cm
 	pDClasses.insert(pDClasses.end(), dClasses.begin()+1, dClasses.end() );
 	vector <string> fTypes= MD->getForTypeIds();
-
+	vector <vector <int> > l2r = MD->getRegionIds();
 
 	// starting the GAMS code
 
@@ -220,10 +220,16 @@ ModelCore::runInitPeriod(){
 
 	} // end for each region in level 2
 
-
-
-
-
+// initializing the exports to zero quantities
+	for(uint r1=0;r1<l2r.size();r1++){
+		for(uint r2=0;r2<l2r[r1].size();r2++){
+			for(uint p=0;p<allProducts.size();p++){
+			 for(uint r2To=0;r2To<l2r[r1].size();r2To++){
+					spd(0,"rt",l2r[r1][r2],allProducts[p],secondYear,true,i2s(l2r[r1][r2To]));  // regional trade, it was exp in gams
+				}
+			}
+		}
+	}
 
 };
 
