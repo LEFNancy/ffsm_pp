@@ -61,7 +61,7 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		nAllPr = allPr.size();
 		std::vector<int> l1regIds =  MTHREAD->MD->getRegionIds(1, true);
 		nL2r =  MTHREAD->MD->getRegionIds(2, true).size();
-		previousYear = MTHREAD->SCD->getYear()-1;
+		firstYear = MTHREAD->MD->getIntSetting("initialYear");
 
 		for(uint i=0;i<l1regIds.size();i++){
 			std::vector<int> l2ChildrenIds;
@@ -226,6 +226,8 @@ exit(0);
 
 	} // finish initialisation things to be done only the first year
 
+	previousYear = MTHREAD->SCD->getYear()-1; // this has to be done EVERY years !!
+
 	n = nVar; // 300; // nVar;
 
 	m = nCons; // 70; // nCons;
@@ -326,13 +328,78 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 
 template<class T> bool
 Opt::eval_obj(Index n, const T *x, T& obj_value){
-	T a1, a2;
+	// T a1, a2;
 	obj_value = 0.;
-	for (Index i=0; i<n-1; i++) {
-		a1 = x[i]*x[i]-x[i+1];
-		a2 = x[i] - 1.;
-		obj_value += 100.*a1*a1 + a2*a2;
-	}
+
+//	mktobj .. Obj =e=
+
+
+
+
+
+
+//;
+
+	double aa, bb, dc0, sigma, pc, a_pr, ct, m;
+
+	for (uint r1=0;r1<l2r.size();r1++){
+		for (uint r2=0;r2<l2r[r1].size();r2++){
+		//  // consumer's surplus..
+		//  sum ((i,p_tr),
+		//    AA(i,p_tr)*(RVAR('dc',i,p_tr)**((sigma(p_tr)+1)/sigma(p_tr)))
+		//    - AA(i,p_tr)*((0.5*dc0(i,p_tr))**((sigma(p_tr)+1)/sigma(p_tr)))
+		//    - RVAR('pc',i,p_tr)*RVAR('dc',i,p_tr)
+		//  )
+			for (uint p=0;p<secPr.size();p++){
+				aa = gpd("aa",l2r[r1][r2],secPr[p]);
+				sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
+				dc0 = gpd("dc",l2r[r1][r2],secPr[p],firstYear);
+				obj_value += aa*pow(x[gix("dc",r1,r2,p)],(sigma+1)/sigma)-aa*pow(0.5*dc0,(sigma+1)/sigma)-x[gix("pc",r1,r2,p)]*x[gix("dc",r1,r2,p)];
+			}
+			//  // producers surplus..
+			//  + sum((i,p_pr),
+			//    RVAR('pc',i,p_pr)*RVAR('sc',i,p_pr)
+			//    - BB(i,p_pr)*(RVAR('sc',i,p_pr)**((sigma(p_pr)+1)/sigma(p_pr)))
+			//  )
+			for (uint p=0;p<priPr.size();p++){
+				bb = gpd("bb",l2r[r1][r2],priPr[p]);
+				sigma = gpd("sigma",l2r[r1][r2],priPr[p]);
+				obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - bb*pow(x[gix("sc",r1,r2,p)],((sigma+1)/sigma));
+			}
+			//  // trasformations between primary products
+			//  + sum ((i,p_pr,p_pr2),
+			//  +RVAR('pc',i,p_pr2)*pres(p_pr,p_pr2)*RVAR('sc',i,p_pr)
+			//  -BB(i,p_pr2)*(pres(p_pr,p_pr2)*RVAR('sc',i,p_pr))**((sigma(p_pr2)+1)/sigma(p_pr2))
+			//   )
+			for (uint p1=0;p1<priPr.size();p1++){
+				for (uint p2=0;p2<priPr.size();p2++){
+					a_pr = gpd("a_pr",l2r[r1][r2],priPr[p1],DATA_NOW,priPr[p2]);
+					bb = gpd("bb",l2r[r1][r2],priPr[p2]);
+					sigma = gpd("sigma",l2r[r1][r2],priPr[p2]);
+					obj_value += x[gix("pc",r1,r2,p2)]*a_pr*x[gix("sc",r1,r2,p1)]-bb*a_pr*pow(x[gix("sc",r1,r2,p1)],(sigma+1)/sigma);
+				}
+			}
+			//  // surplus of transport agents..
+			//  + sum((i,j,prd), (RVAR('pl',j,prd)-RVAR('pl',i,prd)-CT(i,j,prd))*EXP(i,j,prd))
+			for (uint r2To=0;r2To<l2r[r1].size();r2To++){
+				for (uint p=0;p<allPr.size();p++){
+					ct = gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2To]));
+					obj_value += (x[gix("pl",r1,r2To,p)]-x[gix("pl",r1,r2,p)]-ct)*x[gix("rt",r1,r2,p,r2To)];
+				}
+			}
+			//  // transformers surplus..
+			//  + sum((i,p_tr), (RVAR('pl',i,p_tr)-m(i,p_tr))*(RVAR('sl',i,p_tr))) // attenction it's local. if we include w imports or p expports this have to change
+			for (uint p=0;p<secPr.size();p++){
+				m = gpd("m",l2r[r1][r2],secPr[p]);
+				obj_value += (x[gix("pl",r1,r2,p)]-m)*x[gix("sl",r1,r2,p)];
+			}
+			//  - sum((i,p_pr), RVAR('pl',i,p_pr)*RVAR('dl',i,p_pr))               // to total and an other equation total=local+abroad should be added
+			for (uint p=0;p<priPr.size();p++){
+				obj_value -= x[gix("pl",r1,r2,p)]*x[gix("dl",r1,r2,p)];
+			}
+		} // end of each lev2 regions
+
+	} //end of each r1 regions
 
 	return true;
 }

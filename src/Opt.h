@@ -146,6 +146,7 @@ private:
 	int                                     nVar;
 	int                                    nCons;
 	int                             previousYear;
+	int                                firstYear;
 
 
 
