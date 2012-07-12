@@ -147,6 +147,7 @@ private:
 	int                                    nCons;
 	int                             previousYear;
 	int                                firstYear;
+	int                            worldCodeLev2;
 
 
 

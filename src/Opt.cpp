@@ -62,6 +62,7 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		std::vector<int> l1regIds =  MTHREAD->MD->getRegionIds(1, true);
 		nL2r =  MTHREAD->MD->getRegionIds(2, true).size();
 		firstYear = MTHREAD->MD->getIntSetting("initialYear");
+		worldCodeLev2 = MTHREAD->MD->getIntSetting("worldCodeLev2");
 
 		for(uint i=0;i<l1regIds.size();i++){
 			std::vector<int> l2ChildrenIds;
@@ -328,19 +329,9 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 
 template<class T> bool
 Opt::eval_obj(Index n, const T *x, T& obj_value){
-	// T a1, a2;
-	obj_value = 0.;
-
-//	mktobj .. Obj =e=
-
-
-
-
-
-
-//;
 
 	double aa, bb, dc0, sigma, pc, a_pr, ct, m;
+	obj_value = 0.;
 
 	for (uint r1=0;r1<l2r.size();r1++){
 		for (uint r2=0;r2<l2r[r1].size();r2++){
@@ -406,11 +397,81 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 
 template<class T> bool
 Opt::eval_constraints(Index n, const T *x, Index m, T* g){
-	for (Index i=0; i<m; i++) {
+
+	double a_pr, a, sigma, ff, gg, q1, p1v, t1, r1v, psi, eta, pworld;
+	Index cix = 0;
+	for (uint r1=0;r1<l2r.size();r1++){
+		for (uint r2=0;r2<l2r[r1].size();r2++){
+
+			for (uint p=0;p<secPr.size();p++){
+				// mkteq2(i,p_tr)..  RVAR('dl',i,p_tr)+sum(j,EXP(i,j,p_tr))  =e=  RVAR('sl',i,p_tr)+ sum(b,EXP(b,i,p_tr)); // h1
+				g[cix] = x[gix("dl",r1,r2,p)]-x[gix("sl",r1,r2,p)];
+				for (uint r2To=0;r2To<l2r[r1].size();r2To++){
+					g[cix] += x[gix("rt",r1,r2,p,r2To)]-x[gix("rt",r1,r2To,p,r2)];
+				}
+				cix++;
+				// mkteq6(i,p_tr)..  RVAR('dc',i,p_tr)  =e=  GG(i,p_tr)*(RVAR('pc',i,p_tr)**sigma(p_tr)); // eq. 20
+				gg = gpd("gg",l2r[r1][r2],secPr[p]);
+				sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
+				g[cix] = x[gix("dc",r1,r2,p)]-gg*pow(x[gix("pc",r1,r2,p)],sigma);
+				cix++;
+				// mkteq7(i,p_tr)..  RVAR('da',i,p_tr)/RVAR('dl',i,p_tr)  =e=  ((q1(i,p_tr)*RVAR('pl',i,p_tr))/(p1(i,p_tr)*PT_t(p_tr)))**psi(i,p_tr); // h7 and h3 ?
+				q1 = gpd("q1",l2r[r1][r2],secPr[p]);
+				p1v = 1-q1;
+				psi = gpd("psi",l2r[r1][r2],secPr[p]);
+				pworld = gpd("pl", worldCodeLev2,secPr[p]);
+				g[cix] = x[gix("da",r1,r2,p)]/x[gix("dl",r1,r2,p)] - pow((q1*x[gix("pl",r1,r2,p)])/(p1v*pworld),psi);
+				cix++;
+				// mkteq13(i,p_tr).. RVAR('pc',i,p_tr)*RVAR('dc',i,p_tr)  =e=  RVAR('dl',i,p_tr)*RVAR('pl',i,p_tr)+RVAR('da',i,p_tr)*PT_t(p_tr);  // h9
+				pworld = gpd("pl", worldCodeLev2,secPr[p]);
+				g[cix] = x[gix("pc",r1,r2,p)]*x[gix("dc",r1,r2,p)]-x[gix("dl",r1,r2,p)]*x[gix("pl",r1,r2,p)]-x[gix("da",r1,r2,p)]*pworld;
+				cix++;
+				// TODO.. continue
+			} // end secondary products constrains
+
+			for (uint p=0;p<priPr.size();p++){
+				// mkteq3(i,p_pr)..  RVAR('dl',i,p_pr)+sum(j,EXP(i,j,p_pr))   =e=  RVAR('sl',i,p_pr)+ sum(b,EXP(b,i,p_pr))+sum(p_pr2, pres(p_pr2,p_pr)* RVAR('sl',i,p_pr2)); // h2
+				g[cix] = x[gix("dl",r1,r2,p)]-x[gix("sl",r1,r2,p)];
+				for (uint r2To=0;r2To<l2r[r1].size();r2To++){
+					g[cix] += x[gix("rt",r1,r2,p,r2To)]-x[gix("rt",r1,r2To,p,r2)];
+				}
+				for (uint p2=0;p2<priPr.size();p2++){
+					a_pr = gpd("a_pr",l2r[r1][r2],priPr[p2],DATA_NOW,priPr[p]);
+					g[cix] -= a_pr*x[gix("sl",r1,r2,p2)];
+				}
+				cix++;
+				//mkteq4(i,p_pr)..  RVAR('dl',i,p_pr)  =e=  sum(p_tr, a(p_pr,p_tr)*(RVAR('sl',i,p_tr))); // eq. 13
+				g[cix] = x[gix("dl",r1,r2,p)];
+				for (uint p2=0;p2<secPr.size();p2++){
+					a = gpd("a",l2r[r1][r2],priPr[p],DATA_NOW,secPr[p2]);
+					g[cix] -= a*x[gix("sl",r1,r2,p2)];
+				}
+				cix++;
+				// mkteq5(i,p_pr)..  RVAR('sc',i,p_pr)  =e=  FF(i,p_pr)*(RVAR('pc',i,p_pr)**sigma(p_pr)); // eq. 21
+				ff = gpd("ff",l2r[r1][r2],priPr[p]);
+				sigma = gpd("sigma",l2r[r1][r2],priPr[p]);
+				g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma);
+				cix++;
+
+				 // mkteq8(i,p_pr)..  RVAR('sa',i,p_pr)/RVAR('sl',i,p_pr)  =e=  ((t1(i,p_pr)*RVAR('pl',i,p_pr))/(r1(i,p_pr)*PT_t(p_pr)))**eta(i,p_pr); // h8 and h4 ?
+				t1 = gpd("t1",l2r[r1][r2],priPr[p]);
+				r1v = 1-t1;
+				eta = gpd("eta",l2r[r1][r2],priPr[p]);
+				pworld = gpd("pl", worldCodeLev2,priPr[p]);
+				g[cix] = x[gix("sa",r1,r2,p)]/x[gix("sl",r1,r2,p)] - pow((t1*x[gix("pl",r1,r2,p)])/(r1v*pworld),eta);
+				cix++;
+
+			} // end primary products constrains
+
+		} // end level2 regions
+	} // end lev1 regions
+
+
+/*	for (Index i=0; i<m; i++) {
 		g[i] = 3.*pow(x[i+1],3.) + 2.*x[i+2] - 5.
 					 + sin(x[i+1]-x[i+2])*sin(x[i+1]+x[i+2]) + 4.*x[i+1]
 					 - x[i]*exp(x[i]-x[i+1]) - 3.;
-	}
+	}*/
 
 	return true;
 }
