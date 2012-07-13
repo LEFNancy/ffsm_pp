@@ -150,8 +150,6 @@ private:
 	int                            worldCodeLev2;
 
 
-
-
 	/**@name Methods to block default compiler methods.
 	 * The compiler automatically generates the following three methods.
 	 *  Since the default compiler implementation is generally not what
