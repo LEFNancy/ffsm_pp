@@ -207,6 +207,9 @@ exit(0);
 
 		// calculating the number of constrains..
 		nCons = 0; // leave 0
+		nEqualityConstrains = 0;
+		nLowerEqualZeroConstrains = 0;
+		nGreaterEqualZeroConstrains = 0;
 		nCons += nL2r*nSecPr; // mkeq2
 		nCons += nL2r*nPriPr; // mkeq3
 		nCons += nL2r*nPriPr; // mkeq4
@@ -216,12 +219,16 @@ exit(0);
 		nCons += nL2r*nPriPr; // mkeq8
 		nCons += nL2r*nSecPr; // mkeq13
 		nCons += nL2r*nPriPr; // mkeq14
-		nCons += nL2r*nSecPr; // mkeq17
-		nCons += nL2r*nPriPr; // mkeq18
 		nCons += nL2r*nSecPr; // mkeq23
 		nCons += nL2r*nPriPr; // mkeq24
-		nCons += nL2r*nSecPr; // mkeq25
+		nEqualityConstrains = nCons;
+		nCons += nL2r*nSecPr; // mkeq17
+		nCons += nL2r*nPriPr; // mkeq18
 		nCons += 1;           // mkeq26
+		nLowerEqualZeroConstrains = nCons - nEqualityConstrains;
+		nCons += nL2r*nSecPr; // mkeq25
+		nGreaterEqualZeroConstrains = nCons - nEqualityConstrains - nLowerEqualZeroConstrains;
+
 		msgOut(MSG_INFO,"The model will work with "+i2s(nVar)+" variables and "+i2s(nCons)+" constrains.");
 
 
@@ -251,7 +258,7 @@ exit(0);
 
 bool
 Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Number* g_u){
-	// none of the variables have bounds
+	// all variables have upper or equal than zero bound
 	for (Index i=0; i<n; i++) {
 		x_l[i] =    0.;
 		x_u[i] =  1e20;
@@ -259,8 +266,16 @@ Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Nu
 
 	// Set the bounds for the constraints
 	for (Index i=0; i<m; i++) {
-		g_l[i] = 0;
-		g_u[i] = 0;
+		if(i<nEqualityConstrains){
+			g_l[i] = 0.;
+			g_u[i] = 0.;
+		} else if(i<nLowerEqualZeroConstrains){
+			g_l[i] = -1e20;
+			g_u[i] = 0.;
+		} else {
+			g_l[i] = 0.;
+			g_u[i] = 1e20;
+		}
 	}
 
 	return true;
@@ -398,8 +413,10 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 template<class T> bool
 Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
-	double a_pr, a, sigma, ff, gg, q1, p1v, t1, r1v, psi, eta, pworld;
+	double a_pr, a, sigma, ff, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv;
 	Index cix = 0;
+
+	// *** equality contrains.. ***
 	for (uint r1=0;r1<l2r.size();r1++){
 		for (uint r2=0;r2<l2r[r1].size();r2++){
 
@@ -426,7 +443,18 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 				pworld = gpd("pl", worldCodeLev2,secPr[p]);
 				g[cix] = x[gix("pc",r1,r2,p)]*x[gix("dc",r1,r2,p)]-x[gix("dl",r1,r2,p)]*x[gix("pl",r1,r2,p)]-x[gix("da",r1,r2,p)]*pworld;
 				cix++;
-				// TODO.. continue
+				 // mkteq23(i,p_tr).. RVAR('dc',i,p_tr)  =e=  (q1(i,p_tr)*(RVAR('da',i,p_tr)**((psi(i,p_tr)-1)/psi(i,p_tr)))+ p1(i,p_tr)*(RVAR('dl',i,p_tr)**((psi(i,p_tr)-1)/psi(i,p_tr))))**(psi(i,p_tr)/(psi(i,p_tr)-1)); // h3
+				q1 = gpd("q1",l2r[r1][r2],secPr[p]);
+				psi = gpd("psi",l2r[r1][r2],secPr[p]);
+				p1v = 1-q1;
+				g[cix] = x[gix("dc",r1,r2,p)] -
+						pow(
+								 q1 * pow(x[gix("da",r1,r2,p)],(psi-1)/psi)
+							+ p1v * pow(x[gix("dl",r1,r2,p)],(psi-1)/psi),
+							psi/(psi-1)
+						);
+				cix++;
+
 			} // end secondary products constrains
 
 			for (uint p=0;p<priPr.size();p++){
@@ -460,12 +488,82 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 				pworld = gpd("pl", worldCodeLev2,priPr[p]);
 				g[cix] = x[gix("sa",r1,r2,p)]/x[gix("sl",r1,r2,p)] - pow((t1*x[gix("pl",r1,r2,p)])/(r1v*pworld),eta);
 				cix++;
+				// mkteq14(i,p_pr).. RVAR('pc',i,p_pr)*RVAR('sc',i,p_pr)  =e=  RVAR('sl',i,p_pr)*RVAR('pl',i,p_pr)+RVAR('sa',i,p_pr)*PT_t(p_pr);  // h10
+				pworld = gpd("pl", worldCodeLev2,secPr[p]);
+				g[cix] = x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)]-x[gix("sl",r1,r2,p)]*x[gix("pl",r1,r2,p)]-x[gix("sa",r1,r2,p)]*pworld;
+				cix++;
+				// mkteq24(i,p_pr).. RVAR('sc',i,p_pr)  =e=  (t1(i,p_pr)*(RVAR('sa',i,p_pr)**((eta(i,p_pr)-1)/eta(i,p_pr)))+ r1(i,p_pr)*(RVAR('sl',i,p_pr)**((eta(i,p_pr)-1)/eta(i,p_pr))))**(eta(i,p_pr)/(eta(i,p_pr)-1)); // h4
+				t1 = gpd("t1",l2r[r1][r2],priPr[p]);
+				r1v = 1-t1;
+				eta = gpd("eta",l2r[r1][r2],priPr[p]);
+				g[cix] = x[gix("sc",r1,r2,p)] -
+						pow(
+								 q1 * pow(x[gix("sa",r1,r2,p)],(eta-1)/eta)
+							+ r1v * pow(x[gix("sl",r1,r2,p)],(eta-1)/eta),
+							psi/(psi-1)
+						);
+				cix++;
 
 			} // end primary products constrains
 
 		} // end level2 regions
 	} // end lev1 regions
 
+
+	// *** lower than zero contrains.. ***
+	for (uint r1=0;r1<l2r.size();r1++){
+		for (uint r2=0;r2<l2r[r1].size();r2++){
+
+			for (uint p=0;p<secPr.size();p++){
+				// mkteq17(i,p_tr).. RVAR('sl',i,p_tr)                    =l=  Kt(i,p_tr);     // h16 in the presentation paper
+				k = gpd("k",l2r[r1][r2],secPr[p]);
+				g[cix] = x[gix("sl",r1,r2,p)]-k;
+				cix++;
+			} // end secondary products
+
+			for (uint p=0;p<priPr.size();p++){
+			// mkteq18(i,p_pr).. RVAR('sa',i,p_pr)+RVAR('sl',i,p_pr)  =l=  dispor(i,p_pr); // total supply lower than the available stock
+				dispor = gpd("dispor",l2r[r1][r2],priPr[p]);
+				g[cix] = x[gix("sa",r1,r2,p)]+x[gix("sl",r1,r2,p)]-dispor;
+				cix++;
+			} // end primary products
+		} //end level2 regions
+	} // end lev1 regions
+
+	//mkteq26        .. sum((i,j,prd), (RVAR('pl',j,prd)-RVAR('pl',i,prd)-CT(i,j,prd))*EXP(i,j,prd)) =l=  0;  // 0				margin on transport
+	g[cix] = 0.;
+	for (uint r1=0;r1<l2r.size();r1++){
+		for (uint r2=0;r2<l2r[r1].size();r2++){
+			for (uint r2To=0;r2To<l2r[r1].size();r2To++){
+				for (uint p=0;p<allPr.size();p++){
+					ct = gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2To]));
+					g[cix] += (x[gix("pl",r1,r2To,p)]-x[gix("pl",r1,r2,p)]-ct)*x[gix("rt",r1,r2,p,r2To)];
+				}
+			}
+		}
+	}
+	cix++;
+
+
+
+	// *** higher than zero contrains.. ***
+	for (uint r1=0;r1<l2r.size();r1++){
+		for (uint r2=0;r2<l2r[r1].size();r2++){
+
+			for (uint p=0;p<secPr.size();p++){
+				// mkteq25(i,p_tr).. sum(p_pr, a(p_pr,p_tr)*RVAR('pl',i,p_pr))+m(i,p_tr)  =g=  (RVAR('pl',i,p_tr));        // price of raw products + transf cost > trasf product
+				mv = gpd("m",l2r[r1][r2],secPr[p]);
+				g[cix] = mv - x[gix("pl",r1,r2,p)];
+				for (uint p2=0;p2<priPr.size();p2++){
+					a = gpd("a",l2r[r1][r2],priPr[p2],DATA_NOW,secPr[p]);
+					g[cix] += a * x[gix("pl",r1,r2,p2)];
+				}
+				cix++ ;
+			} // end secondary products
+
+
+		} //end level2 regions
+	} // end lev1 regions
 
 
 	return true;

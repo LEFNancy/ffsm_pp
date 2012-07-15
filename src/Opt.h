@@ -145,6 +145,9 @@ private:
 	int                                     nL2r;
 	int                                     nVar;
 	int                                    nCons;
+	int                      nEqualityConstrains;
+	int                nLowerEqualZeroConstrains;
+	int              nGreaterEqualZeroConstrains;
 	int                             previousYear;
 	int                                firstYear;
 	int                            worldCodeLev2;
