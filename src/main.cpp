@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
 	int debug;
 	//TEST.runSimpleTests();
 	// TEST.testIpopt();
-	debug = TEST.testAdolc();
+	//debug = TEST.testAdolc();
 	cout << "Early debug value: " << debug << endl;
 
 

@@ -38,7 +38,7 @@ class Pixel;
 /// %Output methods
 
 /**
-Class responsable to output the data, both as all kind of log as well as georeferenciated one.
+Class responsable to output  the data, both as all kind of log as well as georeferenciated one.
 @author Antonello Lobianco
 */
 class Output: public BaseClass{

@@ -30,7 +30,7 @@
 #include "BaseClass.h"
 //#include "ModelData.h"
 
-/// Manage the yearly loops
+/// Manage the yearly  loops
 
 /**
 This class is responsable to manage the time-dimension of the program.

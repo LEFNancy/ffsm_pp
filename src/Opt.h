@@ -23,19 +23,16 @@
 
 #include "IpTNLP.hpp"
 #include <adolc.h>
-#include <adolc_sparse.h>
 
 //regmas headers
 #include "BaseClass.h"
 #include "ThreadManager.h"
 #include "ModelData.h"
 
-
-
 #define tag_f 1
 #define tag_g 2
 #define tag_L 3
-#define HPOFF 30
+
 
 
 /// Class containing the optimization problem (the matrix and its methods)
@@ -118,7 +115,7 @@ public:
 	//***************    start ADOL-C part ***********************************
 
 	/** Method to generate the required tapes */
-	virtual void generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h_lag);
+	virtual void generate_tapes(Index n, Index m);
 
 	//***************    end   ADOL-C part ***********************************
 
@@ -173,24 +170,10 @@ private:
 	//@}
 
 	//@{
+	double **Jac;
 
 	double *x_lam;
-
-	//** variables for sparsity exploitation
-	unsigned int **HP_t;         /* compressed block row storage */
-	unsigned int *rind_g;        /* row indices    */
-	unsigned int *cind_g;        /* column indices */
-	double *jacval;              /* values         */
-	unsigned int *rind_L;        /* row indices    */
-	unsigned int *cind_L;        /* column indices */
-	unsigned int *rind_L_total;  /* row indices    */
-	unsigned int *cind_L_total;  /* column indices */
-	double *hessval;             /* values */
-	int nnz_jac;
-	int nnz_L, nnz_L_total;
-	int options_g[4];
-	int options_L[4];
-
+	double **Hess;
 	//@}
 
 };

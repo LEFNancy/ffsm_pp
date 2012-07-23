@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------
  ADOL-C -- Automatic Differentiation by Overloading in C++
- File:     ADOL-C_sparseNLP.hpp
+ File:     ADOL-C_NLP.hpp
  Revision: $$
- Contents:  class myADOL-C_sparseNPL for interfacing with Ipopt
+ Contents:  class myADOL-C_NPL for interfacing with Ipopt
  
  Copyright (c) Andrea Walther
    
@@ -27,23 +27,21 @@
 
 #include "IpTNLP.hpp"
 #include <adolc.h>
-#include <adolc_sparse.h>
 
 #define tag_f 1
 #define tag_g 2
 #define tag_L 3
-#define HPOFF 30
 
 using namespace Ipopt;
 
-class MyADOLC_sparseNLP : public TNLP
+class MyADOLC_NLP : public TNLP
 {
 public:
   /** default constructor */
-  MyADOLC_sparseNLP();
+  MyADOLC_NLP();
 
   /** default destructor */
-  virtual ~MyADOLC_sparseNLP();
+  virtual ~MyADOLC_NLP();
 
   /**@name Overloaded from TNLP */
   //@{
@@ -115,7 +113,7 @@ public:
 //***************    start ADOL-C part ***********************************
 
  /** Method to generate the required tapes */
-  virtual void generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h_lag);
+  virtual void generate_tapes(Index n, Index m);
 
 //***************    end   ADOL-C part ***********************************
 
@@ -131,30 +129,16 @@ private:
    *  
    */
   //@{
-  //  MyADOLC_sparseNLP();
-  MyADOLC_sparseNLP(const MyADOLC_sparseNLP&);
-  MyADOLC_sparseNLP& operator=(const MyADOLC_sparseNLP&);
+  //  MyADOLC_NLP();
+  MyADOLC_NLP(const MyADOLC_NLP&);
+  MyADOLC_NLP& operator=(const MyADOLC_NLP&);
   //@}
 
   //@{
+  double **Jac;
 
   double *x_lam;
-
-  //** variables for sparsity exploitation
-  unsigned int **HP_t;         /* compressed block row storage */
-  unsigned int *rind_g;        /* row indices    */
-  unsigned int *cind_g;        /* column indices */
-  double *jacval;              /* values         */
-  unsigned int *rind_L;        /* row indices    */
-  unsigned int *cind_L;        /* column indices */
-  unsigned int *rind_L_total;  /* row indices    */
-  unsigned int *cind_L_total;  /* column indices */
-  double *hessval;             /* values */
-  int nnz_jac;
-  int nnz_L, nnz_L_total;
-  int options_g[4];
-  int options_L[4];
-  
+  double **Hess;
   //@}
 
 };
