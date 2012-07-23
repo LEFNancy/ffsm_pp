@@ -755,7 +755,8 @@ Sandbox::testAdolc(){
 
   using namespace Ipopt;
  // Create an instance of your nlp...
-  SmartPtr<TNLP> myadolc_nlp = new MyADOLC_NLP();
+  // SmartPtr<TNLP> myadolc_nlp = new MyADOLC_NLP();
+  SmartPtr<TNLP> myadolc_nlp = new MyADOLC_sparseNLP();
 
   // Create an instance of the IpoptApplication
   SmartPtr<IpoptApplication> app = new IpoptApplication();

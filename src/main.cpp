@@ -47,8 +47,8 @@ int main(int argc, char *argv[]){
 	// Running "simple testing" that can be done at this early time
 	Sandbox TEST;
 	int debug;
-	TEST.runSimpleTests();
-	TEST.testIpopt();
+	//TEST.runSimpleTests();
+	// TEST.testIpopt();
 	debug = TEST.testAdolc();
 	cout << "Early debug value: " << debug << endl;
 

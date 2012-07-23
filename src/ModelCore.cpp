@@ -8,7 +8,7 @@
 #include "ThreadManager.h"
 #include "Opt.h"
 #include "Scheduler.h"
-
+#include "Adolc_debugtest.h"
 
 ModelCore::ModelCore(ThreadManager* MTHREAD_h){
 	MTHREAD = MTHREAD_h;
@@ -309,8 +309,15 @@ ModelCore::runSimulationYear(){
 
 	} // end for each region in level 2 (and updating variables)
 
+	//SmartPtr<TNLP> nlpYearProblem = new Opt(MTHREAD);
+	SmartPtr<TNLP> nlpYearProblem = new MyADOLC_sparseNLP();
+
 	// Create an instance of the IpoptApplication
 	SmartPtr<IpoptApplication> app = new IpoptApplication();
+
+	// Set ipopt options..
+	// This is required if no scaling is used, otherwise too much memory. Default is 1000x memory, changed to 5x !!!
+	// app->Options()->SetIntegerValue("mumps_mem_percent", 5);
 
 	// Initialize the IpoptApplication and process the options
 	ApplicationReturnStatus status;
@@ -320,7 +327,7 @@ ModelCore::runSimulationYear(){
 		return;
 	}
 
-	status = app->OptimizeTNLP(MTHREAD->OPT);
+	status = app->OptimizeTNLP(nlpYearProblem);
 
 	if (status == Solve_Succeeded) {
 		// Retrieve some statistics about the solve
@@ -330,6 +337,7 @@ ModelCore::runSimulationYear(){
 		Number final_obj = app->Statistics()->FinalObjective();
 		printf("\n\n*** The final value of the objective function is %e.\n", final_obj);
 	}
+	cout << "done this year" << endl;
 
 	return;
 
