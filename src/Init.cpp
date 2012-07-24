@@ -102,6 +102,7 @@ Init::setInitLevel1(){
 	MTHREAD->MD->setReclassificationRules();
 	MTHREAD->MD->applyOverrides();
 	MTHREAD->MD->setProductResourceMatrixLink();
+	MTHREAD->MD->applyDebugMode();
 
 
 	if(MTHREAD->MD->getBoolSetting("randomSimulation")){

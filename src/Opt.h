@@ -122,15 +122,15 @@ public:
 private:
 
 	// convenient handles to equivalent ModelData functions..
-	double              gpd(const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h=""){return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};
-	double              gfd(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW){return MTHREAD->MD->getForData(type_h, regId_h, forType_h, diamClass_h, year);};
+	const double        gpd(const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h=""){return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};
+	const double        gfd(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW){return MTHREAD->MD->getForData(type_h, regId_h, forType_h, diamClass_h, year);};
 	void                spd(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, bool allowCreate=false, const string &freeDim_h=""){MTHREAD->MD->setProdData(value_h, type_h, regId_h, prodId_h, year, allowCreate, freeDim_h);};
 	void                sfd(double value_h, const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW, bool allowCreate=false){MTHREAD->MD->setForData(value_h, type_h, regId_h, forType_h, diamClass_h, year, allowCreate);};
 	bool                app(const string &prod_h, const string &forType_h, const string &dClass_h){return MTHREAD->MD->assessProdPossibility(prod_h, forType_h, dClass_h);};
-	int                 gip(const string &varName); ///< Get the initial index position of a given variable in the concatenated array
-	int                 gix_uncached(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
-	int                 gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
-	int                 gdt(const string &varName); ///< Get the domain type of a given variable
+	const int           gip(const string &varName); ///< Get the initial index position of a given variable in the concatenated array
+	const int           gix_uncached(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
+	const int           gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
+	const int           gdt(const string &varName); ///< Get the domain type of a given variable
 
 	vector<string>                         priPr;
 	vector<string>                         secPr;

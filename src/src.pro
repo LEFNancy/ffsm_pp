@@ -10,14 +10,18 @@ TARGET = pythia
 DESTDIR = ..
 
 unix {
-     LIBS += -lipopt
+     #LIBS += -lipopt
      LIBS += -ladolc
      #LIBS += -lColPack
      INCLUDEPATH += /usr/include/coin
      INCLUDEPATH += /usr/include/coin/ThirdParty
      INCLUDEPATH += /usr/include/adolc
-     LIBS += -lcoinmetis -lcoinmumps -lblas -llapack
-     LIBS += -lpthread -lgfortran -lcoinmetis -lblas
+     INCLUDEPATH += `PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig: /usr/bin/pkg-config --cflags ipopt` $(ADDINCFLAGS)
+     LIBS += `PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig: /usr/bin/pkg-config --libs ipopt`
+     #LIBS += -lcoinmetis -lcoinmumps -lblas -llapack
+     #LIBS += -lpthread -lgfortran -lcoinmetis -lblas
+     QMAKE_CXXFLAGS_RELEASE += -O3 -pipe -DNDEBUG -pedantic-errors -Wparentheses -Wreturn-type -Wcast-qual -Wall -Wpointer-arith -Wwrite-strings -Wconversion -Wno-unknown-pragmas -Wno-long-long   -DIPOPT_BUILD
+     QMAKE_LFLAGS_RELEASE +=  -Wl,--rpath -Wl,/usr/lib
 
 }
 
@@ -42,9 +46,15 @@ TEMPLATE = app
 DEPENDPATH += ". agents"
 CONFIG += warn_on \
           qt \
-          thread \
-          debug
-CONFIG -= release
+	    thread \
+	    debug
+#CONFIG -= release
+
+
+QMAKE_CXXFLAGS_RELEASE -= -O2
+QMAKE_CXXFLAGS_RELEASE += -O3
+
+QMAKE_LFLAGS_RELEASE -= -O1
 
 # testing..
 #CONFIG += link_pkgconfig
@@ -56,7 +66,7 @@ CONFIG -= release
 
 
 
-INCLUDEPATH += ". agents"
+#INCLUDEPATH += ". agents"
 
 
 OBJECTS_DIR = ../bin

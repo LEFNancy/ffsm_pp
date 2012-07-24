@@ -311,7 +311,7 @@ ModelData::getForTypeIds(bool all){
 	return toReturn;
 }
 
-bool
+const bool
 ModelData::assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h){
 	bool ok=false;
 	for(uint i=0;i<forToProdVector.size();i++){
@@ -693,6 +693,41 @@ ModelData::applyOverrides(){
 	}
 }
 
+/**
+The applyDebugMode flag all level2 regions not in the "debugRegions" option as "residual" (so they are in the map but not in the model code) and remove the primary and secondary products that are not included in the debugPriProducts and debugSecProducts options.
+*/
+void
+ModelData::applyDebugMode(){
+	if(! getBoolSetting("debugFlag")) return;
+
+	vector <int> debugRegions = getIntVectorSetting("debugRegions");
+	vector <string> debugPriProducts = getStringVectorSetting("debugPriProducts");
+	vector <string> debugSecProducts = getStringVectorSetting("debugSecProducts");
+
+	for(uint i=0;i< regionsVector.size();i++){
+		if (regionsVector[i].getRegLevel()==2){
+			bool found= false;
+			for(uint j=0;j<debugRegions.size();j++){
+				if (debugRegions[j] == regionsVector[i].getRegId()){
+					found = true;
+					break;
+				}
+			}
+			if(!found){ // not in the list to keep
+				regionsVector[i].setIsResidual(true);
+			}
+		}
+	}
+
+	for (uint i=0; i<programSettingsVector.size();i++){
+		if (programSettingsVector.at(i).name == "priProducts"){
+			programSettingsVector.at(i).values = debugPriProducts;
+		} else if (programSettingsVector.at(i).name == "secProducts"){
+			programSettingsVector.at(i).values = debugSecProducts;
+		}
+	}
+
+}
 
 void
 ModelData::setOutputDirectory(const char* output_dirname_h){
@@ -844,7 +879,7 @@ It addmits the following "filters":
 @freeDim_h If specified, look exactly for it, otherwise simply doesn't filter for it.
 
 */
-double
+const double
 ModelData::getProdData(const string &type_h, int regId_h, const string &prodId_h, int year, const string &freeDim_h){
 	vector <string> priProducts = getStringVectorSetting("priProducts");
 	vector <string> secProducts = getStringVectorSetting("secProducts");
@@ -883,7 +918,7 @@ It addmits the following "filters":
 @year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
 */
 
-double
+const double
 ModelData::getForData(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year){
 	vector <string> dClasses = getStringVectorSetting("dClasses");
 

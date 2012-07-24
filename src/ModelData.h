@@ -80,7 +80,8 @@ public:
 	void                setProductResourceMatrixLink();
 	void                setForestTypes();
 	void                setReclassificationRules();
-	void                applyOverrides(); ///< Cancel all reg1 level and trasform them in reg2 level if not already existing
+	void                applyOverrides(); ///< Cancel all reg1 level data and trasform them in reg2 level if not already existing
+	void                applyDebugMode(); ///< Works only a specified subset of regions and products
 	void                setSpace();
 	/// Create the vector availableObjectsBySoilType so it is faster to assign spacial objects to farmers basing on their land types
 	void                debug();
@@ -101,7 +102,7 @@ public:
 	vector <string>     getForTypeIds(bool all=false); ///< By default it doesn't return forTypes used only as input
 	reclRule*           getReclRule(int position){return &reclRules[position];};
 	/// A simple function to assess if a specified product can be made by a certain forest type and diameter class
-	bool                assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
+	const bool          assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
 
 	double              getTimedData(const vector <double> &dated_vector, int year_h); ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
 	void                setTimedData(double value_h, vector<double> &dated_vector, int year_h, int MSG_LEVEL=MSG_WARNING);
@@ -116,8 +117,8 @@ public:
 	vector <bool>       getBoolVectorSetting   (const string &name_h);
 
 
-	double              getProdData(const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h="");
-	double              getForData(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW);
+	const double        getProdData(const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h="");
+	const double        getForData(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW);
 
 
 	void                setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, bool allowCreate=false, const string &freeDim_h=""); // Remember default arguments must be at the end

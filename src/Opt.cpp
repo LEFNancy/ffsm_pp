@@ -95,8 +95,8 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		nVar = 0;
 		map<string, int>::iterator viter;
 		for (viter = vars.begin(); viter != vars.end(); ++viter) {
-			string debugs = viter->first;
-			int debugpos = nVar;
+			//string debugs = viter->first;
+			//int debugpos = nVar;
 			initPos.insert(pair<string, int>(viter->first, nVar));
 			int vdomtype = viter->second;
 			if(vdomtype==VDOM_PRI_PR){
@@ -270,11 +270,11 @@ Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Nu
 			g_l[i] = 0.;
 			g_u[i] = 0.;
 		} else if(i<nLowerEqualZeroConstrains){ // inverted as IPOPT minimize, we want maximised
-			g_l[i] = 0.;
-			g_u[i] = 1e20;
-		} else {
 			g_l[i] = -1e20;
 			g_u[i] = 0.;
+		} else {
+			g_l[i] = 0.;
+			g_u[i] = 1e20;
 		}
 	}
 
@@ -285,6 +285,8 @@ bool
 Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_L, Number* z_U,
 												Index m, bool init_lambda, Number* lambda){
 
+// function checked on 20120724 on a subset of 3 regions and 4 products. All variables initial values are correctly those outputed by gams in 2006.
+
 	msgOut(MSG_DEBUG,"Giving optimising variables previous years value as starting point");
 	// Here, we assume we only have starting values for x, if you code
 	// your own NLP, you can provide starting values for the others if
@@ -294,6 +296,7 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 	assert(init_lambda == false);
 
 	map<string, int>::iterator viter;
+	cout << "varname;regId;prd;value;freeDim" << endl;
 	// fixing the starting points for each variable at the level of the previous years
 	for (viter = vars.begin(); viter != vars.end(); ++viter) {
 		//string debugs = viter->first;
@@ -303,6 +306,7 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 				for(uint r2=0;r2<l2r[r1].size();r2++){
 					for(uint p=0;p<priPr.size();p++){
 						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],priPr[p],previousYear);
+						//cout << viter->first <<";"<< l2r[r1][r2] <<";"<< priPr[p] <<";"<< gpd(viter->first,l2r[r1][r2],priPr[p],previousYear) <<";"<<""<< endl;
 					}
 				}
 			}
@@ -311,6 +315,7 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 				for(uint r2=0;r2<l2r[r1].size();r2++){
 					for(uint p=0;p<secPr.size();p++){
 						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],secPr[p],previousYear);
+						//cout << viter->first <<";"<< l2r[r1][r2] <<";"<< secPr[p] <<";"<< gpd(viter->first,l2r[r1][r2],secPr[p],previousYear) <<";"<<""<< endl;
 					}
 				}
 			}
@@ -319,6 +324,7 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 				for(uint r2=0;r2<l2r[r1].size();r2++){
 					for(uint p=0;p<allPr.size();p++){
 						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],allPr[p],previousYear);
+						//cout << viter->first <<";"<< l2r[r1][r2] <<";"<< allPr[p] <<";"<< gpd(viter->first,l2r[r1][r2],allPr[p],previousYear) <<";"<<""<< endl;
 					}
 				}
 			}
@@ -328,6 +334,7 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 					for(uint p=0;p<allPr.size();p++){
 						for(uint r2To=0;r2To<l2r[r1].size();r2To++){
 							x[gix(viter->first,r1,r2,p,r2To)]= gpd(viter->first,l2r[r1][r2],allPr[p],previousYear,i2s(l2r[r1][r2To]));
+							//cout << viter->first <<";"<< l2r[r1][r2] <<";"<< allPr[p] <<";"<< gpd(viter->first,l2r[r1][r2],allPr[p],previousYear,i2s(l2r[r1][r2To])) <<";"<<l2r[r1][r2To]<< endl;
 						}
 					}
 				}
@@ -407,7 +414,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 
 	} //end of each r1 regions
 
-	obj_value = -obj_value; // we want maximisation, ipopt minimize!
+	//obj_value = -obj_value; // we want maximisation, ipopt minimize!
 
 	return true;
 }
@@ -636,6 +643,7 @@ Opt::eval_jac_g(Index n, const Number* x, bool new_x,Index m, Index nele_jac,
 bool
 Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, const Number* lambda,
 						bool new_lambda, Index nele_hess, Index* iRow, Index* jCol, Number* values){
+/*
 	if (values == NULL) {
 		// return the structure. This is a symmetric matrix, fill the lower left
 		// triangle only.
@@ -676,6 +684,8 @@ Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, co
 	}
 
 	return true;
+*/
+	return false;
 }
 
 void
@@ -787,8 +797,7 @@ Opt::generate_tapes(Index n, Index m){
 
 // ***************    PYTHIA OPT specific part ***********************************
 
-int
-Opt::gip(const string &varName){ // get initial position
+const int Opt::gip(const string &varName){ // get initial position
 	map<string, int>::const_iterator p;
 	p=initPos.find(varName);
 	if(p != initPos.end()) {
@@ -800,7 +809,7 @@ Opt::gip(const string &varName){ // get initial position
 	}
 };
 
-int
+const int
 Opt::gdt(const string &varName){ // get domain type
 	map<string, int>::const_iterator p;
 	p=vars.find(varName);
@@ -813,7 +822,7 @@ Opt::gdt(const string &varName){ // get domain type
 	}
 }
 
-int
+const int
 Opt::gix_uncached(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo){
 
 	// attenction, for computational reason we are not checking the call is within vectors limits!!!
@@ -845,7 +854,7 @@ Opt::gix_uncached(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxT
 
 }
 
-int
+const int
 Opt::gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo){
 	// attenction, for computational reasons we are not checking the call is within vectors limits!!!
 	map <string, vector < vector < vector < vector <int> > > > >::const_iterator p;

@@ -46,11 +46,11 @@ int main(int argc, char *argv[]){
 
 	// Running "simple testing" that can be done at this early time
 	Sandbox TEST;
-	int debug;
+	int debug=0;
 	//TEST.runSimpleTests();
 	// TEST.testIpopt();
 	//debug = TEST.testAdolc();
-	cout << "Early debug value: " << debug << endl;
+	//cout << "Early debug value: " << debug << endl;
 
 
 	QDir dir;
