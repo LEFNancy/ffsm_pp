@@ -59,7 +59,7 @@ MainProgram::run(){
 	MTHREAD->setGISPointer(GIS);
 	// a test object for various 0-effects tests (sandbox)..
 	Sandbox* TEST = new Sandbox(MTHREAD);
-	TEST->test();
+	MTHREAD->setTestPointer(TEST);
 	// the Init object, it schedule the pre-simulation phase..
 	Init *INIT = new Init(MTHREAD);
 	MTHREAD->setINITPointer(INIT);

@@ -37,6 +37,9 @@
 
 using namespace std;
 
+typedef map<string, vector <double> > DataMap;
+typedef pair<string, vector <double> > DataPair;
+
 struct IFiles;
 struct BasicData;
 class  LLData;
@@ -124,6 +127,8 @@ public:
 	void                setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, bool allowCreate=false, const string &freeDim_h=""); // Remember default arguments must be at the end
 	void                setForData(double value_h, const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW, bool allowCreate=false); // Remember default arguments must be at the end
 
+string                makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="");
+void                  unpackKeyProdData(const string& key, string& parName, int &regId, string& prod, string& freeDim);
 
 	/// Retrieve the list of objects type that can be placed on the specified soil type
 
@@ -141,6 +146,12 @@ private:
 	string              getBaseData (const string &name_h, int type_h, int position=0);
 	vector <string>     getVectorBaseData (const string &name_h, int type_h);
 	void                setBasicData(const string &name_h, string value, int type_h, int position);
+
+	bool                dataMapCheckExist(const DataMap& map, const string& search_for, bool exactMatch=false);
+	double              dataMapGetValue(const DataMap& map, const string& search_for, int year_h, bool exactMatch=false);
+	void                dataMapSetValue(DataMap& map, const string& search_for, double value_h, int year_h, bool exactMatch=false);
+
+	bool                tempBool; ///< a temporary bool variable used for various functions
 
 	string                                   inputFilename; // from Qt fileOpen dialog
 	string                                   outputDirname; // from main config files

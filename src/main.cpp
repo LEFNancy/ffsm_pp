@@ -47,6 +47,7 @@ int main(int argc, char *argv[]){
 	// Running "simple testing" that can be done at this early time
 	Sandbox TEST;
 	int debug=0;
+	TEST.basicTest(); // normally this is an empty function, used only to place temporary in-developmentr tests
 	//TEST.runSimpleTests();
 	// TEST.testIpopt();
 	//debug = TEST.testAdolc();

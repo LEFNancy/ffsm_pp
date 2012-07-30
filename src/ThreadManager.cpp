@@ -42,6 +42,7 @@ ThreadManager::ThreadManager(){
 	SCD = NULL;
 	DO = NULL;
 	CORE=NULL;
+	TEST=NULL;
 	
 	GUI = false;
 
@@ -155,6 +156,7 @@ ThreadManager::deleteDeadOldPointers(){
 	if (MD) {delete MD; MD=0;}
 	if (CORE){delete CORE; CORE=0;}
 	//if (OPT) {delete OPT; OPT=0;} // not needed, it's a "smart point"
+	if(TEST){delete TEST; TEST=0;}
 }
 
 void

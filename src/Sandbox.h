@@ -41,20 +41,25 @@ public:
                              Sandbox(ThreadManager* MTHREAD_h);
 							 Sandbox();
                             ~Sandbox();
-	void                     test();
+
 	template <class T> T     getSetting(string name_h, int type);
 	template <class T> vector <T> getVectorSetting(string name_h, int type);
 	template <class T> T      test2(const std::string& s); // e.g. int x = test<int>("123");
 	void                     printAString(string what){cout << "You printed: "<< what << endl;};
 	vector <TestStructure*>  getTestStructure();
 	void                     testThreads();
-	void                     runSimpleTests(); ///< Simple tests that doesn't require anything else (are encapsulated) and so they can be run at the beginning of the program
-	void                testIpopt();
-	int testAdolc();
+	void                     basicTest(); ///< Simple tests that doesn't require anything else (are encapsulated) and so they can be run at the beginning of the program. Normally empty
+	void                     fullTest(); ///< Tests that require a full sandbox object including MTHREAD. Normally empty
+	void                     testIpopt();
+	int                      testAdolc();
+	void                     testPartMatching(); ///< How to partial matching the key of a map
+
 
 private:
 	vector <TestStructure>  testVector;
-	
+	// How to partial matching the key of a map
+//	map<string, string>::iterator FindPrefix(const map<string, string>& map, const string& search_for);
+	void                       testSearchMap(const map<string, string>& map, const string& search_for);
 
 };
 

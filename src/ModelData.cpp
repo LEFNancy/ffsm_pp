@@ -40,6 +40,9 @@
 #include "Scheduler.h"
 #include "ModelRegion.h"
 
+typedef map<string, vector <double> > DataMap;
+typedef pair<string, vector <double> > DataPair;
+
 
 
 ModelData::ModelData(ThreadManager* MTHREAD_h){
@@ -400,11 +403,11 @@ ModelData::setDefaultProdData(){
 	msgOut(MSG_DEBUG,"Loading products data..");
 	LLData table = getTable("prodData");
 	for (int i=0; i< table.nrecords();i++){
-		prodData PDATA;
-		PDATA.parName = table.getData(i,"parName");
-		PDATA.region = s2i(table.getData(i,"region"));
-		PDATA.prod = table.getData(i,"prod");
-		PDATA.freeDim = table.getData(i,"freeDim");
+//		prodData PDATA;
+//		PDATA.parName = table.getData(i,"parName");
+//		PDATA.region = s2i(table.getData(i,"region"));
+//		PDATA.prod = table.getData(i,"prod");
+//		PDATA.freeDim = table.getData(i,"freeDim");
 		vector <double> values;
 		for (int z=0;z<100;z++){
 			string toSearch = "value_"+i2s(z);
@@ -413,12 +416,12 @@ ModelData::setDefaultProdData(){
 				values.push_back(s2d(value));
 			}
 		}
-		PDATA.values = values;
-		prodDataVector.push_back(PDATA);
-		string keys = table.getData(i,"parName")+table.getData(i,"region")+table.getData(i,"prod")+table.getData(i,"freeDim");
+//		PDATA.values = values;
+//		prodDataVector.push_back(PDATA);
+		string keys = makeKeyProdData(table.getData(i,"parName"), table.getData(i,"region"),table.getData(i,"prod"),table.getData(i,"freeDim"));
 		prodDataMap.insert(std::pair<string, vector<double> >(keys, values));
 		//giving a link to it to its own region:
-		getRegion(PDATA.region)->addProdData(&PDATA);
+//		getRegion(PDATA.region)->addProdData(&PDATA);
 	}
 }
 
@@ -430,14 +433,14 @@ ModelData::setScenarioProdData(){
 	if(table.getTableName() == "") return;
 
 	for(int i=0; i< table.nrecords(); i++){
-		prodData PDATA;
+		//prodData PDATA;
 		bool found = false;
-		string keys = table.getData(i,"parName")+table.getData(i,"region")+table.getData(i,"prod")+table.getData(i,"freeDim");
+		string keys = makeKeyProdData(table.getData(i,"parName"),table.getData(i,"region"),table.getData(i,"prod"),table.getData(i,"freeDim"));
 
-		PDATA.parName = table.getData(i,"parName");
-		PDATA.region = s2i(table.getData(i,"region"));
-		PDATA.prod = table.getData(i,"prod");
-		PDATA.freeDim = table.getData(i,"freeDim");
+		//PDATA.parName = table.getData(i,"parName");
+		//PDATA.region = s2i(table.getData(i,"region"));
+		//PDATA.prod = table.getData(i,"prod");
+		//PDATA.freeDim = table.getData(i,"freeDim");
 		vector <double> values;
 		for (int z=0;z<100;z++){
 			string toSearch = "value_"+i2s(z);
@@ -446,28 +449,29 @@ ModelData::setScenarioProdData(){
 				values.push_back(s2d(value));
 			}
 		}
-		PDATA.values = values;
-		for(uint i=0;i<prodDataVector.size();i++){
-			if(prodDataVector[i].parName == PDATA.parName
-			   && prodDataVector[i].region == PDATA.region
-			   && prodDataVector[i].prod == PDATA.prod
-			   && prodDataVector[i].freeDim == PDATA.freeDim){
-				// existing prodData..
-				prodDataVector[i].values = PDATA.values;
-				found = true;
-				break;
-			}
-		}
-		if(!found){
-			// new one, adding it
-			prodDataVector.push_back(PDATA);
-			//giving a link to it to its own region:
-			getRegion(PDATA.region)->addProdData(&PDATA);
-		}
+		//PDATA.values = values;
+		//for(uint i=0;i<prodDataVector.size();i++){
+		//	if(prodDataVector[i].parName == PDATA.parName
+		//	   && prodDataVector[i].region == PDATA.region
+		//	   && prodDataVector[i].prod == PDATA.prod
+		//	   && prodDataVector[i].freeDim == PDATA.freeDim){
+		//		// existing prodData..
+		//		prodDataVector[i].values = PDATA.values;
+		//		found = true;
+		//		break;
+		//	}
+		//}
+		//if(!found){
+		//	// new one, adding it
+		//	prodDataVector.push_back(PDATA);
+		//	//giving a link to it to its own region:
+		//	getRegion(PDATA.region)->addProdData(&PDATA);
+		//}
 
 		map <string, vector < double > >::iterator p;
 		p=prodDataMap.find(keys);
 		if(p != prodDataMap.end()) {
+			// updating an existing record
 			p->second = values;
 		}
 		else {
@@ -519,11 +523,18 @@ ModelData::setReclassificationRules(){
 	}
 }
 
+/// Cancel all reg1 level data and trasform them in reg2 level if not already existing
 void
 ModelData::applyOverrides(){
 
 	if(!getBoolSetting("applyOverriding")) return;
 	msgOut(MSG_INFO, "Starting regional overriding analysis..");
+
+	DataMap::iterator p;
+	string parName,prod,freeDim,key;
+	int regId;
+	DataMap toBeAdded;
+
 
 	//apply override from level 0 to level 1 for forestry data
 	for(uint i=0;i<forDataVector.size();i++){
@@ -586,66 +597,46 @@ ModelData::applyOverrides(){
 		}
 	}
 
+
 	//apply override from level 0 to level 1 for production data
-	for(uint i=0;i<prodDataVector.size();i++){
-		if(prodDataVector[i].region == 0){
-			for(uint j=0;j<getRegion(prodDataVector[i].region)->getNChildren(false);j++){
-				vector<ModelRegion*> childs = getRegion(prodDataVector[i].region)->getChildren(false);
-				bool found = 0;
-				for(uint z=0;z<prodDataVector.size();z++){
-					if(   prodDataVector[z].parName == prodDataVector[i].parName
-					   && prodDataVector[z].region == childs[j]->getRegId()
-					   && prodDataVector[z].prod == prodDataVector[i].prod
-					   && prodDataVector[z].freeDim == prodDataVector[i].freeDim
-					){
-						found = true; // do nothing, this child has been already manually overritten
-						break;
-					}
-				}
-				if(!found){
-					prodData PD;
-					PD.parName   = prodDataVector[i].parName;
-					PD.region    = childs[j]->getRegId();
-					PD.prod   = prodDataVector[i].prod;
-					PD.freeDim = prodDataVector[i].freeDim;
-					PD.values    = prodDataVector[i].values;
-					prodDataVector.push_back(PD);
+	toBeAdded.clear();
+	for(p=prodDataMap.begin();p!=prodDataMap.end();p++){
+		unpackKeyProdData(p->first,parName,regId,prod,freeDim);
+		if(getRegion(regId)->getRegLevel() == 0){
+			for(uint j=0;j<getRegion(regId)->getNChildren(false);j++){
+				vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
+				bool found = false;
+				key = makeKeyProdData(parName,i2s(childs[j]->getRegId()),prod,freeDim);
+				if (!dataMapCheckExist(prodDataMap,key,true)){
+					toBeAdded.insert(DataPair(key,p->second));
 				}
 			}
-			prodDataVector.erase(prodDataVector.begin()+i);
-			i--;
+			prodDataMap.erase(p);
+			p--;
 		}
 	}
+	prodDataMap.insert(toBeAdded.begin(),toBeAdded.end());
+
+
 	//apply override from level 1 to level 2 for production data
-	for(uint i=0;i<prodDataVector.size();i++){
-		if(getRegion(prodDataVector[i].region)->getRegLevel() == 1){
-			for(uint j=0;j<getRegion(prodDataVector[i].region)->getNChildren(false);j++){
-				vector<ModelRegion*> childs = getRegion(prodDataVector[i].region)->getChildren(false);
-				bool found = 0;
-				for(uint z=0;z<prodDataVector.size();z++){
-					if(   prodDataVector[z].parName == prodDataVector[i].parName
-					   && prodDataVector[z].region == childs[j]->getRegId()
-					   && prodDataVector[z].prod == prodDataVector[i].prod
-					   && prodDataVector[z].freeDim == prodDataVector[i].freeDim
-					){
-						found = true; // do nothing, this child has been already manually overritten
-						break;
-					}
-				}
-				if(!found){
-					prodData PD;
-					PD.parName   = prodDataVector[i].parName;
-					PD.region    = childs[j]->getRegId();
-					PD.prod   = prodDataVector[i].prod;
-					PD.freeDim = prodDataVector[i].freeDim;
-					PD.values    = prodDataVector[i].values;
-					prodDataVector.push_back(PD);
+	toBeAdded.clear();
+	for(p=prodDataMap.begin();p!=prodDataMap.end();p++){
+		string debug = p->first;
+		unpackKeyProdData(p->first,parName,regId,prod,freeDim);
+		if(getRegion(regId)->getRegLevel() == 1){
+			for(uint j=0;j<getRegion(regId)->getNChildren(false);j++){
+				vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
+				bool found = false;
+				key = makeKeyProdData(parName,i2s(childs[j]->getRegId()),prod,freeDim);
+				if (!dataMapCheckExist(prodDataMap,key,true)){
+					toBeAdded.insert(DataPair(key,p->second));
 				}
 			}
-			prodDataVector.erase(prodDataVector.begin()+i);
-			i--;
+			prodDataMap.erase(p);
+			p--;
 		}
 	}
+	prodDataMap.insert(toBeAdded.begin(),toBeAdded.end());
 
 	//apply override from level 0 to level 1 for reclassification rules
 	for(uint i=0;i<reclRules.size();i++){
@@ -889,9 +880,6 @@ It addmits the following "filters":
 @regId_h Look for specific level 2 region.
 @prodId_h Product. It accept three keywords, for summing up all products, primary products or secondary products, namelly PROD_ALL, PROD_PRI, PROD_SEC.
 @year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
-Changed 20120725:
-@freeDim_h If specified, look exactly for it, otherwise get only data without freeDimension.
-Old:
 @freeDim_h If specified, look exactly for it, otherwise simply doesn't filter for it.
 
 */
@@ -928,7 +916,7 @@ ModelData::getProdData(const string &type_h, int regId_h, const string &prodId_h
 	return value;
 	*/
 	string keys;
-	map <string, vector <double> >::const_iterator p;
+	DataMap::const_iterator p;
 	vector <string> priProducts;
 	vector <string> secProducts;
 	vector <string> allProducts;
@@ -937,22 +925,17 @@ ModelData::getProdData(const string &type_h, int regId_h, const string &prodId_h
 	if (prodId_h == PROD_PRI){
 		priProducts = getStringVectorSetting("priProducts");
 		for(uint i=0;i<priProducts.size();i++){
-			keys = type_h+i2s(regId_h)+priProducts[i]+freeDim_h;
-			p=prodDataMap.find(keys);
-			if(p != prodDataMap.end()) {
-				value += getTimedData(p->second, year);
-				found = true;
-			}
+			keys = makeKeyProdData(type_h,i2s(regId_h),priProducts[i],freeDim_h);
+			value += dataMapGetValue(prodDataMap,keys,year);
+			if(tempBool) found = true;
+
 		}
 	} else if (prodId_h == PROD_SEC){
 		secProducts = getStringVectorSetting("secProducts");
 		for(uint i=0;i<secProducts.size();i++){
-			keys = type_h+i2s(regId_h)+secProducts[i]+freeDim_h;
-			p=prodDataMap.find(keys);
-			if(p != prodDataMap.end()) {
-				value += getTimedData(p->second, year);
-				found = true;
-			}
+			keys = makeKeyProdData(type_h,i2s(regId_h),secProducts[i],freeDim_h);
+			value += dataMapGetValue(prodDataMap,keys,year);
+			if(tempBool) found = true;
 		}
 	}  else if (prodId_h == PROD_ALL){
 		priProducts = getStringVectorSetting("priProducts");
@@ -960,23 +943,16 @@ ModelData::getProdData(const string &type_h, int regId_h, const string &prodId_h
 		allProducts = priProducts;
 		allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
 		for(uint i=0;i<allProducts.size();i++){
-			keys = type_h+i2s(regId_h)+allProducts[i]+freeDim_h;
-			p=prodDataMap.find(keys);
-			if(p != prodDataMap.end()) {
-				value += getTimedData(p->second, year);
-				found = true;
-			}
+			keys = makeKeyProdData(type_h,i2s(regId_h),allProducts[i],freeDim_h);
+			value += dataMapGetValue(prodDataMap,keys,year);
+			if(tempBool) found = true;
+
 		}
 
 	} else {
-		keys = type_h+i2s(regId_h)+prodId_h+freeDim_h;
-		p=prodDataMap.find(keys);
-		if(p != prodDataMap.end()) {
-			return getTimedData(p->second, year);
-			found = true;
-		}
-
-
+		keys = makeKeyProdData(type_h,i2s(regId_h),prodId_h,freeDim_h);
+		value = dataMapGetValue(prodDataMap,keys,year);
+		if(tempBool) return value;
 	}
 
 	if(!found){
@@ -1044,8 +1020,11 @@ It addmits the following "filters":
 void
 ModelData::setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year, bool allowCreate, const string &freeDim_h){
 	vector<int> regIds;
-	vector <string> priProducts = getStringVectorSetting("priProducts");
-	vector <string> secProducts = getStringVectorSetting("secProducts");
+	vector <string> priProducts;
+	vector <string> secProducts;
+	vector <string> allProducts;
+	string keys;
+	DataMap::const_iterator p;
 
 	// Make sure to set the new value to all l2 regions if requested fora reg1 level
 	if(getRegion(regId_h)->getRegLevel()==2){
@@ -1061,39 +1040,43 @@ ModelData::setProdData(double value_h, const string &type_h, int regId_h, const 
 	if(year==DATA_NOW){
 		year=MTHREAD->SCD->getYear();
 	}
-	bool found = false;
+	bool found = false;	
 
-	for(uint i=0;i<prodDataVector.size();i++){
-		if(prodDataVector[i].parName == type_h // name of parameter filter
-		  && (prodDataVector[i].prod == prodId_h
-			|| prodId_h == PROD_ALL // product filter
-			|| (prodId_h == PROD_PRI  && find(priProducts.begin(), priProducts.end(), prodDataVector[i].prod)!= priProducts.end() )
-			|| (prodId_h == PROD_SEC  && find(secProducts.begin(), secProducts.end(), prodDataVector[i].prod)!= secProducts.end() ) )
-		  && (find(regIds.begin(), regIds.end(), prodDataVector[i].region)!= regIds.end()) // region filter
-		  && (freeDim_h == "" || freeDim_h == prodDataVector[i].freeDim) // free dimension filter
-		){
-		 setTimedData(value_h, prodDataVector[i].values, year);
-		 found = true;
+	for(uint r=0;r< regIds.size();r++){
+		if (prodId_h == PROD_PRI){
+			priProducts = getStringVectorSetting("priProducts");
+			for(uint i=0;i<priProducts.size();i++){
+				keys = makeKeyProdData(type_h,i2s(regIds[r]),priProducts[i],freeDim_h);
+				dataMapSetValue(prodDataMap,keys,value_h, year);
+				if(tempBool) found = true;
+			}
+		} else if (prodId_h == PROD_SEC){
+			secProducts = getStringVectorSetting("secProducts");
+			for(uint i=0;i<secProducts.size();i++){
+				keys = makeKeyProdData(type_h,i2s(regIds[r]),secProducts[i],freeDim_h);
+				dataMapSetValue(prodDataMap,keys,value_h, year);
+				if(tempBool) found = true;
+			}
+		} else if (prodId_h == PROD_ALL){
+			priProducts = getStringVectorSetting("priProducts");
+			secProducts = getStringVectorSetting("secProducts");
+			allProducts = priProducts;
+			allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
+			for(uint i=0;i<allProducts.size();i++){
+				keys = makeKeyProdData(type_h,i2s(regIds[r]),allProducts[i],freeDim_h);
+				dataMapSetValue(prodDataMap,keys,value_h,year);
+				if(tempBool) found = true;
+			}
+		} else {
+			keys = makeKeyProdData(type_h,i2s(regIds[r]),prodId_h,freeDim_h);
+			dataMapSetValue(prodDataMap,keys,value_h,year);
+			if(tempBool) found = true;
 		}
 	}
-	if(!found){
-		if(!allowCreate){
-			msgOut(MSG_CRITICAL_ERROR, "Error in setProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
-		}
-		if(prodId_h == PROD_ALL || prodId_h == PROD_SEC || prodId_h == PROD_PRI){
-			msgOut(MSG_CRITICAL_ERROR, "Keywords for multiple products not allowed in new prodData generation.");
-		}
-		for(uint i=0; i<regIds.size(); i++){
-			prodData PD;
-			PD.parName = type_h;
-			PD.region = regIds[i];
-			PD.prod = prodId_h;
-			PD.freeDim = freeDim_h;
-			vector<double> emptyVector;
-			PD.values = emptyVector;
-			setTimedData(value_h, PD.values, year, MSG_NO_MSG); // don't warning if we are making a multi-year value vector, as it is a new one
-			prodDataVector.push_back(PD); // TODO: testing
-		}
+
+
+	if(!found && !allowCreate ){
+		msgOut(MSG_CRITICAL_ERROR, "Error in setProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
 	}
 };
 
@@ -1459,6 +1442,118 @@ ModelData::getTable(string tableName_h, int debugLevel){
 }
 
 
+bool
+ModelData::dataMapCheckExist(const DataMap& map, const string& search_for, bool exactMatch){
+	/*int dummyYear=MTHREAD->SCD->getYear();
+	if(dataMapGetValue(map, search_for, dummyYear, exactMatch)==DATA_ERROR) {
+		return false;
+	} else {
+		return true;
+	}
+	return false;
+}*/
+	bool found = false;
+	DataMap::const_iterator i;
+	if(!exactMatch){
+		i = map.lower_bound(search_for);
+		for(;i != map.end();i++){
+			const string& key = i->first;
+			if (key.compare(0, search_for.size(), search_for) == 0) {// Really a prefix?
+					return true;
+			} else {
+				return false;
+			}
+		}
+	} else {
+		i = map.find(search_for);
+		if (i!=map.end()){
+			return true;
+		}
+	}
+	return false;
+}
+
+
+double
+ModelData::dataMapGetValue(const DataMap& map, const string& search_for, int year_h, bool exactMatch) {
+	double toReturn = 0;
+	tempBool = false;
+	DataMap::const_iterator i;
+	if(!exactMatch){
+		i = map.lower_bound(search_for);
+		for(;i != map.end();i++){
+			const string& key = i->first;
+			if (key.compare(0, search_for.size(), search_for) == 0) {// Really a prefix?
+					tempBool = true;
+					toReturn += getTimedData( i->second, year_h );
+			} else {
+				break;
+			}
+		}
+	} else {
+		i = map.find(search_for);
+		if (i!=map.end()){
+			tempBool = true;
+			return  getTimedData( i->second, year_h );
+		}
+	}
+	return toReturn;
+}
+
+
+
+void
+ModelData::dataMapSetValue( DataMap& map, const string& search_for, double value_h, int year_h, bool exactMatch){
+	tempBool = false;
+	DataMap::iterator i;
+	if(!exactMatch){
+		i = map.lower_bound(search_for);
+		for(;i != map.end();i++){
+			const string& key = i->first;
+			if (key.compare(0, search_for.size(), search_for) == 0) {// Really a prefix?
+					tempBool = true;
+					setTimedData(value_h, i->second, year_h);
+			} else {
+				break;
+			}
+		}
+	} else {
+		i = map.find(search_for);
+		if (i!=map.end()){
+			tempBool = true;
+			setTimedData(value_h, i->second, year_h);
+		}
+	}
+	if(!tempBool){
+		vector < double> newValues;
+		setTimedData(value_h, newValues, year_h, MSG_NO_MSG); // don't warning if we are making a multi-year value vector, as it is a new one
+		map.insert(DataPair (search_for,newValues));
+	}
+}
+
+string
+ModelData::makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim){
+	return parName+"#"+regId+"#"+prod+"#"+freeDim+"#";
+}
+
+void
+ModelData::unpackKeyProdData(const string& key, string& parName, int& regId, string& prod, string& freeDim){
+
+	int parNameDelimiter = key.find("#",0);
+	int regIdDelimiter = key.find("#",parNameDelimiter+1);
+	int prodDelimiter = key.find("#",regIdDelimiter+1);
+	int freeDimDelimiter = key.find("#",prodDelimiter+1);
+	if (freeDimDelimiter == string::npos){
+		msgOut(MSG_CRITICAL_ERROR, "Error in unpacking a key in the map of production data.");
+	}
+	parName.assign(key,0,parNameDelimiter);
+	string regIdString="";
+	regIdString.assign(key,parNameDelimiter+1,regIdDelimiter-parNameDelimiter-1);
+	regId = s2i(regIdString);
+	prod.assign(key,regIdDelimiter+1,prodDelimiter-regIdDelimiter-1);
+	freeDim.assign(key,prodDelimiter+1,freeDimDelimiter-prodDelimiter-1);
+
+}
 
 // ========================== LLData =======================================
 

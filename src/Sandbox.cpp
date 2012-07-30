@@ -19,10 +19,14 @@
  ***************************************************************************/
 #include <algorithm>
 
-#include "Sandbox.h"
-#include "ThreadManager.h"
 #include <cmath>
 #include <algorithm>
+#include <map>
+
+#include "Sandbox.h"
+#include "ThreadManager.h"
+#include "ModelData.h"
+
 
 
 
@@ -44,6 +48,8 @@
 #include "Adolc_debugtest.h"
 
 
+typedef map<string, string> TStrStrMap;
+typedef pair<string, string> TStrStrPair;
 
 using namespace std;
 
@@ -98,8 +104,9 @@ struct GccTest
 
 // --------------------------------------
 void
-Sandbox::runSimpleTests(){
+Sandbox::basicTest(){
 
+	//testPartMatching();
 	/*
 	// -------------------------------------------------------------------
 	// Testing how to erase elements from a vector according to conditions
@@ -132,8 +139,72 @@ Sandbox::runSimpleTests(){
 }
 
 void
-Sandbox::test(){
+Sandbox::fullTest(){
 
+/*
+// ------------------------------------
+// Testing makeKeyProdData() and unpackKeyProdData()
+	string parName = "za";
+	int regId = 20000;
+	string prod = "wood";
+	string freeDim = "";
+	string key = MTHREAD->MD->makeKeyProdData(parName,i2s(regId),prod,freeDim);
+	cout << "key: " << key << endl;
+	MTHREAD->MD->unpackKeyProdData(key,parName,regId,prod,freeDim);
+	cout << "parName: " << parName << endl;
+	cout << "regId: " << regId << endl;
+	cout << "prod: " << prod << endl;
+	cout << "freeDim: " << freeDim << endl;
+	exit(0);
+*/
+
+/*
+// ---------------------------------------------
+// checking the functions dataMapCheckExist() and dataMapGetValue() works well
+typedef map<string, vector <double> > DataMap;
+typedef pair<string, vector <double> > DataPair;
+
+vector <double> abaa (5, 1.);
+vector <double> abcc (5,10);
+vector <double> anbb (5,100);
+vector <double> andd (5,5);
+vector <double> anff (5,3);
+vector <double> ag (5,2);
+vector <double> agii (5,7);
+
+
+
+DataMap dM;
+dM.insert(DataPair("abaa", abaa));
+dM.insert(DataPair("abcc", abcc));
+dM.insert(DataPair("anbb", anbb));
+dM.insert(DataPair("andd", andd));
+dM.insert(DataPair("anff", anff));
+dM.insert(DataPair("ag", ag));
+dM.insert(DataPair("agii", agii));
+
+vector<string> tests;
+tests.push_back("ab");
+tests.push_back("anbb");
+tests.push_back("ane");
+tests.push_back("an");
+tests.push_back("ac");
+tests.push_back("ag");
+tests.push_back("agii");
+tests.push_back("al");
+
+
+bool found;
+double value;
+
+for(uint i=0;i<tests.size();i++){
+	found = MTHREAD->MD->dataMapCheckExist(dM, tests[i]);
+	value = MTHREAD->MD->dataMapGetValue(dM, tests[i],2010);
+	cout << tests[i] << ": " << b2s(found) << " value: "<< value << endl;
+}
+
+exit(0);
+*/
 
 
 	/*
@@ -782,4 +853,70 @@ Sandbox::testAdolc(){
 
   return (int) status;
 }
+
+// ------------------------------------------------------------------
+// How to partial matching the key of a map
+
+/*TStrStrMap::iterator
+Sandbox::FindPrefix(const TStrStrMap& map, const string& search_for) {
+		TStrStrMap::iterator i = map.lower_bound(search_for);
+		if (i != map.end()) {
+				const string& key = i->first;
+				if (key.compare(0, search_for.size(), search_for) == 0) // Really a prefix?
+						return i;
+		}
+		return map.end();
+}
+*/
+
+/*
+void
+Sandbox::testSearchMap(const TStrStrMap& map, const string& search_for) {
+	 cout << search_for;
+		TStrStrMap::iterator i = FindPrefix(map, search_for);
+		if (i != map.end())
+				cout << '\t' << i->first << ", " << i->second;
+		cout << endl;
+
+}
+*/
+
+void
+Sandbox::testSearchMap(const TStrStrMap& map, const string& search_for) {
+	TStrStrMap::const_iterator i = map.lower_bound(search_for);
+	for(;i != map.end();i++){
+		const string& key = i->first;
+		if (key.compare(0, search_for.size(), search_for) == 0) {// Really a prefix?
+				cout << i->first << ", " << i->second << endl;
+		} else {
+			break;
+		}
+	}
+
+}
+
+
+void
+Sandbox::testPartMatching(){
+
+		TStrStrMap tMap;
+
+		tMap.insert(TStrStrPair("John", "AA"));
+		tMap.insert(TStrStrPair("Mary", "BBB"));
+		tMap.insert(TStrStrPair("Mother", "A"));
+		tMap.insert(TStrStrPair("Moliere", "D"));
+		tMap.insert(TStrStrPair("Marlon", "C"));
+
+		testSearchMap(tMap, "Marl");
+		testSearchMap(tMap, "Mo");
+		testSearchMap(tMap, "ther");
+		testSearchMap(tMap, "Mad");
+		testSearchMap(tMap, "Mom");
+		testSearchMap(tMap, "Perr");
+		testSearchMap(tMap, "Jo");
+
+		return;
+}
+
+
 

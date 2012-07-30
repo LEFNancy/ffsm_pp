@@ -26,6 +26,7 @@
 #include "Output.h"
 #include "ModelCore.h"
 #include "Opt.h"
+#include "Sandbox.h"
 
 //using namespace std;
 
@@ -93,6 +94,7 @@ Init::setInitLevel1(){
 	msgOut(MSG_DEBUG,out.str());
 	MTHREAD->MD->setDefaultSettings();
 	MTHREAD->MD->setScenarioSettings();
+	MTHREAD->TEST->fullTest(); // normally empty function
 	MTHREAD->MD->createRegions();
 	MTHREAD->MD->setDefaultForData();
 	MTHREAD->MD->setScenarioForData();
@@ -110,6 +112,7 @@ Init::setInitLevel1(){
 	}
 	MTHREAD->GIS->setSpace();
 	MTHREAD->GIS->applyForestReclassification();
+
 
 };
 

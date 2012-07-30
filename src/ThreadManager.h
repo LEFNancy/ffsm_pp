@@ -46,6 +46,7 @@ class Scheduler;
 class Output;
 class ModelCore;
 class Opt;
+class Sandbox;
 
 using namespace std;
 
@@ -68,6 +69,7 @@ public:
 	Scheduler*          SCD;  ///< the scheduler object (simulation-loops scheduler)
 	Output*             DO;   ///< data output
 	ModelCore*          CORE; ///< Core of the model
+	Sandbox*            TEST; ///< Various debugging code for development
 	Ipopt::SmartPtr <Ipopt::TNLP>      OPT;  ///< Market optimisation
 
 	void                setMessage(const QString &message);
@@ -94,6 +96,8 @@ public:
 	void                setGISPointer(Gis *GIS_h){GIS=GIS_h;};
 	/// the Init object, it schedule the pre-simulation phase..
 	void                setINITPointer(Init *INIT_h){INIT=INIT_h;};
+	/// the sandbox object for within-development quick tests
+	void                setTestPointer(Sandbox *TEST_h){TEST=TEST_h;};
 	/// the scheduler object. It manage the simulation loops..
 	void                setSCDPointer(Scheduler *SCD_h){SCD=SCD_h;};
 	/// manage the printing of data needed for scenario-analisys. The "message output" (needed to see "what is it happening?" are instead simply printed with msgOut()..
