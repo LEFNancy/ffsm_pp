@@ -148,11 +148,14 @@ private:
 
 	vector <forData>                         forDataVector; ///< Forestry data
 	vector <prodData>                       prodDataVector; ///< Product data
+	map <string, vector<double> >              prodDataMap; ///< Cached values of product data
+	vector <forToProd>                     forToProdVector; ///< Vector of coefficients from forest resources to primary products
+
 	vector <IFiles>                           iFilesVector; ///< List of all input files. Simple (struct)
 	vector <BasicData>               programSettingsVector; ///< Setting data. Simple (struct)
 	vector <LLData>                           LLDataVector; ///< Vector of Low Level Data
 	vector <ModelRegion>                     regionsVector; ///< Vector of modelled regions
-	vector <forToProd>                     forToProdVector; ///< Vector of coefficients from forest resources to primary products
+
 	vector <forType>                              forTypes; ///< Vector of forest types
 	vector <reclRule>                            reclRules; ///< Vector of reclassification rules
 	vector < vector <int> >                            l2r; ///< Region2 ids

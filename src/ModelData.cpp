@@ -415,6 +415,8 @@ ModelData::setDefaultProdData(){
 		}
 		PDATA.values = values;
 		prodDataVector.push_back(PDATA);
+		string keys = table.getData(i,"parName")+table.getData(i,"region")+table.getData(i,"prod")+table.getData(i,"freeDim");
+		prodDataMap.insert(std::pair<string, vector<double> >(keys, values));
 		//giving a link to it to its own region:
 		getRegion(PDATA.region)->addProdData(&PDATA);
 	}
@@ -430,6 +432,7 @@ ModelData::setScenarioProdData(){
 	for(int i=0; i< table.nrecords(); i++){
 		prodData PDATA;
 		bool found = false;
+		string keys = table.getData(i,"parName")+table.getData(i,"region")+table.getData(i,"prod")+table.getData(i,"freeDim");
 
 		PDATA.parName = table.getData(i,"parName");
 		PDATA.region = s2i(table.getData(i,"region"));
@@ -460,6 +463,16 @@ ModelData::setScenarioProdData(){
 			prodDataVector.push_back(PDATA);
 			//giving a link to it to its own region:
 			getRegion(PDATA.region)->addProdData(&PDATA);
+		}
+
+		map <string, vector < double > >::iterator p;
+		p=prodDataMap.find(keys);
+		if(p != prodDataMap.end()) {
+			p->second = values;
+		}
+		else {
+			// new one, adding it
+			prodDataMap.insert(std::pair<string, vector<double> >(keys, values));
 		}
 	}
 }
@@ -876,18 +889,25 @@ It addmits the following "filters":
 @regId_h Look for specific level 2 region.
 @prodId_h Product. It accept three keywords, for summing up all products, primary products or secondary products, namelly PROD_ALL, PROD_PRI, PROD_SEC.
 @year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
+Changed 20120725:
+@freeDim_h If specified, look exactly for it, otherwise get only data without freeDimension.
+Old:
 @freeDim_h If specified, look exactly for it, otherwise simply doesn't filter for it.
 
 */
 const double
 ModelData::getProdData(const string &type_h, int regId_h, const string &prodId_h, int year, const string &freeDim_h){
-	vector <string> priProducts = getStringVectorSetting("priProducts");
-	vector <string> secProducts = getStringVectorSetting("secProducts");
 	if(year==DATA_NOW){
 		year=MTHREAD->SCD->getYear();
 	}
-	bool found = false;
 	double value=0;
+
+	/*
+	vector <string> priProducts = getStringVectorSetting("priProducts");
+	vector <string> secProducts = getStringVectorSetting("secProducts");
+
+	bool found = false;
+
 	for(uint i=0;i<prodDataVector.size();i++){
 		if(prodDataVector[i].parName == type_h // name of parameter filter
 		  && (prodDataVector[i].prod == prodId_h
@@ -906,6 +926,65 @@ ModelData::getProdData(const string &type_h, int regId_h, const string &prodId_h
 		msgOut(MSG_ERROR, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
 	}
 	return value;
+	*/
+	string keys;
+	map <string, vector <double> >::const_iterator p;
+	vector <string> priProducts;
+	vector <string> secProducts;
+	vector <string> allProducts;
+	bool found = false;
+
+	if (prodId_h == PROD_PRI){
+		priProducts = getStringVectorSetting("priProducts");
+		for(uint i=0;i<priProducts.size();i++){
+			keys = type_h+i2s(regId_h)+priProducts[i]+freeDim_h;
+			p=prodDataMap.find(keys);
+			if(p != prodDataMap.end()) {
+				value += getTimedData(p->second, year);
+				found = true;
+			}
+		}
+	} else if (prodId_h == PROD_SEC){
+		secProducts = getStringVectorSetting("secProducts");
+		for(uint i=0;i<secProducts.size();i++){
+			keys = type_h+i2s(regId_h)+secProducts[i]+freeDim_h;
+			p=prodDataMap.find(keys);
+			if(p != prodDataMap.end()) {
+				value += getTimedData(p->second, year);
+				found = true;
+			}
+		}
+	}  else if (prodId_h == PROD_ALL){
+		priProducts = getStringVectorSetting("priProducts");
+		secProducts = getStringVectorSetting("secProducts");
+		allProducts = priProducts;
+		allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
+		for(uint i=0;i<allProducts.size();i++){
+			keys = type_h+i2s(regId_h)+allProducts[i]+freeDim_h;
+			p=prodDataMap.find(keys);
+			if(p != prodDataMap.end()) {
+				value += getTimedData(p->second, year);
+				found = true;
+			}
+		}
+
+	} else {
+		keys = type_h+i2s(regId_h)+prodId_h+freeDim_h;
+		p=prodDataMap.find(keys);
+		if(p != prodDataMap.end()) {
+			return getTimedData(p->second, year);
+			found = true;
+		}
+
+
+	}
+
+	if(!found){
+		msgOut(MSG_ERROR, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
+	}
+	return value;
+
+
 };
 
 /**
