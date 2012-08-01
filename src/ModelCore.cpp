@@ -297,7 +297,7 @@ ModelCore::runSimulationYear(){
 			double gamma = gpd("gamma",r2,priProducts[pp]);
 			double sigma = gpd("sigma",r2,priProducts[pp]);
 			double pc_1  = gpd("pc",r2,priProducts[pp],previousYear);
-			double sc_1  = gpd("pc",r2,priProducts[pp],previousYear);
+			double sc_1  = gpd("sc",r2,priProducts[pp],previousYear);
 			double in    = gpd("in",r2,priProducts[pp]);
 			double in_1  = gpd("in",r2,priProducts[pp],previousYear);
 

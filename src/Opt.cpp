@@ -887,7 +887,6 @@ Opt:: debugPrintParameters(){
 	normalPar.push_back("eta");
 	normalPar.push_back("k");
 	normalPar.push_back("dispor");
-	normalPar.push_back("mv");
 
 	vector <string> freeDimParProduct;
 	freeDimParProduct.push_back("a_pr");
