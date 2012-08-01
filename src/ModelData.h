@@ -158,8 +158,9 @@ private:
 	string                                   baseDirectory; // from Qt fileOpen dialog
 
 	vector <forData>                         forDataVector; ///< Forestry data
-	vector <prodData>                       prodDataVector; ///< Product data
-	map <string, vector<double> >              prodDataMap; ///< Cached values of product data
+	map <string, vector<double> >               forDataMap; ///< Forestry data
+	//vector <prodData>                       prodDataVector; ///< Product data
+	map <string, vector<double> >              prodDataMap; ///< Product data
 	vector <forToProd>                     forToProdVector; ///< Vector of coefficients from forest resources to primary products
 
 	vector <IFiles>                           iFilesVector; ///< List of all input files. Simple (struct)
@@ -221,13 +222,13 @@ struct forData {
 /**
 Struct containing the product-based data. This data is stored here but also each region has a link to its own data.
 */
-struct prodData {
+/*struct prodData {
 	string                                         parName;
 	int                                             region;
 	string                                            prod;
 	string                                         freeDim;
 	vector<double>                                  values;
-};
+};*/
 /// IO production matrix between the forest resources and the primary products (struct)
 /**
 Struct containing the io matrix between the forest resources and the primary products. Not to be confunded with the IO matrix between primary products and secondary products.

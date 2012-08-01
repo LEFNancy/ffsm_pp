@@ -151,6 +151,9 @@ private:
 	int                             previousYear;
 	int                                firstYear;
 	int                            worldCodeLev2;
+	bool                            debugRunOnce;
+	void                debugPrintParameters();
+	bool                                 initOpt;
 
 
 	/**@name Methods to block default compiler methods.

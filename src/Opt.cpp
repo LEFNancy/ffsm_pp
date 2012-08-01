@@ -38,6 +38,8 @@ Opt::Opt(ThreadManager* MTHREAD_h){
 	MTHREAD = MTHREAD_h;
 	nVar    = 0;
 	nCons   = 0;
+	debugRunOnce = false;
+	initOpt = true;
 }
 
 Opt::~Opt(){
@@ -50,8 +52,8 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 									Index& nnz_h_lag, IndexStyleEnum& index_style){
 
 
-	if(MTHREAD->SCD->getIteration()==0){
-		// does this caching thing only once
+	if(initOpt){
+		// does this initialisation code only once
 		priPr = MTHREAD->MD->getStringVectorSetting("priProducts");
 		secPr = MTHREAD->MD->getStringVectorSetting("secProducts");
 		allPr = priPr;
@@ -231,7 +233,8 @@ exit(0);
 
 		msgOut(MSG_INFO,"The model will work with "+i2s(nVar)+" variables and "+i2s(nCons)+" constrains.");
 
-
+		debugPrintParameters();
+		initOpt=false;
 	} // finish initialisation things to be done only the first year
 
 	previousYear = MTHREAD->SCD->getYear()-1; // this has to be done EVERY years !!
@@ -296,7 +299,7 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 	assert(init_lambda == false);
 
 	map<string, int>::iterator viter;
-	cout << "varname;regId;prd;value;freeDim" << endl;
+	//cout << "varname;regId;prd;value;freeDim" << endl;
 	// fixing the starting points for each variable at the level of the previous years
 	for (viter = vars.begin(); viter != vars.end(); ++viter) {
 		//string debugs = viter->first;
@@ -352,7 +355,7 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 template<class T> bool
 Opt::eval_obj(Index n, const T *x, T& obj_value){
 
-	double aa, bb, dc0, sigma, pc, a_pr, ct, m;
+	double aa, bb, dc0, sigma, a_pr, ct, m;
 	obj_value = 0.;
 
 	for (uint r1=0;r1<l2r.size();r1++){
@@ -643,7 +646,7 @@ Opt::eval_jac_g(Index n, const Number* x, bool new_x,Index m, Index nele_jac,
 bool
 Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, const Number* lambda,
 						bool new_lambda, Index nele_hess, Index* iRow, Index* jCol, Number* values){
-/*
+
 	if (values == NULL) {
 		// return the structure. This is a symmetric matrix, fill the lower left
 		// triangle only.
@@ -684,8 +687,8 @@ Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, co
 	}
 
 	return true;
-*/
-	return false;
+
+//	return false;
 }
 
 void
@@ -868,4 +871,82 @@ Opt::gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo){
 	}
 }
 
+void
+Opt:: debugPrintParameters(){
+
+	vector <string> normalPar;
+	normalPar.push_back("aa");
+	normalPar.push_back("bb");
+	normalPar.push_back("sigma");
+	normalPar.push_back("m");
+	normalPar.push_back("ff");
+	normalPar.push_back("gg");
+	normalPar.push_back("q1");
+	normalPar.push_back("t1");
+	normalPar.push_back("psi");
+	normalPar.push_back("eta");
+	normalPar.push_back("k");
+	normalPar.push_back("dispor");
+	normalPar.push_back("mv");
+
+	vector <string> freeDimParProduct;
+	freeDimParProduct.push_back("a_pr");
+	freeDimParProduct.push_back("a");
+
+	// to be managed individually: dc0, pworld, ct
+
+	cout <<"CURRENT YEAR: "<<MTHREAD->SCD->getYear()<<endl;
+	cout <<"parName;regId;prod;value;freeDim;"<<endl;
+	for(uint par=0;par<normalPar.size();par++){
+		for(uint r1=0;r1<l2r.size();r1++){
+			for(uint r2=0;r2<l2r[r1].size();r2++){
+				for(uint p=0;p<allPr.size();p++){
+					double value = gpd(normalPar[par],l2r[r1][r2],allPr[p]);
+					cout <<normalPar[par]<<";"<<l2r[r1][r2]<<";"<<allPr[p]<<";"<<value<<";;"<<endl;
+				}
+			}
+		}
+	}
+
+	for(uint par=0;par<freeDimParProduct.size();par++){
+		for(uint r1=0;r1<l2r.size();r1++){
+			for(uint r2=0;r2<l2r[r1].size();r2++){
+				for(uint p=0;p<allPr.size();p++){
+					for(uint p2=0;p2<allPr.size();p2++){
+						double value = gpd(freeDimParProduct[par],l2r[r1][r2],allPr[p],DATA_NOW,allPr[p2]);
+						cout <<freeDimParProduct[par]<<";"<<l2r[r1][r2]<<";"<<allPr[p]<<";"<<value<<";"<<allPr[p2]<<";"<<endl;
+					}
+				}
+			}
+		}
+	}
+
+
+		for(uint r1=0;r1<l2r.size();r1++){
+			for(uint r2=0;r2<l2r[r1].size();r2++){
+				for(uint p=0;p<allPr.size();p++){
+					for(uint r2to=0;r2to<l2r[r1].size();r2to++){
+						double value = gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2to]));
+						cout <<"ct"<<";"<<l2r[r1][r2]<<";"<<allPr[p]<<";"<<value<<";"<<l2r[r1][r2to]<<";"<<endl;
+					}
+				}
+			}
+		}
+
+		for(uint r1=0;r1<l2r.size();r1++){
+			for(uint r2=0;r2<l2r[r1].size();r2++){
+				for(uint p=0;p<allPr.size();p++){
+						double value = gpd("dc",l2r[r1][r2],allPr[p],firstYear);
+						cout <<"dc(2005)"<<";"<<l2r[r1][r2]<<";"<<allPr[p]<<";"<<value<<";;"<<endl;
+				}
+			}
+		}
+
+				for(uint p=0;p<allPr.size();p++){
+						double value = gpd("pl",worldCodeLev2,allPr[p]);
+						cout <<"pl(world)"<<";"<<worldCodeLev2<<";"<<allPr[p]<<";"<<value<<";;"<<endl;
+				}
+
+
+}
 

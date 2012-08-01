@@ -35,7 +35,9 @@ Scheduler::~Scheduler(){
 void
 Scheduler::run(){
 
-	for (int it=0;it<MTHREAD->MD->getIntSetting("simulationYears");it++){
+	int initialYear           = MTHREAD->MD->getIntSetting("initialYear");
+	int initialSimulationYear = MTHREAD->MD->getIntSetting("initialOptYear");
+	for (int it=initialSimulationYear-initialYear;it<MTHREAD->MD->getIntSetting("simulationYears");it++){
 		iteration = it;
 		MTHREAD->upgradeMainSBLabel("New year started..");
 		msgOut(MSG_INFO, "### "+i2s(getYear())+ " year started.. ####");

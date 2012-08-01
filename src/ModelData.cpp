@@ -534,13 +534,14 @@ ModelData::applyOverrides(){
 	string parName,prod,freeDim,key;
 	int regId;
 	DataMap toBeAdded;
+	vector <string> keysToRemove;
 
 
 	//apply override from level 0 to level 1 for forestry data
 	for(uint i=0;i<forDataVector.size();i++){
 		if(forDataVector[i].region == 0){
-			for(uint j=0;j<getRegion(forDataVector[i].region)->getNChildren(false);j++){
-				vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren(false);
+			vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren(false);
+			for(uint j=0;j<childs.size();j++){
 				bool found = 0;
 				for(uint z=0;z<forDataVector.size();z++){
 					if(   forDataVector[z].parName == forDataVector[i].parName
@@ -569,8 +570,8 @@ ModelData::applyOverrides(){
 	//apply override from level 1 to level 2 for forestry data
 	for(uint i=0;i<forDataVector.size();i++){
 		if(getRegion(forDataVector[i].region)->getRegLevel() == 1){
-			for(uint j=0;j<getRegion(forDataVector[i].region)->getNChildren(false);j++){
-				vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren(false);
+			vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren(false);
+			for(uint j=0;j<childs.size();j++){
 				bool found = 0;
 				for(uint z=0;z<forDataVector.size();z++){
 					if(   forDataVector[z].parName == forDataVector[i].parName
@@ -600,43 +601,59 @@ ModelData::applyOverrides(){
 
 	//apply override from level 0 to level 1 for production data
 	toBeAdded.clear();
+	keysToRemove.clear();
 	for(p=prodDataMap.begin();p!=prodDataMap.end();p++){
 		unpackKeyProdData(p->first,parName,regId,prod,freeDim);
 		if(getRegion(regId)->getRegLevel() == 0){
-			for(uint j=0;j<getRegion(regId)->getNChildren(false);j++){
-				vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
+			vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
+			for(uint j=0;j<childs.size();j++){
 				bool found = false;
 				key = makeKeyProdData(parName,i2s(childs[j]->getRegId()),prod,freeDim);
 				if (!dataMapCheckExist(prodDataMap,key,true)){
 					toBeAdded.insert(DataPair(key,p->second));
 				}
 			}
-			prodDataMap.erase(p);
-			p--;
+			//prodDataMap.erase(p);
+			//p--;
+			keysToRemove.push_back(p->first);
 		}
 	}
 	prodDataMap.insert(toBeAdded.begin(),toBeAdded.end());
+	for(uint i=0;i<keysToRemove.size();i++){
+		DataMap::iterator rem = prodDataMap.find(keysToRemove[i]);
+		if(rem != prodDataMap.end()){
+			prodDataMap.erase(rem);
+		}
+	}
 
 
 	//apply override from level 1 to level 2 for production data
 	toBeAdded.clear();
+	keysToRemove.clear();
 	for(p=prodDataMap.begin();p!=prodDataMap.end();p++){
 		string debug = p->first;
 		unpackKeyProdData(p->first,parName,regId,prod,freeDim);
 		if(getRegion(regId)->getRegLevel() == 1){
-			for(uint j=0;j<getRegion(regId)->getNChildren(false);j++){
-				vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
+			vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
+			for(uint j=0;j<childs.size();j++){
 				bool found = false;
 				key = makeKeyProdData(parName,i2s(childs[j]->getRegId()),prod,freeDim);
 				if (!dataMapCheckExist(prodDataMap,key,true)){
 					toBeAdded.insert(DataPair(key,p->second));
 				}
 			}
-			prodDataMap.erase(p);
-			p--;
+			//prodDataMap.erase(p);
+			//p--;
+			keysToRemove.push_back(p->first);
 		}
 	}
 	prodDataMap.insert(toBeAdded.begin(),toBeAdded.end());
+		for(uint i=0;i<keysToRemove.size();i++){
+		DataMap::iterator rem = prodDataMap.find(keysToRemove[i]);
+		if(rem != prodDataMap.end()){
+			prodDataMap.erase(rem);
+		}
+	}
 
 	//apply override from level 0 to level 1 for reclassification rules
 	for(uint i=0;i<reclRules.size();i++){

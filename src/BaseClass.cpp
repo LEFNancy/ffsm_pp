@@ -117,7 +117,12 @@ BaseClass::msgOut2(int msgCode_h, string msg_h, bool refreshGUI_h) const {
 	}
 	else {
 		string totalMsg = prefix+msg_h;
-		cout<< totalMsg <<endl;
+		if(msgCode_h==MSG_ERROR){
+			cout<< totalMsg <<";";
+		} else {
+			cout<< totalMsg <<endl;
+		}
+		//cout<< totalMsg <<endl;
 	}
 
 	if(refreshGUI_h) {refreshGUI();}
