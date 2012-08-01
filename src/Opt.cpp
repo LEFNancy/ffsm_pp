@@ -272,12 +272,12 @@ Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Nu
 		if(i<nEqualityConstrains){
 			g_l[i] = 0.;
 			g_u[i] = 0.;
-		} else if(i<nLowerEqualZeroConstrains){ // inverted as IPOPT minimize, we want maximised
-			g_l[i] = -1e20;
+		} else if(i<(nLowerEqualZeroConstrains+nEqualityConstrains)){ //bug fixed 20120801
+			g_l[i] = -2e19;
 			g_u[i] = 0.;
 		} else {
 			g_l[i] = 0.;
-			g_u[i] = 1e20;
+			g_u[i] = 2e19;
 		}
 	}
 
@@ -392,7 +392,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 					a_pr = gpd("a_pr",l2r[r1][r2],priPr[p1],DATA_NOW,priPr[p2]);
 					bb = gpd("bb",l2r[r1][r2],priPr[p2]);
 					sigma = gpd("sigma",l2r[r1][r2],priPr[p2]);
-					obj_value += x[gix("pc",r1,r2,p2)]*a_pr*x[gix("sc",r1,r2,p1)]-bb*a_pr*pow(x[gix("sc",r1,r2,p1)],(sigma+1)/sigma);
+					obj_value += x[gix("pc",r1,r2,p2)]*a_pr*x[gix("sc",r1,r2,p1)]-bb*pow(a_pr*x[gix("sc",r1,r2,p1)],(sigma+1)/sigma);
 				}
 			}
 			//  // surplus of transport agents..
@@ -646,7 +646,7 @@ Opt::eval_jac_g(Index n, const Number* x, bool new_x,Index m, Index nele_jac,
 bool
 Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, const Number* lambda,
 						bool new_lambda, Index nele_hess, Index* iRow, Index* jCol, Number* values){
-
+/*
 	if (values == NULL) {
 		// return the structure. This is a symmetric matrix, fill the lower left
 		// triangle only.
@@ -687,8 +687,8 @@ Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, co
 	}
 
 	return true;
-
-//	return false;
+*/
+	return false;
 }
 
 void

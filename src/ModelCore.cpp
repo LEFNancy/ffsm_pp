@@ -312,8 +312,8 @@ ModelCore::runSimulationYear(){
 
 	// Create an instance of the IpoptApplication
 	SmartPtr<IpoptApplication> app = new IpoptApplication();
-	//app->Options()->SetStringValue("linear_solver", "mumps"); // default in ipopt is ma27
-	//app->Options()->SetStringValue("hessian_approximation", "limited-memory"); // quasi-newton approximation of the hessian
+	app->Options()->SetStringValue("linear_solver", "mumps"); // default in ipopt is ma27
+	app->Options()->SetStringValue("hessian_approximation", "limited-memory"); // quasi-newton approximation of the hessian
 	app->Options()->SetIntegerValue("mumps_mem_percent", 100);
 	app->Options()->SetNumericValue("obj_scaling_factor", -1); // maximisation
 
