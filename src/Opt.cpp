@@ -233,7 +233,7 @@ exit(0);
 
 		msgOut(MSG_INFO,"The model will work with "+i2s(nVar)+" variables and "+i2s(nCons)+" constrains.");
 
-		debugPrintParameters();
+		//debugPrintParameters();
 		initOpt=false;
 	} // finish initialisation things to be done only the first year
 
@@ -370,7 +370,10 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 				aa = gpd("aa",l2r[r1][r2],secPr[p]);
 				sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
 				dc0 = gpd("dc",l2r[r1][r2],secPr[p],firstYear);
-				obj_value += aa*pow(x[gix("dc",r1,r2,p)],(sigma+1)/sigma)-aa*pow(0.5*dc0,(sigma+1)/sigma)-x[gix("pc",r1,r2,p)]*x[gix("dc",r1,r2,p)];
+				obj_value += aa*pow(x[gix("dc",r1,r2,p)],(sigma+1)/sigma)-aa*pow(0.5*dc0,(sigma+1)/sigma)-x[gix("pc",r1,r2,p+nPriPr)]*x[gix("dc",r1,r2,p)];
+				//cout << "x[gix(\"dc\",r1,r2,Fsciages)]: " << gix("dc",r1,r2,p) << " - " << x[gix("dc",r1,r2,p)] << endl;
+				//cout << "x[gix(\"pc\",r1,r2,Fsciages)]: " << gix("pc",r1,r2,p+nPriPr) << " - " << x[gix("pc",r1,r2,p+nPriPr)] << endl;
+				//cout << "Consumer surplus: " << aa*pow(x[gix("dc",r1,r2,p)],(sigma+1)/sigma)-aa*pow(0.5*dc0,(sigma+1)/sigma)-x[gix("pc",r1,r2,p+nPriPr)]*x[gix("dc",r1,r2,p)] << endl;
 			}
 			//  // producers surplus..
 			//  + sum((i,p_pr),
@@ -407,7 +410,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 			//  + sum((i,p_tr), (RVAR('pl',i,p_tr)-m(i,p_tr))*(RVAR('sl',i,p_tr))) // attenction it's local. if we include w imports or p expports this have to change
 			for (uint p=0;p<secPr.size();p++){
 				m = gpd("m",l2r[r1][r2],secPr[p]);
-				obj_value += (x[gix("pl",r1,r2,p)]-m)*x[gix("sl",r1,r2,p)];
+				obj_value += (x[gix("pl",r1,r2,p+nPriPr)]-m)*x[gix("sl",r1,r2,p+nPriPr)];
 			}
 			//  - sum((i,p_pr), RVAR('pl',i,p_pr)*RVAR('dl',i,p_pr))               // to total and an other equation total=local+abroad should be added
 			for (uint p=0;p<priPr.size();p++){
@@ -419,6 +422,8 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 
 	//obj_value = -obj_value; // we want maximisation, ipopt minimize!
 
+ // cout << "obj:" << obj_value << endl;
+ //exit(0);
 	return true;
 }
 
@@ -433,27 +438,28 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 		for (uint r2=0;r2<l2r[r1].size();r2++){
 
 			for (uint p=0;p<secPr.size();p++){
+				int psec = p+nPriPr;
 				// mkteq2(i,p_tr)..  RVAR('dl',i,p_tr)+sum(j,EXP(i,j,p_tr))  =e=  RVAR('sl',i,p_tr)+ sum(b,EXP(b,i,p_tr)); // h1
 				g[cix] = x[gix("dl",r1,r2,p)]-x[gix("sl",r1,r2,p)];
 				for (uint r2To=0;r2To<l2r[r1].size();r2To++){
-					g[cix] += x[gix("rt",r1,r2,p,r2To)]-x[gix("rt",r1,r2To,p,r2)];
+					g[cix] += x[gix("rt",r1,r2,psec,r2To)]-x[gix("rt",r1,r2To,psec,r2)];
 				}
 				cix++;
 				// mkteq6(i,p_tr)..  RVAR('dc',i,p_tr)  =e=  GG(i,p_tr)*(RVAR('pc',i,p_tr)**sigma(p_tr)); // eq. 20
 				gg = gpd("gg",l2r[r1][r2],secPr[p]);
 				sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
-				g[cix] = x[gix("dc",r1,r2,p)]-gg*pow(x[gix("pc",r1,r2,p)],sigma);
+				g[cix] = x[gix("dc",r1,r2,p)]-gg*pow(x[gix("pc",r1,r2,psec)],sigma);
 				cix++;
 				// mkteq7(i,p_tr)..  RVAR('da',i,p_tr)/RVAR('dl',i,p_tr)  =e=  ((q1(i,p_tr)*RVAR('pl',i,p_tr))/(p1(i,p_tr)*PT_t(p_tr)))**psi(i,p_tr); // h7 and h3 ?
 				q1 = gpd("q1",l2r[r1][r2],secPr[p]);
 				p1v = 1-q1;
 				psi = gpd("psi",l2r[r1][r2],secPr[p]);
 				pworld = gpd("pl", worldCodeLev2,secPr[p]);
-				g[cix] = x[gix("da",r1,r2,p)]/x[gix("dl",r1,r2,p)] - pow((q1*x[gix("pl",r1,r2,p)])/(p1v*pworld),psi);
+				g[cix] = x[gix("da",r1,r2,p)]/x[gix("dl",r1,r2,psec)] - pow((q1*x[gix("pl",r1,r2,psec)])/(p1v*pworld),psi);
 				cix++;
 				// mkteq13(i,p_tr).. RVAR('pc',i,p_tr)*RVAR('dc',i,p_tr)  =e=  RVAR('dl',i,p_tr)*RVAR('pl',i,p_tr)+RVAR('da',i,p_tr)*PT_t(p_tr);  // h9
 				pworld = gpd("pl", worldCodeLev2,secPr[p]);
-				g[cix] = x[gix("pc",r1,r2,p)]*x[gix("dc",r1,r2,p)]-x[gix("dl",r1,r2,p)]*x[gix("pl",r1,r2,p)]-x[gix("da",r1,r2,p)]*pworld;
+				g[cix] = x[gix("pc",r1,r2,psec)]*x[gix("dc",r1,r2,p)]-x[gix("dl",r1,r2,psec)]*x[gix("pl",r1,r2,psec)]-x[gix("da",r1,r2,p)]*pworld;
 				cix++;
 				 // mkteq23(i,p_tr).. RVAR('dc',i,p_tr)  =e=  (q1(i,p_tr)*(RVAR('da',i,p_tr)**((psi(i,p_tr)-1)/psi(i,p_tr)))+ p1(i,p_tr)*(RVAR('dl',i,p_tr)**((psi(i,p_tr)-1)/psi(i,p_tr))))**(psi(i,p_tr)/(psi(i,p_tr)-1)); // h3
 				q1 = gpd("q1",l2r[r1][r2],secPr[p]);
@@ -462,7 +468,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 				g[cix] = x[gix("dc",r1,r2,p)] -
 						pow(
 								 q1 * pow(x[gix("da",r1,r2,p)],(psi-1)/psi)
-							+ p1v * pow(x[gix("dl",r1,r2,p)],(psi-1)/psi),
+							+ p1v * pow(x[gix("dl",r1,r2,psec)],(psi-1)/psi),
 							psi/(psi-1)
 						);
 				cix++;
@@ -484,7 +490,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 				g[cix] = x[gix("dl",r1,r2,p)];
 				for (uint p2=0;p2<secPr.size();p2++){
 					a = gpd("a",l2r[r1][r2],priPr[p],DATA_NOW,secPr[p2]);
-					g[cix] -= a*x[gix("sl",r1,r2,p2)];
+					g[cix] -= a*x[gix("sl",r1,r2,p2+nPriPr)];
 				}
 				cix++;
 				// mkteq5(i,p_pr)..  RVAR('sc',i,p_pr)  =e=  FF(i,p_pr)*(RVAR('pc',i,p_pr)**sigma(p_pr)); // eq. 21
@@ -529,7 +535,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 			for (uint p=0;p<secPr.size();p++){
 				// mkteq17(i,p_tr).. RVAR('sl',i,p_tr)                    =l=  Kt(i,p_tr);     // h16 in the presentation paper
 				k = gpd("k",l2r[r1][r2],secPr[p]);
-				g[cix] = x[gix("sl",r1,r2,p)]-k;
+				g[cix] = x[gix("sl",r1,r2,p+nPriPr)]-k;
 				cix++;
 			} // end secondary products
 
@@ -565,7 +571,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 			for (uint p=0;p<secPr.size();p++){
 				// mkteq25(i,p_tr).. sum(p_pr, a(p_pr,p_tr)*RVAR('pl',i,p_pr))+m(i,p_tr)  =g=  (RVAR('pl',i,p_tr));        // price of raw products + transf cost > trasf product
 				mv = gpd("m",l2r[r1][r2],secPr[p]);
-				g[cix] = mv - x[gix("pl",r1,r2,p)];
+				g[cix] = mv - x[gix("pl",r1,r2,p+nPriPr)];
 				for (uint p2=0;p2<priPr.size();p2++){
 					a = gpd("a",l2r[r1][r2],priPr[p2],DATA_NOW,secPr[p]);
 					g[cix] += a * x[gix("pl",r1,r2,p2)];
