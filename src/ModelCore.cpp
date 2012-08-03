@@ -254,6 +254,9 @@ ModelCore::runSimulationYear(){
 	pDClasses.insert(pDClasses.end(), dClasses.begin()+1, dClasses.end() );
 	vector <string> fTypes= MD->getForTypeIds();
 
+
+	// *** PRE-OPTIMISATION YEARLY OPERATIONS..
+
 	// Updating variables
 	// notes:
 	// - dispo_sup: not actually entering anywhere, forgiving it for now..
@@ -310,14 +313,16 @@ ModelCore::runSimulationYear(){
 
 	} // end for each region in level 2 (and updating variables)
 
+
+
+	// *** OPTIMISATION....
+
 	// Create an instance of the IpoptApplication
 	SmartPtr<IpoptApplication> app = new IpoptApplication();
 	app->Options()->SetStringValue("linear_solver", "mumps"); // default in ipopt is ma27
 	app->Options()->SetStringValue("hessian_approximation", "limited-memory"); // quasi-newton approximation of the hessian
 	app->Options()->SetIntegerValue("mumps_mem_percent", 100);
 	app->Options()->SetNumericValue("obj_scaling_factor", -1); // maximisation
-
-
 
 	// Initialize the IpoptApplication and process the options
 	ApplicationReturnStatus status;
@@ -329,6 +334,9 @@ ModelCore::runSimulationYear(){
 
 	status = app->OptimizeTNLP(MTHREAD->OPT);
 
+
+	// *** POST OPTIMISATION....
+
 	if (status == Solve_Succeeded) {
 		// Retrieve some statistics about the solve
 		Index iter_count = app->Statistics()->IterationCount();
@@ -336,6 +344,33 @@ ModelCore::runSimulationYear(){
 
 		Number final_obj = app->Statistics()->FinalObjective();
 		printf("\n\n*** The final value of the objective function is %e.\n", final_obj);
+	}
+
+	for(uint r2= 0; r2<=regIds2.size();r2++){
+		for (uint p=0;p<allProducts.size();p++){
+			double st = gpd("sl",regIds2[r2],allProducts[p])+gpd("sa",regIds2[r2],allProducts[p]);
+			double dt = gpd("dl",regIds2[r2],allProducts[p])+gpd("da",regIds2[r2],allProducts[p]);
+			spd(st,"st",regIds2[r2],allProducts[p]);
+			spd(dt,"dt",regIds2[r2],allProducts[p]);
+		}
+		for (uint p=0;p<secProducts.size();p++){
+			double dl = gpd("dl",regIds2[r2],secProducts[p]);
+			double pl = gpd("pl",regIds2[r2],secProducts[p]);
+			double da = gpd("pl",regIds2[r2],secProducts[p]);
+			double pworld = gpd("pl", WL2,secProducts[p]);
+			double dt = gpd("dt",regIds2[r2],secProducts[p]);
+			double pw = (dl*pl+da*pworld)/dt;
+			spd(pw,"pw",regIds2[r2],secProducts[p]);
+		}
+		for (uint p=0;p<priProducts.size();p++){
+			double sl = gpd("sl",regIds2[r2],priProducts[p]);
+			double pl = gpd("pl",regIds2[r2],priProducts[p]);
+			double sa = gpd("sl",regIds2[r2],priProducts[p]);
+			double pworld = gpd("pl", WL2,priProducts[p]);
+			double st = gpd("st",regIds2[r2],priProducts[p]);
+			double pw = (sl*pl+sa*pworld)/st;
+			spd(pw,"pw",regIds2[r2],priProducts[p]);
+		}
 	}
 
 	return;

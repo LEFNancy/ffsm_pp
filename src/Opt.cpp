@@ -574,6 +574,78 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 	return true;
 }
 
+void
+Opt::finalize_solution(SolverReturn status,
+											 Index n, const Number* x, const Number* z_L, const Number* z_U,
+											 Index m, const Number* g, const Number* lambda,
+											 Number obj_value, const IpoptData* ip_data, IpoptCalculatedQuantities* ip_cq){
+
+	printf("\n\nObjective value\n");
+	printf("f(x*) = %e\n", obj_value);
+
+	// --> here is where to code the assignment of optimal values to to spd()
+
+		map<string, int>::iterator viter;
+
+	// fixing the starting points for each variable at the level of the previous years
+	for (viter = vars.begin(); viter != vars.end(); ++viter) {
+		//string debugs = viter->first;
+		int vdomtype = viter->second;
+		if(vdomtype==VDOM_PRI_PR){
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<priPr.size();p++){
+						spd(x[gix(viter->first,r1,r2,p)],viter->first,l2r[r1][r2],priPr[p]);
+					}
+				}
+			}
+		} else if (vdomtype==VDOM_SEC_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<secPr.size();p++){
+						spd(x[gix(viter->first,r1,r2,p)],viter->first,l2r[r1][r2],secPr[p]);
+
+					}
+				}
+			}
+		} else if (vdomtype==VDOM_ALL_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<allPr.size();p++){
+						spd(x[gix(viter->first,r1,r2,p)],viter->first,l2r[r1][r2],allPr[p]);
+					}
+				}
+			}
+		} else if (vdomtype==VDOM_R2_ALL_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<allPr.size();p++){
+						for(uint r2To=0;r2To<l2r[r1].size();r2To++){
+							spd(x[gix(viter->first,r1,r2,p,r2To)],viter->first,l2r[r1][r2],allPr[p],DATA_NOW,false,i2s(l2r[r1][r2To]));
+						}
+					}
+				}
+			}
+		} else {
+			msgOut(MSG_CRITICAL_ERROR,"Try to setting the solved value of a variable of unknow type ("+viter->first+")");
+		}
+	}
+
+
+
+// Memory deallocation for ADOL-C variables
+
+	delete[] x_lam;
+
+	for(Index i=0;i<m;i++)
+		delete[] Jac[i];
+	delete[] Jac;
+
+	for(Index i=0;i<n+m+1;i++)
+		delete[] Hess[i];
+	delete[] Hess;
+}
+
 //*************************************************************************
 //
 //
@@ -684,28 +756,6 @@ Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, co
 	return true;
 */
 	return false;
-}
-
-void
-Opt::finalize_solution(SolverReturn status,
-											 Index n, const Number* x, const Number* z_L, const Number* z_U,
-											 Index m, const Number* g, const Number* lambda,
-											 Number obj_value, const IpoptData* ip_data, IpoptCalculatedQuantities* ip_cq){
-
-	printf("\n\nObjective value\n");
-	printf("f(x*) = %e\n", obj_value);
-
-// Memory deallocation for ADOL-C variables
-
-	delete[] x_lam;
-
-	for(Index i=0;i<m;i++)
-		delete[] Jac[i];
-	delete[] Jac;
-
-	for(Index i=0;i<n+m+1;i++)
-		delete[] Hess[i];
-	delete[] Hess;
 }
 
 
