@@ -64,6 +64,7 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		std::vector<int> l1regIds =  MTHREAD->MD->getRegionIds(1, true);
 		nL2r =  MTHREAD->MD->getRegionIds(2, true).size();
 		firstYear = MTHREAD->MD->getIntSetting("initialYear");
+		secondYear = firstYear+1;
 		worldCodeLev2 = MTHREAD->MD->getIntSetting("worldCodeLev2");
 
 		for(uint i=0;i<l1regIds.size();i++){
@@ -188,25 +189,6 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 			positions.insert(pair<string, vector < vector < vector < vector <int> > > > >(viter->first,  positionsToAdd));
 		}
 
-
-
-
-
-// some debug code
-
-/*int debug;
-debug = gip("pc"); cout << "debug: "<<debug<<endl;
-debug = gix("pc",0,0,0); cout << "debug: "<<debug<<endl;
-debug = gix("pc",0,0,2); cout << "debug: "<<debug<<endl;
-debug = gix("pc",0,2,2); cout << "debug: "<<debug<<endl;
-debug = gix("pc",0,2,2); cout << "debug: "<<debug<<endl;
-debug = gip("pl"); cout << "debug: "<<debug<<endl;
-debug = gix("pl",0,2,2); cout << "debug: "<<debug<<endl;
-debug = gip("exp"); cout << "debug: "<<debug<<endl;
-debug = gix("exp",0,2,2,2); cout << "debug: "<<debug<<endl;
-exit(0);
-*/
-
 		// calculating the number of constrains..
 		nCons = 0; // leave 0
 		nEqualityConstrains = 0;
@@ -243,16 +225,13 @@ exit(0);
 
 	m = nCons; // 70; // nCons;
 
-	std::cout<<"PRE MEMORY ALLOCATION"<<std::endl;
 	// in this example the jacobian is dense. Hence, it contains n*m nonzeros
 	nnz_jac_g = n*m;
 
 	// the hessian is also dense and has n*n total nonzeros, but we
 	// only need the lower left corner (since it is symmetric)
 	nnz_h_lag = n*(n-1)/2+n;
-	std::cout<<"PRE GENERATE TAPES ALLOCATION"<<std::endl;
 	generate_tapes(n, m);
-	std::cout<<"POST MEMORY ALLOCATION"<<std::endl;
 	// use the C style indexing (0-based)
 	index_style = C_STYLE;
 
@@ -261,10 +240,23 @@ exit(0);
 
 bool
 Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Number* g_u){
+
+
 	// all variables have upper or equal than zero bound
 	for (Index i=0; i<n; i++) {
-		x_l[i] =    0.;
-		x_u[i] =  1e20;
+		if(
+				 ( n>=gip("dl")&& n<gip("dl")+nAllPr)
+			|| ( n>=gip("sa")&& n<gip("sa")+nPriPr)
+			|| ( n>=gip("sl")&& n<gip("sl")+nAllPr)
+			|| ( n>=gip("da")&& n<gip("da")+nSecPr)
+			|| ( n>=gip("pl")&& n<gip("sa")+nAllPr)
+		) {  // I could make a function to return the number of positions by a certain variable name, looking up the the map that define its domain
+			x_l[i] = 0.00000001;
+			x_u[i] =       1e20;
+		} else {
+			x_l[i] =         0.;
+			x_u[i] =       1e20;
+		}
 	}
 
 	// Set the bounds for the constraints
@@ -299,7 +291,7 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 	assert(init_lambda == false);
 
 	map<string, int>::iterator viter;
-	//cout << "varname;regId;prd;value;freeDim" << endl;
+
 	// fixing the starting points for each variable at the level of the previous years
 	for (viter = vars.begin(); viter != vars.end(); ++viter) {
 		//string debugs = viter->first;
@@ -309,7 +301,6 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 				for(uint r2=0;r2<l2r[r1].size();r2++){
 					for(uint p=0;p<priPr.size();p++){
 						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],priPr[p],previousYear);
-						//cout << viter->first <<";"<< l2r[r1][r2] <<";"<< priPr[p] <<";"<< gpd(viter->first,l2r[r1][r2],priPr[p],previousYear) <<";"<<""<< endl;
 					}
 				}
 			}
@@ -318,7 +309,6 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 				for(uint r2=0;r2<l2r[r1].size();r2++){
 					for(uint p=0;p<secPr.size();p++){
 						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],secPr[p],previousYear);
-						//cout << viter->first <<";"<< l2r[r1][r2] <<";"<< secPr[p] <<";"<< gpd(viter->first,l2r[r1][r2],secPr[p],previousYear) <<";"<<""<< endl;
 					}
 				}
 			}
@@ -327,7 +317,6 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 				for(uint r2=0;r2<l2r[r1].size();r2++){
 					for(uint p=0;p<allPr.size();p++){
 						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],allPr[p],previousYear);
-						//cout << viter->first <<";"<< l2r[r1][r2] <<";"<< allPr[p] <<";"<< gpd(viter->first,l2r[r1][r2],allPr[p],previousYear) <<";"<<""<< endl;
 					}
 				}
 			}
@@ -337,7 +326,6 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 					for(uint p=0;p<allPr.size();p++){
 						for(uint r2To=0;r2To<l2r[r1].size();r2To++){
 							x[gix(viter->first,r1,r2,p,r2To)]= gpd(viter->first,l2r[r1][r2],allPr[p],previousYear,i2s(l2r[r1][r2To]));
-							//cout << viter->first <<";"<< l2r[r1][r2] <<";"<< allPr[p] <<";"<< gpd(viter->first,l2r[r1][r2],allPr[p],previousYear,i2s(l2r[r1][r2To])) <<";"<<l2r[r1][r2To]<< endl;
 						}
 					}
 				}
@@ -369,11 +357,8 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 			for (uint p=0;p<secPr.size();p++){
 				aa = gpd("aa",l2r[r1][r2],secPr[p]);
 				sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
-				dc0 = gpd("dc",l2r[r1][r2],secPr[p],firstYear);
+				dc0 = gpd("dc",l2r[r1][r2],secPr[p],secondYear);
 				obj_value += aa*pow(x[gix("dc",r1,r2,p)],(sigma+1)/sigma)-aa*pow(0.5*dc0,(sigma+1)/sigma)-x[gix("pc",r1,r2,p+nPriPr)]*x[gix("dc",r1,r2,p)];
-				//cout << "x[gix(\"dc\",r1,r2,Fsciages)]: " << gix("dc",r1,r2,p) << " - " << x[gix("dc",r1,r2,p)] << endl;
-				//cout << "x[gix(\"pc\",r1,r2,Fsciages)]: " << gix("pc",r1,r2,p+nPriPr) << " - " << x[gix("pc",r1,r2,p+nPriPr)] << endl;
-				//cout << "Consumer surplus: " << aa*pow(x[gix("dc",r1,r2,p)],(sigma+1)/sigma)-aa*pow(0.5*dc0,(sigma+1)/sigma)-x[gix("pc",r1,r2,p+nPriPr)]*x[gix("dc",r1,r2,p)] << endl;
 			}
 			//  // producers surplus..
 			//  + sum((i,p_pr),
@@ -390,6 +375,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 			//  +RVAR('pc',i,p_pr2)*pres(p_pr,p_pr2)*RVAR('sc',i,p_pr)
 			//  -BB(i,p_pr2)*(pres(p_pr,p_pr2)*RVAR('sc',i,p_pr))**((sigma(p_pr2)+1)/sigma(p_pr2))
 			//   )
+
 			for (uint p1=0;p1<priPr.size();p1++){
 				for (uint p2=0;p2<priPr.size();p2++){
 					a_pr = gpd("a_pr",l2r[r1][r2],priPr[p1],DATA_NOW,priPr[p2]);
@@ -406,6 +392,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 					obj_value += (x[gix("pl",r1,r2To,p)]-x[gix("pl",r1,r2,p)]-ct)*x[gix("rt",r1,r2,p,r2To)];
 				}
 			}
+
 			//  // transformers surplus..
 			//  + sum((i,p_tr), (RVAR('pl',i,p_tr)-m(i,p_tr))*(RVAR('sl',i,p_tr))) // attenction it's local. if we include w imports or p expports this have to change
 			for (uint p=0;p<secPr.size();p++){
@@ -420,11 +407,11 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 
 	} //end of each r1 regions
 
-	//obj_value = -obj_value; // we want maximisation, ipopt minimize!
+	//obj_value = -obj_value; // we want maximisation, ipopt minimize! (donei n the options - scaling obj function)
 
- // cout << "obj:" << obj_value << endl;
  //exit(0);
 	return true;
+	// checked 20120802 this function is ok with gams, both in input and in output of the preoptimisation stage
 }
 
 template<class T> bool
@@ -440,7 +427,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 			for (uint p=0;p<secPr.size();p++){
 				int psec = p+nPriPr;
 				// mkteq2(i,p_tr)..  RVAR('dl',i,p_tr)+sum(j,EXP(i,j,p_tr))  =e=  RVAR('sl',i,p_tr)+ sum(b,EXP(b,i,p_tr)); // h1
-				g[cix] = x[gix("dl",r1,r2,p)]-x[gix("sl",r1,r2,p)];
+				g[cix] = x[gix("dl",r1,r2,psec)]-x[gix("sl",r1,r2,psec)];
 				for (uint r2To=0;r2To<l2r[r1].size();r2To++){
 					g[cix] += x[gix("rt",r1,r2,psec,r2To)]-x[gix("rt",r1,r2To,psec,r2)];
 				}
@@ -507,18 +494,18 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 				g[cix] = x[gix("sa",r1,r2,p)]/x[gix("sl",r1,r2,p)] - pow((t1*x[gix("pl",r1,r2,p)])/(r1v*pworld),eta);
 				cix++;
 				// mkteq14(i,p_pr).. RVAR('pc',i,p_pr)*RVAR('sc',i,p_pr)  =e=  RVAR('sl',i,p_pr)*RVAR('pl',i,p_pr)+RVAR('sa',i,p_pr)*PT_t(p_pr);  // h10
-				pworld = gpd("pl", worldCodeLev2,secPr[p]);
+				pworld = gpd("pl", worldCodeLev2,priPr[p]);
 				g[cix] = x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)]-x[gix("sl",r1,r2,p)]*x[gix("pl",r1,r2,p)]-x[gix("sa",r1,r2,p)]*pworld;
 				cix++;
-				// mkteq24(i,p_pr).. RVAR('sc',i,p_pr)  =e=  (t1(i,p_pr)*(RVAR('sa',i,p_pr)**((eta(i,p_pr)-1)/eta(i,p_pr)))+ r1(i,p_pr)*(RVAR('sl',i,p_pr)**((eta(i,p_pr)-1)/eta(i,p_pr))))**(eta(i,p_pr)/(eta(i,p_pr)-1)); // h4
+				 //mkteq24(i,p_pr).. RVAR('sc',i,p_pr)  =e=  (t1(i,p_pr)*(RVAR('sa',i,p_pr)**((eta(i,p_pr)-1)/eta(i,p_pr)))+ r1(i,p_pr)*(RVAR('sl',i,p_pr)**((eta(i,p_pr)-1)/eta(i,p_pr))))**(eta(i,p_pr)/(eta(i,p_pr)-1)); // h4
 				t1 = gpd("t1",l2r[r1][r2],priPr[p]);
 				r1v = 1-t1;
 				eta = gpd("eta",l2r[r1][r2],priPr[p]);
 				g[cix] = x[gix("sc",r1,r2,p)] -
-						pow(
-								 q1 * pow(x[gix("sa",r1,r2,p)],(eta-1)/eta)
+							pow(
+								 t1 * pow(x[gix("sa",r1,r2,p)],(eta-1)/eta)
 							+ r1v * pow(x[gix("sl",r1,r2,p)],(eta-1)/eta),
-							psi/(psi-1)
+							eta/(eta-1)
 						);
 				cix++;
 
@@ -641,8 +628,9 @@ Opt::eval_jac_g(Index n, const Number* x, bool new_x,Index m, Index nele_jac,
 
 		Index idx = 0;
 		for(Index i=0; i<m; i++)
-			for(Index j=0; j<n; j++)
-			values[idx++] = Jac[i][j];
+			for(Index j=0; j<n; j++){
+				values[idx++] = Jac[i][j];
+			}
 
 	}
 
@@ -652,6 +640,7 @@ Opt::eval_jac_g(Index n, const Number* x, bool new_x,Index m, Index nele_jac,
 bool
 Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, const Number* lambda,
 						bool new_lambda, Index nele_hess, Index* iRow, Index* jCol, Number* values){
+
 /*
 	if (values == NULL) {
 		// return the structure. This is a symmetric matrix, fill the lower left

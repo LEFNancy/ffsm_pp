@@ -150,6 +150,7 @@ private:
 	int              nGreaterEqualZeroConstrains;
 	int                             previousYear;
 	int                                firstYear;
+	int                               secondYear;
 	int                            worldCodeLev2;
 	bool                            debugRunOnce;
 	void                debugPrintParameters();
