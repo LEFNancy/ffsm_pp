@@ -986,7 +986,7 @@ It addmits the following "filters":
 @type_h Name of the specific parameter requested
 @regId_h Look for specific level 2 region.
 @forType_h If specified, look exactly for the specified forest type, otherwise simply doesn't filter for it.
-@diamClass_h Diameter class. It accept three keywords, for summing up all diameters, production-ready diamters or sub-production ones, namelly DIAM_ALL, DIAM_PROD, DIAM_FIRST.
+@diamClass_h Diameter class. It accept three keywords, for summing up all diameters, production-ready diameters or sub-production ones, namelly DIAM_ALL, DIAM_PROD, DIAM_FIRST.
 @year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
 */
 
