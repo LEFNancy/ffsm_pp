@@ -347,6 +347,12 @@ ModelCore::runSimulationYear(){
 
 	// *** POST OPTIMISATION....
 
+	// post-equilibrium variables->parameters assignments..
+	// RPAR(type,i,prd,t)   =  RVAR.l(type,i,prd);
+	// EX(i,j,prd,t)        =  EXP.l(i,j,prd);
+	// ObjT(t)              =  Obj.l ;
+	// ==> in Opt::finalize_solution()
+
 	if (status == Solve_Succeeded) {
 		// Retrieve some statistics about the solve
 		Index iter_count = application->Statistics()->IterationCount();
@@ -359,6 +365,12 @@ ModelCore::runSimulationYear(){
 	for(uint r2= 0; r2<regIds2.size();r2++){  // you can use r2<=regIds2.size() to try an out-of range memory error that is not detected other than by valgrind (with a message "Invalid read of size 4 in ModelCore::runSimulationYear() in src/ModelCore.cpp:351")
 		int regId = regIds2[r2];
 
+		//  // total supply and total demand..
+		//  RPAR('st',i,prd,t)   =  RPAR('sl',i,prd,t)+RPAR('sa',i,prd,t);
+		//  RPAR('dt',i,prd,t)   =  RPAR('dl',i,prd,t)+RPAR('da',i,prd,t);
+		//  // weighted prices.. //changed 20120419
+		//  RPAR('pw',i,p_tr,t)   =  (RPAR('dl',i,p_tr,t)*RPAR('pl',i,p_tr,t)+RPAR('da',i,p_tr,t)*PT(p_tr,t))/RPAR('dt',i,p_tr,t) ; //changed 20120419
+		//  RPAR('pw',i,p_pr,t)   =  (RPAR('sl',i,p_pr,t)*RPAR('pl',i,p_pr,t)+RPAR('sa',i,p_pr,t)*PT(p_pr,t))/RPAR('st',i,p_pr,t) ; //changed 20120419
 		for (uint p=0;p<allProducts.size();p++){
 			double st = gpd("sl",regId,allProducts[p])+gpd("sa",regId,allProducts[p]);
 			double dt = gpd("dl",regId,allProducts[p])+gpd("da",regId,allProducts[p]);
@@ -387,6 +399,7 @@ ModelCore::runSimulationYear(){
 
 
 		// Post optimisation biological mobule..
+
 		vector <double> cachedExpectedReturnsByFt;
 		for(uint j=0;j<fTypes.size();j++){
 			string ft = fTypes[j];
@@ -426,15 +439,13 @@ ModelCore::runSimulationYear(){
 				for(uint pp=0;pp<priProducts.size();pp++){
 					double st = gpd("st",regId,priProducts[pp]);
 					double in = gpd("in",regId,priProducts[pp]);
-					hr += app(priProducts[pp],ft,dc)*st/ in; //TODO !!!!
-					//hr += app(priProducts[pp],ft,dc)*st/ in;
-					//bool                app(const string &prod_h, const string &forType_h, const string &dClass_h)
-
-					hV_byPrd.push_back(hr*pastYearVol);
+					double hr_pr = app(priProducts[pp],ft,dc)*st/ in;
+					hr += hr_pr;
+					hV_byPrd.push_back( hr_pr*pastYearVol);
 				}
 				double hV = hr*pastYearVol;
-
 				hV_byDiamAndPrd.push_back(hV_byPrd);
+
 				// post harvesting remained volumes computation..
 				// loop(u$(ord(u)=1),
 				//	first diameter class, no harvesting and fixed regenaration..
@@ -465,44 +476,23 @@ ModelCore::runSimulationYear(){
 				sfd(hr,"hr",regId,ft,dc);
 				sfd(hV,"hV",regId,ft,dc);
 				sfd(vol,"vol",regId,ft,dc);
-				//harvestedArea += hv2fa*hr*pastYearVol*100;
 				sfd(hv2fa*hr*pastYearVol*100,"harvestedArea",regId,ft,dc,DATA_NOW,true);
 			} // end foreach diameter classes
 
 			// Post optimisation management mobule..
 
-			//// calculating freeArea at the end of the year..
-			//freeArea(i,essence,lambda) = sum(u, hv2fa(i,essence,lambda,u)*hr(u,i,essence,lambda,t)*V(u,i,lambda,essence,t-1)*100);
-			//if(scen("endVreg") ,
-			//	regArea(i,essence,lambda,t) = freeArea(i,essence, lambda);   // here we could introduce in/out area from other land usages
-			//else
-			//	//calculating the expected returns..
-			//	loop ( (u,i,essence,lambda,p_pr),
-			//		if (sum(u2, hV(u2,i,essence,lambda,t))= 0,
-			//			expRetPondCoef(u,i,essence,lambda,p_pr) = 0;
-			//		else
-			//			expRetPondCoef(u,i,essence,lambda,p_pr) = hV_byPrd(u,i,essence,lambda,p_pr,t)/ sum(u2, hV(u2,i,essence,lambda,t));
-			//		);
-			//	);
-			//	expReturns(i,essence,lambda) = sum( (u,p_pr),
-			//	          RPAR("pl",i,p_pr,t)*hv2fa(i,essence,lambda,u)*(1/df_byFT(u,i,lambda,essence))*        // df_byFT(u,i,lambda,essence)
-			//	          expRetPondCoef(u,i,essence,lambda,p_pr)
-			//	          );
-
-			//	// choosing the new regeneration area
-			//	loop (i,
-			//		loop( (essence,lambda),
-			//			if ( expReturns(i,essence,lambda) = smax( (essence2,lambda2),expReturns(i,essence2,lambda2) ),
-			//				regArea (i,essence,lambda,t) =  sum( (essence2, lambda2), freeArea(i,essence2, lambda2) ) * mr;
-			//			);
-			//		);
-			//		regArea(i,essence,lambda,t) = freeArea(i,essence, lambda)*(1-mr);   // here we could introduce in/out area from other land usages
-			//	);
+			// calculating the cumulative time of passage for each diameter class (depending on forest owners diam growth expectations)
+			//loop(u$(ord(u)=1),
+			//   cumTp(u,i,lambda,essence) = tp_u1(i,essence,lambda);
 			//);
-
-			// calculating the cumulative time of passage, depending on forest owners diam growth expectations
+			//loop(u$(ord(u)>1),
+			//   cumTp(u,i,lambda,essence) = cumTp(u-1,i,lambda,essence)+tp(u-1,i,lambda,essence);
+			//);
+			////ceil(x) DNLP returns the smallest integer number greater than or equal to x
+			//loop( (u,i,lambda,essence),
+			//  cumTp(u,i,lambda,essence) =   ceil(cumTp(u,i,lambda,essence));
+			//);
 			vector <double> cumTp; //cumulative time of passage to REACH a diameter class (tp is to LEAVE to the next one)
-			//vector <double> df_byFT; // discounf factors for each diameter classes
 			for (uint u=0; u<dClasses.size(); u++){
 				string dc = dClasses[u];
 				double cumTp_u, cumTp_u_noExp, cumTp_u_fullExp;
@@ -523,25 +513,23 @@ ModelCore::runSimulationYear(){
 						cumTp.push_back(cumTp_u);
 					}
 				}
-				//double df = calculateDiscountFactor(cumTp);
-				//df_byFT.push_back(df);
-
-
 			} // end of each diam class
 
-			// calculating the discount factor for each forest type and diameter class
-			//loop((u,i,lambda,essence),
-			//	loop(fy,
-			//		if( ord(fy)= cumTp(u,i,lambda,essence),
-			//			df_byFT(u,i,lambda,essence) = df(fy);
-			//		);
-			//	);
-			//);
 
 
 			if(regType != "fixed" && regType != "fromHrLevel"){
 				// calculating the expected returns..
-				//vector < vector <double> > expReturnsPondCoef;
+				//	loop ( (u,i,essence,lambda,p_pr),
+				//		if (sum(u2, hV(u2,i,essence,lambda,t))= 0,
+				//			expRetPondCoef(u,i,essence,lambda,p_pr) = 0;
+				//		else
+				//			expRetPondCoef(u,i,essence,lambda,p_pr) = hV_byPrd(u,i,essence,lambda,p_pr,t)/ sum(u2, hV(u2,i,essence,lambda,t));
+				//		);
+				//	);
+				//	expReturns(i,essence,lambda) = sum( (u,p_pr),
+				//	          RPAR("pl",i,p_pr,t)*hv2fa(i,essence,lambda,u)*(1/df_byFT(u,i,lambda,essence))*        // df_byFT(u,i,lambda,essence)
+				//	          expRetPondCoef(u,i,essence,lambda,p_pr)
+				//	          );
 				double hV_byFT = gfd("hV",regId,ft,DIAM_PROD);
 				double expReturns = 0;
 				for (uint u=0; u<pDClasses.size(); u++){
@@ -551,6 +539,10 @@ ModelCore::runSimulationYear(){
 						if(hV_byFT==0.){
 							//expReturnsPondCoef_byPrd.push_back(0.);
 							// I'll do an average of price of products that can be obtained from that FT TODO !!!
+							if(app(priProducts[pp],ft,dc)){
+								cout << "debug me !" << endl;
+								exit(1);
+							}
 						} else {
 							//expReturnsPondCoef_byPrd.push_back(hV_byDiamAndPrd.at(u).at(pp)/hV_byFT);
 							double pw    = gpd("pw",regId,priProducts[pp]);
@@ -569,7 +561,11 @@ ModelCore::runSimulationYear(){
 		} // end foreach forest type
 
 
-		//	// choosing the new regeneration area
+		// calculating freeArea at the end of the year and choosing the new regeneration area..
+		//freeArea(i,essence,lambda) = sum(u, hv2fa(i,essence,lambda,u)*hr(u,i,essence,lambda,t)*V(u,i,lambda,essence,t-1)*100);
+		//if(scen("endVreg") ,
+		//	regArea(i,essence,lambda,t) = freeArea(i,essence, lambda);   // here we could introduce in/out area from other land usages
+		//else
 		//	loop (i,
 		//		loop( (essence,lambda),
 		//			if ( expReturns(i,essence,lambda) = smax( (essence2,lambda2),expReturns(i,essence2,lambda2) ),
@@ -596,8 +592,6 @@ ModelCore::runSimulationYear(){
 				sfd(regArea,"regArea",regId,ft,"");
 			}
 		}
-
-
 
 
 	} // end of each r2 region
