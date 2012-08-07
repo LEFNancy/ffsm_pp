@@ -328,31 +328,31 @@ ModelCore::runSimulationYear(){
 	// *** OPTIMISATION....
 
 	// Create an instance of the IpoptApplication
-	SmartPtr<IpoptApplication> app = new IpoptApplication();
-	app->Options()->SetStringValue("linear_solver", "mumps"); // default in ipopt is ma27
-	app->Options()->SetStringValue("hessian_approximation", "limited-memory"); // quasi-newton approximation of the hessian
-	app->Options()->SetIntegerValue("mumps_mem_percent", 100);
-	app->Options()->SetNumericValue("obj_scaling_factor", -1); // maximisation
+	SmartPtr<IpoptApplication> application = new IpoptApplication();
+	application->Options()->SetStringValue("linear_solver", "mumps"); // default in ipopt is ma27
+	application->Options()->SetStringValue("hessian_approximation", "limited-memory"); // quasi-newton approximation of the hessian
+	application->Options()->SetIntegerValue("mumps_mem_percent", 100);
+	application->Options()->SetNumericValue("obj_scaling_factor", -1); // maximisation
 
 	// Initialize the IpoptApplication and process the options
 	ApplicationReturnStatus status;
-	status = app->Initialize();
+	status = application->Initialize();
 	if (status != Solve_Succeeded) {
 		printf("\n\n*** Error during initialization!\n");
 		return;
 	}
 
-	status = app->OptimizeTNLP(MTHREAD->OPT);
+	status = application->OptimizeTNLP(MTHREAD->OPT);
 
 
 	// *** POST OPTIMISATION....
 
 	if (status == Solve_Succeeded) {
 		// Retrieve some statistics about the solve
-		Index iter_count = app->Statistics()->IterationCount();
+		Index iter_count = application->Statistics()->IterationCount();
 		printf("\n\n*** The problem solved in %d iterations!\n", iter_count);
 
-		Number final_obj = app->Statistics()->FinalObjective();
+		Number final_obj = application->Statistics()->FinalObjective();
 		printf("\n\n*** The final value of the objective function is %e.\n", final_obj);
 	}
 
@@ -405,7 +405,7 @@ ModelCore::runSimulationYear(){
 			//);
 			int tp_u0 = gfd("tp",regId,ft,dClasses[0]); // time of passage to reach the first diameter class
 			if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // TODO to be checked
-				double pastRegArea = gfd("regArea",regId,ft,"",thisyear-tp_u0);
+				double pastRegArea = gfd("regArea",regId,ft,"",thisYear-tp_u0);
 				double entryVolHa = gfd("entryVolHa",regId,ft,"");
 				double vReg = pastRegArea*entryVolHa/1000000; // TODO: check the 1000000
 				sfd(vReg,"vReg",regId,ft,"");
@@ -426,7 +426,10 @@ ModelCore::runSimulationYear(){
 				for(uint pp=0;pp<priProducts.size();pp++){
 					double st = gpd("st",regId,priProducts[pp]);
 					double in = gpd("in",regId,priProducts[pp]);
-					hr += app(priProducts[pp],ft,dc)*st/ in;
+					hr += app(priProducts[pp],ft,dc)*st/ in; //TODO !!!!
+					//hr += app(priProducts[pp],ft,dc)*st/ in;
+					//bool                app(const string &prod_h, const string &forType_h, const string &dClass_h)
+
 					hV_byPrd.push_back(hr*pastYearVol);
 				}
 				double hV = hr*pastYearVol;
@@ -443,13 +446,12 @@ ModelCore::runSimulationYear(){
 				//	V(u,i,lambda,essence,t)=((1-1/(tp(u,i,lambda,essence))
 				//	                       -mort(u,i,lambda,essence) - hr(u,i,essence,lambda,t))*V(u,i,lambda,essence,t-1)
 				//	                       +(1/(tp(u-1,i,lambda,essence)))*beta(u,i,lambda,essence)*V(u-1,i,lambda,essence,t-1));
-				double pastYearVol = gfd("vol",regId,ft,dc,previousYear);
 				double vol;
 				double tp          = gfd("tp",regId,ft,dc);
 				double mort        = gfd("mortCoef",regId,ft,dc);
 				double vReg        = gfd("vReg",regId,ft,""); // Taking it from the memory database as we could be in a fixed vReg scenario and not having calculated it from above!
 				double beta        = gfd("betaCoef",regId,ft,dc);
-				double hv2fa       = gfd("hv2fa",regId,ft,dc,);
+				double hv2fa       = gfd("hv2fa",regId,ft,dc);
 				if(u==0){
 					vol = (1-1/tp-mort)*pastYearVol+vReg;
 					double debug = vol;
@@ -503,7 +505,7 @@ ModelCore::runSimulationYear(){
 			//vector <double> df_byFT; // discounf factors for each diameter classes
 			for (uint u=0; u<dClasses.size(); u++){
 				string dc = dClasses[u];
-				double cumTp_u, cumTp_u_noExp; cumTp_u_fullExp;
+				double cumTp_u, cumTp_u_noExp, cumTp_u_fullExp;
 				if(u==0) {
 					cumTp_u = 0.;
 					sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
@@ -553,14 +555,14 @@ ModelCore::runSimulationYear(){
 							//expReturnsPondCoef_byPrd.push_back(hV_byDiamAndPrd.at(u).at(pp)/hV_byFT);
 							double pw    = gpd("pw",regId,priProducts[pp]);
 							double hv2fa = gfd("hv2fa",regId,ft,dc);
-							double raw_amount = pw*h2va*hV_byDiamAndPrd.at(u).at(pp)/hV_byFT;
+							double raw_amount = pw*hv2fa*hV_byDiamAndPrd.at(u).at(pp)/hV_byFT;
 
 							expReturns += MD->calculateAnnualisedEquivalent(raw_amount,cumTp.at(u+1)); //comTp is on diamClasses, u here is on pDiamClasses
 						}
 						//expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
 					}
 				}
-				sfd(expReturns,"expReturns",ft,"",DATA_NOW,true);
+				sfd(expReturns,"expReturns",regId, ft,"",DATA_NOW,true);
 				cachedExpectedReturnsByFt.push_back(expReturns);
 			}
 
@@ -593,6 +595,7 @@ ModelCore::runSimulationYear(){
 				regArea +=  gfd("harvestedArea",regId,ft,DIAM_ALL)*(1-mr);
 				sfd(regArea,"regArea",regId,ft,"");
 			}
+		}
 
 
 

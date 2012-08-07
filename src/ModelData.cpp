@@ -995,11 +995,6 @@ const double
 ModelData::getForData(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year){
 	vector <string> dClasses = getStringVectorSetting("dClasses");
 
-	if (forType_h == ""){
-		cout << "debug me !!!" << endl;
-		exit(1);
-	}
-
 	if(year==DATA_NOW){
 		year=MTHREAD->SCD->getYear();
 	}
@@ -1603,7 +1598,7 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
 		if(y==1){
 			df = pow((1+ir),y);
 		} else {
-			df = df_byat.at(y-2)+pow((1+ir),y);
+			df = df_by.at(y-2)+pow((1+ir),y);
 		}
 		if (y==years_h) return df;
 		df_by.push_back(df);
@@ -1617,7 +1612,8 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, double years_h){
 	//loop( (u,i,lambda,essence),
 	//	cumTp(u,i,lambda,essence) =   ceil(cumTp(u,i,lambda,essence));
 	//);
-	return calculateAnnualisedEquivalent(amount_h, ceil(years_h));
+	int ceiledYear = ceil(years_h);
+	return calculateAnnualisedEquivalent(amount_h, ceiledYear);
 }
 
 // ========================== LLData =======================================
