@@ -21,6 +21,7 @@
 #include <stdexcept>
 #include <algorithm> //alghoritm used to reverse an array ( reverse(v.begin(), v.end()); )
 #include <iomanip> // for unzip
+#include <math.h>
 
 // Qt headers..
 #include <QFile>
@@ -985,7 +986,7 @@ Basic function to retrieve forest-related data.
 It addmits the following "filters":
 @type_h Name of the specific parameter requested
 @regId_h Look for specific level 2 region.
-@forType_h If specified, look exactly for the specified forest type, otherwise simply doesn't filter for it.
+@forType_h If specified, look exactly for the specified forest type, otherwise accept the keyword FT_ALL for summing all of them
 @diamClass_h Diameter class. It accept three keywords, for summing up all diameters, production-ready diameters or sub-production ones, namelly DIAM_ALL, DIAM_PROD, DIAM_FIRST.
 @year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
 */
@@ -993,6 +994,11 @@ It addmits the following "filters":
 const double
 ModelData::getForData(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year){
 	vector <string> dClasses = getStringVectorSetting("dClasses");
+
+	if (forType_h == ""){
+		cout << "debug me !!!" << endl;
+		exit(1);
+	}
 
 	if(year==DATA_NOW){
 		year=MTHREAD->SCD->getYear();
@@ -1002,7 +1008,7 @@ ModelData::getForData(const string &type_h, int regId_h, const string &forType_h
 	for(uint i=0;i<forDataVector.size();i++){
 		if(forDataVector[i].parName == type_h // name of parameter filter
 		  && (regId_h == forDataVector[i].region) // region filter
-		  && (forType_h == "" || forType_h == forDataVector[i].forType) // forestry type
+			&& (forType_h == FT_ALL || forType_h == forDataVector[i].forType) // forestry type
 		  && (forDataVector[i].diamClass == diamClass_h // diameter class filter
 			|| diamClass_h == DIAM_ALL
 			|| (diamClass_h == DIAM_PROD  && find(dClasses.begin()+1, dClasses.end(), forDataVector[i].diamClass)!= dClasses.end() )
@@ -1570,6 +1576,48 @@ ModelData::unpackKeyProdData(const string& key, string& parName, int& regId, str
 	prod.assign(key,regIdDelimiter+1,prodDelimiter-regIdDelimiter-1);
 	freeDim.assign(key,prodDelimiter+1,freeDimDelimiter-prodDelimiter-1);
 
+}
+
+/**
+// calculating the discount factor
+// revenues at years n will be transforemed as average year rate as
+// av.y.rev = rev(n)/ ( (1+ir)^(n-1)+(1+ir)^(n-2)+(1+ir)^(n-3)+...+(1+ir)^(n-n) )
+*/
+double
+ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
+	// calculating the discount factor
+	// revenues at years n will be transforemed as average year rate as
+	// av.y.rev = rev(n)/ ( (1+ir)^(n-1)+(1+ir)^(n-2)+(1+ir)^(n-3)+...+(1+ir)^(n-n) )
+	//loop(fy$(ord(fy)=1),
+	//	df(fy)= (1+ir)**(ord(fy));
+	//);
+	//loop(fy$(ord(fy)>1),
+	//	df(fy)=df(fy-1)+(1+ir)**(ord(fy));
+	//);
+	if(years_h<0) return 0.;
+	if(years_h==0) return amount_h;
+	double ir = getDoubleSetting("ir");
+	vector <double> df_by;
+	for(int y=1;y<=years_h;y++){
+		double df;
+		if(y==1){
+			df = pow((1+ir),y);
+		} else {
+			df = df_byat.at(y-2)+pow((1+ir),y);
+		}
+		if (y==years_h) return df;
+		df_by.push_back(df);
+	}
+	exit(1);
+	return 0; // never reached, just to avoid compilation warnings
+}
+double
+ModelData::calculateAnnualisedEquivalent(double amount_h, double years_h){
+	//ceil(x) DNLP returns the smallest integer number greater than or equal to x
+	//loop( (u,i,lambda,essence),
+	//	cumTp(u,i,lambda,essence) =   ceil(cumTp(u,i,lambda,essence));
+	//);
+	return calculateAnnualisedEquivalent(amount_h, ceil(years_h));
 }
 
 // ========================== LLData =======================================

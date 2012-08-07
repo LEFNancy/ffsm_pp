@@ -119,7 +119,9 @@ enum {
 #ifndef DIAM_FIRST
 #define DIAM_FIRST "DIAM_FIRST_CLASS" //< first diameter class (NOT used for production)
 #endif
-
+#ifndef FT_ALL
+#define FT_ALL "FT_ALL" //< all forest types
+#endif
 
 /// Base class for the regmas application.
 /**

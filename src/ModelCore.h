@@ -38,8 +38,8 @@
 class ModelCore : public BaseClass{
 
 public:
-						ModelCore(ThreadManager* MTHREAD_h);
-					   ~ModelCore();
+											ModelCore(ThreadManager* MTHREAD_h);
+										 ~ModelCore();
 	void                runInitPeriod();
 	void                runSimulationYear();
 
@@ -50,9 +50,6 @@ private:
 	void                spd(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, bool allowCreate=false, const string &freeDim_h=""){MTHREAD->MD->setProdData(value_h, type_h, regId_h, prodId_h, year, allowCreate, freeDim_h);};
 	void                sfd(double value_h, const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW, bool allowCreate=false){MTHREAD->MD->setForData(value_h, type_h, regId_h, forType_h, diamClass_h, year, allowCreate);};
 	bool                app(const string &prod_h, const string &forType_h, const string &dClass_h){return MTHREAD->MD->assessProdPossibility(prod_h, forType_h, dClass_h);};
-
-
-
 };
 
 #endif // MODELCORE_H

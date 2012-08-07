@@ -130,6 +130,9 @@ public:
 string                makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="");
 void                  unpackKeyProdData(const string& key, string& parName, int &regId, string& prod, string& freeDim);
 
+double                calculateAnnualisedEquivalent(double amount_h, int years_h); ///< Calculate the annual equivalent flow
+double                calculateAnnualisedEquivalent(double amount_h, double years_h); ///< Transform the double to the highest integer and call calculateAnnualisedEquivalent(double amount_h, int years_h)
+
 	/// Retrieve the list of objects type that can be placed on the specified soil type
 
 	void                setOutputDirectory(const char* output_dirname_h);

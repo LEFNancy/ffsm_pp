@@ -1,4 +1,5 @@
 #include <cmath>
+#include <algorithm>
 
 #include "IpIpoptApplication.hpp"
 #include "IpSolveStatistics.hpp"
@@ -260,6 +261,7 @@ ModelCore::runSimulationYear(){
 	if((futureTPBelief<0 || futureTPBelief>1) && futureTPBelief != -1){
 		msgOut(MSG_CRITICAL_ERROR, "futureTPBelief parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
 	}
+	double mr = MD->getDoubleSetting("mr");
 
 
 
@@ -385,7 +387,7 @@ ModelCore::runSimulationYear(){
 
 
 		// Post optimisation biological mobule..
-
+		vector <double> cachedExpectedReturnsByFt;
 		for(uint j=0;j<fTypes.size();j++){
 			string ft = fTypes[j];
 			vector < vector <double> > hV_byDiamAndPrd;
@@ -410,9 +412,7 @@ ModelCore::runSimulationYear(){
 			}
 
 
-			double freeArea = 0;
-
-
+			//double harvestedArea = 0;
 			for (uint u=0; u<pDClasses.size(); u++){
 				string dc = pDClasses[u];
 				double hr =0;
@@ -463,7 +463,8 @@ ModelCore::runSimulationYear(){
 				sfd(hr,"hr",regId,ft,dc);
 				sfd(hV,"hV",regId,ft,dc);
 				sfd(vol,"vol",regId,ft,dc);
-				freeArea += hv2fa*hr*pastYearVol*100;
+				//harvestedArea += hv2fa*hr*pastYearVol*100;
+				sfd(hv2fa*hr*pastYearVol*100,"harvestedArea",regId,ft,dc,DATA_NOW,true);
 			} // end foreach diameter classes
 
 			// Post optimisation management mobule..
@@ -497,15 +498,16 @@ ModelCore::runSimulationYear(){
 			//	);
 			//);
 
-			// calculating the cumulative time of passage, depending on forest owners expectations
+			// calculating the cumulative time of passage, depending on forest owners diam growth expectations
 			vector <double> cumTp; //cumulative time of passage to REACH a diameter class (tp is to LEAVE to the next one)
-
+			//vector <double> df_byFT; // discounf factors for each diameter classes
 			for (uint u=0; u<dClasses.size(); u++){
 				string dc = dClasses[u];
 				double cumTp_u, cumTp_u_noExp; cumTp_u_fullExp;
 				if(u==0) {
-					sfd(0.,"cumTp",regId,ft,dc,DATA_NOW,true);
-					cumTp.push_back(0.);
+					cumTp_u = 0.;
+					sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
+					cumTp.push_back(cumTp_u);
 				} else {
 					if (futureTPBelief == -1){
 						cumTp_u = cumTp[u-1]+gfd("tp",regId,ft,dClasses[u-1],firstYear);
@@ -519,40 +521,78 @@ ModelCore::runSimulationYear(){
 						cumTp.push_back(cumTp_u);
 					}
 				}
+				//double df = calculateDiscountFactor(cumTp);
+				//df_byFT.push_back(df);
+
+
 			} // end of each diam class
 
-			if(regType == "fixed" || regType == "fromHrLevel"){
-				sfd(freeArea,"regArea",regId,ft,"");
-			} else {
+			// calculating the discount factor for each forest type and diameter class
+			//loop((u,i,lambda,essence),
+			//	loop(fy,
+			//		if( ord(fy)= cumTp(u,i,lambda,essence),
+			//			df_byFT(u,i,lambda,essence) = df(fy);
+			//		);
+			//	);
+			//);
+
+
+			if(regType != "fixed" && regType != "fromHrLevel"){
 				// calculating the expected returns..
-				vector < vector <double> > expReturnsPondCoef;
+				//vector < vector <double> > expReturnsPondCoef;
 				double hV_byFT = gfd("hV",regId,ft,DIAM_PROD);
 				double expReturns = 0;
 				for (uint u=0; u<pDClasses.size(); u++){
-					vector <double> expReturnsPondCoef_byPrd;
+					//vector <double> expReturnsPondCoef_byPrd;
 					string dc = pDClasses[u];
 					for (uint pp=0;pp<priProducts.size();pp++){
 						if(hV_byFT==0.){
-							expReturnsPondCoef_byPrd.push_back(0.);
+							//expReturnsPondCoef_byPrd.push_back(0.);
+							// I'll do an average of price of products that can be obtained from that FT TODO !!!
 						} else {
-							expReturnsPondCoef_byPrd.push_back(hV_byDiamAndPrd.at(u).at(pp)/hV_byFT);
+							//expReturnsPondCoef_byPrd.push_back(hV_byDiamAndPrd.at(u).at(pp)/hV_byFT);
 							double pw    = gpd("pw",regId,priProducts[pp]);
 							double hv2fa = gfd("hv2fa",regId,ft,dc);
+							double raw_amount = pw*h2va*hV_byDiamAndPrd.at(u).at(pp)/hV_byFT;
 
-							expReturns += gpd("pw")
+							expReturns += MD->calculateAnnualisedEquivalent(raw_amount,cumTp.at(u+1)); //comTp is on diamClasses, u here is on pDiamClasses
 						}
-						expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
+						//expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
 					}
 				}
-
-
+				sfd(expReturns,"expReturns",ft,"",DATA_NOW,true);
+				cachedExpectedReturnsByFt.push_back(expReturns);
 			}
-
-	);
-
 
 		} // end foreach forest type
 
+
+		//	// choosing the new regeneration area
+		//	loop (i,
+		//		loop( (essence,lambda),
+		//			if ( expReturns(i,essence,lambda) = smax( (essence2,lambda2),expReturns(i,essence2,lambda2) ),
+		//				regArea (i,essence,lambda,t) =  sum( (essence2, lambda2), freeArea(i,essence2, lambda2) ) * mr;
+		//			);
+		//		);
+		//		regArea(i,essence,lambda,t) = freeArea(i,essence, lambda)*(1-mr);   // here we could introduce in/out area from other land usages
+		//	);
+		double totalHarvestedArea = gfd("harvestedArea",regId,FT_ALL,DIAM_ALL);
+		for(uint j=0;j<fTypes.size();j++){
+			string ft = fTypes[j];
+			if(regType == "fixed" || regType == "fromHrLevel"){
+				double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL);
+				sfd(harvestedArea,"regArea",regId,ft,"");
+			} else {
+				double regArea = 0;
+				double maxExpReturns = *( max_element( cachedExpectedReturnsByFt.begin(), cachedExpectedReturnsByFt.end() ) );
+				for (uint j2=0;j2<fTypes.size();j2++){
+					if (cachedExpectedReturnsByFt[j] == maxExpReturns){
+						regArea += totalHarvestedArea*mr;
+					}
+				}
+				regArea +=  gfd("harvestedArea",regId,ft,DIAM_ALL)*(1-mr);
+				sfd(regArea,"regArea",regId,ft,"");
+			}
 
 
 
@@ -562,3 +602,5 @@ ModelCore::runSimulationYear(){
 	return;
 
 };
+
+
