@@ -34,6 +34,7 @@
 // RegMAS headers...
 #include "BaseClass.h"
 #include "InputNode.h"
+#include "Output.h"
 
 using namespace std;
 
@@ -45,6 +46,7 @@ struct BasicData;
 class  LLData;
 class  ModelRegion;
 class  Layers;
+class  Output;
 struct forData;
 struct prodData;
 struct forToProd;
@@ -144,6 +146,8 @@ double                calculateAnnualisedEquivalent(double amount_h, double year
 	void                setBasicData(const string &name_h, double value, int position=0);
 	void                setBasicData(const string &name_h, string value, int position=0);
 	void                setBasicData(const string &name_h, bool value, int position=0);
+	friend void         Output::printForestData();
+	friend void         Output::printProductData();
 
 private:
 	string              getBaseData (const string &name_h, int type_h, int position=0);

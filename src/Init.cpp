@@ -148,6 +148,7 @@ Init::setInitLevel5(){
 void
 Init::setInitLevel6(){
 	InitState=6;
+	MTHREAD->DO->printFinalOutput();
 	msgOut(MSG_INFO, "Model has ended scheduled simulation in a regular way.");
 };
 

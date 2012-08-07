@@ -50,12 +50,17 @@ public:
 		void                initOutputAggregatedData();
 		void                initOutputMaps();
 		void                initOutputDetailedData();
+		void                initOutputForestData();
+		void                initOutputProductData();
 	void                collectData();
 	void                print();
 		void                printAggregatedData();
 		void                printMaps();
 		void                printDetailedData();
 		void                printDebugMatrices();
+	void                printFinalOutput();
+		void                printForestData();
+		void                printProductData();
 	char                getOutputFieldDelimiter();
 	void                cleanScenario(string fileName, string scenarioName, char d);
 

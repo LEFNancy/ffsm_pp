@@ -25,6 +25,9 @@
 #include "ModelData.h"
 #include "Gis.h"
 
+typedef map<string, vector <double> > DataMap;
+typedef pair<string, vector <double> > DataPair;
+
 
 Output::Output(ThreadManager* MTHREAD_h){
 	MTHREAD=MTHREAD_h;
@@ -42,10 +45,59 @@ Output::collectData(){
 
 void
 Output::initOutput(){
-	initOutputAggregatedData();
+	//initOutputAggregatedData();
 	initOutputMaps();
-	initOutputDetailedData();
+	//initOutputDetailedData();
+	initOutputForestData();
+	initOutputProductData();
+
 }
+
+
+void
+Output::initOutputForestData(){
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
+	char d = getOutputFieldDelimiter();
+	int inYear = MTHREAD->MD->getIntSetting("initialYear");
+	int nYears =  MTHREAD->MD->getIntSetting("simulationYears");
+	string outFileName;
+	outFileName =   MTHREAD->MD->getBaseDirectory()
+								+ MTHREAD->MD->getOutputDirectory()
+								+ "results/forestData_"
+								+ MTHREAD->getScenarioName()
+								+ MTHREAD->MD->getStringSetting("outputFileExtension");
+		ofstream out(outFileName.c_str(), ios::out);
+		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
+		out << "scen" << d << "parName" << d << "region" << d << "forType" << d << "diamClass" << d;
+
+		for(int i=0;i<nYears;i++){
+			out << i+inYear << d;
+		}
+		out << "\n";
+		out.close();
+};
+
+void
+Output::initOutputProductData(){
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
+	char d = getOutputFieldDelimiter();
+	int inYear = MTHREAD->MD->getIntSetting("initialYear");
+	int nYears =  MTHREAD->MD->getIntSetting("simulationYears");
+	string outFileName;
+	outFileName =   MTHREAD->MD->getBaseDirectory()
+								+ MTHREAD->MD->getOutputDirectory()
+								+ "results/productData_"
+								+ MTHREAD->getScenarioName()
+								+ MTHREAD->MD->getStringSetting("outputFileExtension");
+		ofstream out(outFileName.c_str(), ios::out);
+		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
+		out << "scen" << d << "parName" << d << "region" << d << "prod" << d << "freeDim" << d;
+		for(int i=0;i<nYears;i++){
+			out << i+inYear << d;
+		}
+		out << "\n";
+		out.close();
+};
 
 void
 Output::initOutputAggregatedData(){
@@ -169,16 +221,153 @@ Output::initOutputDetailedData(){
 
 
 
+
 void
 Output::print(){
-
-	printAggregatedData();
+	//printAggregatedData();
 	printMaps();
-	printDetailedData();
-	printDebugMatrices();
+	//printDetailedData();
+	//printDebugMatrices();
+}
 
+void
+Output::printMaps(){
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_MAPS) return;
+	MTHREAD->GIS->printLayers();
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_BINMAPS) return;
+	MTHREAD->GIS->printBinMaps();
 
 }
+
+void
+Output::printDetailedData(){
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_DETAILED) return;
+
+	char           d         = getOutputFieldDelimiter();
+
+	string out;
+
+	vector <string> sData; //surveyData
+	//sData.push_back(surveyID);
+	//sData.push_back(i2s(surveys[i].year));
+
+
+	if(MTHREAD->MD->getBoolSetting("detailedOutputHumanReadable")){
+		string inOutFileName =     MTHREAD->MD->getBaseDirectory()
+								 + MTHREAD->MD->getOutputDirectory()
+								 + "results/ag_"
+								 + "detailID"
+								 + "_"
+								 + MTHREAD->getScenarioName()
+								 + MTHREAD->MD->getStringSetting("outputFileExtension");
+
+		ifstream inFile (inOutFileName.c_str(), ios::in);
+		if (!inFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for reading.");}
+		for(uint i=0;i<sData.size();i++) {
+			string tempString;
+			getline (inFile,tempString);
+			out.append(tempString);
+			out.append(sData[i]+d);
+			out.append("\n");
+		}
+		inFile.close();
+
+		ofstream outFile (inOutFileName.c_str(), ios::out);
+		if (!outFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for writing.");}
+			outFile << out ;
+			outFile.close();
+	} else {  // one big file...
+		string outFileName =     MTHREAD->MD->getBaseDirectory()
+								 + MTHREAD->MD->getOutputDirectory()
+								 + "results/agentsDetails"
+								 //+ MTHREAD->getScenarioName()
+								 + MTHREAD->MD->getStringSetting("outputFileExtension");
+		ofstream outFile (outFileName.c_str(), ios::app);
+		if (!outFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+".");}
+		outFile << MTHREAD->getScenarioName() << d ;
+		for (uint i=0;i<sData.size();i++){
+			outFile << sData[i] << d ;
+		}
+		outFile << "\n" ;
+		outFile.close();
+	}
+}
+
+void
+Output::printFinalOutput(){
+	printForestData();
+	printProductData();
+}
+
+void
+Output::printForestData(){
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
+	msgOut(MSG_INFO, "Printing forest data..");
+	string inOutFileName;
+	char d = getOutputFieldDelimiter();
+	int inYear = MTHREAD->MD->getIntSetting("initialYear");
+	int nYears =  MTHREAD->MD->getIntSetting("simulationYears");
+	inOutFileName =   MTHREAD->MD->getBaseDirectory()
+									+ MTHREAD->MD->getOutputDirectory()
+									+ "results/forestData_"
+									+ MTHREAD->getScenarioName()
+									+ MTHREAD->MD->getStringSetting("outputFileExtension");
+	ofstream out (inOutFileName.c_str(), ios::app);
+	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for writing.");}
+
+	for(uint i=0;i<MTHREAD->MD->forDataVector.size();i++){
+		out << MTHREAD->getScenarioName() << d;
+		out << MTHREAD->MD->forDataVector[i].parName << d;
+		out << MTHREAD->MD->forDataVector[i].region << d;
+		out << MTHREAD->MD->forDataVector[i].forType << d;
+		out << MTHREAD->MD->forDataVector[i].diamClass << d;
+		for(int y=0;y<nYears;y++){
+			out << MTHREAD->MD->getTimedData(MTHREAD->MD->forDataVector[i].values,y+inYear) << d;
+		}
+		out << "\n";
+	}
+	out.close();
+};
+
+void
+Output::printProductData(){
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
+	msgOut(MSG_INFO, "Printing product data..");
+	string inOutFileName;
+	char d = getOutputFieldDelimiter();
+	int inYear = MTHREAD->MD->getIntSetting("initialYear");
+	int nYears =  MTHREAD->MD->getIntSetting("simulationYears");
+	inOutFileName =   MTHREAD->MD->getBaseDirectory()
+									+ MTHREAD->MD->getOutputDirectory()
+									+ "results/productData_"
+									+ MTHREAD->getScenarioName()
+									+ MTHREAD->MD->getStringSetting("outputFileExtension");
+	ofstream out (inOutFileName.c_str(), ios::app);
+	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for writing.");}
+
+	DataMap::const_iterator i;
+	string key;
+	vector <double> values;
+	string parName;
+	int regId;
+	string prod;
+	string freeDim;
+	for(i=MTHREAD->MD->prodDataMap.begin();i!=MTHREAD->MD->prodDataMap.end();i++){
+		key = i->first;
+		values = i->second;
+		MTHREAD->MD->unpackKeyProdData(key, parName, regId, prod, freeDim);
+		out << MTHREAD->getScenarioName() << d;
+		out << parName << d;
+		out << regId << d;
+		out << prod << d;
+		out << freeDim << d;
+		for(int y=0;y<nYears;y++){
+			out << MTHREAD->MD->getTimedData(values,y+inYear) << d;
+		}
+		out << "\n";
+	}
+	out.close();
+};
 
 void
 Output::printAggregatedData(){
@@ -236,68 +425,7 @@ Output::printAggregatedData(){
 	}
 }
 
-void
-Output::printMaps(){
-	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_MAPS) return;
-	MTHREAD->GIS->printLayers();
-	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_BINMAPS) return;
-	MTHREAD->GIS->printBinMaps();
-	
-}
 
-void
-Output::printDetailedData(){
-	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_DETAILED) return;
-
-	char           d         = getOutputFieldDelimiter();
-
-	string out;
-
-	vector <string> sData; //surveyData
-	//sData.push_back(surveyID);
-	//sData.push_back(i2s(surveys[i].year));
-
-
-	if(MTHREAD->MD->getBoolSetting("detailedOutputHumanReadable")){
-		string inOutFileName =     MTHREAD->MD->getBaseDirectory()
-							   + MTHREAD->MD->getOutputDirectory()
-							   + "results/ag_"
-							   + "detailID"
-							   + "_"
-							   + MTHREAD->getScenarioName()
-							   + MTHREAD->MD->getStringSetting("outputFileExtension");
-
-		ifstream inFile (inOutFileName.c_str(), ios::in);
-		if (!inFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for reading.");}
-		for(uint i=0;i<sData.size();i++) {
-			string tempString;
-			getline (inFile,tempString);
-			out.append(tempString);
-			out.append(sData[i]+d);
-			out.append("\n");
-		}
-		inFile.close();
-
-		ofstream outFile (inOutFileName.c_str(), ios::out);
-		if (!outFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for writing.");}
-			outFile << out ;
-			outFile.close();
-	} else {  // one big file...
-		string outFileName =     MTHREAD->MD->getBaseDirectory()
-							   + MTHREAD->MD->getOutputDirectory()
-							   + "results/agentsDetails"
-							   //+ MTHREAD->getScenarioName()
-							   + MTHREAD->MD->getStringSetting("outputFileExtension");
-		ofstream outFile (outFileName.c_str(), ios::app);
-		if (!outFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+".");}
-		outFile << MTHREAD->getScenarioName() << d ;
-		for (uint i=0;i<sData.size();i++){
-			outFile << sData[i] << d ;
-		}
-		outFile << "\n" ;
-		outFile.close();
-	}
-}
 
 void
 Output::printDebugMatrices(){
