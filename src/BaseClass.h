@@ -79,10 +79,16 @@ enum {
 	OUTVL_BINMAPS          =6,
 	OUTVL_ALL              =7,
 
-	VDOM_PRI_PR                 =1, // domain of the variable: primary, secondary, all products or all products over r2 couple regions (in-country commercial flows)
-	VDOM_SEC_PR                 =2,
-	VDOM_ALL_PR                 =3,
-	VDOM_R2_ALL_PR              =4
+	VDOM_PRI_PR            =1, // domain of the variable: primary, secondary, all products or all products over r2 couple regions (in-country commercial flows)
+	VDOM_SEC_PR            =2,
+	VDOM_ALL_PR            =3,
+	VDOM_R2_ALL_PR         =4,
+	VDOM_SCALAR            =5,
+
+	CONSTR_EQ              =1, // constrain of type equality
+	CONSTR_LE0             =2, // constrain of type lower or equal than 0
+	CONSTR_GE0             =3  // constrain of type greater or equal 0
+
 
 };
 

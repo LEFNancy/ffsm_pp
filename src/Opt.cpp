@@ -31,8 +31,141 @@
 #include "ThreadManager.h"
 #include "Scheduler.h"
 #include "ModelRegion.h"
+#include "Opt.h"
 
 using namespace Ipopt;
+
+typedef std::map<std::string, int >  DomainMap;
+typedef std::pair<std::string, int > DomainPair;
+
+// ****** MODEL IMPLEMENTATION START HERE ********************************
+
+void
+Opt::defineVariables(){
+		// filling the list of variables and their domain
+		// if you add variables in the model that enter optimisation you'll have to add them here
+		// the map goes automatically in alphabetical order
+		// original order: pc,pl,dc,dl,da,sc,sl,sa,exp
+		vars.insert(DomainPair("da", VDOM_SEC_PR));
+		vars.insert(DomainPair("dc", VDOM_SEC_PR));
+		vars.insert(DomainPair("dl", VDOM_ALL_PR));
+		vars.insert(DomainPair("pc", VDOM_ALL_PR));
+		vars.insert(DomainPair("pl", VDOM_ALL_PR));
+		vars.insert(DomainPair("rt", VDOM_R2_ALL_PR)); // regional trade, it was exp in gams
+		vars.insert(DomainPair("sa", VDOM_PRI_PR));
+		vars.insert(DomainPair("sc", VDOM_PRI_PR));
+		vars.insert(DomainPair("sl", VDOM_ALL_PR));
+}
+
+void
+Opt::defineConstrains (){
+	constrain mkeq2;
+	mkeq2.name="mkeq2";
+	mkeq2.comment="h1 in the paper, material balance equation";
+	mkeq2.domain=VDOM_SEC_PR;
+	mkeq2.direction = CONSTR_EQ;
+
+	mkeq2.evaluate = Opt::mkteq6f;
+
+	vector<double> test;
+	test.push_back(3);
+	test.push_back(2);
+	double result = mkeq2.evaluate(test);
+	cout << "result: " << result << endl;
+
+}
+
+template<class T> bool
+Opt::eval_obj(Index n, const T *x, T& obj_value){
+
+	double aa, bb, dc0, sigma, a_pr, ct, m;
+	obj_value = 0.;
+
+	for (uint r1=0;r1<l2r.size();r1++){
+		for (uint r2=0;r2<l2r[r1].size();r2++){
+		//  // consumer's surplus..
+		//  sum ((i,p_tr),
+		//    AA(i,p_tr)*(RVAR('dc',i,p_tr)**((sigma(p_tr)+1)/sigma(p_tr)))
+		//    - AA(i,p_tr)*((0.5*dc0(i,p_tr))**((sigma(p_tr)+1)/sigma(p_tr)))
+		//    - RVAR('pc',i,p_tr)*RVAR('dc',i,p_tr)
+		//  )
+			for (uint p=0;p<secPr.size();p++){
+				aa = gpd("aa",l2r[r1][r2],secPr[p]);
+				sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
+				dc0 = gpd("dc",l2r[r1][r2],secPr[p],secondYear);
+				obj_value += aa*pow(x[gix("dc",r1,r2,p)],(sigma+1)/sigma)-aa*pow(0.5*dc0,(sigma+1)/sigma)-x[gix("pc",r1,r2,p+nPriPr)]*x[gix("dc",r1,r2,p)];
+			}
+			//  // producers surplus..
+			//  + sum((i,p_pr),
+			//    RVAR('pc',i,p_pr)*RVAR('sc',i,p_pr)
+			//    - BB(i,p_pr)*(RVAR('sc',i,p_pr)**((sigma(p_pr)+1)/sigma(p_pr)))
+			//  )
+			for (uint p=0;p<priPr.size();p++){
+				bb = gpd("bb",l2r[r1][r2],priPr[p]);
+				sigma = gpd("sigma",l2r[r1][r2],priPr[p]);
+				obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - bb*pow(x[gix("sc",r1,r2,p)],((sigma+1)/sigma));
+			}
+			//  // trasformations between primary products
+			//  + sum ((i,p_pr,p_pr2),
+			//  +RVAR('pc',i,p_pr2)*pres(p_pr,p_pr2)*RVAR('sc',i,p_pr)
+			//  -BB(i,p_pr2)*(pres(p_pr,p_pr2)*RVAR('sc',i,p_pr))**((sigma(p_pr2)+1)/sigma(p_pr2))
+			//   )
+
+			for (uint p1=0;p1<priPr.size();p1++){
+				for (uint p2=0;p2<priPr.size();p2++){
+					a_pr = gpd("a_pr",l2r[r1][r2],priPr[p1],DATA_NOW,priPr[p2]);
+					bb = gpd("bb",l2r[r1][r2],priPr[p2]);
+					sigma = gpd("sigma",l2r[r1][r2],priPr[p2]);
+					obj_value += x[gix("pc",r1,r2,p2)]*a_pr*x[gix("sc",r1,r2,p1)]-bb*pow(a_pr*x[gix("sc",r1,r2,p1)],(sigma+1)/sigma);
+				}
+			}
+			//  // surplus of transport agents..
+			//  + sum((i,j,prd), (RVAR('pl',j,prd)-RVAR('pl',i,prd)-CT(i,j,prd))*EXP(i,j,prd))
+			for (uint r2To=0;r2To<l2r[r1].size();r2To++){
+				for (uint p=0;p<allPr.size();p++){
+					ct = gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2To]));
+					obj_value += (x[gix("pl",r1,r2To,p)]-x[gix("pl",r1,r2,p)]-ct)*x[gix("rt",r1,r2,p,r2To)];
+				}
+			}
+
+			//  // transformers surplus..
+			//  + sum((i,p_tr), (RVAR('pl',i,p_tr)-m(i,p_tr))*(RVAR('sl',i,p_tr))) // attenction it's local. if we include w imports or p expports this have to change
+			for (uint p=0;p<secPr.size();p++){
+				m = gpd("m",l2r[r1][r2],secPr[p]);
+				obj_value += (x[gix("pl",r1,r2,p+nPriPr)]-m)*x[gix("sl",r1,r2,p+nPriPr)];
+			}
+			//  - sum((i,p_pr), RVAR('pl',i,p_pr)*RVAR('dl',i,p_pr))               // to total and an other equation total=local+abroad should be added
+			for (uint p=0;p<priPr.size();p++){
+				obj_value -= x[gix("pl",r1,r2,p)]*x[gix("dl",r1,r2,p)];
+			}
+		} // end of each lev2 regions
+
+	} //end of each r1 regions
+
+	//obj_value = -obj_value; // we want maximisation, ipopt minimize! (donei n the options - scaling obj function)
+
+ //exit(0);
+	return true;
+	// checked 20120802 this function is ok with gams, both in input and in output of the preoptimisation stage
+
+}
+
+// implement here the constrains:
+
+
+double
+Opt::mkteq6f(const vector <double> &x_var){
+	// mkteq6(i,p_tr)..  RVAR('dc',i,p_tr)  =e=  GG(i,p_tr)*(RVAR('pc',i,p_tr)**sigma(p_tr)); // eq. 20
+	//gg = gpd("gg",l2r[r1][r2],secPr[p]);
+	//sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
+	//g[cix] = x[gix("dc",r1,r2,p)]-gg*pow(x[gix("pc",r1,r2,psec)],sigma);
+	return x_var.at(0)*10+x_var.at(1)*2;
+}
+
+
+
+
+//  ******** NOTHING TO DO BELOW THIS LINE ********************************
 
 Opt::Opt(ThreadManager* MTHREAD_h){
 	MTHREAD = MTHREAD_h;
@@ -45,6 +178,8 @@ Opt::Opt(ThreadManager* MTHREAD_h){
 Opt::~Opt(){
 
 }
+
+
 
 
 bool
@@ -79,20 +214,8 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 			}
 		}
 
-		// filling the list of variables and their domain
-		// if you add variables in the model that enter optimisation you'll have to add them here
-		// the map goes automatically in alphabetical order
-		// original order: pc,pl,dc,dl,da,sc,sl,sa,exp
-		vars.insert(std::pair<string, int>("da", VDOM_SEC_PR));
-		vars.insert(std::pair<string, int>("dc", VDOM_SEC_PR));
-		vars.insert(std::pair<string, int>("dl", VDOM_ALL_PR));
-		vars.insert(std::pair<string, int>("pc", VDOM_ALL_PR));
-		vars.insert(std::pair<string, int>("pl", VDOM_ALL_PR));
-		vars.insert(std::pair<string, int>("rt", VDOM_R2_ALL_PR)); // regional trade, it was exp in gams
-		vars.insert(std::pair<string, int>("sa", VDOM_PRI_PR));
-		vars.insert(std::pair<string, int>("sc", VDOM_PRI_PR));
-		vars.insert(std::pair<string, int>("sl", VDOM_ALL_PR));
-
+		// put the variables and their domain in the vars map
+		defineVariables();
 
 		// calculating the number of variables and the initial positions in the concatenated array..
 		nVar = 0;
@@ -188,6 +311,11 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 			}
 			positions.insert(pair<string, vector < vector < vector < vector <int> > > > >(viter->first,  positionsToAdd));
 		}
+
+	// defining the contrains...
+	defineConstrains();
+
+
 
 		// calculating the number of constrains..
 		nCons = 0; // leave 0
@@ -340,79 +468,9 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 	return true;
 }
 
-template<class T> bool
-Opt::eval_obj(Index n, const T *x, T& obj_value){
 
-	double aa, bb, dc0, sigma, a_pr, ct, m;
-	obj_value = 0.;
 
-	for (uint r1=0;r1<l2r.size();r1++){
-		for (uint r2=0;r2<l2r[r1].size();r2++){
-		//  // consumer's surplus..
-		//  sum ((i,p_tr),
-		//    AA(i,p_tr)*(RVAR('dc',i,p_tr)**((sigma(p_tr)+1)/sigma(p_tr)))
-		//    - AA(i,p_tr)*((0.5*dc0(i,p_tr))**((sigma(p_tr)+1)/sigma(p_tr)))
-		//    - RVAR('pc',i,p_tr)*RVAR('dc',i,p_tr)
-		//  )
-			for (uint p=0;p<secPr.size();p++){
-				aa = gpd("aa",l2r[r1][r2],secPr[p]);
-				sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
-				dc0 = gpd("dc",l2r[r1][r2],secPr[p],secondYear);
-				obj_value += aa*pow(x[gix("dc",r1,r2,p)],(sigma+1)/sigma)-aa*pow(0.5*dc0,(sigma+1)/sigma)-x[gix("pc",r1,r2,p+nPriPr)]*x[gix("dc",r1,r2,p)];
-			}
-			//  // producers surplus..
-			//  + sum((i,p_pr),
-			//    RVAR('pc',i,p_pr)*RVAR('sc',i,p_pr)
-			//    - BB(i,p_pr)*(RVAR('sc',i,p_pr)**((sigma(p_pr)+1)/sigma(p_pr)))
-			//  )
-			for (uint p=0;p<priPr.size();p++){
-				bb = gpd("bb",l2r[r1][r2],priPr[p]);
-				sigma = gpd("sigma",l2r[r1][r2],priPr[p]);
-				obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - bb*pow(x[gix("sc",r1,r2,p)],((sigma+1)/sigma));
-			}
-			//  // trasformations between primary products
-			//  + sum ((i,p_pr,p_pr2),
-			//  +RVAR('pc',i,p_pr2)*pres(p_pr,p_pr2)*RVAR('sc',i,p_pr)
-			//  -BB(i,p_pr2)*(pres(p_pr,p_pr2)*RVAR('sc',i,p_pr))**((sigma(p_pr2)+1)/sigma(p_pr2))
-			//   )
 
-			for (uint p1=0;p1<priPr.size();p1++){
-				for (uint p2=0;p2<priPr.size();p2++){
-					a_pr = gpd("a_pr",l2r[r1][r2],priPr[p1],DATA_NOW,priPr[p2]);
-					bb = gpd("bb",l2r[r1][r2],priPr[p2]);
-					sigma = gpd("sigma",l2r[r1][r2],priPr[p2]);
-					obj_value += x[gix("pc",r1,r2,p2)]*a_pr*x[gix("sc",r1,r2,p1)]-bb*pow(a_pr*x[gix("sc",r1,r2,p1)],(sigma+1)/sigma);
-				}
-			}
-			//  // surplus of transport agents..
-			//  + sum((i,j,prd), (RVAR('pl',j,prd)-RVAR('pl',i,prd)-CT(i,j,prd))*EXP(i,j,prd))
-			for (uint r2To=0;r2To<l2r[r1].size();r2To++){
-				for (uint p=0;p<allPr.size();p++){
-					ct = gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2To]));
-					obj_value += (x[gix("pl",r1,r2To,p)]-x[gix("pl",r1,r2,p)]-ct)*x[gix("rt",r1,r2,p,r2To)];
-				}
-			}
-
-			//  // transformers surplus..
-			//  + sum((i,p_tr), (RVAR('pl',i,p_tr)-m(i,p_tr))*(RVAR('sl',i,p_tr))) // attenction it's local. if we include w imports or p expports this have to change
-			for (uint p=0;p<secPr.size();p++){
-				m = gpd("m",l2r[r1][r2],secPr[p]);
-				obj_value += (x[gix("pl",r1,r2,p+nPriPr)]-m)*x[gix("sl",r1,r2,p+nPriPr)];
-			}
-			//  - sum((i,p_pr), RVAR('pl',i,p_pr)*RVAR('dl',i,p_pr))               // to total and an other equation total=local+abroad should be added
-			for (uint p=0;p<priPr.size();p++){
-				obj_value -= x[gix("pl",r1,r2,p)]*x[gix("dl",r1,r2,p)];
-			}
-		} // end of each lev2 regions
-
-	} //end of each r1 regions
-
-	//obj_value = -obj_value; // we want maximisation, ipopt minimize! (donei n the options - scaling obj function)
-
- //exit(0);
-	return true;
-	// checked 20120802 this function is ok with gams, both in input and in output of the preoptimisation stage
-}
 
 template<class T> bool
 Opt::eval_constraints(Index n, const T *x, Index m, T* g){
@@ -776,6 +834,7 @@ Opt::generate_tapes(Index n, Index m){
 
 	double dummy;
 
+	//TODO: remove the next
 	Jac = new double*[m];
 	for(Index i=0;i<m;i++)
 		Jac[i] = new double[n];
@@ -993,4 +1052,7 @@ Opt:: debugPrintParameters(){
 
 
 }
+
+
+
 

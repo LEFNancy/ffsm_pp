@@ -44,6 +44,8 @@
 
 using namespace Ipopt;
 
+struct constrain;
+
 class Opt: public BaseClass, public TNLP{
 public:
 						Opt(ThreadManager* MTHREAD_h); ///< Constructor
@@ -119,7 +121,19 @@ public:
 
 	//***************    end   ADOL-C part ***********************************
 
-private:
+	// **************   start PYTHIA part ************************************
+	void         defineVariables(); ///< define the variables and their domains
+	void         defineConstrains(); ///< define the constrains, their domain, their direction and their associated evaluation function
+
+	// **************   end PYTHIA part **************************************
+
+
+	//************** start constrains (MODELLER PART) *******************************************
+	static double            mkteq6f(const vector <double> &x_var);
+
+	//************** end constrains (MODELLER PART) *****************************************
+
+protected:
 
 	// convenient handles to equivalent ModelData functions..
 	const double        gpd(const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h=""){return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};
@@ -131,30 +145,32 @@ private:
 	const int           gix_uncached(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
 	const int           gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
 	const int           gdt(const string &varName); ///< Get the domain type of a given variable
+	//virtual void        eval_obj (Index n, const T *x, T& obj_value);
 
-	vector<string>                         priPr;
-	vector<string>                         secPr;
-	vector<string>                         allPr;
-	vector < vector <int> >                  l2r;
-	map <string, int>                    initPos; ///< A map that return the initial index position in the concatenated array for each variable
-	map <string, int>                       vars; ///< List of variables in the model and their domain: pr product, sec prod, all products or all products over each subregion pair (exports)
+	vector<string>                           priPr;
+	vector<string>                           secPr;
+	vector<string>                           allPr;
+	vector < vector <int> >                    l2r;
+	map <string, int>                      initPos; ///< A map that return the initial index position in the concatenated array for each variable
+	map <string, int>                         vars; ///< List of variables in the model and their domain: pr product, sec prod, all products or all products over each subregion pair (exports)
 	map <string, vector < vector < vector < vector <int> > > > >  positions; ///< cached position in the concatenated vector for each variables. Dimensions are l1reg, l2reg, prod, (l2To region).
-	int                                   nPriPr;
-	int                                   nSecPr;
-	int                                   nAllPr;
-	int                                     nL2r;
-	int                                     nVar;
-	int                                    nCons;
-	int                      nEqualityConstrains;
-	int                nLowerEqualZeroConstrains;
-	int              nGreaterEqualZeroConstrains;
-	int                             previousYear;
-	int                                firstYear;
-	int                               secondYear;
-	int                            worldCodeLev2;
-	bool                            debugRunOnce;
-	void                debugPrintParameters();
-	bool                                 initOpt;
+	int                                     nPriPr;
+	int                                     nSecPr;
+	int                                     nAllPr;
+	int                                       nL2r;
+	int                                       nVar;
+	int                                      nCons;
+	int                        nEqualityConstrains;
+	int                  nLowerEqualZeroConstrains;
+	int                nGreaterEqualZeroConstrains;
+	int                               previousYear;
+	int                                  firstYear;
+	int                                 secondYear;
+	int                              worldCodeLev2;
+	bool                              debugRunOnce;
+	void                    debugPrintParameters();
+	bool                                   initOpt;
+	vector <constrain>                  constrains;
 
 
 	/**@name Methods to block default compiler methods.
@@ -181,6 +197,17 @@ private:
 	//@}
 
 };
+
+struct constrain{
+	string                                    name;
+	string                                 comment;
+	int                                     domain;
+	int                                  direction;
+	map <string,int>                 usedVariables;
+	//double*                              callbackF;
+	std::function<double (const std::vector<double> &)> evaluate;
+};
+
 
 #endif
 

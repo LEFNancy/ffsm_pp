@@ -50,6 +50,7 @@ CONFIG += warn_on \
 	    debug
 #CONFIG -= release
 
+QMAKE_CXXFLAGS += -std=c++0x
 
 QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -O3
