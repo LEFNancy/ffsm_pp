@@ -46,32 +46,180 @@ Opt::defineVariables(){
 		// if you add variables in the model that enter optimisation you'll have to add them here
 		// the map goes automatically in alphabetical order
 		// original order: pc,pl,dc,dl,da,sc,sl,sa,exp
-		vars.insert(DomainPair("da", VDOM_SEC_PR));
-		vars.insert(DomainPair("dc", VDOM_SEC_PR));
-		vars.insert(DomainPair("dl", VDOM_ALL_PR));
-		vars.insert(DomainPair("pc", VDOM_ALL_PR));
-		vars.insert(DomainPair("pl", VDOM_ALL_PR));
-		vars.insert(DomainPair("rt", VDOM_R2_ALL_PR)); // regional trade, it was exp in gams
-		vars.insert(DomainPair("sa", VDOM_PRI_PR));
-		vars.insert(DomainPair("sc", VDOM_PRI_PR));
-		vars.insert(DomainPair("sl", VDOM_ALL_PR));
+		vars.insert(DomainPair("da", DOM_SEC_PR));
+		vars.insert(DomainPair("dc", DOM_SEC_PR));
+		vars.insert(DomainPair("dl", DOM_ALL_PR));
+		vars.insert(DomainPair("pc", DOM_ALL_PR));
+		vars.insert(DomainPair("pl", DOM_ALL_PR));
+		vars.insert(DomainPair("rt", DOM_R2_ALL_PR)); // regional trade, it was exp in gams
+		vars.insert(DomainPair("sa", DOM_PRI_PR));
+		vars.insert(DomainPair("sc", DOM_PRI_PR));
+		vars.insert(DomainPair("sl", DOM_ALL_PR));
 }
 
 void
 Opt::defineConstrains (){
+	// domain of constrains variables (squares means a vector, r2n means neighbour -same r1- regions)
+	//CDOM_SCALAR            =1, // r1,r2,p
+	//CDOM_R2TO              =2, // r1,r2,p,[r2n]
+	//CDOM_R2FROM            =3, // r1,[r2n],p,r2
+	//CDOM_R2FROMTO          =4, // r1,[r2n],p,[r2n]
+	//CDOM_PRI_PR            =5, // r1,r2,[p_pr]
+	//CDOM_PRI_PR_AND_SCALAR =6, // r1,r2,[p_pr]&&p
+	//CDOM_SEC_PR            =7, // r1,r2,[p_sec]
+	//CDOM_ALL               =8, // [r1],[r2],[p]
+	//CDOM_ALLR2             =9, // [r1],[r2],[p],[r2n]
+
 	constrain mkeq2;
 	mkeq2.name="mkeq2";
-	mkeq2.comment="h1 in the paper, material balance equation";
-	mkeq2.domain=VDOM_SEC_PR;
+	mkeq2.comment="[h1] Conservation of matters of transformed products";
+	mkeq2.domain=DOM_SEC_PR;
 	mkeq2.direction = CONSTR_EQ;
+	mkeq2.cvars.insert(DomainPair("dl",CDOM_SCALAR));
+	mkeq2.cvars.insert(DomainPair("sl",CDOM_SCALAR));
+	mkeq2.cvars.insert(DomainPair("rt",CDOM_R2FROMTO));
+	//mkeq2.evaluate = Opt::mkteq2f;
 
-	mkeq2.evaluate = Opt::mkteq6f;
+	constrain mkeq3;
+	mkeq3.name="mkeq3";
+	mkeq3.comment="[h2] Conservation of matters of raw products";
+	mkeq3.domain=DOM_PRI_PR;
+	mkeq3.direction = CONSTR_EQ;
+	mkeq3.cvars.insert(DomainPair("dl",CDOM_SCALAR));
+	mkeq3.cvars.insert(DomainPair("sl",CDOM_SCALAR));
+	mkeq3.cvars.insert(DomainPair("rt",CDOM_R2FROMTO));
+	//mkeq3.evaluate = Opt::mkteq3f;
 
-	vector<double> test;
-	test.push_back(3);
-	test.push_back(2);
-	double result = mkeq2.evaluate(test);
-	cout << "result: " << result << endl;
+	constrain mkeq4;
+	mkeq4.name="mkeq4";
+	mkeq4.comment="[eq 13] Leontief transformation function";
+	mkeq4.domain=DOM_PRI_PR;
+	mkeq4.direction = CONSTR_EQ;
+	mkeq4.cvars.insert(DomainPair("dl",CDOM_SCALAR));
+	mkeq4.cvars.insert(DomainPair("sl",CDOM_PRI_PR));
+
+	constrain mkeq5;
+	mkeq5.name="mkeq5";
+	mkeq5.comment="[eq 21] Raw product supply function";
+	mkeq5.domain=DOM_PRI_PR;
+	mkeq5.direction = CONSTR_EQ;
+	mkeq5.cvars.insert(DomainPair("sc",CDOM_SCALAR));
+	mkeq5.cvars.insert(DomainPair("pc",CDOM_SCALAR));
+
+	constrain mkeq6;
+	mkeq6.name="mkeq6";
+	mkeq6.comment="[eq 20] Trasformed products demand function";
+	mkeq6.domain=DOM_SEC_PR;
+	mkeq6.direction = CONSTR_EQ;
+	mkeq6.cvars.insert(DomainPair("dc",CDOM_SCALAR));
+	mkeq6.cvars.insert(DomainPair("pc",CDOM_SCALAR));
+
+	constrain mkeq7;
+	mkeq7.name="mkeq7";
+	mkeq7.comment="[h7 and h3] Transformed products import function";
+	mkeq7.domain=DOM_SEC_PR;
+	mkeq7.direction = CONSTR_EQ;
+	mkeq7.cvars.insert(DomainPair("da",CDOM_SCALAR));
+	mkeq7.cvars.insert(DomainPair("dl",CDOM_SCALAR));
+	mkeq7.cvars.insert(DomainPair("pl",CDOM_SCALAR));
+
+	constrain mkeq8;
+	mkeq8.name="mkeq8";
+	mkeq8.comment="[h8 and h4] Raw products export function";
+	mkeq8.domain=DOM_PRI_PR;
+	mkeq8.direction = CONSTR_EQ;
+	mkeq8.cvars.insert(DomainPair("sa",CDOM_SCALAR));
+	mkeq8.cvars.insert(DomainPair("sl",CDOM_SCALAR));
+	mkeq8.cvars.insert(DomainPair("pl",CDOM_SCALAR));
+
+	constrain mkeq13;
+	mkeq13.name="mkeq13";
+	mkeq13.comment="[h9] Calculation of the composite price of transformed products (PPC_Dp)";
+	mkeq13.domain=DOM_SEC_PR;
+	mkeq13.direction = CONSTR_EQ;
+	mkeq13.cvars.insert(DomainPair("pc",CDOM_SCALAR));
+	mkeq13.cvars.insert(DomainPair("dc",CDOM_SCALAR));
+	mkeq13.cvars.insert(DomainPair("dl",CDOM_SCALAR));
+	mkeq13.cvars.insert(DomainPair("pl",CDOM_SCALAR));
+	mkeq13.cvars.insert(DomainPair("da",CDOM_SCALAR));
+
+	constrain mkeq14;
+	mkeq14.name="mkeq14";
+	mkeq14.comment="[h10] Calculation of the composite price of raw products (PPC_Sw)";
+	mkeq14.domain=DOM_PRI_PR;
+	mkeq14.direction = CONSTR_EQ;
+	mkeq14.cvars.insert(DomainPair("pc",CDOM_SCALAR));
+	mkeq14.cvars.insert(DomainPair("sc",CDOM_SCALAR));
+	mkeq14.cvars.insert(DomainPair("sl",CDOM_SCALAR));
+	mkeq14.cvars.insert(DomainPair("pl",CDOM_SCALAR));
+	mkeq14.cvars.insert(DomainPair("sa",CDOM_SCALAR));
+
+	constrain mkeq17;
+	mkeq17.name="mkeq17";
+	mkeq17.comment="[h16] Constrain of the transformaton supply (lower than the regional maximal production capacity)";
+	mkeq17.domain=DOM_SEC_PR;
+	mkeq17.direction = CONSTR_LE0;
+	mkeq17.cvars.insert(DomainPair("sl",CDOM_SCALAR));
+
+
+	constrain mkeq18;
+	mkeq18.name="mkeq18";
+	mkeq18.comment="Constrain on raw material supply (lower than gross regional biological availability)";
+	mkeq18.domain=DOM_PRI_PR;
+	mkeq18.direction = CONSTR_LE0;
+	mkeq18.cvars.insert(DomainPair("sa",CDOM_SCALAR));
+	mkeq18.cvars.insert(DomainPair("sl",CDOM_SCALAR));
+
+	constrain mkeq23;
+	mkeq23.name="mkeq23";
+	mkeq23.comment="[h3] Composit demand eq. (Dp)";
+	mkeq23.domain=DOM_SEC_PR;
+	mkeq23.direction = CONSTR_EQ;
+	mkeq23.cvars.insert(DomainPair("dc",CDOM_SCALAR));
+	mkeq23.cvars.insert(DomainPair("da",CDOM_SCALAR));
+	mkeq23.cvars.insert(DomainPair("dl",CDOM_SCALAR));
+
+	constrain mkeq24;
+	mkeq24.name="mkeq24";
+	mkeq24.comment="[h4] Composite supply eq. (Sw)";
+	mkeq24.domain=DOM_PRI_PR;
+	mkeq24.direction = CONSTR_EQ;
+	mkeq24.cvars.insert(DomainPair("sc",CDOM_SCALAR));
+	mkeq24.cvars.insert(DomainPair("sa",CDOM_SCALAR));
+	mkeq24.cvars.insert(DomainPair("sl",CDOM_SCALAR));
+
+	constrain mkeq25;
+	mkeq25.name="mkeq25";
+	mkeq25.comment="Verification of the null trasformers supply (price of raw product + trasf product > trasf product)";
+	mkeq25.domain=DOM_SEC_PR;
+	mkeq25.direction = CONSTR_GE0;
+	mkeq25.cvars.insert(DomainPair("pl",CDOM_PRI_PR_AND_SCALAR));
+
+	constrain mkeq26;
+	mkeq26.name="mkeq26";
+	mkeq26.comment="[eq ] Verification of the null transport agents supply";
+	mkeq26.domain=DOM_SCALAR;
+	mkeq26.direction = CONSTR_EQ;
+	mkeq26.cvars.insert(DomainPair("pl",CDOM_ALL));
+	mkeq26.cvars.insert(DomainPair("rt",CDOM_ALLR2));
+
+
+	constrains.push_back(mkeq2);
+	constrains.push_back(mkeq3);
+	constrains.push_back(mkeq4);
+	constrains.push_back(mkeq5);
+	constrains.push_back(mkeq6);
+	constrains.push_back(mkeq7);
+	constrains.push_back(mkeq8);
+	constrains.push_back(mkeq13);
+	constrains.push_back(mkeq14);
+	constrains.push_back(mkeq17);
+	constrains.push_back(mkeq18);
+	constrains.push_back(mkeq23);
+	constrains.push_back(mkeq24);
+	constrains.push_back(mkeq25);
+	constrains.push_back(mkeq26);
+
 
 }
 
@@ -151,325 +299,6 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 }
 
 // implement here the constrains:
-
-
-double
-Opt::mkteq6f(const vector <double> &x_var){
-	// mkteq6(i,p_tr)..  RVAR('dc',i,p_tr)  =e=  GG(i,p_tr)*(RVAR('pc',i,p_tr)**sigma(p_tr)); // eq. 20
-	//gg = gpd("gg",l2r[r1][r2],secPr[p]);
-	//sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
-	//g[cix] = x[gix("dc",r1,r2,p)]-gg*pow(x[gix("pc",r1,r2,psec)],sigma);
-	return x_var.at(0)*10+x_var.at(1)*2;
-}
-
-
-
-
-//  ******** NOTHING TO DO BELOW THIS LINE ********************************
-
-Opt::Opt(ThreadManager* MTHREAD_h){
-	MTHREAD = MTHREAD_h;
-	nVar    = 0;
-	nCons   = 0;
-	debugRunOnce = false;
-	initOpt = true;
-}
-
-Opt::~Opt(){
-
-}
-
-
-
-
-bool
-Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
-									Index& nnz_h_lag, IndexStyleEnum& index_style){
-
-
-	if(initOpt){
-		// does this initialisation code only once
-		priPr = MTHREAD->MD->getStringVectorSetting("priProducts");
-		secPr = MTHREAD->MD->getStringVectorSetting("secProducts");
-		allPr = priPr;
-		allPr.insert( allPr.end(), secPr.begin(), secPr.end() );
-		nPriPr = priPr.size();
-		nSecPr = secPr.size();
-		nAllPr = allPr.size();
-		std::vector<int> l1regIds =  MTHREAD->MD->getRegionIds(1, true);
-		nL2r =  MTHREAD->MD->getRegionIds(2, true).size();
-		firstYear = MTHREAD->MD->getIntSetting("initialYear");
-		secondYear = firstYear+1;
-		worldCodeLev2 = MTHREAD->MD->getIntSetting("worldCodeLev2");
-
-		for(uint i=0;i<l1regIds.size();i++){
-			std::vector<int> l2ChildrenIds;
-			ModelRegion* l1Region = MTHREAD->MD->getRegion(l1regIds[i]);
-			std::vector<ModelRegion*> l2Childrens = l1Region->getChildren(true);
-			for(uint j=0;j<l2Childrens.size();j++){
-				l2ChildrenIds.push_back(l2Childrens[j]->getRegId());
-			}
-			if(l2ChildrenIds.size()){
-				l2r.push_back(l2ChildrenIds);
-			}
-		}
-
-		// put the variables and their domain in the vars map
-		defineVariables();
-
-		// calculating the number of variables and the initial positions in the concatenated array..
-		nVar = 0;
-		map<string, int>::iterator viter;
-		for (viter = vars.begin(); viter != vars.end(); ++viter) {
-			//string debugs = viter->first;
-			//int debugpos = nVar;
-			initPos.insert(pair<string, int>(viter->first, nVar));
-			int vdomtype = viter->second;
-			if(vdomtype==VDOM_PRI_PR){
-				nVar += nL2r*nPriPr;
-			} else if (vdomtype==VDOM_SEC_PR) {
-				nVar += nL2r*nSecPr;
-			} else if (vdomtype==VDOM_ALL_PR) {
-				nVar += nL2r*nAllPr;
-			} else if (vdomtype==VDOM_R2_ALL_PR) {
-				for(uint r1=0;r1<l2r.size();r1++){
-					nVar += l2r[r1].size()*l2r[r1].size()*nAllPr; // EXP(i,j,prd)
-				}
-			} else {
-				msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+viter->first+")");
-			}
-		}
-
-		// caching the initial positions
-		for (viter = vars.begin(); viter != vars.end(); ++viter) {
-			//string debugs = viter->first;
-			int vdomtype = viter->second;
-			vector < vector < vector < vector <int> > > > positionsToAdd;
-
-
-			if(vdomtype==VDOM_PRI_PR){
-				for(uint r1=0;r1<l2r.size();r1++){
-					vector < vector < vector <int> > > dim1;
-					for(uint r2=0;r2<l2r[r1].size();r2++){
-						vector < vector <int> > dim2;
-						for(uint p=0;p<priPr.size();p++){
-							vector <int> dim3;
-							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
-							dim2.push_back(dim3);
-						}
-						dim1.push_back(dim2);
-					}
-					positionsToAdd.push_back(dim1);
-				}
-			} else if (vdomtype==VDOM_SEC_PR) {
-				for(uint r1=0;r1<l2r.size();r1++){
-					vector < vector < vector <int> > > dim1;
-					for(uint r2=0;r2<l2r[r1].size();r2++){
-						vector < vector <int> > dim2;
-						for(uint p=0;p<secPr.size();p++){
-							vector <int> dim3;
-							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
-							dim2.push_back(dim3);
-						}
-						dim1.push_back(dim2);
-					}
-					positionsToAdd.push_back(dim1);
-				}
-			} else if (vdomtype==VDOM_ALL_PR) {
-				for(uint r1=0;r1<l2r.size();r1++){
-					vector < vector < vector <int> > > dim1;
-					for(uint r2=0;r2<l2r[r1].size();r2++){
-						vector < vector <int> > dim2;
-						for(uint p=0;p<allPr.size();p++){
-							vector <int> dim3;
-							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
-							dim2.push_back(dim3);
-						}
-						dim1.push_back(dim2);
-					}
-					positionsToAdd.push_back(dim1);
-				}
-			} else if (vdomtype==VDOM_R2_ALL_PR) {
-				for(uint r1=0;r1<l2r.size();r1++){
-					vector < vector < vector <int> > > dim1;
-					for(uint r2=0;r2<l2r[r1].size();r2++){
-						vector < vector <int> > dim2;
-						for(uint p=0;p<allPr.size();p++){
-							vector <int> dim3;
-							for(uint r2To=0;r2To<l2r[r1].size();r2To++){
-								dim3.push_back(gix_uncached(viter->first,r1,r2,p,r2To));
-							}
-							dim2.push_back(dim3);
-						}
-						dim1.push_back(dim2);
-					}
-					positionsToAdd.push_back(dim1);
-				}
-
-			} else {
-				msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+viter->first+")");
-			}
-			positions.insert(pair<string, vector < vector < vector < vector <int> > > > >(viter->first,  positionsToAdd));
-		}
-
-	// defining the contrains...
-	defineConstrains();
-
-
-
-		// calculating the number of constrains..
-		nCons = 0; // leave 0
-		nEqualityConstrains = 0;
-		nLowerEqualZeroConstrains = 0;
-		nGreaterEqualZeroConstrains = 0;
-		nCons += nL2r*nSecPr; // mkeq2
-		nCons += nL2r*nPriPr; // mkeq3
-		nCons += nL2r*nPriPr; // mkeq4
-		nCons += nL2r*nPriPr; // mkeq5
-		nCons += nL2r*nSecPr; // mkeq6
-		nCons += nL2r*nSecPr; // mkeq7
-		nCons += nL2r*nPriPr; // mkeq8
-		nCons += nL2r*nSecPr; // mkeq13
-		nCons += nL2r*nPriPr; // mkeq14
-		nCons += nL2r*nSecPr; // mkeq23
-		nCons += nL2r*nPriPr; // mkeq24
-		nEqualityConstrains = nCons;
-		nCons += nL2r*nSecPr; // mkeq17
-		nCons += nL2r*nPriPr; // mkeq18
-		nCons += 1;           // mkeq26
-		nLowerEqualZeroConstrains = nCons - nEqualityConstrains;
-		nCons += nL2r*nSecPr; // mkeq25
-		nGreaterEqualZeroConstrains = nCons - nEqualityConstrains - nLowerEqualZeroConstrains;
-
-		msgOut(MSG_INFO,"The model will work with "+i2s(nVar)+" variables and "+i2s(nCons)+" constrains.");
-
-		//debugPrintParameters();
-		initOpt=false;
-	} // finish initialisation things to be done only the first year
-
-	previousYear = MTHREAD->SCD->getYear()-1; // this has to be done EVERY years !!
-
-	n = nVar; // 300; // nVar;
-
-	m = nCons; // 70; // nCons;
-
-	// in this example the jacobian is dense. Hence, it contains n*m nonzeros
-	nnz_jac_g = n*m;
-
-	// the hessian is also dense and has n*n total nonzeros, but we
-	// only need the lower left corner (since it is symmetric)
-	nnz_h_lag = n*(n-1)/2+n;
-	generate_tapes(n, m);
-	// use the C style indexing (0-based)
-	index_style = C_STYLE;
-
-	return true;
-}
-
-bool
-Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Number* g_u){
-
-
-	// all variables have upper or equal than zero bound
-	for (Index i=0; i<n; i++) {
-		if(
-				 ( n>=gip("dl")&& n<gip("dl")+nAllPr)
-			|| ( n>=gip("sa")&& n<gip("sa")+nPriPr)
-			|| ( n>=gip("sl")&& n<gip("sl")+nAllPr)
-			|| ( n>=gip("da")&& n<gip("da")+nSecPr)
-			|| ( n>=gip("pl")&& n<gip("sa")+nAllPr)
-		) {  // I could make a function to return the number of positions by a certain variable name, looking up the the map that define its domain
-			x_l[i] = 0.00000001;
-			x_u[i] =       1e20;
-		} else {
-			x_l[i] =         0.;
-			x_u[i] =       1e20;
-		}
-	}
-
-	// Set the bounds for the constraints
-	for (Index i=0; i<m; i++) {
-		if(i<nEqualityConstrains){
-			g_l[i] = 0.;
-			g_u[i] = 0.;
-		} else if(i<(nLowerEqualZeroConstrains+nEqualityConstrains)){ //bug fixed 20120801
-			g_l[i] = -2e19;
-			g_u[i] = 0.;
-		} else {
-			g_l[i] = 0.;
-			g_u[i] = 2e19;
-		}
-	}
-
-	return true;
-}
-
-bool
-Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_L, Number* z_U,
-												Index m, bool init_lambda, Number* lambda){
-
-// function checked on 20120724 on a subset of 3 regions and 4 products. All variables initial values are correctly those outputed by gams in 2006.
-
-	msgOut(MSG_DEBUG,"Giving optimising variables previous years value as starting point");
-	// Here, we assume we only have starting values for x, if you code
-	// your own NLP, you can provide starting values for the others if
-	// you wish.
-	assert(init_x == true);
-	assert(init_z == false);
-	assert(init_lambda == false);
-
-	map<string, int>::iterator viter;
-
-	// fixing the starting points for each variable at the level of the previous years
-	for (viter = vars.begin(); viter != vars.end(); ++viter) {
-		//string debugs = viter->first;
-		int vdomtype = viter->second;
-		if(vdomtype==VDOM_PRI_PR){
-			for(uint r1=0;r1<l2r.size();r1++){
-				for(uint r2=0;r2<l2r[r1].size();r2++){
-					for(uint p=0;p<priPr.size();p++){
-						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],priPr[p],previousYear);
-					}
-				}
-			}
-		} else if (vdomtype==VDOM_SEC_PR) {
-			for(uint r1=0;r1<l2r.size();r1++){
-				for(uint r2=0;r2<l2r[r1].size();r2++){
-					for(uint p=0;p<secPr.size();p++){
-						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],secPr[p],previousYear);
-					}
-				}
-			}
-		} else if (vdomtype==VDOM_ALL_PR) {
-			for(uint r1=0;r1<l2r.size();r1++){
-				for(uint r2=0;r2<l2r[r1].size();r2++){
-					for(uint p=0;p<allPr.size();p++){
-						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],allPr[p],previousYear);
-					}
-				}
-			}
-		} else if (vdomtype==VDOM_R2_ALL_PR) {
-			for(uint r1=0;r1<l2r.size();r1++){
-				for(uint r2=0;r2<l2r[r1].size();r2++){
-					for(uint p=0;p<allPr.size();p++){
-						for(uint r2To=0;r2To<l2r[r1].size();r2To++){
-							x[gix(viter->first,r1,r2,p,r2To)]= gpd(viter->first,l2r[r1][r2],allPr[p],previousYear,i2s(l2r[r1][r2To]));
-						}
-					}
-				}
-			}
-		} else {
-			msgOut(MSG_CRITICAL_ERROR,"Try to setting the initial value of a variable of unknow type ("+viter->first+")");
-		}
-	}
-
-	msgOut(MSG_DEBUG,"Finisced initial value assignments");
-
-	return true;
-}
-
-
-
 
 
 template<class T> bool
@@ -593,7 +422,8 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 		} //end level2 regions
 	} // end lev1 regions
 
-	//mkteq26        .. sum((i,j,prd), (RVAR('pl',j,prd)-RVAR('pl',i,prd)-CT(i,j,prd))*EXP(i,j,prd)) =l=  0;  // 0				margin on transport
+/*
+//mkteq26        .. sum((i,j,prd), (RVAR('pl',j,prd)-RVAR('pl',i,prd)-CT(i,j,prd))*EXP(i,j,prd)) =l=  0;  // 0				margin on transport
 	g[cix] = 0.;
 	for (uint r1=0;r1<l2r.size();r1++){
 		for (uint r2=0;r2<l2r[r1].size();r2++){
@@ -606,6 +436,23 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 		}
 	}
 	cix++;
+	*/
+
+		g[cix] = 0.;
+	for (uint r1=0;r1<l2r.size();r1++){
+		for (uint r2=0;r2<l2r[r1].size();r2++){
+			for (uint r2To=0;r2To<l2r[r1].size();r2To++){
+				for (uint p=0;p<allPr.size();p++){
+					ct = gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2To]));
+					g[cix] += (x[gix("pl",r1,r2To,p)]-x[gix("pl",r1,r2,p)]-ct)*x[gix("rt",r1,r2,p,r2To)];
+				}
+			}
+		}
+	}
+	cix++;
+
+
+
 
 
 
@@ -632,6 +479,326 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 	return true;
 }
 
+
+
+//  ******** NOTHING TO DO BELOW THIS LINE ********************************
+
+Opt::Opt(ThreadManager* MTHREAD_h){
+	MTHREAD = MTHREAD_h;
+	nVar    = 0;
+	nCons   = 0;
+	debugRunOnce = false;
+	initOpt = true;
+}
+
+Opt::~Opt(){
+
+}
+
+
+bool
+Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
+									Index& nnz_h_lag, IndexStyleEnum& index_style){
+
+
+	if(initOpt){
+		// does this initialisation code only once
+		priPr = MTHREAD->MD->getStringVectorSetting("priProducts");
+		secPr = MTHREAD->MD->getStringVectorSetting("secProducts");
+		allPr = priPr;
+		allPr.insert( allPr.end(), secPr.begin(), secPr.end() );
+		nPriPr = priPr.size();
+		nSecPr = secPr.size();
+		nAllPr = allPr.size();
+		std::vector<int> l1regIds =  MTHREAD->MD->getRegionIds(1, true);
+		nL2r =  MTHREAD->MD->getRegionIds(2, true).size();
+		firstYear = MTHREAD->MD->getIntSetting("initialYear");
+		secondYear = firstYear+1;
+		worldCodeLev2 = MTHREAD->MD->getIntSetting("worldCodeLev2");
+
+		for(uint i=0;i<l1regIds.size();i++){
+			std::vector<int> l2ChildrenIds;
+			ModelRegion* l1Region = MTHREAD->MD->getRegion(l1regIds[i]);
+			std::vector<ModelRegion*> l2Childrens = l1Region->getChildren(true);
+			for(uint j=0;j<l2Childrens.size();j++){
+				l2ChildrenIds.push_back(l2Childrens[j]->getRegId());
+			}
+			if(l2ChildrenIds.size()){
+				l2r.push_back(l2ChildrenIds);
+			}
+		}
+
+		// put the variables and their domain in the vars map
+		defineVariables();
+
+		// calculating the number of variables and the initial positions in the concatenated array..
+		nVar = 0;
+		map<string, int>::iterator viter;
+		for (viter = vars.begin(); viter != vars.end(); ++viter) {
+			//string debugs = viter->first;
+			//int debugpos = nVar;
+			initPos.insert(pair<string, int>(viter->first, nVar));
+			int vdomtype = viter->second;
+			if(vdomtype==DOM_PRI_PR){
+				nVar += nL2r*nPriPr;
+			} else if (vdomtype==DOM_SEC_PR) {
+				nVar += nL2r*nSecPr;
+			} else if (vdomtype==DOM_ALL_PR) {
+				nVar += nL2r*nAllPr;
+			} else if (vdomtype==DOM_R2_ALL_PR) {
+				for(uint r1=0;r1<l2r.size();r1++){
+					nVar += l2r[r1].size()*l2r[r1].size()*nAllPr; // EXP(i,j,prd)
+				}
+			} else {
+				msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+viter->first+")");
+			}
+		}
+
+		// caching the initial positions
+		for (viter = vars.begin(); viter != vars.end(); ++viter) {
+			//string debugs = viter->first;
+			int vdomtype = viter->second;
+			vector < vector < vector < vector <int> > > > positionsToAdd;
+
+
+			if(vdomtype==DOM_PRI_PR){
+				for(uint r1=0;r1<l2r.size();r1++){
+					vector < vector < vector <int> > > dim1;
+					for(uint r2=0;r2<l2r[r1].size();r2++){
+						vector < vector <int> > dim2;
+						for(uint p=0;p<priPr.size();p++){
+							vector <int> dim3;
+							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
+							dim2.push_back(dim3);
+						}
+						dim1.push_back(dim2);
+					}
+					positionsToAdd.push_back(dim1);
+				}
+			} else if (vdomtype==DOM_SEC_PR) {
+				for(uint r1=0;r1<l2r.size();r1++){
+					vector < vector < vector <int> > > dim1;
+					for(uint r2=0;r2<l2r[r1].size();r2++){
+						vector < vector <int> > dim2;
+						for(uint p=0;p<secPr.size();p++){
+							vector <int> dim3;
+							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
+							dim2.push_back(dim3);
+						}
+						dim1.push_back(dim2);
+					}
+					positionsToAdd.push_back(dim1);
+				}
+			} else if (vdomtype==DOM_ALL_PR) {
+				for(uint r1=0;r1<l2r.size();r1++){
+					vector < vector < vector <int> > > dim1;
+					for(uint r2=0;r2<l2r[r1].size();r2++){
+						vector < vector <int> > dim2;
+						for(uint p=0;p<allPr.size();p++){
+							vector <int> dim3;
+							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
+							dim2.push_back(dim3);
+						}
+						dim1.push_back(dim2);
+					}
+					positionsToAdd.push_back(dim1);
+				}
+			} else if (vdomtype==DOM_R2_ALL_PR) {
+				for(uint r1=0;r1<l2r.size();r1++){
+					vector < vector < vector <int> > > dim1;
+					for(uint r2=0;r2<l2r[r1].size();r2++){
+						vector < vector <int> > dim2;
+						for(uint p=0;p<allPr.size();p++){
+							vector <int> dim3;
+							for(uint r2To=0;r2To<l2r[r1].size();r2To++){
+								dim3.push_back(gix_uncached(viter->first,r1,r2,p,r2To));
+							}
+							dim2.push_back(dim3);
+						}
+						dim1.push_back(dim2);
+					}
+					positionsToAdd.push_back(dim1);
+				}
+
+			} else {
+				msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+viter->first+")");
+			}
+			positions.insert(pair<string, vector < vector < vector < vector <int> > > > >(viter->first,  positionsToAdd));
+		}
+
+	// defining the contrains...
+	defineConstrains();
+
+	vector<double> test;
+	test.push_back(3);
+	test.push_back(2);
+	double result;
+
+	for (uint i=0; i<constrains.size();i++){
+		//result = constrains[i].evaluate(test);
+		//cout << "result: " << result << endl;
+	}
+
+
+
+
+		// calculating the number of constrains..
+		nCons = 0; // leave 0
+		nEqualityConstrains = 0;
+		nLowerEqualZeroConstrains = 0;
+		nGreaterEqualZeroConstrains = 0;
+		nCons += nL2r*nSecPr; // mkeq2
+		nCons += nL2r*nPriPr; // mkeq3
+		nCons += nL2r*nPriPr; // mkeq4
+		nCons += nL2r*nPriPr; // mkeq5
+		nCons += nL2r*nSecPr; // mkeq6
+		nCons += nL2r*nSecPr; // mkeq7
+		nCons += nL2r*nPriPr; // mkeq8
+		nCons += nL2r*nSecPr; // mkeq13
+		nCons += nL2r*nPriPr; // mkeq14
+		nCons += nL2r*nSecPr; // mkeq23
+		nCons += nL2r*nPriPr; // mkeq24
+		nEqualityConstrains = nCons;
+		nCons += nL2r*nSecPr; // mkeq17
+		nCons += nL2r*nPriPr; // mkeq18
+		nCons += 1;           // mkeq26
+		nLowerEqualZeroConstrains = nCons - nEqualityConstrains;
+		nCons += nL2r*nSecPr; // mkeq25
+		nGreaterEqualZeroConstrains = nCons - nEqualityConstrains - nLowerEqualZeroConstrains;
+
+		msgOut(MSG_INFO,"The model will work with "+i2s(nVar)+" variables and "+i2s(nCons)+" constrains.");
+
+		//debugPrintParameters();
+		initOpt=false;
+	} // finish initialisation things to be done only the first year
+
+	previousYear = MTHREAD->SCD->getYear()-1; // this has to be done EVERY years !!
+
+	n = nVar; // 300; // nVar;
+
+	m = nCons; // 70; // nCons;
+
+	// in this example the jacobian is dense. Hence, it contains n*m nonzeros
+	nnz_jac_g = n*m;
+
+	// the hessian is also dense and has n*n total nonzeros, but we
+	// only need the lower left corner (since it is symmetric)
+	nnz_h_lag = n*(n-1)/2+n;
+	generate_tapes(n, m);
+	// use the C style indexing (0-based)
+	index_style = C_STYLE;
+
+	return true;
+}
+
+bool
+Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Number* g_u){
+
+
+	// all variables have upper or equal than zero bound
+	for (Index i=0; i<n; i++) {
+		if(
+				 ( n>=gip("dl")&& n<gip("dl")+nAllPr)
+			|| ( n>=gip("sa")&& n<gip("sa")+nPriPr)
+			|| ( n>=gip("sl")&& n<gip("sl")+nAllPr)
+			|| ( n>=gip("da")&& n<gip("da")+nSecPr)
+			|| ( n>=gip("pl")&& n<gip("sa")+nAllPr)
+		) {  // I could make a function to return the number of positions by a certain variable name, looking up the the map that define its domain
+			x_l[i] = 0.00000001;
+			x_u[i] =       1e20;
+		} else {
+			x_l[i] =         0.;
+			x_u[i] =       1e20;
+		}
+	}
+
+	// Set the bounds for the constraints
+	for (Index i=0; i<m; i++) {
+		if(i<nEqualityConstrains){
+			g_l[i] = 0.;
+			g_u[i] = 0.;
+		} else if(i<(nLowerEqualZeroConstrains+nEqualityConstrains)){ //bug fixed 20120801
+			g_l[i] = -2e19;
+			g_u[i] = 0.;
+		} else {
+			g_l[i] = 0.;
+			g_u[i] = 2e19;
+		}
+	}
+
+	return true;
+}
+
+bool
+Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_L, Number* z_U,
+												Index m, bool init_lambda, Number* lambda){
+
+// function checked on 20120724 on a subset of 3 regions and 4 products. All variables initial values are correctly those outputed by gams in 2006.
+
+	msgOut(MSG_DEBUG,"Giving optimising variables previous years value as starting point");
+	// Here, we assume we only have starting values for x, if you code
+	// your own NLP, you can provide starting values for the others if
+	// you wish.
+	assert(init_x == true);
+	assert(init_z == false);
+	assert(init_lambda == false);
+
+	map<string, int>::iterator viter;
+
+	// fixing the starting points for each variable at the level of the previous years
+	for (viter = vars.begin(); viter != vars.end(); ++viter) {
+		//string debugs = viter->first;
+		int vdomtype = viter->second;
+		if(vdomtype==DOM_PRI_PR){
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<priPr.size();p++){
+						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],priPr[p],previousYear);
+					}
+				}
+			}
+		} else if (vdomtype==DOM_SEC_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<secPr.size();p++){
+						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],secPr[p],previousYear);
+					}
+				}
+			}
+		} else if (vdomtype==DOM_ALL_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<allPr.size();p++){
+						x[gix(viter->first,r1,r2,p)]= gpd(viter->first,l2r[r1][r2],allPr[p],previousYear);
+					}
+				}
+			}
+		} else if (vdomtype==DOM_R2_ALL_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					for(uint p=0;p<allPr.size();p++){
+						for(uint r2To=0;r2To<l2r[r1].size();r2To++){
+							x[gix(viter->first,r1,r2,p,r2To)]= gpd(viter->first,l2r[r1][r2],allPr[p],previousYear,i2s(l2r[r1][r2To]));
+						}
+					}
+				}
+			}
+		} else {
+			msgOut(MSG_CRITICAL_ERROR,"Try to setting the initial value of a variable of unknow type ("+viter->first+")");
+		}
+	}
+
+	msgOut(MSG_DEBUG,"Finisced initial value assignments");
+
+	return true;
+}
+
+
+
+
+
+
+
 void
 Opt::finalize_solution(SolverReturn status,
 											 Index n, const Number* x, const Number* z_L, const Number* z_U,
@@ -649,7 +816,7 @@ Opt::finalize_solution(SolverReturn status,
 	for (viter = vars.begin(); viter != vars.end(); ++viter) {
 		//string debugs = viter->first;
 		int vdomtype = viter->second;
-		if(vdomtype==VDOM_PRI_PR){
+		if(vdomtype==DOM_PRI_PR){
 			for(uint r1=0;r1<l2r.size();r1++){
 				for(uint r2=0;r2<l2r[r1].size();r2++){
 					for(uint p=0;p<priPr.size();p++){
@@ -657,7 +824,7 @@ Opt::finalize_solution(SolverReturn status,
 					}
 				}
 			}
-		} else if (vdomtype==VDOM_SEC_PR) {
+		} else if (vdomtype==DOM_SEC_PR) {
 			for(uint r1=0;r1<l2r.size();r1++){
 				for(uint r2=0;r2<l2r[r1].size();r2++){
 					for(uint p=0;p<secPr.size();p++){
@@ -666,7 +833,7 @@ Opt::finalize_solution(SolverReturn status,
 					}
 				}
 			}
-		} else if (vdomtype==VDOM_ALL_PR) {
+		} else if (vdomtype==DOM_ALL_PR) {
 			for(uint r1=0;r1<l2r.size();r1++){
 				for(uint r2=0;r2<l2r[r1].size();r2++){
 					for(uint p=0;p<allPr.size();p++){
@@ -674,7 +841,7 @@ Opt::finalize_solution(SolverReturn status,
 					}
 				}
 			}
-		} else if (vdomtype==VDOM_R2_ALL_PR) {
+		} else if (vdomtype==DOM_R2_ALL_PR) {
 			for(uint r1=0;r1<l2r.size();r1++){
 				for(uint r2=0;r2<l2r[r1].size();r2++){
 					for(uint p=0;p<allPr.size();p++){
@@ -940,13 +1107,13 @@ Opt::gix_uncached(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxT
 		othCountriesRegions += l2r[i].size();
 	}
 
-	if(vdtype == VDOM_PRI_PR){
+	if(vdtype == DOM_PRI_PR){
 		return gip(varName)+(othCountriesRegions+r2Ix)*nPriPr+prIx;
-	} else if (vdtype == VDOM_SEC_PR){
+	} else if (vdtype == DOM_SEC_PR){
 		return gip(varName)+(othCountriesRegions+r2Ix)*nSecPr+prIx;
-	} else if (vdtype == VDOM_ALL_PR){
+	} else if (vdtype == DOM_ALL_PR){
 		return gip(varName)+(othCountriesRegions+r2Ix)*nAllPr+prIx;
-	} else if (vdtype == VDOM_R2_ALL_PR){
+	} else if (vdtype == DOM_R2_ALL_PR){
 		int othCountrReg = 0;
 		for (uint i=0;i<r1Ix;i++){
 			othCountrReg +=l2r[i].size()*l2r[i].size();

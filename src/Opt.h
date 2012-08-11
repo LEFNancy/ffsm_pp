@@ -129,7 +129,8 @@ public:
 
 
 	//************** start constrains (MODELLER PART) *******************************************
-	static double            mkteq6f(const vector <double> &x_var);
+	template<class T> static void mkteq2f (const T *x, T *g, Index *cix);
+	template<class T> static void mkteq3f (const T *x, T *g, Index *cix);
 
 	//************** end constrains (MODELLER PART) *****************************************
 
@@ -199,13 +200,13 @@ protected:
 };
 
 struct constrain{
+												constrain(){comment="";};
 	string                                    name;
 	string                                 comment;
 	int                                     domain;
 	int                                  direction;
-	map <string,int>                 usedVariables;
-	//double*                              callbackF;
-	std::function<double (const std::vector<double> &)> evaluate;
+	map <string,int>                         cvars;
+	//std::function < template <class T> void (const T *, T *, Index *) >  evaluate; // std::function can't hold templates
 };
 
 
