@@ -1004,7 +1004,7 @@ Opt::gix_uncached(const T &v_or_c, int r1Ix, int r2Ix, int prIx, int r2IxTo){
 		case DOM_R2_ALL_PR:
 			return gip(v_or_c)+(othCountriesRegions_r2case+r2Ix*l2r[r1Ix].size()+r2IxTo)*nAllPr+prIx;
 		case DOM_SCALAR:
-			return gip(v_or_c)+1;
+			return gip(v_or_c);
 	default:
 		msgOut(MSG_CRITICAL_ERROR,"Try to calculate the position of a variable (or constrain) of unknow type.");
 		return 0;
@@ -1016,8 +1016,8 @@ const int
 Opt::gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo){
 	// attenction, for computational reasons we are not checking the call is within vectors limits!!!
 	map <string, vector < vector < vector < vector <int> > > > >::const_iterator p;
-	p=positions.find(varName);
-	if(p != positions.end()) {
+	p=vpositions.find(varName);
+	if(p != vpositions.end()) {
 		return p->second[r1Ix][r2Ix][prIx][r2IxTo];
 	}
 	else {
@@ -1053,86 +1053,67 @@ Opt::cacheInitialPosition(){
 void
 Opt::cachePositions(){
 
-	// VARIABLES..
+	// variables..
 	map<string, int>::iterator viter;
 	for (viter = vars.begin(); viter != vars.end(); ++viter) {
-		//string debugs = viter->first;
-		int vdomtype = viter->second;
-		vector < vector < vector < vector <int> > > > positionsToAdd;
-
-		if(vdomtype==DOM_PRI_PR){
-			for(uint r1=0;r1<l2r.size();r1++){
-				vector < vector < vector <int> > > dim1;
-				for(uint r2=0;r2<l2r[r1].size();r2++){
-					vector < vector <int> > dim2;
-					for(uint p=0;p<priPr.size();p++){
-						vector <int> dim3;
-						dim3.push_back(gix_uncached(viter->first,r1,r2,p));
-						dim2.push_back(dim3);
-					}
-					dim1.push_back(dim2);
-				}
-				positionsToAdd.push_back(dim1);
-			}
-		} else if (vdomtype==DOM_SEC_PR) {
-			for(uint r1=0;r1<l2r.size();r1++){
-				vector < vector < vector <int> > > dim1;
-				for(uint r2=0;r2<l2r[r1].size();r2++){
-					vector < vector <int> > dim2;
-					for(uint p=0;p<secPr.size();p++){
-						vector <int> dim3;
-						dim3.push_back(gix_uncached(viter->first,r1,r2,p));
-						dim2.push_back(dim3);
-					}
-					dim1.push_back(dim2);
-				}
-				positionsToAdd.push_back(dim1);
-			}
-		} else if (vdomtype==DOM_ALL_PR) {
-			for(uint r1=0;r1<l2r.size();r1++){
-				vector < vector < vector <int> > > dim1;
-				for(uint r2=0;r2<l2r[r1].size();r2++){
-					vector < vector <int> > dim2;
-					for(uint p=0;p<allPr.size();p++){
-						vector <int> dim3;
-						dim3.push_back(gix_uncached(viter->first,r1,r2,p));
-						dim2.push_back(dim3);
-					}
-					dim1.push_back(dim2);
-				}
-				positionsToAdd.push_back(dim1);
-			}
-		} else if (vdomtype==DOM_R2_ALL_PR) {
-			for(uint r1=0;r1<l2r.size();r1++){
-				vector < vector < vector <int> > > dim1;
-				for(uint r2=0;r2<l2r[r1].size();r2++){
-					vector < vector <int> > dim2;
-					for(uint p=0;p<allPr.size();p++){
-						vector <int> dim3;
-						for(uint r2To=0;r2To<l2r[r1].size();r2To++){
-							dim3.push_back(gix_uncached(viter->first,r1,r2,p,r2To));
-						}
-						dim2.push_back(dim3);
-					}
-					dim1.push_back(dim2);
-				}
-				positionsToAdd.push_back(dim1);
-			}
-
-		} else {
-			msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+viter->first+")");
-		}
-		positions.insert(pair<string, vector < vector < vector < vector <int> > > > >(viter->first,  positionsToAdd));
+		vpositions.insert(pair<string, vector < vector < vector < vector <int> > > > >(viter->first,  buildPositionVector(viter->first, viter->second)));
 	}
-
-
-
+	// constrains..
 	for (uint i=0; i<cons.size();i++){
-
+		cpositions.push_back(buildPositionVector(i, cons[i].domain));
 	}
-
 
 }
+
+template<class T> vector < vector < vector < vector <int> > > >
+Opt::buildPositionVector(const T &v_or_c, int dType){
+	switch (dType){
+		case DOM_PRI_PR:
+			return buildPositionVector(v_or_c, priPr);
+		case DOM_SEC_PR:
+			return buildPositionVector(v_or_c, secPr);
+		case DOM_ALL_PR:
+			return buildPositionVector(v_or_c, allPr);
+		case DOM_R2_PRI_PR:
+			return buildPositionVector(v_or_c, priPr);
+		case DOM_R2_SEC_PR:
+			return buildPositionVector(v_or_c, secPr);
+		case DOM_R2_ALL_PR:
+			return buildPositionVector(v_or_c, allPr);
+		case DOM_SCALAR:
+			return buildPositionVector(v_or_c, allPr); // it will simply fill the matrix all with the same value (the ip)
+	default:
+		msgOut(MSG_CRITICAL_ERROR,"Try to build the position of a variable (or contrain) of unknow type.");
+	}
+}
+
+template<class T> vector < vector < vector < vector <int> > > >
+Opt::buildPositionVector(const T &v_or_c, vector<string> &prVector){
+	vector < vector < vector < vector <int> > > > positionsToAdd;
+	for(uint r1=0;r1<l2r.size();r1++){
+		vector < vector < vector <int> > > dim1;
+		for(uint r2=0;r2<l2r[r1].size();r2++){
+			vector < vector <int> > dim2;
+			for(uint p=0;p<prVector.size();p++){
+				vector <int> dim3;
+				//if(!r2flag){
+				//	dim3.push_back(gix_uncached(v_or_c,r1,r2,p));
+				//}
+				//else {
+					for(uint r2To=0;r2To<l2r[r1].size();r2To++){
+						dim3.push_back(gix_uncached(v_or_c,r1,r2,p,r2To));
+					}
+				//}
+
+				dim2.push_back(dim3);
+			}
+			dim1.push_back(dim2);
+		}
+		positionsToAdd.push_back(dim1);
+	}
+	return positionsToAdd;
+}
+
 
 void
 Opt::calculateNumberVariablesConstrains(){

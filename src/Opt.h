@@ -128,6 +128,8 @@ public:
 	void                calculateNumberVariablesConstrains(); ///< calculate the number of variables and constrains
 	void                cachePositions(); ///< cache the exact position index (initial+f(r1,r2,p,r2To) for each variable and constrain
 	int                 getDomainElements(int domain); ///< return the number of elements of a domain
+template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, int dType); ///< build the matrix of the positions for a given variable or contrain
+template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, vector<string> &prVector); ///< build the matrix of the positions for a given variable or contrain
 
 	// **************   end PYTHIA part **************************************
 
@@ -163,7 +165,8 @@ protected:
 	map <string, int>                      initPos; ///< A map that return the initial index position in the concatenated array for each variable
 	vector<int>                           cInitPos; ///< A vector that return the initial index position in the concatenated array for each constrain
 	map <string, int>                         vars; ///< List of variables in the model and their domain: pr product, sec prod, all products or all products over each subregion pair (exports)
-	map <string, vector < vector < vector < vector <int> > > > >  positions; ///< cached position in the concatenated vector for each variables. Dimensions are l1reg, l2reg, prod, (l2To region).
+	map <string, vector < vector < vector < vector <int> > > > > vpositions; ///< cached position in the concatenated vector for each variables. Dimensions are l1reg, l2reg, prod, (l2To region).
+	vector < vector < vector < vector < vector <int> > > > > cpositions; ///< cached position in the concatenated vector for each variables. Dimensions are contrain number, l1reg, l2reg, prod, (l2To region).
 	int                                     nPriPr;
 	int                                     nSecPr;
 	int                                     nAllPr;
