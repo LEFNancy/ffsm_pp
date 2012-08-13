@@ -524,7 +524,7 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		defineConstrains();
 
 		// calculate number of variables and constrains..
-		calculateNumberVariabesConstrains();
+		calculateNumberVariablesConstrains();
 
 		// cache initial positions (variables and constrains)..
 		cacheInitialPosition();
@@ -938,7 +938,8 @@ Opt::generate_tapes(Index n, Index m){
 
 // ***************    PYTHIA OPT specific part ***********************************
 
-const int Opt::gip(const string &varName){ // get initial position
+const int
+Opt::gip(const string &varName){ // get initial position
 	map<string, int>::const_iterator p;
 	p=initPos.find(varName);
 	if(p != initPos.end()) {
@@ -948,6 +949,11 @@ const int Opt::gip(const string &varName){ // get initial position
 		msgOut(MSG_CRITICAL_ERROR, "Asking the initial position in the concatenated array of a variable ("+varName+") that doesn't exist!");
 		return 0;
 	}
+};
+
+const int
+Opt::gip(const int &cn){ // get initial position
+	return cInitPos.at(cn);
 };
 
 const int
@@ -964,36 +970,47 @@ Opt::gdt(const string &varName){ // get domain type
 }
 
 const int
-Opt::gix_uncached(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo){
+Opt::gdt(const int &cn){ // get domain type
+	return cons.at(cn).domain;
+}
+
+template<class T> const int
+Opt::gix_uncached(const T &v_or_c, int r1Ix, int r2Ix, int prIx, int r2IxTo){
 
 	// attenction, for computational reason we are not checking the call is within vectors limits!!!
 
-	int vdtype = gdt(varName);
+	int dType = gdt(v_or_c);
 	int othCountriesRegions = 0;
+	int othCountriesRegions_r2case = 0;
 	for (uint i=0;i<r1Ix;i++){
 		othCountriesRegions += l2r[i].size();
 	}
-
-	if(vdtype == DOM_PRI_PR){
-		return gip(varName)+(othCountriesRegions+r2Ix)*nPriPr+prIx;
-	} else if (vdtype == DOM_SEC_PR){
-		return gip(varName)+(othCountriesRegions+r2Ix)*nSecPr+prIx;
-	} else if (vdtype == DOM_ALL_PR){
-		return gip(varName)+(othCountriesRegions+r2Ix)*nAllPr+prIx;
-	} else if (vdtype == DOM_R2_ALL_PR){
-		int othCountrReg = 0;
-		for (uint i=0;i<r1Ix;i++){
-			othCountrReg +=l2r[i].size()*l2r[i].size();
-		}
-		// initial position + (other countries region pairs + same country other regions from pair + regions to)* number of all products+product
-		return gip(varName)+(othCountrReg+r2Ix*l2r[r1Ix].size()+r2IxTo)*nAllPr+prIx;
-
-	} else {
-		msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+varName+")");
-		return 0;
+	for (uint i=0;i<r1Ix;i++){
+		othCountriesRegions_r2case +=l2r[i].size()*l2r[i].size();
 	}
 
+	switch (dType){
+		case DOM_PRI_PR:
+			return gip(v_or_c)+(othCountriesRegions+r2Ix)*nPriPr+prIx;
+		case DOM_SEC_PR:
+			return gip(v_or_c)+(othCountriesRegions+r2Ix)*nSecPr+prIx;;
+		case DOM_ALL_PR:
+			return gip(v_or_c)+(othCountriesRegions+r2Ix)*nAllPr+prIx;
+		case DOM_R2_PRI_PR:
+			// initial position + (other countries region pairs + same country other regions from pair + regions to)* number of all products+product
+			return gip(v_or_c)+(othCountriesRegions_r2case+r2Ix*l2r[r1Ix].size()+r2IxTo)*nPriPr+prIx;
+		case DOM_R2_SEC_PR:
+			return gip(v_or_c)+(othCountriesRegions_r2case+r2Ix*l2r[r1Ix].size()+r2IxTo)*nSecPr+prIx;
+		case DOM_R2_ALL_PR:
+			return gip(v_or_c)+(othCountriesRegions_r2case+r2Ix*l2r[r1Ix].size()+r2IxTo)*nAllPr+prIx;
+		case DOM_SCALAR:
+			return gip(v_or_c)+1;
+	default:
+		msgOut(MSG_CRITICAL_ERROR,"Try to calculate the position of a variable (or constrain) of unknow type.");
+		return 0;
+	}
 }
+
 
 const int
 Opt::gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo){
@@ -1009,89 +1026,27 @@ Opt::gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo){
 	}
 }
 
-void
-Opt:: debugPrintParameters(){
+const int
+Opt::gix(const int &cn, int r1Ix, int r2Ix, int prIx, int r2IxTo){
 
-	vector <string> normalPar;
-	normalPar.push_back("aa");
-	normalPar.push_back("bb");
-	normalPar.push_back("sigma");
-	normalPar.push_back("m");
-	normalPar.push_back("ff");
-	normalPar.push_back("gg");
-	normalPar.push_back("q1");
-	normalPar.push_back("t1");
-	normalPar.push_back("psi");
-	normalPar.push_back("eta");
-	normalPar.push_back("k");
-	normalPar.push_back("dispor");
-
-	vector <string> freeDimParProduct;
-	freeDimParProduct.push_back("a_pr");
-	freeDimParProduct.push_back("a");
-
-	// to be managed individually: dc0, pworld, ct
-
-	cout <<"CURRENT YEAR: "<<MTHREAD->SCD->getYear()<<endl;
-	cout <<"parName;regId;prod;value;freeDim;"<<endl;
-	for(uint par=0;par<normalPar.size();par++){
-		for(uint r1=0;r1<l2r.size();r1++){
-			for(uint r2=0;r2<l2r[r1].size();r2++){
-				for(uint p=0;p<allPr.size();p++){
-					double value = gpd(normalPar[par],l2r[r1][r2],allPr[p]);
-					cout <<normalPar[par]<<";"<<l2r[r1][r2]<<";"<<allPr[p]<<";"<<value<<";;"<<endl;
-				}
-			}
-		}
-	}
-
-	for(uint par=0;par<freeDimParProduct.size();par++){
-		for(uint r1=0;r1<l2r.size();r1++){
-			for(uint r2=0;r2<l2r[r1].size();r2++){
-				for(uint p=0;p<allPr.size();p++){
-					for(uint p2=0;p2<allPr.size();p2++){
-						double value = gpd(freeDimParProduct[par],l2r[r1][r2],allPr[p],DATA_NOW,allPr[p2]);
-						cout <<freeDimParProduct[par]<<";"<<l2r[r1][r2]<<";"<<allPr[p]<<";"<<value<<";"<<allPr[p2]<<";"<<endl;
-					}
-				}
-			}
-		}
-	}
-
-
-		for(uint r1=0;r1<l2r.size();r1++){
-			for(uint r2=0;r2<l2r[r1].size();r2++){
-				for(uint p=0;p<allPr.size();p++){
-					for(uint r2to=0;r2to<l2r[r1].size();r2to++){
-						double value = gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2to]));
-						cout <<"ct"<<";"<<l2r[r1][r2]<<";"<<allPr[p]<<";"<<value<<";"<<l2r[r1][r2to]<<";"<<endl;
-					}
-				}
-			}
-		}
-
-		for(uint r1=0;r1<l2r.size();r1++){
-			for(uint r2=0;r2<l2r[r1].size();r2++){
-				for(uint p=0;p<allPr.size();p++){
-						double value = gpd("dc",l2r[r1][r2],allPr[p],firstYear);
-						cout <<"dc(2005)"<<";"<<l2r[r1][r2]<<";"<<allPr[p]<<";"<<value<<";;"<<endl;
-				}
-			}
-		}
-				for(uint p=0;p<allPr.size();p++){
-						double value = gpd("pl",worldCodeLev2,allPr[p]);
-						cout <<"pl(world)"<<";"<<worldCodeLev2<<";"<<allPr[p]<<";"<<value<<";;"<<endl;
-				}
+	//TODO
+	return 0;
 
 }
 
+
 void
 Opt::cacheInitialPosition(){
-	int initialPosition = 0;
+	int vInitialPosition = 0;
+	int cInitialPosition = 0;
 	map<string, int>::iterator viter;
 	for (viter = vars.begin(); viter != vars.end(); ++viter) {
-		initPos.insert(pair<string, int>(viter->first, initialPosition));
-		initialPosition += getDomainElements(viter->second);
+		initPos.insert(pair<string, int>(viter->first, vInitialPosition));
+		vInitialPosition += getDomainElements(viter->second);
+	}
+	for (uint i=0;i<cons.size();i++){
+		cInitPos.push_back(cInitialPosition);
+		cInitialPosition += getDomainElements(cons[i].domain);
 	}
 }
 
@@ -1173,13 +1128,14 @@ Opt::cachePositions(){
 
 
 	for (uint i=0; i<cons.size();i++){
-		//result = constrains[i].evaluate(test);
-		//cout << "result: " << result << endl;
+
 	}
+
+
 }
 
 void
-Opt::calculateNumberVariabesConstrains(){
+Opt::calculateNumberVariablesConstrains(){
 		// calculating the number of variables and the initial positions in the concatenated array..
 		nVar = 0;
 		map<string, int>::iterator viter;

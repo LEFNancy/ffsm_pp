@@ -125,7 +125,7 @@ public:
 	void                defineVariables(); ///< define the variables and their domains
 	void                defineConstrains(); ///< define the constrains, their domain, their direction and their associated evaluation function
 	void                cacheInitialPosition(); ///< cache the initial positions of the variables and the constrains
-	void                calculateNumberVariabesConstrains(); ///< calculate the number of variables and constrains
+	void                calculateNumberVariablesConstrains(); ///< calculate the number of variables and constrains
 	void                cachePositions(); ///< cache the exact position index (initial+f(r1,r2,p,r2To) for each variable and constrain
 	int                 getDomainElements(int domain); ///< return the number of elements of a domain
 
@@ -147,10 +147,13 @@ protected:
 	void                sfd(double value_h, const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW, bool allowCreate=false){MTHREAD->MD->setForData(value_h, type_h, regId_h, forType_h, diamClass_h, year, allowCreate);};
 	bool                app(const string &prod_h, const string &forType_h, const string &dClass_h){return MTHREAD->MD->assessProdPossibility(prod_h, forType_h, dClass_h);};
 	const int           gip(const string &varName); ///< Get the initial index position of a given variable in the concatenated array
-	const int           gix_uncached(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
-
+	const int           gip(const int &cn); ///< Return the initial index position of a certain constrain
+	template<class T> const int gix_uncached(const T &v_or_c, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name (string) or constrain index (int), the reg lev1 index, the reg lev2 index and the prod. index
 	const int           gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
+	const int           gix(const int &cn, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain constrain, the reg lev1 index, the reg lev2 index and the prod. index
 	const int           gdt(const string &varName); ///< Get the domain type of a given variable
+	const int           gdt(const int &cn); ///< Get the domain type of a given constrain
+
 	//virtual void        eval_obj (Index n, const T *x, T& obj_value);
 
 	vector<string>                           priPr;
@@ -158,7 +161,7 @@ protected:
 	vector<string>                           allPr;
 	vector < vector <int> >                    l2r;
 	map <string, int>                      initPos; ///< A map that return the initial index position in the concatenated array for each variable
-	map <string, int>                     cInitPos; ///< A map that return the initial index position in the concatenated array for each constrain
+	vector<int>                           cInitPos; ///< A vector that return the initial index position in the concatenated array for each constrain
 	map <string, int>                         vars; ///< List of variables in the model and their domain: pr product, sec prod, all products or all products over each subregion pair (exports)
 	map <string, vector < vector < vector < vector <int> > > > >  positions; ///< cached position in the concatenated vector for each variables. Dimensions are l1reg, l2reg, prod, (l2To region).
 	int                                     nPriPr;
