@@ -155,6 +155,7 @@ protected:
 	const int           gix(const int &cn, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain constrain, the reg lev1 index, the reg lev2 index and the prod. index
 	const int           gdt(const string &varName); ///< Get the domain type of a given variable
 	const int           gdt(const int &cn); ///< Get the domain type of a given constrain
+	int                 getConstrainDirectionByIndex(int idx); ///< Return the direction of a given constrain
 
 	//virtual void        eval_obj (Index n, const T *x, T& obj_value);
 
