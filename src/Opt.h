@@ -122,8 +122,12 @@ public:
 	//***************    end   ADOL-C part ***********************************
 
 	// **************   start PYTHIA part ************************************
-	void         defineVariables(); ///< define the variables and their domains
-	void         defineConstrains(); ///< define the constrains, their domain, their direction and their associated evaluation function
+	void                defineVariables(); ///< define the variables and their domains
+	void                defineConstrains(); ///< define the constrains, their domain, their direction and their associated evaluation function
+	void                cacheInitialPosition(); ///< cache the initial positions of the variables and the constrains
+	void                calculateNumberVariabesConstrains(); ///< calculate the number of variables and constrains
+	void                cachePositions(); ///< cache the exact position index (initial+f(r1,r2,p,r2To) for each variable and constrain
+	int                 getDomainElements(int domain); ///< return the number of elements of a domain
 
 	// **************   end PYTHIA part **************************************
 
@@ -144,6 +148,7 @@ protected:
 	bool                app(const string &prod_h, const string &forType_h, const string &dClass_h){return MTHREAD->MD->assessProdPossibility(prod_h, forType_h, dClass_h);};
 	const int           gip(const string &varName); ///< Get the initial index position of a given variable in the concatenated array
 	const int           gix_uncached(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
+
 	const int           gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
 	const int           gdt(const string &varName); ///< Get the domain type of a given variable
 	//virtual void        eval_obj (Index n, const T *x, T& obj_value);
@@ -153,6 +158,7 @@ protected:
 	vector<string>                           allPr;
 	vector < vector <int> >                    l2r;
 	map <string, int>                      initPos; ///< A map that return the initial index position in the concatenated array for each variable
+	map <string, int>                     cInitPos; ///< A map that return the initial index position in the concatenated array for each constrain
 	map <string, int>                         vars; ///< List of variables in the model and their domain: pr product, sec prod, all products or all products over each subregion pair (exports)
 	map <string, vector < vector < vector < vector <int> > > > >  positions; ///< cached position in the concatenated vector for each variables. Dimensions are l1reg, l2reg, prod, (l2To region).
 	int                                     nPriPr;
@@ -171,7 +177,7 @@ protected:
 	bool                              debugRunOnce;
 	void                    debugPrintParameters();
 	bool                                   initOpt;
-	vector <constrain>                  constrains;
+	vector <constrain>                        cons;
 
 
 	/**@name Methods to block default compiler methods.

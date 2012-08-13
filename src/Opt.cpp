@@ -207,27 +207,27 @@ Opt::defineConstrains (){
 	constrain mkeq26;
 	mkeq26.name="mkeq26";
 	mkeq26.comment="[eq ] Verification of the null transport agents supply";
-	mkeq26.domain=DOM_SCALAR;
-	mkeq26.direction = CONSTR_EQ;
+	mkeq26.domain=DOM_R2_ALL_PR;
+	mkeq26.direction = CONSTR_LE0;
 	mkeq26.cvars.insert(DomainPair("pl",CDOM_ALL));
 	mkeq26.cvars.insert(DomainPair("rt",CDOM_ALLR2));
 
 
-	constrains.push_back(mkeq2);
-	constrains.push_back(mkeq3);
-	constrains.push_back(mkeq4);
-	constrains.push_back(mkeq5);
-	constrains.push_back(mkeq6);
-	constrains.push_back(mkeq7);
-	constrains.push_back(mkeq8);
-	constrains.push_back(mkeq13);
-	constrains.push_back(mkeq14);
-	constrains.push_back(mkeq17);
-	constrains.push_back(mkeq18);
-	constrains.push_back(mkeq23);
-	constrains.push_back(mkeq24);
-	constrains.push_back(mkeq25);
-	constrains.push_back(mkeq26);
+	cons.push_back(mkeq2);
+	cons.push_back(mkeq3);
+	cons.push_back(mkeq4);
+	cons.push_back(mkeq5);
+	cons.push_back(mkeq6);
+	cons.push_back(mkeq7);
+	cons.push_back(mkeq8);
+	cons.push_back(mkeq13);
+	cons.push_back(mkeq14);
+	cons.push_back(mkeq17);
+	cons.push_back(mkeq18);
+	cons.push_back(mkeq23);
+	cons.push_back(mkeq24);
+	cons.push_back(mkeq25);
+	cons.push_back(mkeq26);
 
 
 }
@@ -444,6 +444,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 		cix++;
 	CONSTRAIN_END_LOOP
 
+	// mkeq26(i,prd,j).. RVAR('pl',j,prd)-RVAR('pl',i,prd)-CT(i,j,prd) =l= 0;
 	CONSTRAIN_START_LOOP(allPr)
 		for (uint r2To=0;r2To<l2r[r1].size();r2To++){
 			ct = gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2To]));
@@ -519,145 +520,19 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		// put the variables and their domain in the vars map
 		defineVariables();
 
-		// calculating the number of variables and the initial positions in the concatenated array..
-		nVar = 0;
-		map<string, int>::iterator viter;
-		for (viter = vars.begin(); viter != vars.end(); ++viter) {
-			//string debugs = viter->first;
-			//int debugpos = nVar;
-			initPos.insert(pair<string, int>(viter->first, nVar));
-			int vdomtype = viter->second;
-			if(vdomtype==DOM_PRI_PR){
-				nVar += nL2r*nPriPr;
-			} else if (vdomtype==DOM_SEC_PR) {
-				nVar += nL2r*nSecPr;
-			} else if (vdomtype==DOM_ALL_PR) {
-				nVar += nL2r*nAllPr;
-			} else if (vdomtype==DOM_R2_ALL_PR) {
-				for(uint r1=0;r1<l2r.size();r1++){
-					nVar += l2r[r1].size()*l2r[r1].size()*nAllPr; // EXP(i,j,prd)
-				}
-			} else {
-				msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+viter->first+")");
-			}
-		}
+		// defining the contrains...
+		defineConstrains();
 
-		// caching the initial positions
-		for (viter = vars.begin(); viter != vars.end(); ++viter) {
-			//string debugs = viter->first;
-			int vdomtype = viter->second;
-			vector < vector < vector < vector <int> > > > positionsToAdd;
+		// calculate number of variables and constrains..
+		calculateNumberVariabesConstrains();
+
+		// cache initial positions (variables and constrains)..
+		cacheInitialPosition();
+
+		// cache initial positions (variables and constrains)..
+		cachePositions();
 
 
-			if(vdomtype==DOM_PRI_PR){
-				for(uint r1=0;r1<l2r.size();r1++){
-					vector < vector < vector <int> > > dim1;
-					for(uint r2=0;r2<l2r[r1].size();r2++){
-						vector < vector <int> > dim2;
-						for(uint p=0;p<priPr.size();p++){
-							vector <int> dim3;
-							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
-							dim2.push_back(dim3);
-						}
-						dim1.push_back(dim2);
-					}
-					positionsToAdd.push_back(dim1);
-				}
-			} else if (vdomtype==DOM_SEC_PR) {
-				for(uint r1=0;r1<l2r.size();r1++){
-					vector < vector < vector <int> > > dim1;
-					for(uint r2=0;r2<l2r[r1].size();r2++){
-						vector < vector <int> > dim2;
-						for(uint p=0;p<secPr.size();p++){
-							vector <int> dim3;
-							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
-							dim2.push_back(dim3);
-						}
-						dim1.push_back(dim2);
-					}
-					positionsToAdd.push_back(dim1);
-				}
-			} else if (vdomtype==DOM_ALL_PR) {
-				for(uint r1=0;r1<l2r.size();r1++){
-					vector < vector < vector <int> > > dim1;
-					for(uint r2=0;r2<l2r[r1].size();r2++){
-						vector < vector <int> > dim2;
-						for(uint p=0;p<allPr.size();p++){
-							vector <int> dim3;
-							dim3.push_back(gix_uncached(viter->first,r1,r2,p));
-							dim2.push_back(dim3);
-						}
-						dim1.push_back(dim2);
-					}
-					positionsToAdd.push_back(dim1);
-				}
-			} else if (vdomtype==DOM_R2_ALL_PR) {
-				for(uint r1=0;r1<l2r.size();r1++){
-					vector < vector < vector <int> > > dim1;
-					for(uint r2=0;r2<l2r[r1].size();r2++){
-						vector < vector <int> > dim2;
-						for(uint p=0;p<allPr.size();p++){
-							vector <int> dim3;
-							for(uint r2To=0;r2To<l2r[r1].size();r2To++){
-								dim3.push_back(gix_uncached(viter->first,r1,r2,p,r2To));
-							}
-							dim2.push_back(dim3);
-						}
-						dim1.push_back(dim2);
-					}
-					positionsToAdd.push_back(dim1);
-				}
-
-			} else {
-				msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+viter->first+")");
-			}
-			positions.insert(pair<string, vector < vector < vector < vector <int> > > > >(viter->first,  positionsToAdd));
-		}
-
-	// defining the contrains...
-	defineConstrains();
-
-	vector<double> test;
-	test.push_back(3);
-	test.push_back(2);
-	double result;
-
-	for (uint i=0; i<constrains.size();i++){
-		//result = constrains[i].evaluate(test);
-		//cout << "result: " << result << endl;
-	}
-
-
-
-
-		// calculating the number of constrains..
-		nCons = 0; // leave 0
-		nEqualityConstrains = 0;
-		nLowerEqualZeroConstrains = 0;
-		nGreaterEqualZeroConstrains = 0;
-		nCons += nL2r*nSecPr; // mkeq2
-		nCons += nL2r*nPriPr; // mkeq3
-		nCons += nL2r*nPriPr; // mkeq4
-		nCons += nL2r*nPriPr; // mkeq5
-		nCons += nL2r*nSecPr; // mkeq6
-		nCons += nL2r*nSecPr; // mkeq7
-		nCons += nL2r*nPriPr; // mkeq8
-		nCons += nL2r*nSecPr; // mkeq13
-		nCons += nL2r*nPriPr; // mkeq14
-		nCons += nL2r*nSecPr; // mkeq23
-		nCons += nL2r*nPriPr; // mkeq24
-		nEqualityConstrains = nCons;
-		nCons += nL2r*nSecPr; // mkeq17
-		nCons += nL2r*nPriPr; // mkeq18
-
-		for (uint r1=0;r1<l2r.size();r1++){
-			nCons += (l2r[r1].size()*l2r[r1].size()*allPr.size()); // mkeq26
-		}
-		nLowerEqualZeroConstrains = nCons - nEqualityConstrains;
-		nCons += nL2r*nSecPr; // mkeq25
-		nGreaterEqualZeroConstrains = nCons - nEqualityConstrains - nLowerEqualZeroConstrains;
-
-		msgOut(MSG_INFO,"The model will work with "+i2s(nVar)+" variables and "+i2s(nCons)+" constrains.");
 
 		//debugPrintParameters();
 		initOpt=false;
@@ -1203,15 +1078,171 @@ Opt:: debugPrintParameters(){
 				}
 			}
 		}
-
 				for(uint p=0;p<allPr.size();p++){
 						double value = gpd("pl",worldCodeLev2,allPr[p]);
 						cout <<"pl(world)"<<";"<<worldCodeLev2<<";"<<allPr[p]<<";"<<value<<";;"<<endl;
 				}
 
+}
 
+void
+Opt::cacheInitialPosition(){
+	int initialPosition = 0;
+	map<string, int>::iterator viter;
+	for (viter = vars.begin(); viter != vars.end(); ++viter) {
+		initPos.insert(pair<string, int>(viter->first, initialPosition));
+		initialPosition += getDomainElements(viter->second);
+	}
+}
+
+void
+Opt::cachePositions(){
+
+	// VARIABLES..
+	map<string, int>::iterator viter;
+	for (viter = vars.begin(); viter != vars.end(); ++viter) {
+		//string debugs = viter->first;
+		int vdomtype = viter->second;
+		vector < vector < vector < vector <int> > > > positionsToAdd;
+
+		if(vdomtype==DOM_PRI_PR){
+			for(uint r1=0;r1<l2r.size();r1++){
+				vector < vector < vector <int> > > dim1;
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					vector < vector <int> > dim2;
+					for(uint p=0;p<priPr.size();p++){
+						vector <int> dim3;
+						dim3.push_back(gix_uncached(viter->first,r1,r2,p));
+						dim2.push_back(dim3);
+					}
+					dim1.push_back(dim2);
+				}
+				positionsToAdd.push_back(dim1);
+			}
+		} else if (vdomtype==DOM_SEC_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				vector < vector < vector <int> > > dim1;
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					vector < vector <int> > dim2;
+					for(uint p=0;p<secPr.size();p++){
+						vector <int> dim3;
+						dim3.push_back(gix_uncached(viter->first,r1,r2,p));
+						dim2.push_back(dim3);
+					}
+					dim1.push_back(dim2);
+				}
+				positionsToAdd.push_back(dim1);
+			}
+		} else if (vdomtype==DOM_ALL_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				vector < vector < vector <int> > > dim1;
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					vector < vector <int> > dim2;
+					for(uint p=0;p<allPr.size();p++){
+						vector <int> dim3;
+						dim3.push_back(gix_uncached(viter->first,r1,r2,p));
+						dim2.push_back(dim3);
+					}
+					dim1.push_back(dim2);
+				}
+				positionsToAdd.push_back(dim1);
+			}
+		} else if (vdomtype==DOM_R2_ALL_PR) {
+			for(uint r1=0;r1<l2r.size();r1++){
+				vector < vector < vector <int> > > dim1;
+				for(uint r2=0;r2<l2r[r1].size();r2++){
+					vector < vector <int> > dim2;
+					for(uint p=0;p<allPr.size();p++){
+						vector <int> dim3;
+						for(uint r2To=0;r2To<l2r[r1].size();r2To++){
+							dim3.push_back(gix_uncached(viter->first,r1,r2,p,r2To));
+						}
+						dim2.push_back(dim3);
+					}
+					dim1.push_back(dim2);
+				}
+				positionsToAdd.push_back(dim1);
+			}
+
+		} else {
+			msgOut(MSG_CRITICAL_ERROR,"Try to calculate the number of variables of a variable of unknow type ("+viter->first+")");
+		}
+		positions.insert(pair<string, vector < vector < vector < vector <int> > > > >(viter->first,  positionsToAdd));
+	}
+
+
+
+	for (uint i=0; i<cons.size();i++){
+		//result = constrains[i].evaluate(test);
+		//cout << "result: " << result << endl;
+	}
+}
+
+void
+Opt::calculateNumberVariabesConstrains(){
+		// calculating the number of variables and the initial positions in the concatenated array..
+		nVar = 0;
+		map<string, int>::iterator viter;
+		for (viter = vars.begin(); viter != vars.end(); ++viter) {
+				nVar += getDomainElements(viter->second);
+		}
+
+		// calculating the number of constrains..
+		nCons = 0;
+		nEqualityConstrains = 0;
+		nLowerEqualZeroConstrains = 0;
+		nGreaterEqualZeroConstrains = 0;
+		for(uint i=0;i<cons.size();i++){
+			nCons += getDomainElements(cons[i].domain);
+			if(cons[i].direction == CONSTR_EQ){
+				nEqualityConstrains += getDomainElements(cons[i].domain);
+				continue;
+			} else if (cons[i].direction == CONSTR_LE0) {
+				nLowerEqualZeroConstrains += getDomainElements(cons[i].domain);
+				continue;
+			} else if (cons[i].direction == CONSTR_GE0) {
+				nGreaterEqualZeroConstrains += getDomainElements(cons[i].domain);
+				continue;
+			} else {
+				msgOut(MSG_CRITICAL_ERROR, "Asking for a constrain with unknown direction ("+i2s(cons[i].direction)+")");
+			}
+		}
+
+		msgOut(MSG_INFO,"The model will work with "+i2s(nVar)+" variables and "+i2s(nCons)+" constrains ("+i2s(nEqualityConstrains)+" equalities, "+i2s(nLowerEqualZeroConstrains)+" lower than 0 and "+i2s(nGreaterEqualZeroConstrains)+" greater than 0)");
 }
 
 
 
+int
+Opt::getDomainElements(int domain){
 
+	int elements = 0;
+	switch (domain){
+		case DOM_PRI_PR:
+			return nL2r*nPriPr;
+		case DOM_SEC_PR:
+			return nL2r*nSecPr;
+		case DOM_ALL_PR:
+			return nL2r*nAllPr;
+		case DOM_R2_PRI_PR:
+			for(uint r1=0;r1<l2r.size();r1++){
+					elements += l2r[r1].size()*l2r[r1].size()*nPriPr; // EXP(i,j,p_pr)
+			}
+			return elements;
+		case DOM_R2_SEC_PR:
+			for(uint r1=0;r1<l2r.size();r1++){
+					elements += l2r[r1].size()*l2r[r1].size()*nSecPr; // EXP(i,j,p_tr)
+			}
+			return elements;
+		case DOM_R2_ALL_PR:
+			for(uint r1=0;r1<l2r.size();r1++){
+					elements += l2r[r1].size()*l2r[r1].size()*nAllPr; // EXP(i,j,prd)
+			}
+			return elements;
+		case DOM_SCALAR:
+			return 1;
+	default:
+		msgOut(MSG_CRITICAL_ERROR, "Asking for an unknown domain type ("+i2s(domain)+")");
+	}
+
+}

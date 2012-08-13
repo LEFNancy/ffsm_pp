@@ -73,11 +73,11 @@ enum {
 	DATA_ERROR             = -99999999999, // error in retrieving data
 
 	OUTVL_NONE             =0, //output verbosity level
-	OUTVL_MAPS             =3,
-	OUTVL_AGGREGATED       =3,
-	OUTVL_DETAILED         =5,
-	OUTVL_BINMAPS          =6,
-	OUTVL_ALL              =7,
+	OUTVL_MAPS             =5,
+	OUTVL_AGGREGATED       =10,
+	OUTVL_DETAILED         =15,
+	OUTVL_BINMAPS          =20,
+	OUTVL_ALL              =25,
 
 	DOM_PRI_PR             =1, // domain of variables and constrains: primary, secondary, all products or all products over r2 couple regions (in-country commercial flows)
 	DOM_SEC_PR             =2,
@@ -88,15 +88,17 @@ enum {
 	DOM_SCALAR             =7,
 
 	// domain of constrains variables (squares means a vector, r2n means neighbour -same r1- regions)
-	CDOM_SCALAR            =1, // r1,r2,p
-	CDOM_R2TO              =2, // r1,r2,p,[r2n]
-	CDOM_R2FROM            =3, // r1,[r2n],p,r2
-	CDOM_R2FROMTO          =4, // r1,[r2n],p,[r2n]
-	CDOM_PRI_PR            =5, // r1,r2,[p_pr]
-	CDOM_PRI_PR_AND_SCALAR =6, // r1,r2,[p_pr]&&p
-	CDOM_SEC_PR            =7, // r1,r2,[p_sec]
-	CDOM_ALL               =8, // [r1],[r2],[p]
-	CDOM_ALLR2             =9, // [r1],[r2],[p],[r2n]
+	CDOM_SCALAR            =1,  // r1,r2,p
+	CDOM_SCALAR_DOUBLE     =2,  // r1,r2,p,r2n and r1,r2n,p,r2
+	CDOM_R2TO              =3,  // r1,r2,p,[r2n]
+	CDOM_R2FROM            =4,  // r1,[r2n],p,r2
+	CDOM_R2FROMTO          =5,  // r1,[r2n],p,[r2n]
+	CDOM_PRI_PR            =6,  // r1,r2,[p_pr]
+	CDOM_PRI_PR_AND_SCALAR =7,  // r1,r2,[p_pr]&&p
+	CDOM_SEC_PR            =8,  // r1,r2,[p_sec]
+	// next not used
+	CDOM_ALL               =9,  // [r1],[r2],[p]
+	CDOM_ALLR2             =10, // [r1],[r2],[p],[r2n]
 
 
 	CONSTR_EQ              =1, // constrain of type equality
