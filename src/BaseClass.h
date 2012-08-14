@@ -85,20 +85,21 @@ enum {
 	DOM_R2_PRI_PR          =4,
 	DOM_R2_SEC_PR          =5,
 	DOM_R2_ALL_PR          =6,
-	DOM_SCALAR             =7,
+	DOM_SCALAR             =7, // NOTUSED
 
 	// domain of constrains variables (squares means a vector, r2n means neighbour -same r1- regions)
-	CDOM_SCALAR            =1,  // r1,r2,p
-	CDOM_SCALAR_DOUBLE     =2,  // r1,r2,p,r2n and r1,r2n,p,r2
-	CDOM_R2TO              =3,  // r1,r2,p,[r2n]
-	CDOM_R2FROM            =4,  // r1,[r2n],p,r2
-	CDOM_R2FROMTO          =5,  // r1,[r2n],p,[r2n]
-	CDOM_PRI_PR            =6,  // r1,r2,[p_pr]
-	CDOM_PRI_PR_AND_SCALAR =7,  // r1,r2,[p_pr]&&p
-	CDOM_SEC_PR            =8,  // r1,r2,[p_sec]
-	// next not used
-	CDOM_ALL               =9,  // [r1],[r2],[p]
-	CDOM_ALLR2             =10, // [r1],[r2],[p],[r2n]
+	// attention for the not used, as algorithm to handle them may not have been implemented or -as minimum- tested!!
+	CDOM_SCALAR            =1,             // r1,r2,p
+	CDOM_SCALAR_DOUBLE     =2,             // r1,r2,p,r2n and r1,r2n,p,r2
+	CDOM_R2TO              =3,  // NOTUSED // r1,r2,p,[r2n]
+	CDOM_R2FROM            =4,  // NOTUSED // r1,[r2n],p,r2
+	CDOM_R2FROMTO          =5,             // r1,[r2n],p,[r2n]
+	CDOM_PRI_PR            =6,             // r1,r2,[p_pr]
+	CDOM_PRI_PR_AND_SCALAR =7,             // r1,r2,[p_pr]&&p
+	CDOM_SEC_PR            =8,  // NOTUSED // r1,r2,[p_sec]
+	CDOM_ALL_PR            =9,  // NOTUSED // r1,r2,[prd]
+	CDOM_ALL               =10, // NOTUSED // [r1],[r2],[p]
+	CDOM_ALLR2             =11, // NOTUSED // [r1],[r2],[p],[r2n]
 
 
 	CONSTR_EQ              =1, // constrain of type equality

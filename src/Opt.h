@@ -122,14 +122,15 @@ public:
 	//***************    end   ADOL-C part ***********************************
 
 	// **************   start PYTHIA part ************************************
-	void                defineVariables(); ///< define the variables and their domains
-	void                defineConstrains(); ///< define the constrains, their domain, their direction and their associated evaluation function
+	void                declareVariables(); ///< declare the variables and their domains
+	void                declareConstrains(); ///< declare the constrains, their domain, their direction and their associated evaluation function
 	void                cacheInitialPosition(); ///< cache the initial positions of the variables and the constrains
 	void                calculateNumberVariablesConstrains(); ///< calculate the number of variables and constrains
 	void                cachePositions(); ///< cache the exact position index (initial+f(r1,r2,p,r2To) for each variable and constrain
 	int                 getDomainElements(int domain); ///< return the number of elements of a domain
 template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, int dType); ///< build the matrix of the positions for a given variable or contrain
 template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, vector<string> &prVector); ///< build the matrix of the positions for a given variable or contrain
+void                  calculateSparsityPattern(); //
 
 	// **************   end PYTHIA part **************************************
 
@@ -156,6 +157,12 @@ protected:
 	const int           gdt(const string &varName); ///< Get the domain type of a given variable
 	const int           gdt(const int &cn); ///< Get the domain type of a given constrain
 	int                 getConstrainDirectionByIndex(int idx); ///< Return the direction of a given constrain
+	constrain*          getConstrainByIndex(int idx);
+	void                unpack(int ix_h, int domain, int initial, int &r1_h, int &r2_h, int&p_h, int&r2to_h, bool fullp=false); ///< Return the dimensions given a certain index, domain type and initial position
+	int                 getConNumber(constrain* con); ///< Return the position in the cons vector
+
+
+	void tempDebug();
 
 	//virtual void        eval_obj (Index n, const T *x, T& obj_value);
 
@@ -185,6 +192,9 @@ protected:
 	void                    debugPrintParameters();
 	bool                                   initOpt;
 	vector <constrain>                        cons;
+	vector <vector <int> >						 nzjelements; ///< nzero elements. nzelements[i][0] -> row (constrain), nzelements[i][1] -> column (variable)
+	//int                               nnzjelements; ///< number of non zero elements
+
 
 
 	/**@name Methods to block default compiler methods.
