@@ -89,7 +89,7 @@ Opt::declareConstrains (){
 	mkeq3.domain=DOM_PRI_PR;
 	mkeq3.direction = CONSTR_EQ;
 	mkeq3.cvars.insert(DomainPair("dl",CDOM_SCALAR));
-	mkeq3.cvars.insert(DomainPair("sl",CDOM_SCALAR));
+	mkeq3.cvars.insert(DomainPair("sl",CDOM_PRI_PR));
 	mkeq3.cvars.insert(DomainPair("rt",CDOM_R2FROMTO));
 	//mkeq3.evaluate = Opt::mkteq3f;
 
@@ -99,7 +99,7 @@ Opt::declareConstrains (){
 	mkeq4.domain=DOM_PRI_PR;
 	mkeq4.direction = CONSTR_EQ;
 	mkeq4.cvars.insert(DomainPair("dl",CDOM_SCALAR));
-	mkeq4.cvars.insert(DomainPair("sl",CDOM_PRI_PR));
+	mkeq4.cvars.insert(DomainPair("sl",CDOM_SEC_PR));
 
 	constrain mkeq5;
 	mkeq5.name="mkeq5";
@@ -478,7 +478,6 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		allPr = priPr;
 		allPr.insert( allPr.end(), secPr.begin(), secPr.end() );
 		nPriPr = priPr.size();
-		cout << "nPriPr: " << nPriPr << endl;
 		nSecPr = secPr.size();
 		nAllPr = allPr.size();
 		std::vector<int> l1regIds =  MTHREAD->MD->getRegionIds(1, true);
@@ -516,7 +515,7 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 
 		calculateSparsityPattern();
 
-		tempDebug();
+		//tempDebug();
 
 		//debugPrintParameters();
 		initOpt=false;
@@ -529,7 +528,8 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 	m = nCons; // 70; // nCons;
 
 	// in this example the jacobian is dense. Hence, it contains n*m nonzeros
-	nnz_jac_g = n*m;
+	//nnz_jac_g = n*m;
+	nnz_jac_g = nzjelements.size();
 
 	// the hessian is also dense and has n*n total nonzeros, but we
 	// only need the lower left corner (since it is symmetric)
@@ -760,12 +760,19 @@ Opt::eval_g(Index n, const Number* x, bool new_x, Index m, Number* g){
 }
 
 bool
-Opt::eval_jac_g(Index n, const Number* x, bool new_x,Index m, Index nele_jac,
+Opt::eval_jac_g(Index n, const Number *x, bool new_x,Index m, Index nele_jac,
 								Index* iRow, Index *jCol, Number* values){
 	if (values == NULL) {
 		// return the structure of the jacobian,
 		// assuming that the Jacobian is dense
 
+
+		for(Index idx=0;idx<nzjelements.size();idx++){
+			iRow[idx] = nzjelements[idx][0];
+			jCol[idx] = nzjelements[idx][1];
+		}
+
+		/*
 		Index idx = 0;
 		for(Index i=0; i<m; i++)
 			for(Index j=0; j<n; j++)
@@ -773,17 +780,55 @@ Opt::eval_jac_g(Index n, const Number* x, bool new_x,Index m, Index nele_jac,
 			iRow[idx] = i;
 			jCol[idx++] = j;
 		}
+			*/
  }
 	else {
 		// return the values of the jacobian of the constraints
 
 		jacobian(tag_g,m,n,x,Jac);
 
+/*
+		vector < vector<double> > fakeJ;
+		for(Index r=0; r<nCons;r++){
+			vector<double> fakeJRow;
+			for (Index c=0; c<nVar; c++){
+				fakeJRow.push_back(Jac[r][c]);
+			}
+			fakeJ.push_back(fakeJRow);
+		}
+
+
+for(Index r=0; r<nCons; r++){
+	for (Index c=0; c<nVar; c++){
+		double val = Jac[r][c];
+		if (val != 0){
+			bool found = false;
+			//looping in the nzjelements to be sure we included it
+			for(uint i=0;i<nzjelements.size();i++){
+				if(nzjelements[i][0]==r && nzjelements[i][1]==c){
+					found=true;
+					break;
+				}
+			}
+			if(!found){
+				cout << "***** HERE WE ARE !!!! r/c/value: "<< r << " / " << c << " / " << Jac[r][c] << endl;
+			}
+		}
+	}
+}
+*/
+
+		for(Index idx=0;idx<nzjelements.size();idx++){
+			values[idx] = Jac[nzjelements[idx][0]][nzjelements[idx][1]];
+		}
+
+		/*
 		Index idx = 0;
 		for(Index i=0; i<m; i++)
 			for(Index j=0; j<n; j++){
 				values[idx++] = Jac[i][j];
 			}
+		*/
 
 	}
 
@@ -1216,9 +1261,9 @@ Opt::unpack(int ix_h, int domain, int initial, int &r1_h, int &r2_h, int&p_h, in
 	if(domain==DOM_R2_PRI_PR || domain==DOM_R2_SEC_PR ||domain==DOM_R2_ALL_PR){
 		r2flag = true;
 	}
-	if(fullp && (domain==DOM_SEC_PR || domain==DOM_R2_SEC_PR)){
+	if(fullp && (domain==DOM_ALL_PR || domain==DOM_R2_ALL_PR)){ // not working, lead to crash
 		pIndexToAdd = nPriPr;
-		cout << "pindexToAdd: " << pIndexToAdd << endl;
+		//cout << "pindexToAdd: " << pIndexToAdd << endl;
 	}
 
 	for (uint r1=0;r1<l2r.size();r1++){
@@ -1267,7 +1312,7 @@ Opt::getConNumber(constrain *con){
 void
 Opt::calculateSparsityPattern(){
 	constrain* CON;
-	int r1,r2,p,r2to,ipos,dom,cpos,origVdt,vdt;
+	int r1,r2,p,pfull,pForV,r2to,ipos,cdom,cpos,vdom,vdomInC;
 	int raw=0,col1=0,col2=0;
 	map<string, int>::iterator viter;
 
@@ -1277,61 +1322,83 @@ Opt::calculateSparsityPattern(){
 		CON = getConstrainByIndex(c);
 		cpos = getConNumber(CON);
 		ipos = gip(cpos);
-		dom = gdt(cpos);
+		cdom = gdt(cpos);
 		// ok cout << "c/name/cpos/initpos/dom: " << c << "/" << CON->name << "/" << cpos << "/" << ipos << "/" << dom << endl;
-		unpack(c,dom,ipos,r1,r2,p,r2to);
+		unpack(c,cdom,ipos,r1,r2,p,r2to);
+		if(cdom==DOM_SEC_PR || cdom==DOM_R2_SEC_PR){
+			pfull=nPriPr+p;
+		} else {
+			pfull=p;
+		}
 
 		for (viter = CON->cvars.begin(); viter != CON->cvars.end(); ++viter) {
-			origVdt = gdt(viter->first);
-			vdt     = viter->second;
-			switch (vdt){
+			string debugname = viter->first;
+			vdom = gdt(viter->first);
+			vdomInC     = viter->second;
+			if(vdom==DOM_ALL_PR || vdom==DOM_R2_ALL_PR){
+				pForV=pfull;
+			} else {
+				pForV=p;
+			}
+			switch (vdomInC){
 				case CDOM_SCALAR:{
-					col1 = gix(viter->first,r1,r2,p,r2to);
+					col1 = gix(viter->first,r1,r2,pForV,r2to);
 					vector<int> nzjelement1;
 					nzjelement1.push_back(raw);
 					nzjelement1.push_back(col1);
 					nzjelements.push_back(nzjelement1);
 				}
+				break;
 				case CDOM_R2FROMTO:{
 					for(int r2c=0;r2c<l2r[r1].size();r2c++){
-						col1 = gix(viter->first,r1,r2,p,r2c);
-						col2 = gix(viter->first,r1,r2c,p,r2);
+						col1 = gix(viter->first,r1,r2,pForV,r2c);
+						col2 = gix(viter->first,r1,r2c,pForV,r2);
 						vector<int> nzjelement1,nzjelement2;
 						nzjelement1.push_back(raw);
 						nzjelement1.push_back(col1);
 						nzjelement2.push_back(raw);
 						nzjelement2.push_back(col2);
 						nzjelements.push_back(nzjelement1);
-						nzjelements.push_back(nzjelement2);
+						if(col2!=col1) nzjelements.push_back(nzjelement2);
 					}
 				}
+				break;
 				case CDOM_PRI_PR:{
 					for(int p2=0;p2<nPriPr;p2++){
-						col1 = gix(viter->first,r1,r2,p);
+						col1 = gix(viter->first,r1,r2,p2);
 						vector<int> nzjelement1;
 						nzjelement1.push_back(raw);
 						nzjelement1.push_back(col1);
 						nzjelements.push_back(nzjelement1);
 					}
 				}
+				break;
 				case CDOM_SEC_PR:{
+					int p2c;
 					for(int p2=0;p2<nSecPr;p2++){
-						col1 = gix(viter->first,r1,r2,p);
+						if(vdom==DOM_ALL_PR || vdom==DOM_R2_ALL_PR){
+							p2c = nPriPr+p2;
+						} else {
+							p2c = p2;
+						}
+						col1 = gix(viter->first,r1,r2,p2c);
 						vector<int> nzjelement1;
 						nzjelement1.push_back(raw);
 						nzjelement1.push_back(col1);
 						nzjelements.push_back(nzjelement1);
 					}
 				}
+				break;
 				case CDOM_ALL_PR:{
 					for(int p2=0;p2<nAllPr;p2++){
-						col1 = gix(viter->first,r1,r2,p);
+						col1 = gix(viter->first,r1,r2,p2);
 						vector<int> nzjelement1;
 						nzjelement1.push_back(raw);
 						nzjelement1.push_back(col1);
 						nzjelements.push_back(nzjelement1);
 					}
 				}
+				break;
 				case CDOM_PRI_PR_AND_SCALAR:{
 					for(int p2=0;p2<nPriPr;p2++){
 						col1 = gix(viter->first,r1,r2,p2);
@@ -1340,22 +1407,27 @@ Opt::calculateSparsityPattern(){
 						nzjelement1.push_back(col1);
 						nzjelements.push_back(nzjelement1);
 					}
-					col2 = gix(viter->first,r1,r2,p);
+					col2 = gix(viter->first,r1,r2,pForV);
 					vector<int> nzjelement2;
 					nzjelement2.push_back(raw);
 					nzjelement2.push_back(col2);
 					nzjelements.push_back(nzjelement2);
 				}
+				break;
 				case CDOM_SCALAR_DOUBLE:{
-					col1 = gix(viter->first,r1,r2,p,r2to);
-					col2 = gix(viter->first,r1,r2to,p,r2);
+					col1 = gix(viter->first,r1,r2,pForV,r2to);
+					col2 = gix(viter->first,r1,r2to,pForV,r2);
 					vector<int> nzjelement1,nzjelement2;
 					nzjelement1.push_back(raw);
 					nzjelement1.push_back(col1);
 					nzjelement2.push_back(raw);
 					nzjelement2.push_back(col2);
 					nzjelements.push_back(nzjelement1);
-					nzjelements.push_back(nzjelement2);
+					if(col2!=col1) nzjelements.push_back(nzjelement2);
+				}
+				break;
+				default:{
+					msgOut(MSG_CRITICAL_ERROR,"In calCulateSparSePattern() looping trough a variable with an unknow domain type in the constrain ("+i2s(vdomInC)+")");
 				}
 			}
 		}
@@ -1365,11 +1437,14 @@ Opt::calculateSparsityPattern(){
 void
 Opt::tempDebug(){
 
-	cout << "ROW | COL" << endl;
+
+	cout << "IDX | ROW | COL" << endl;
 	for(uint i=0;i<nzjelements.size();i++){
-		cout << nzjelements[i][0] << " | " << nzjelements[i][1] << endl;
+		cout << i << " | " << nzjelements[i][0] << " | " << nzjelements[i][1] << endl;
 	}
-	exit(0);
+
+	cout << "Dense jacobian: " << nCons * nVar << " elements" << endl;
+	//exit(0);
 
 
 }

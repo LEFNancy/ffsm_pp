@@ -192,7 +192,7 @@ protected:
 	void                    debugPrintParameters();
 	bool                                   initOpt;
 	vector <constrain>                        cons;
-	vector <vector <int> >						 nzjelements; ///< nzero elements. nzelements[i][0] -> row (constrain), nzelements[i][1] -> column (variable)
+	vector <vector <Index> >						 nzjelements; ///< nzero elements. nzelements[i][0] -> row (constrain), nzelements[i][1] -> column (variable)
 	//int                               nnzjelements; ///< number of non zero elements
 
 
