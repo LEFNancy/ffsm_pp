@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006-2008 by Antonello Lobianco                         *
- *   http://regmas.org                                                     *
+ *   Copyright (C) 2012 by Laboratoire d'Economie Forestière               *
+ *   http://www.nancy.inra.fr/lef_eng                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *

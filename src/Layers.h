@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2008 by Antonello Lobianco                         *
+ *   Copyright (C) 2012 by Laboratoire d'Economie Forestière               *
  *   antonello@regmas.org                                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
