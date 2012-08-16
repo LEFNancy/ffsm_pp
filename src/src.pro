@@ -35,6 +35,7 @@ win32 {
     LIBS += -L win32/lib -lipopt
     LIBS += -L win32/lib -lcoinmetis
     LIBS += -L win32/lib -lcoinmumps
+    LIBS += -L win32/lib -lcoinhsl
     LIBS += -L win32/lib -lcoinblas
     LIBS += -L win32/lib -lcoinlapack
     LIBS += -L win32/lib -ladolc
