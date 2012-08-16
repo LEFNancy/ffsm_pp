@@ -1,7 +1,0 @@
-name: Universe Transverse Mercator
-proj: utm
-datum: wgs84
-a: 6378137
-es: 0.006694379990141316
-zone: 33
-no_defs: defined
