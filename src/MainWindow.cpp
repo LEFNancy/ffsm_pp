@@ -645,7 +645,7 @@ MainWindow::resetGUIForNewSimulation(){
 	if (simulationCounter) logArea->append("***WARNING: You are running more simulations from the GUI without closing/reopening it. It should works, but there are no guarantees. The best way is to run only one simulation from the GUI, eventually closing and opening Pythia again for further simulations.");
 	simulationCounter++;
 	
-};
+}
 
 void
 MainWindow::receiveScenarioOptions(const QVector<QString> &scenarios_h){

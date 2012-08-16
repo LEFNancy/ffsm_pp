@@ -27,10 +27,10 @@
 Scheduler::Scheduler(ThreadManager* MTHREAD_h){
 	MTHREAD=MTHREAD_h;
 	iteration=-1;
-};
+}
 
 Scheduler::~Scheduler(){
-};
+}
 
 void
 Scheduler::run(){

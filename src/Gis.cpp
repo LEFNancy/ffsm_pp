@@ -85,7 +85,7 @@ Gis::setSpace(){
 	MTHREAD->fitInWindow(); // tell the gui to fit the map to the widget
 //	countItems("landUse",false); // count the various records assigned to each legendItem. Do not print debug infos
 	return;
-};
+}
 
 /**
 Called from setSpace(), initLayers() is responsable of:

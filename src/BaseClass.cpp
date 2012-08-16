@@ -138,7 +138,7 @@ BaseClass::refreshGUI()const{
 	if (MTHREAD && MTHREAD->usingGUI()){
 		MTHREAD->refreshGUI();
 	}
-};
+}
 
 int
 BaseClass::s2i ( string string_h) const {
@@ -213,7 +213,7 @@ BaseClass::s2i( vector <string> string_h) const{
 		valuesAsInteger.push_back(valueAsInteger);
 	}
 	return valuesAsInteger;
-};
+}
 
 /// Includes comma to dot conversion if needed.
 vector <double>
@@ -242,7 +242,7 @@ BaseClass::s2b( vector <string> string_h) const{
 		valuesAsBool.push_back(s2b(string_h.at(i)));
 	}
 	return valuesAsBool;
-};
+}
 
 vector <string>
 BaseClass::i2s (vector <int> int_h) const{

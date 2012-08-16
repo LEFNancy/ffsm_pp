@@ -75,7 +75,7 @@ Output::initOutputForestData(){
 		}
 		out << "\n";
 		out.close();
-};
+}
 
 void
 Output::initOutputProductData(){
@@ -97,7 +97,7 @@ Output::initOutputProductData(){
 		}
 		out << "\n";
 		out.close();
-};
+}
 
 void
 Output::initOutputAggregatedData(){
@@ -327,7 +327,7 @@ Output::printForestData(){
 		out << "\n";
 	}
 	out.close();
-};
+}
 
 void
 Output::printProductData(){
@@ -367,7 +367,7 @@ Output::printProductData(){
 		out << "\n";
 	}
 	out.close();
-};
+}
 
 void
 Output::printAggregatedData(){

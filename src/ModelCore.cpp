@@ -231,7 +231,7 @@ ModelCore::runInitPeriod(){
 		}
 	}
 
-};
+}
 
 void
 ModelCore::runSimulationYear(){
@@ -598,6 +598,6 @@ ModelCore::runSimulationYear(){
 
 	return;
 
-};
+}
 
 

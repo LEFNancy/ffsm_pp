@@ -144,7 +144,7 @@ ModelData::setDefaultSettings(){
 	msgOut(MSG_INFO,"### USING SCENARIO: "+MTHREAD->getScenarioName()+" ###");
 	
 	setOutputDirectory(getStringSetting("outputDirname").c_str());
-};
+}
 
 void
 ModelData::setScenarioSettings(){
@@ -327,7 +327,7 @@ ModelData::assessProdPossibility(const string &prod_h, const string &forType_h, 
 		}
 	}
 	return false;
-};
+}
 
 void
 ModelData::setDefaultForData(){
@@ -789,7 +789,7 @@ ModelData::getBaseData (const string &name_h, int type_h, int position){
 		msgOut(MSG_CRITICAL_ERROR, "Error calling getBaseData() for "+ name_h +". No setting option or macro data found with this name.");
 	}
 	return "";
-};
+}
 
 vector <string>
 ModelData::getVectorBaseData (const string &name_h, int type_h){
@@ -803,7 +803,7 @@ ModelData::getVectorBaseData (const string &name_h, int type_h){
 	msgOut(MSG_CRITICAL_ERROR, "Error calling getVectorBaseData() for "+ name_h +". No setting option or macro data found with this name.");
 	vector <string> toReturn;
 	return toReturn;
-};
+}
 
 // ------------- start getSetting() amd getMacro() functions ....... -----------------
 int
@@ -889,7 +889,7 @@ ModelData::getFilenameByType(std::string type_h){
 	}
 	filename_complete = baseDirectory+directory+filename;
 	return filename_complete;
-};
+}
 
 /**
 Basic function to retrieve products-related data.
@@ -979,7 +979,7 @@ ModelData::getProdData(const string &type_h, int regId_h, const string &prodId_h
 	return value;
 
 
-};
+}
 
 /**
 Basic function to retrieve forest-related data.
@@ -1020,7 +1020,7 @@ ModelData::getForData(const string &type_h, int regId_h, const string &forType_h
 	}
 	return value;
 
-};
+}
 
 /**
 Basic function to set products-related data.
@@ -1096,7 +1096,7 @@ ModelData::setProdData(double value_h, const string &type_h, int regId_h, const 
 	if(!found && !allowCreate ){
 		msgOut(MSG_CRITICAL_ERROR, "Error in setProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
 	}
-};
+}
 
 void
 ModelData::setForData(double value_h, const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year, bool allowCreate){
@@ -1152,7 +1152,7 @@ ModelData::setForData(double value_h, const string &type_h, int regId_h, const s
 			forDataVector.push_back(FD); // TODO: testing
 		}
 	}
-};
+}
 
 
 double

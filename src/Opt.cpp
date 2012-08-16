@@ -983,12 +983,12 @@ Opt::gip(const string &varName){ // get initial position
 		msgOut(MSG_CRITICAL_ERROR, "Asking the initial position in the concatenated array of a variable ("+varName+") that doesn't exist!");
 		return 0;
 	}
-};
+}
 
 const int
 Opt::gip(const int &cn){ // get initial position
 	return cInitPos.at(cn);
-};
+}
 
 const int
 Opt::gdt(const string &varName){ // get domain type
@@ -1448,3 +1448,4 @@ Opt::tempDebug(){
 
 
 }
+

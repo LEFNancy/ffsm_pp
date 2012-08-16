@@ -54,23 +54,23 @@ InputNode::setWorkingFile(std::string filename_h){
     }
 	domElement = doc.documentElement();
 	return true;
-};
+}
 
 // *******************************************************************************
 int
 InputNode::getIntContent(){
 	return domElement.text().toInt();
-};
+}
 
 double
 InputNode::getDoubleContent(){
 	return domElement.text().toDouble(); // This is a Qt function that works both with dot and comma separators !
-};
+}
 
 std::string
 InputNode::getStringContent(){
 	return domElement.text().toStdString();
-};
+}
 
 bool
 InputNode::getBoolContent(){
@@ -81,7 +81,7 @@ InputNode::getBoolContent(){
 		return true;
 	msgOut(MSG_WARNING, "Sorry, I don't know how to convert "+content+" to a bool value. I return true... hope for the best");
 	return true;
-};
+}
 
 int 
 InputNode::getIntAttributeByName(std::string attributeName_h){
@@ -91,7 +91,7 @@ InputNode::getIntAttributeByName(std::string attributeName_h){
 		msgOut(MSG_ERROR, "Element doens't have attribute " + attributeName_h );
 		return 0;
 	}
-};
+}
 
 double 
 InputNode::getDoubleAttributeByName(std::string attributeName_h){
@@ -101,7 +101,7 @@ InputNode::getDoubleAttributeByName(std::string attributeName_h){
 		msgOut(MSG_ERROR, "Element doens't have attribute " + attributeName_h );
 		return 0;
 	}
-};
+}
 
 string 
 InputNode::getStringAttributeByName(std::string attributeName_h){
@@ -111,7 +111,7 @@ InputNode::getStringAttributeByName(std::string attributeName_h){
 		msgOut(MSG_ERROR, "Element doens't have attribute " + attributeName_h );
 		return "";
 	}
-};
+}
 
 bool 
 InputNode::hasAttributeByName(std::string attributeName_h){
@@ -120,7 +120,7 @@ InputNode::hasAttributeByName(std::string attributeName_h){
 	}else{
 		return 0;
 	}
-};
+}
 
 InputNode
 InputNode::getNodeByName(string nodeName_h, int debugLevel, bool childFlag){
@@ -199,7 +199,7 @@ InputNode::getNodesByName(string nodeName_h, int debugLevel, bool childFlag){
 
 	//}
 	return myNodeVector;
-};
+}
 
 
 /*
@@ -239,7 +239,7 @@ InputNode::getChildNodes(){
 		}
 	}
 	return myNodeVector;
-};
+}
 
 bool
 InputNode::hasChildNode(string name_h){
@@ -268,4 +268,5 @@ InputNode::getChildNodesCount(){
 string
 InputNode::getNodeName(){
 	return domElement.tagName().toStdString();
-};
+}
+

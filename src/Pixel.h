@@ -65,7 +65,7 @@ public:
 	void                setValue ( string layerName_h, double value_h );
 	/// Change the value of an existing layer
 	void                changeValue ( string layerName_h, double value_h, bool setNoValueForZero=false );
-	void                setCoordinates ( int x_h, int y_h ) {pxX=x_h; pxY=y_h;};;
+	void                setCoordinates ( int x_h, int y_h ) {pxX=x_h; pxY=y_h;};
 	void                setPxComments ( std::string pxComments_h ) {pxComments = pxComments_h;};
 	void                setCachedDouble(double cachedDouble_h){cachedDouble=cachedDouble_h;};
 	void                clearCache(){cachedDouble=0;};

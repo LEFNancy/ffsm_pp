@@ -44,6 +44,7 @@ int main(int argc, char *argv[]){
 	cout << "***         Compiled on: " << __DATE__ << " - " << __TIME__ << "                 ***" << endl;
 	cout << "*******************************************************************" << endl<<endl;
 
+
 	// Running "simple testing" that can be done at this early time
 	Sandbox TEST;
 	int debug=0;
@@ -59,14 +60,16 @@ int main(int argc, char *argv[]){
 	QString inputFileName = "";
 	QString scenarioName = "";
 
-	/* 1. CREATE AN OBJECT */
+
+	// 1. CREATE AN OBJECT
 	AnyOption *opt = new AnyOption();
 
-	/* 2. SET PREFERENCES  */
-	//opt->setVerbose(); /* print warnings about unknown options */
-	//opt->autoUsagePrint(true); /* print usage for bad options */
 
-	/* 3. SET THE USAGE/HELP   */
+	// 2. SET PREFERENCES
+	//opt->setVerbose(); // print warnings about unknown options
+	//opt->autoUsagePrint(true); // print usage for bad options
+
+	// 3. SET THE USAGE/HELP
 	opt->addUsage( "*** Pythia - Forest Sector Simulator ***" );
 	opt->addUsage( "Usage: " );
 	opt->addUsage( "" );
@@ -82,16 +85,16 @@ int main(int argc, char *argv[]){
 	opt->addUsage( "Read installed documentation or browse it at http://www.pythia-project.org/doc." );
 	opt->addUsage( "" );
 
-	/* 4. SET THE OPTION STRINGS/CHARACTERS */
+	// 4. SET THE OPTION STRINGS/CHARACTERS
 	opt->setFlag(  "help", 'h' );
 	opt->setFlag(  "console", 'c' );
 	opt->setOption(  "input_file", 'i' );
 	opt->setOption(  "scenario", 's' );
 
-	/* 5. PROCESS THE COMMANDLINE */
+	// 5. PROCESS THE COMMANDLINE
 	opt->processCommandArgs( argc, argv );
 
-	/* 6. GET THE VALUES */
+	// 6. GET THE VALUES
 	if( opt->getFlag( "help" ) || opt->getFlag( 'h' ) || opt->getArgc() >0 ) {
 		opt->printUsage();
 		delete opt;
@@ -121,4 +124,7 @@ int main(int argc, char *argv[]){
 		return app.exec();
 	}
 	delete opt;
+
+
+
 }

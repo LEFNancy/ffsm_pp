@@ -50,7 +50,7 @@ ModelRegion::getChildren(bool excludeResidual){
 		return toReturn;
 	}
 	return chRegions;
-};
+}
 
 int
 ModelRegion::getNChildren(bool excludeResidual){
@@ -64,7 +64,7 @@ ModelRegion::getNChildren(bool excludeResidual){
 		return toReturn;
 	}
 	return chRegions.size();
-};
+}
 
 
 
@@ -72,19 +72,19 @@ double
 getVolumes(){
 	//TODO;
 	return 0;
-};
+}
 
 vector<double>
 getVolumes(int fType_h){
 	//TODO;
 	vector<double> toReturn;
 	return toReturn;
-};
+}
 
 vector < vector <double> >
 getVolumes(int fType_h, string dClass_h){
 	//TODO;
 	vector < vector <double> > toReturn;
 	return toReturn;
-};
+}
 

@@ -20,8 +20,8 @@ unix {
      LIBS += `PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig: /usr/bin/pkg-config --libs ipopt`
      #LIBS += -lcoinmetis -lcoinmumps -lblas -llapack
      #LIBS += -lpthread -lgfortran -lcoinmetis -lblas
-     QMAKE_CXXFLAGS_RELEASE += -O3 -pipe -DNDEBUG -pedantic-errors -Wparentheses -Wreturn-type -Wcast-qual -Wall -Wpointer-arith -Wwrite-strings -Wconversion -Wno-unknown-pragmas -Wno-long-long   -DIPOPT_BUILD
-     QMAKE_LFLAGS_RELEASE +=  -Wl,--rpath -Wl,/usr/lib
+     #QMAKE_CXXFLAGS_RELEASE += -O3 -pipe -DNDEBUG -pedantic-errors -Wparentheses -Wreturn-type -Wcast-qual -Wall -Wpointer-arith -Wwrite-strings -Wconversion -Wno-unknown-pragmas -Wno-long-long   -DIPOPT_BUILD
+     #QMAKE_LFLAGS_RELEASE +=  -Wl,--rpath -Wl,/usr/lib
 
 }
 
@@ -47,15 +47,15 @@ DEPENDPATH += ". agents"
 CONFIG += warn_on \
           qt \
 	    thread \
-	    debug
+	    debug_and_release
 #CONFIG -= release
 
-QMAKE_CXXFLAGS += -std=c++0x
+#QMAKE_CXXFLAGS += -std=c++0x
 
-QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS_RELEASE += -O3
+#QMAKE_CXXFLAGS_RELEASE -= -O2
+#QMAKE_CXXFLAGS_RELEASE += -O3
 
-QMAKE_LFLAGS_RELEASE -= -O1
+#QMAKE_LFLAGS_RELEASE -= -O1
 
 # testing..
 #CONFIG += link_pkgconfig

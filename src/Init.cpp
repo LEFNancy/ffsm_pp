@@ -33,11 +33,11 @@
 Init::Init(ThreadManager* MTHREAD_h){
 	MTHREAD=MTHREAD_h;
 	InitState=0;
-};
+}
 
 Init::~Init()
 {
-};
+}
 
 void
 Init::setInitLevel(int level_h){
@@ -67,13 +67,13 @@ Init::setInitLevel(int level_h){
 		default:
 			msgOut(MSG_ERROR,"unexpected Init level");
 		}	
-};
+}
 
 void
 Init::setInitLevel0(){
 	//unused now
 	InitState=0;
-};
+}
 
 /**
 Setting up the space
@@ -114,12 +114,12 @@ Init::setInitLevel1(){
 	MTHREAD->GIS->applyForestReclassification();
 
 
-};
+}
 
 void
 Init::setInitLevel2(){
 	InitState=2;
-};
+}
 
 /**
 Init 3 run the simulation/assign the values for the pre-optimisation year(s)
@@ -129,12 +129,12 @@ Init::setInitLevel3(){
 	InitState=3;
 	MTHREAD->DO->initOutput();       // initialize the output files
 	MTHREAD->CORE->runInitPeriod();
-};
+}
 
 void
 Init::setInitLevel4(){
 	InitState=4;
-};
+}
 
 /**
 Init level 5 pass the controll to the Scheduler object for the running of the simulations.
@@ -143,14 +143,14 @@ void
 Init::setInitLevel5(){
 	InitState=5;
 	MTHREAD->SCD->run(); // !!!! go "bello" !!!! start the simulation !!!!!
-};
+}
 
 void
 Init::setInitLevel6(){
 	InitState=6;
 	MTHREAD->DO->printFinalOutput();
 	msgOut(MSG_INFO, "Model has ended scheduled simulation in a regular way.");
-};
+}
 
 
 

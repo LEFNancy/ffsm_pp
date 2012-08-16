@@ -129,7 +129,7 @@ Layers::filterExogenousDataset(double code_h){
 		}
 	}	
 	return returnCode;
-};
+}
 
 /**
 This function take as input the value stored in the pixel for the specific layer, loops over the legend item and find the one that match it, returning its color.
