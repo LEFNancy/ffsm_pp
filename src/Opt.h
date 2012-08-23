@@ -129,8 +129,12 @@ public:
 	void                cachePositions(); ///< cache the exact position index (initial+f(r1,r2,p,r2To) for each variable and constrain
 	int                 getDomainElements(int domain); ///< return the number of elements of a domain
 template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, int dType); ///< build the matrix of the positions for a given variable or contrain
-template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, vector<string> &prVector); ///< build the matrix of the positions for a given variable or contrain
-void                  calculateSparsityPattern(); //
+template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, vector<string> &prVector);
+
+///< build the matrix of the positions for a given variable or contrain
+void                  calculateSparsityPatternJ();
+void                  calculateSparsityPatternH();
+void                  calculateSparsityPattern_old();
 
 	// **************   end PYTHIA part **************************************
 
@@ -192,7 +196,8 @@ protected:
 	void                    debugPrintParameters();
 	bool                                   initOpt;
 	vector <constrain>                        cons;
-	vector <vector <Index> >						 nzjelements; ///< nzero elements. nzelements[i][0] -> row (constrain), nzelements[i][1] -> column (variable)
+	vector <vector <Index> >						 nzjelements; ///< nzero elements for the jacobian matrix. nzelements[i][0] -> row (constrain), nzelements[i][1] -> column (variable)
+	vector <vector <Index> >						 nzhelements; ///< nzero elements for the hessian matrix
 	//int                               nnzjelements; ///< number of non zero elements
 
 

@@ -23,6 +23,8 @@
 #include <cassert>
 
 #include <map>
+#include <adolc/drivers/drivers.h>
+#include <adolc/adolc_sparse.h>
 
 #include "Opt.h"
 
@@ -513,19 +515,26 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		// cache initial positions (variables and constrains)..
 		cachePositions();
 
-		calculateSparsityPattern();
+		//calculateSparsityPattern_old();
 
 		//tempDebug();
 
 		//debugPrintParameters();
-		initOpt=false;
+
 	} // finish initialisation things to be done only the first year
 
 	previousYear = MTHREAD->SCD->getYear()-1; // this has to be done EVERY years !!
 
 	n = nVar; // 300; // nVar;
-
 	m = nCons; // 70; // nCons;
+
+	generate_tapes(n, m);
+
+	if(initOpt){
+		calculateSparsityPatternJ();
+		calculateSparsityPatternH();
+		//tempDebug();
+	}
 
 	// in this example the jacobian is dense. Hence, it contains n*m nonzeros
 	//nnz_jac_g = n*m;
@@ -533,11 +542,13 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 
 	// the hessian is also dense and has n*n total nonzeros, but we
 	// only need the lower left corner (since it is symmetric)
-	nnz_h_lag = n*(n-1)/2+n;
-	generate_tapes(n, m);
+	//nnz_h_lag = n*(n-1)/2+n;
+	nnz_h_lag = nzhelements.size();
+
 	// use the C style indexing (0-based)
 	index_style = C_STYLE;
 
+	initOpt=false;
 	return true;
 }
 
@@ -839,6 +850,28 @@ bool
 Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, const Number* lambda,
 						bool new_lambda, Index nele_hess, Index* iRow, Index* jCol, Number* values){
 
+
+	if(values == NULL) {
+		for(Index idx=0;idx<nzhelements.size();idx++){
+			iRow[idx] = nzhelements[idx][0];
+			jCol[idx] = nzhelements[idx][1];
+		}
+	} else {
+		for(Index i = 0; i<n ; i++)
+			x_lam[i] = x[i];
+		for(Index i = 0; i<m ; i++)
+			x_lam[n+i] = lambda[i];
+		x_lam[n+m] = obj_factor;
+
+		hessian(tag_L,n+m+1,x_lam,Hess);
+
+		for(Index idx=0;idx<nzhelements.size();idx++){
+			values[idx] = Hess[nzhelements[idx][0]][nzhelements[idx][1]];
+		}
+	}
+
+	return true;
+// ORIGINAL CODE FOR DENSE MATRIX:
 /*
 	if (values == NULL) {
 		// return the structure. This is a symmetric matrix, fill the lower left
@@ -881,7 +914,7 @@ Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, co
 
 	return true;
 */
-	return false;
+	//return false;
 }
 
 
@@ -1310,7 +1343,7 @@ Opt::getConNumber(constrain *con){
 }
 
 void
-Opt::calculateSparsityPattern(){
+Opt::calculateSparsityPattern_old(){
 	constrain* CON;
 	int r1,r2,p,pfull,pForV,r2to,ipos,cdom,cpos,vdom,vdomInC;
 	int raw=0,col1=0,col2=0;
@@ -1435,15 +1468,69 @@ Opt::calculateSparsityPattern(){
 }
 
 void
+Opt::calculateSparsityPatternJ(){
+
+	unsigned int  **jacpat=NULL; // compressed row storage
+	int           options_j[3]; // options for the jacobian patterns
+	double        *x;
+	int retv_j = -1; // return value
+
+	options_j[0] = 0; // index domain propagation
+	options_j[1] = 0; // automatic mode choice (ignored here)
+	options_j[2] = 0; // safe
+	jacpat = new unsigned int* [nCons];
+	x = new double[nVar];
+
+	nzjelements.clear();
+
+	retv_j = jac_pat(tag_g, nCons, nVar,  x, jacpat, options_j);
+
+	for (int i=0;i<nCons;i++) {
+		for (int j=1;j<=jacpat[i][0];j++){
+			vector <int> nzjelement;
+			nzjelement.push_back(i);
+			nzjelement.push_back(jacpat[i][j]);
+			nzjelements.push_back(nzjelement);
+		}
+	}
+}
+
+void
+Opt::calculateSparsityPatternH(){
+
+	unsigned int  **hesspat=NULL; // compressed row storage
+	int           options_h=0; // options for the hessian patterns
+	double        *x;
+	int retv_h = -1; // return value
+
+	hesspat = new unsigned int* [(nVar+nCons+1)];
+	x = new double[(nVar+nCons+1)];
+
+	retv_h = hess_pat(tag_L,nVar+nCons+1,  x, hesspat, options_h);
+
+	for (int i=0;i<(nVar);i++) {
+		for (int j=1;j<=hesspat[i][0];j++){
+			if(hesspat[i][j]<=i){
+				vector <int> nzhelement;
+				nzhelement.push_back(i);
+				nzhelement.push_back(hesspat[i][j]);
+				nzhelements.push_back(nzhelement);
+			}
+		}
+	}
+}
+
+void
 Opt::tempDebug(){
 
-
-	cout << "IDX | ROW | COL" << endl;
-	for(uint i=0;i<nzjelements.size();i++){
-		cout << i << " | " << nzjelements[i][0] << " | " << nzjelements[i][1] << endl;
+	cout << "Num of variables: " <<  nVar << " - Num of constrains:" << nCons << endl;
+	cout << "IDX;ROW;COL" << endl;
+	for(uint i=0;i<nzhelements.size();i++){
+		cout << i << ";" << nzhelements[i][0] << ";" << nzhelements[i][1] << endl;
 	}
 
 	cout << "Dense jacobian: " << nCons * nVar << " elements" << endl;
+	cout << "Dense hessian:  " << nVar*(nVar-1)/2+nVar << " elements" << endl;
 	//exit(0);
 
 
