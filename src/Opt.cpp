@@ -80,9 +80,6 @@ Opt::declareConstrains (){
 	mkeq2.comment="[h1] Conservation of matters of transformed products";
 	mkeq2.domain=DOM_SEC_PR;
 	mkeq2.direction = CONSTR_EQ;
-	mkeq2.cvars.insert(DomainPair("dl",CDOM_SCALAR));
-	mkeq2.cvars.insert(DomainPair("sl",CDOM_SCALAR));
-	mkeq2.cvars.insert(DomainPair("rt",CDOM_R2FROMTO));
 	//mkeq2.evaluate = Opt::mkteq2f;
 
 	constrain mkeq3;
@@ -90,9 +87,6 @@ Opt::declareConstrains (){
 	mkeq3.comment="[h2] Conservation of matters of raw products";
 	mkeq3.domain=DOM_PRI_PR;
 	mkeq3.direction = CONSTR_EQ;
-	mkeq3.cvars.insert(DomainPair("dl",CDOM_SCALAR));
-	mkeq3.cvars.insert(DomainPair("sl",CDOM_PRI_PR));
-	mkeq3.cvars.insert(DomainPair("rt",CDOM_R2FROMTO));
 	//mkeq3.evaluate = Opt::mkteq3f;
 
 	constrain mkeq4;
@@ -100,71 +94,48 @@ Opt::declareConstrains (){
 	mkeq4.comment="[eq 13] Leontief transformation function";
 	mkeq4.domain=DOM_PRI_PR;
 	mkeq4.direction = CONSTR_EQ;
-	mkeq4.cvars.insert(DomainPair("dl",CDOM_SCALAR));
-	mkeq4.cvars.insert(DomainPair("sl",CDOM_SEC_PR));
 
 	constrain mkeq5;
 	mkeq5.name="mkeq5";
 	mkeq5.comment="[eq 21] Raw product supply function";
 	mkeq5.domain=DOM_PRI_PR;
 	mkeq5.direction = CONSTR_EQ;
-	mkeq5.cvars.insert(DomainPair("sc",CDOM_SCALAR));
-	mkeq5.cvars.insert(DomainPair("pc",CDOM_SCALAR));
 
 	constrain mkeq6;
 	mkeq6.name="mkeq6";
 	mkeq6.comment="[eq 20] Trasformed products demand function";
 	mkeq6.domain=DOM_SEC_PR;
 	mkeq6.direction = CONSTR_EQ;
-	mkeq6.cvars.insert(DomainPair("dc",CDOM_SCALAR));
-	mkeq6.cvars.insert(DomainPair("pc",CDOM_SCALAR));
 
 	constrain mkeq7;
 	mkeq7.name="mkeq7";
 	mkeq7.comment="[h7 and h3] Transformed products import function";
 	mkeq7.domain=DOM_SEC_PR;
 	mkeq7.direction = CONSTR_EQ;
-	mkeq7.cvars.insert(DomainPair("da",CDOM_SCALAR));
-	mkeq7.cvars.insert(DomainPair("dl",CDOM_SCALAR));
-	mkeq7.cvars.insert(DomainPair("pl",CDOM_SCALAR));
 
 	constrain mkeq8;
 	mkeq8.name="mkeq8";
 	mkeq8.comment="[h8 and h4] Raw products export function";
 	mkeq8.domain=DOM_PRI_PR;
 	mkeq8.direction = CONSTR_EQ;
-	mkeq8.cvars.insert(DomainPair("sa",CDOM_SCALAR));
-	mkeq8.cvars.insert(DomainPair("sl",CDOM_SCALAR));
-	mkeq8.cvars.insert(DomainPair("pl",CDOM_SCALAR));
 
 	constrain mkeq13;
 	mkeq13.name="mkeq13";
 	mkeq13.comment="[h9] Calculation of the composite price of transformed products (PPC_Dp)";
 	mkeq13.domain=DOM_SEC_PR;
 	mkeq13.direction = CONSTR_EQ;
-	mkeq13.cvars.insert(DomainPair("pc",CDOM_SCALAR));
-	mkeq13.cvars.insert(DomainPair("dc",CDOM_SCALAR));
-	mkeq13.cvars.insert(DomainPair("dl",CDOM_SCALAR));
-	mkeq13.cvars.insert(DomainPair("pl",CDOM_SCALAR));
-	mkeq13.cvars.insert(DomainPair("da",CDOM_SCALAR));
 
 	constrain mkeq14;
 	mkeq14.name="mkeq14";
 	mkeq14.comment="[h10] Calculation of the composite price of raw products (PPC_Sw)";
 	mkeq14.domain=DOM_PRI_PR;
 	mkeq14.direction = CONSTR_EQ;
-	mkeq14.cvars.insert(DomainPair("pc",CDOM_SCALAR));
-	mkeq14.cvars.insert(DomainPair("sc",CDOM_SCALAR));
-	mkeq14.cvars.insert(DomainPair("sl",CDOM_SCALAR));
-	mkeq14.cvars.insert(DomainPair("pl",CDOM_SCALAR));
-	mkeq14.cvars.insert(DomainPair("sa",CDOM_SCALAR));
 
 	constrain mkeq17;
 	mkeq17.name="mkeq17";
 	mkeq17.comment="[h16] Constrain of the transformaton supply (lower than the regional maximal production capacity)";
 	mkeq17.domain=DOM_SEC_PR;
 	mkeq17.direction = CONSTR_LE0;
-	mkeq17.cvars.insert(DomainPair("sl",CDOM_SCALAR));
 
 
 	constrain mkeq18;
@@ -172,41 +143,30 @@ Opt::declareConstrains (){
 	mkeq18.comment="Constrain on raw material supply (lower than gross regional biological availability)";
 	mkeq18.domain=DOM_PRI_PR;
 	mkeq18.direction = CONSTR_LE0;
-	mkeq18.cvars.insert(DomainPair("sa",CDOM_SCALAR));
-	mkeq18.cvars.insert(DomainPair("sl",CDOM_SCALAR));
 
 	constrain mkeq23;
 	mkeq23.name="mkeq23";
 	mkeq23.comment="[h3] Composit demand eq. (Dp)";
 	mkeq23.domain=DOM_SEC_PR;
 	mkeq23.direction = CONSTR_EQ;
-	mkeq23.cvars.insert(DomainPair("dc",CDOM_SCALAR));
-	mkeq23.cvars.insert(DomainPair("da",CDOM_SCALAR));
-	mkeq23.cvars.insert(DomainPair("dl",CDOM_SCALAR));
 
 	constrain mkeq24;
 	mkeq24.name="mkeq24";
 	mkeq24.comment="[h4] Composite supply eq. (Sw)";
 	mkeq24.domain=DOM_PRI_PR;
 	mkeq24.direction = CONSTR_EQ;
-	mkeq24.cvars.insert(DomainPair("sc",CDOM_SCALAR));
-	mkeq24.cvars.insert(DomainPair("sa",CDOM_SCALAR));
-	mkeq24.cvars.insert(DomainPair("sl",CDOM_SCALAR));
 
 	constrain mkeq25;
 	mkeq25.name="mkeq25";
 	mkeq25.comment="Verification of the null trasformers supply (price of raw product + trasf product > trasf product)";
 	mkeq25.domain=DOM_SEC_PR;
 	mkeq25.direction = CONSTR_GE0;
-	mkeq25.cvars.insert(DomainPair("pl",CDOM_PRI_PR_AND_SCALAR));
 
 	constrain mkeq26;
 	mkeq26.name="mkeq26";
 	mkeq26.comment="[eq ] Verification of the null transport agents supply";
 	mkeq26.domain=DOM_R2_ALL_PR;
 	mkeq26.direction = CONSTR_LE0;
-	mkeq26.cvars.insert(DomainPair("pl",CDOM_SCALAR_DOUBLE));
-
 
 	cons.push_back(mkeq2);
 	cons.push_back(mkeq6);
@@ -514,8 +474,6 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 
 		// cache initial positions (variables and constrains)..
 		cachePositions();
-
-		//calculateSparsityPattern_old();
 
 		//tempDebug();
 
@@ -1342,130 +1300,6 @@ Opt::getConNumber(constrain *con){
 	msgOut(MSG_CRITICAL_ERROR,"Constrain didn't found in list.");
 }
 
-void
-Opt::calculateSparsityPattern_old(){
-	constrain* CON;
-	int r1,r2,p,pfull,pForV,r2to,ipos,cdom,cpos,vdom,vdomInC;
-	int raw=0,col1=0,col2=0;
-	map<string, int>::iterator viter;
-
-
-	for(uint c=0;c<nCons;c++){
-		raw = c;
-		CON = getConstrainByIndex(c);
-		cpos = getConNumber(CON);
-		ipos = gip(cpos);
-		cdom = gdt(cpos);
-		// ok cout << "c/name/cpos/initpos/dom: " << c << "/" << CON->name << "/" << cpos << "/" << ipos << "/" << dom << endl;
-		unpack(c,cdom,ipos,r1,r2,p,r2to);
-		if(cdom==DOM_SEC_PR || cdom==DOM_R2_SEC_PR){
-			pfull=nPriPr+p;
-		} else {
-			pfull=p;
-		}
-
-		for (viter = CON->cvars.begin(); viter != CON->cvars.end(); ++viter) {
-			string debugname = viter->first;
-			vdom = gdt(viter->first);
-			vdomInC     = viter->second;
-			if(vdom==DOM_ALL_PR || vdom==DOM_R2_ALL_PR){
-				pForV=pfull;
-			} else {
-				pForV=p;
-			}
-			switch (vdomInC){
-				case CDOM_SCALAR:{
-					col1 = gix(viter->first,r1,r2,pForV,r2to);
-					vector<int> nzjelement1;
-					nzjelement1.push_back(raw);
-					nzjelement1.push_back(col1);
-					nzjelements.push_back(nzjelement1);
-				}
-				break;
-				case CDOM_R2FROMTO:{
-					for(int r2c=0;r2c<l2r[r1].size();r2c++){
-						col1 = gix(viter->first,r1,r2,pForV,r2c);
-						col2 = gix(viter->first,r1,r2c,pForV,r2);
-						vector<int> nzjelement1,nzjelement2;
-						nzjelement1.push_back(raw);
-						nzjelement1.push_back(col1);
-						nzjelement2.push_back(raw);
-						nzjelement2.push_back(col2);
-						nzjelements.push_back(nzjelement1);
-						if(col2!=col1) nzjelements.push_back(nzjelement2);
-					}
-				}
-				break;
-				case CDOM_PRI_PR:{
-					for(int p2=0;p2<nPriPr;p2++){
-						col1 = gix(viter->first,r1,r2,p2);
-						vector<int> nzjelement1;
-						nzjelement1.push_back(raw);
-						nzjelement1.push_back(col1);
-						nzjelements.push_back(nzjelement1);
-					}
-				}
-				break;
-				case CDOM_SEC_PR:{
-					int p2c;
-					for(int p2=0;p2<nSecPr;p2++){
-						if(vdom==DOM_ALL_PR || vdom==DOM_R2_ALL_PR){
-							p2c = nPriPr+p2;
-						} else {
-							p2c = p2;
-						}
-						col1 = gix(viter->first,r1,r2,p2c);
-						vector<int> nzjelement1;
-						nzjelement1.push_back(raw);
-						nzjelement1.push_back(col1);
-						nzjelements.push_back(nzjelement1);
-					}
-				}
-				break;
-				case CDOM_ALL_PR:{
-					for(int p2=0;p2<nAllPr;p2++){
-						col1 = gix(viter->first,r1,r2,p2);
-						vector<int> nzjelement1;
-						nzjelement1.push_back(raw);
-						nzjelement1.push_back(col1);
-						nzjelements.push_back(nzjelement1);
-					}
-				}
-				break;
-				case CDOM_PRI_PR_AND_SCALAR:{
-					for(int p2=0;p2<nPriPr;p2++){
-						col1 = gix(viter->first,r1,r2,p2);
-						vector<int> nzjelement1;
-						nzjelement1.push_back(raw);
-						nzjelement1.push_back(col1);
-						nzjelements.push_back(nzjelement1);
-					}
-					col2 = gix(viter->first,r1,r2,pForV);
-					vector<int> nzjelement2;
-					nzjelement2.push_back(raw);
-					nzjelement2.push_back(col2);
-					nzjelements.push_back(nzjelement2);
-				}
-				break;
-				case CDOM_SCALAR_DOUBLE:{
-					col1 = gix(viter->first,r1,r2,pForV,r2to);
-					col2 = gix(viter->first,r1,r2to,pForV,r2);
-					vector<int> nzjelement1,nzjelement2;
-					nzjelement1.push_back(raw);
-					nzjelement1.push_back(col1);
-					nzjelement2.push_back(raw);
-					nzjelement2.push_back(col2);
-					nzjelements.push_back(nzjelement1);
-					if(col2!=col1) nzjelements.push_back(nzjelement2);
-				}
-				break;
-				default:{
-					msgOut(MSG_CRITICAL_ERROR,"In calCulateSparSePattern() looping trough a variable with an unknow domain type in the constrain ("+i2s(vdomInC)+")");
-				}
-			}
-		}
-	}
-}
 
 void
 Opt::calculateSparsityPatternJ(){

@@ -134,7 +134,6 @@ template<class T> vector < vector < vector < vector <int> > > > buildPositionVec
 ///< build the matrix of the positions for a given variable or contrain
 void                  calculateSparsityPatternJ();
 void                  calculateSparsityPatternH();
-void                  calculateSparsityPattern_old();
 
 	// **************   end PYTHIA part **************************************
 
@@ -233,7 +232,6 @@ struct constrain{
 	string                                 comment;
 	int                                     domain;
 	int                                  direction;
-	map <string,int>                         cvars;
 	//std::function < template <class T> void (const T *, T *, Index *) >  evaluate; // std::function can't hold templates
 };
 
