@@ -1,8 +1,0 @@
-COMMAND: v.in.ogr dsn="/data/ServerL/risorse/RisorseCartografiche/01_Marche/00_-_colliEsini/colliEsini_adminBorders_wgs84_utm33n.shp" output="adminBorders" min_area=0.0001 snap=-1 location="colliEsini_wgs84_utm33n"
-GISDBASE: /data/Documents/DatiGeografici/grassdata
-LOCATION: colliEsini_wgs84_utm33n MAPSET: PERMANENT USER: lobianco DATE: Mon Aug 27 09:08:56 2007
----------------------------------------------------------------------------------
-24 input polygons
-total area: 6.970240e+08 (24 areas)
-overlapping area: 0.000000e+00 (0 areas)
-area without category: 0.000000e+00 (0 areas)
