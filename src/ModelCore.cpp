@@ -598,7 +598,16 @@ ModelCore::runSimulationYear(){
 
 	} // end of each r2 region
 
+	updateMapAreas();
 	return;
+
+}
+
+/**
+This function take for each region the difference for each forest type between the harvested area and the new regeneration one and apply such delta to each pixel of the region proportionally to the area that it already hosts.
+*/
+void
+ModelCore::updateMapAreas(){
 
 }
 
