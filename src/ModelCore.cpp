@@ -9,6 +9,7 @@
 #include "ThreadManager.h"
 #include "Opt.h"
 #include "Scheduler.h"
+#include "Gis.h"
 
 
 ModelCore::ModelCore(ThreadManager* MTHREAD_h){
@@ -608,6 +609,26 @@ This function take for each region the difference for each forest type between t
 */
 void
 ModelCore::updateMapAreas(){
+
+	map<int,double> forestArea; // foresta area by each region
+	pair<int,double > forestAreaPair;
+	vector<int> l2Regions =  MTHREAD->MD->getRegionIds(2, true);
+	vector <string> fTypes =  MTHREAD->MD->getForTypeIds();
+	int nFTypes = fTypes.size();
+	int nL2Regions = l2Regions.size();
+	for(uint i=0;i<nL2Regions;i++){
+		int regId = l2Regions[i];
+		//vector<Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(l2Regions[i]);
+		ModelRegion* reg = MTHREAD->MD->getRegion(regId);
+		for(uint j=0;j<nFTypes;j++){
+			string ft = fTypes[j];
+			double regForArea = reg->getValue("forType_"+ft);
+			double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL);
+			double regArea = gfd("regArea",regId,ft,DIAM_ALL);
+			cout << "Regid/ft/area/harvested/regeneration: " <<regId<<";"<<ft<<";"<<regForArea<<";"<<harvestedArea<<";" <<regArea<<endl;
+
+		}
+	}
 
 }
 

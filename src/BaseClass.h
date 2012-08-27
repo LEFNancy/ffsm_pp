@@ -104,7 +104,11 @@ enum {
 
 	CONSTR_EQ              =1, // constrain of type equality
 	CONSTR_LE0             =2, // constrain of type lower or equal than 0
-	CONSTR_GE0             =3  // constrain of type greater or equal 0
+	CONSTR_GE0             =3,  // constrain of type greater or equal 0
+
+	// operations possible in certain contexts
+	OP_SUM                 =1,
+	OP_AVG                 =5
 
 
 };

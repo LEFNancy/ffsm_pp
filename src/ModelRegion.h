@@ -68,6 +68,7 @@ public:
 	vector<ModelRegion*>getChildren(bool excludeResidual = true); ///< Return a vector of pointers to the direct child regions
 	double              getVolumes();
 	vector<double>      getVolumes(int fType_h);
+	double              getValue(string layerName, int op=OP_SUM); ///< return the values of its own pixels for the specified layer. Possible operations: OP_SUM or OP_AVG
 	vector < vector <double> > getVolumes(int fType_h, string dClass_h);
 	int                 getNChildren(bool excludeResidual = true);
 

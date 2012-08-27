@@ -266,6 +266,8 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 
 }
 
+
+
 /** Template function to implement (define) the previously declared constains.
 To the initial macro loop it must be passed the product vector over where to loop (priPr, secPr or allPr) and the order of the constrain has it has been added to the const vector.
 It could be possible to change this in a map and uses name, but then we would loose control on the constrains order, and we saw that it matters for finding the equilibrium.

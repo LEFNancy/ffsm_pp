@@ -18,8 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "ThreadManager.h"
 #include "ModelRegion.h"
-//#include <sys/types.h>
+#include "ModelData.h"
+#include "Pixel.h"
+
 
 /**
 The constructor of REGION instances want:
@@ -69,22 +72,42 @@ ModelRegion::getNChildren(bool excludeResidual){
 
 
 double
-getVolumes(){
+ModelRegion::getVolumes(){
 	//TODO;
 	return 0;
 }
 
 vector<double>
-getVolumes(int fType_h){
+ModelRegion::getVolumes(int fType_h){
 	//TODO;
 	vector<double> toReturn;
 	return toReturn;
 }
 
 vector < vector <double> >
-getVolumes(int fType_h, string dClass_h){
+ModelRegion::getVolumes(int fType_h, string dClass_h){
 	//TODO;
 	vector < vector <double> > toReturn;
 	return toReturn;
 }
+
+double
+ModelRegion::getValue(string layerName, int op){
+	vector<Pixel*> myPixels = MTHREAD->GIS->getAllPlotsByRegion(regId);
+	int nPx = myPixels.size();
+	double sumvalue=0;
+	for(uint i=0;i<nPx; i++){
+		sumvalue += myPixels[i]->getDoubleValue(layerName,true);
+	}
+	if(op==OP_SUM){
+		return sumvalue;
+	} else if (op == OP_AVG) {
+		return sumvalue/nPx;
+	} else {
+		string thisf = __PRETTY_FUNCTION__;
+		msgOut(MSG_CRITICAL_ERROR, "in "+thisf+", operation not supported");
+	}
+	return 0.;
+}
+
 

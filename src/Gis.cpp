@@ -558,12 +558,23 @@ Gis::getAllPlots(int outputLevel){
 
 /// Return the vector of all plots by a specific region (main region or subregion), optionally shuffled;
 vector <Pixel*>
-Gis::getAllPlotsByRegion(ModelRegion region_h, bool shuffle){
-    //ToBeImplemented
-    vector <Pixel* > regionalPixels;
-    return regionalPixels;
-
+Gis::getAllPlotsByRegion(ModelRegion &region_h, bool shuffle){
+	int regId = region_h.getRegId();
+	vector <Pixel* > regionalPixels;
+		for(uint i=0;i<xyNPixels;i++){
+			Pixel* px = getPixel(i);
+			if(px->getDoubleValue("regLev_1")==regId || px->getDoubleValue("regLev_2")==regId){
+				regionalPixels.push_back(px);
+			}
+		}
+	return regionalPixels;
 }
+vector <Pixel*>
+Gis::getAllPlotsByRegion(int regId_h, bool shuffle){
+		ModelRegion* reg = MTHREAD->MD->getRegion(regId_h);
+		return getAllPlotsByRegion(*reg,shuffle);
+}
+
 
 
 vector <string>

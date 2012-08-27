@@ -107,8 +107,9 @@ public:
 	vector <Pixel*>     getAllPlotsByValue(string layer_h, vector<int> layerValues_h, int outputLevel=MSG_WARNING);
 	/// Return the vector (shuffled) of all plots, optionally filtering only the free ones. It is also possible to specify the level in case of failure (no free plots available)
 	vector <Pixel*>     getAllPlots(int outputLevel=MSG_WARNING);
-    /// Return the vector of all plots by a specific region (main region or subregion), optionally shuffled;
-    vector <Pixel*>     getAllPlotsByRegion(ModelRegion region_h, bool shuffle=false);
+	/// Return the vector of all plots by a specific region (main region or subregion), optionally shuffled;
+	vector <Pixel*>     getAllPlotsByRegion(ModelRegion &region_h, bool shuffle=false);
+	vector <Pixel*>     getAllPlotsByRegion(int regId_h, bool shuffle=false);
 	/// Return a vector of the layer ids (as string)
 	vector <string>    getLayerNames();
 	/// Return a vector of pointers of existing layers
