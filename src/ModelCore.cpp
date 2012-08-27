@@ -578,23 +578,25 @@ ModelCore::runSimulationYear(){
 		//		regArea(i,essence,lambda,t) = freeArea(i,essence, lambda)*(1-mr);   // here we could introduce in/out area from other land usages
 		//	);
 		double totalHarvestedArea = gfd("harvestedArea",regId,FT_ALL,DIAM_ALL);
+		double maxExpReturns = *( max_element( cachedExpectedReturnsByFt.begin(), cachedExpectedReturnsByFt.end() ) );
+		bool foundMaxExpReturns = false;
 		for(uint j=0;j<fTypes.size();j++){
 			string ft = fTypes[j];
+			double harvestedAreaForThisFT = gfd("harvestedArea",regId,ft,DIAM_ALL);
 			if(regType == "fixed" || regType == "fromHrLevel"){
-				double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL);
+				double harvestedArea = harvestedAreaForThisFT;
 				sfd(harvestedArea,"regArea",regId,ft,"");
 			} else {
 				double regArea = 0;
-				double maxExpReturns = *( max_element( cachedExpectedReturnsByFt.begin(), cachedExpectedReturnsByFt.end() ) );
-				for (uint j2=0;j2<fTypes.size();j2++){
-					if (cachedExpectedReturnsByFt[j] == maxExpReturns){
-						regArea += totalHarvestedArea*mr;
-					}
+				if (!foundMaxExpReturns && cachedExpectedReturnsByFt[j] == maxExpReturns){
+					regArea += totalHarvestedArea*mr;
+					foundMaxExpReturns = true;
 				}
-				regArea +=  gfd("harvestedArea",regId,ft,DIAM_ALL)*(1-mr);
+				regArea +=  harvestedAreaForThisFT*(1-mr);
 				sfd(regArea,"regArea",regId,ft,"");
 			}
 		}
+		double totalRegArea = gfd("regArea",regId,FT_ALL,DIAM_ALL);
 
 
 	} // end of each r2 region
