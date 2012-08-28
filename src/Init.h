@@ -20,6 +20,8 @@
 #ifndef STDINIT_H
 #define STDINIT_H
 
+#include <time.h>
+
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -64,6 +66,8 @@ public:
 
 private:
 	int                                InitState; ///< One of the 7 possible init states (0..6)
+	struct tm *current;
+	time_t now;
 };
 
 #endif
