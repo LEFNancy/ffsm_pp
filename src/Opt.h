@@ -149,16 +149,16 @@ const adouble& mymax(const adouble& a, const adouble& b);
 protected:
 
 	// convenient handles to equivalent ModelData functions..
-	const double        gpd(const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h=""){return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};
-	const double        gfd(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW){return MTHREAD->MD->getForData(type_h, regId_h, forType_h, diamClass_h, year);};
-	void                spd(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, bool allowCreate=false, const string &freeDim_h=""){MTHREAD->MD->setProdData(value_h, type_h, regId_h, prodId_h, year, allowCreate, freeDim_h);};
-	void                sfd(double value_h, const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW, bool allowCreate=false){MTHREAD->MD->setForData(value_h, type_h, regId_h, forType_h, diamClass_h, year, allowCreate);};
+	const double        gpd(const string &type_h, const int& regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h=""){return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};
+	const double        gfd(const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW){return MTHREAD->MD->getForData(type_h, regId_h, forType_h, diamClass_h, year);};
+	void                spd(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, int year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h=""){MTHREAD->MD->setProdData(value_h, type_h, regId_h, prodId_h, year, allowCreate, freeDim_h);};
+	void                sfd(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW, const bool& allowCreate=false){MTHREAD->MD->setForData(value_h, type_h, regId_h, forType_h, diamClass_h, year, allowCreate);};
 	bool                app(const string &prod_h, const string &forType_h, const string &dClass_h){return MTHREAD->MD->assessProdPossibility(prod_h, forType_h, dClass_h);};
-	const int           gip(const string &varName); ///< Get the initial index position of a given variable in the concatenated array
-	const int           gip(const int &cn); ///< Return the initial index position of a certain constrain
+	const int          gip(const string &varName); ///< Get the initial index position of a given variable in the concatenated array
+	const int          gip(const int &cn); ///< Return the initial index position of a certain constrain
 	template<class T> const int gix_uncached(const T &v_or_c, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name (string) or constrain index (int), the reg lev1 index, the reg lev2 index and the prod. index
-	const int           gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
-	const int           gix(const int &cn, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain constrain, the reg lev1 index, the reg lev2 index and the prod. index
+	const int          gix(const string &varName, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
+	const int          gix(const int &cn, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo=0); ///< Get the index in the concatenated array gived a certain constrain, the reg lev1 index, the reg lev2 index and the prod. index
 	const int           gdt(const string &varName); ///< Get the domain type of a given variable
 	const int           gdt(const int &cn); ///< Get the domain type of a given constrain
 	int                 getConstrainDirectionByIndex(int idx); ///< Return the direction of a given constrain

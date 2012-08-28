@@ -1181,7 +1181,7 @@ Opt::gix_uncached(const T &v_or_c, int r1Ix, int r2Ix, int prIx, int r2IxTo){
 
 
 const int
-Opt::gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo){
+Opt::gix(const string &varName, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo){
 	// attenction, for computational reasons we are not checking the call is within vectors limits!!!
 	map <string, vector < vector < vector < vector <int> > > > >::const_iterator p;
 	p=vpositions.find(varName);
@@ -1195,7 +1195,7 @@ Opt::gix(const string &varName, int r1Ix, int r2Ix, int prIx, int r2IxTo){
 }
 
 const int
-Opt::gix(const int &cn, int r1Ix, int r2Ix, int prIx, int r2IxTo){
+Opt::gix(const int &cn, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo){
 	return cpositions[cn][r1Ix][r2Ix][prIx][r2IxTo];
 }
 

@@ -109,8 +109,8 @@ public:
 	/// A simple function to assess if a specified product can be made by a certain forest type and diameter class
 	const bool          assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
 
-	double              getTimedData(const vector <double> &dated_vector, int year_h); ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
-	void                setTimedData(double value_h, vector<double> &dated_vector, int year_h, int MSG_LEVEL=MSG_WARNING);
+	double              getTimedData(const vector <double> &dated_vector, const int& year_h); ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
+	void                setTimedData(const double& value_h, vector<double> &dated_vector, const int& year_h, const int& MSG_LEVEL=MSG_WARNING);
 
 	int                 getIntSetting          (const string &name_h, int position=0);
 	double              getDoubleSetting       (const string &name_h, int position=0);
@@ -122,12 +122,12 @@ public:
 	vector <bool>       getBoolVectorSetting   (const string &name_h);
 
 
-	const double        getProdData(const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h="");
-	const double        getForData(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW);
+	const double        getProdData(const string &type_h, const int& regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h="");
+	const double        getForData(const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW);
 
 
-	void                setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year=DATA_NOW, bool allowCreate=false, const string &freeDim_h=""); // Remember default arguments must be at the end
-	void                setForData(double value_h, const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW, bool allowCreate=false); // Remember default arguments must be at the end
+	void                setProdData(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, int year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h=""); // Remember default arguments must be at the end
+	void                setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW, const bool& allowCreate=false); // Remember default arguments must be at the end
 
 string                makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="");
 void                  unpackKeyProdData(const string& key, string& parName, int &regId, string& prod, string& freeDim);

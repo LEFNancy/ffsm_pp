@@ -902,7 +902,7 @@ It addmits the following "filters":
 
 */
 const double
-ModelData::getProdData(const string &type_h, int regId_h, const string &prodId_h, int year, const string &freeDim_h){
+ModelData::getProdData(const string &type_h, const int& regId_h, const string &prodId_h, int year, const string &freeDim_h){
 	if(year==DATA_NOW){
 		year=MTHREAD->SCD->getYear();
 	}
@@ -992,7 +992,7 @@ It addmits the following "filters":
 */
 
 const double
-ModelData::getForData(const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year){
+ModelData::getForData(const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, int year){
 	vector <string> dClasses = getStringVectorSetting("dClasses");
 
 	if(year==DATA_NOW){
@@ -1036,7 +1036,7 @@ It addmits the following "filters":
 
 */
 void
-ModelData::setProdData(double value_h, const string &type_h, int regId_h, const string &prodId_h, int year, bool allowCreate, const string &freeDim_h){
+ModelData::setProdData(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, int year, const bool& allowCreate, const string &freeDim_h){
 	vector<int> regIds;
 	vector <string> priProducts;
 	vector <string> secProducts;
@@ -1099,7 +1099,7 @@ ModelData::setProdData(double value_h, const string &type_h, int regId_h, const 
 }
 
 void
-ModelData::setForData(double value_h, const string &type_h, int regId_h, const string &forType_h, const string &diamClass_h, int year, bool allowCreate){
+ModelData::setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, int year, const bool& allowCreate){
 
 	vector<int> regIds;
 	vector <string> dClasses = getStringVectorSetting("dClasses");
@@ -1156,7 +1156,7 @@ ModelData::setForData(double value_h, const string &type_h, int regId_h, const s
 
 
 double
-ModelData::getTimedData(const vector<double> &dated_vector, int year_h){
+ModelData::getTimedData(const vector<double> &dated_vector, const int& year_h){
 
 	int position = year_h-getIntSetting("initialYear");
 
@@ -1172,7 +1172,7 @@ ModelData::getTimedData(const vector<double> &dated_vector, int year_h){
 }
 
 void
-ModelData::setTimedData(double value_h, vector<double> &dated_vector, int year_h, int MSG_LEVEL){
+ModelData::setTimedData(const double& value_h, vector<double> &dated_vector, const int& year_h, const int& MSG_LEVEL){
 
 	int position = year_h-getIntSetting("initialYear");
 	int originalVectorSize = dated_vector.size();
