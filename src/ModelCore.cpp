@@ -620,14 +620,21 @@ ModelCore::updateMapAreas(){
 	int nL2Regions = l2Regions.size();
 	for(uint i=0;i<nL2Regions;i++){
 		int regId = l2Regions[i];
-		//vector<Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(l2Regions[i]);
+		vector<Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regId);
 		ModelRegion* reg = MTHREAD->MD->getRegion(regId);
 		for(uint j=0;j<nFTypes;j++){
 			string ft = fTypes[j];
 			double regForArea = reg->getValue("forType_"+ft);
 			double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL);
 			double regArea = gfd("regArea",regId,ft,DIAM_ALL);
-			cout << "Regid/ft/area/harvested/regeneration: " <<regId<<";"<<ft<<";"<<regForArea<<";"<<harvestedArea<<";" <<regArea<<endl;
+			//cout << "Regid/ft/area/harvested/regeneration: " <<regId<<";"<<ft<<";"<<regForArea<<";"<<harvestedArea<<";" <<regArea<<endl;
+			double newAreaNet = regArea-harvestedArea;
+			double newAreaRatio =  newAreaNet / regForArea;
+			for(uint z=0;z<rpx.size();z++){
+				double oldValue = rpx[z]->getDoubleValue("forType_"+ft,true);
+				double newValue = oldValue*(1. + newAreaRatio);
+				rpx[z]->changeValue("forType_"+ft, newValue);
+			}
 
 		}
 	}
