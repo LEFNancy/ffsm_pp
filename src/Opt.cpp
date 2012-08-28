@@ -194,8 +194,9 @@ Define the objective function
 template<class T> bool
 Opt::eval_obj(Index n, const T *x, T& obj_value){
 
-	double aa, bb, dc0, sigma, a_pr, ct, m;
+	double aa, bb, dc0, sigma, a_pr, ct, m, zeromax;
 	obj_value = 0.;
+	zeromax = 0.;
 
 	for (uint r1=0;r1<l2r.size();r1++){
 		for (uint r2=0;r2<l2r[r1].size();r2++){
@@ -209,7 +210,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 				aa = gpd("aa",l2r[r1][r2],secPr[p]);
 				sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
 				dc0 = gpd("dc",l2r[r1][r2],secPr[p],secondYear);
-				obj_value += aa*pow(x[gix("dc",r1,r2,p)],(sigma+1)/sigma)-aa*pow(0.5*dc0,(sigma+1)/sigma)-x[gix("pc",r1,r2,p+nPriPr)]*x[gix("dc",r1,r2,p)];
+				obj_value += aa*pow(mymax(zeromax,x[gix("dc",r1,r2,p)]),(sigma+1)/sigma)-aa*pow(mymax(zeromax,0.5*dc0),(sigma+1)/sigma)-x[gix("pc",r1,r2,p+nPriPr)]*x[gix("dc",r1,r2,p)];
 			}
 			//  // producers surplus..
 			//  + sum((i,p_pr),
@@ -219,7 +220,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 			for (uint p=0;p<priPr.size();p++){
 				bb = gpd("bb",l2r[r1][r2],priPr[p]);
 				sigma = gpd("sigma",l2r[r1][r2],priPr[p]);
-				obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - bb*pow(x[gix("sc",r1,r2,p)],((sigma+1)/sigma));
+				obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - bb*pow(mymax(zeromax,x[gix("sc",r1,r2,p)]),((sigma+1)/sigma));
 			}
 			//  // trasformations between primary products
 			//  + sum ((i,p_pr,p_pr2),
@@ -232,7 +233,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
 					a_pr = gpd("a_pr",l2r[r1][r2],priPr[p1],DATA_NOW,priPr[p2]);
 					bb = gpd("bb",l2r[r1][r2],priPr[p2]);
 					sigma = gpd("sigma",l2r[r1][r2],priPr[p2]);
-					obj_value += x[gix("pc",r1,r2,p2)]*a_pr*x[gix("sc",r1,r2,p1)]-bb*pow(a_pr*x[gix("sc",r1,r2,p1)],(sigma+1)/sigma);
+					obj_value += x[gix("pc",r1,r2,p2)]*a_pr*x[gix("sc",r1,r2,p1)]-bb*pow(mymax(zeromax,a_pr*x[gix("sc",r1,r2,p1)]),(sigma+1)/sigma);
 				}
 			}
 			//  // surplus of transport agents..
@@ -435,7 +436,7 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 									Index& nnz_h_lag, IndexStyleEnum& index_style){
 
 
-	if(initOpt){
+//	if(initOpt){
 		// does this initialisation code only once
 		priPr = MTHREAD->MD->getStringVectorSetting("priProducts");
 		secPr = MTHREAD->MD->getStringVectorSetting("secProducts");
@@ -481,29 +482,29 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 
 		//debugPrintParameters();
 
-	} // finish initialisation things to be done only the first year
+//	} // finish initialisation things to be done only the first year
 
 	previousYear = MTHREAD->SCD->getYear()-1; // this has to be done EVERY years !!
 
 	n = nVar; // 300; // nVar;
 	m = nCons; // 70; // nCons;
 
-	generate_tapes(n, m);
+	generate_tapes(n, m, nnz_jac_g, nnz_h_lag);
 
-	if(initOpt){
-		calculateSparsityPatternJ();
-		calculateSparsityPatternH();
+	//if(initOpt){
+	//	calculateSparsityPatternJ();
+	//	calculateSparsityPatternH();
 		//tempDebug();
-	}
+	//}
 
 	// in this example the jacobian is dense. Hence, it contains n*m nonzeros
 	//nnz_jac_g = n*m;
-	nnz_jac_g = nzjelements.size();
+	//nnz_jac_g = nzjelements.size();
 
 	// the hessian is also dense and has n*n total nonzeros, but we
 	// only need the lower left corner (since it is symmetric)
 	//nnz_h_lag = n*(n-1)/2+n;
-	nnz_h_lag = nzhelements.size();
+	//nnz_h_lag = nzhelements.size();
 
 	// use the C style indexing (0-based)
 	index_style = C_STYLE;
@@ -520,6 +521,8 @@ Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Nu
 	for (Index i=0; i<n; i++) {
 	// removed 20120812, as not really needed.. doesn't actually change either obj or efforts to reach it
 //		if(
+//					 ( n>=gip("dc")&& n<(gip("dc")+nSecPr*nL2r))
+//				|| ( n>=gip("sc")&& n<(gip("sc")+nPriPr*nL2r))
 //				 ( n>=gip("dl")&& n<gip("dl")+nAllPr)
 //			|| ( n>=gip("sa")&& n<gip("sa")+nPriPr)
 //			|| ( n>=gip("sl")&& n<gip("sl")+nAllPr)
@@ -560,9 +563,9 @@ bool
 Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_L, Number* z_U,
 												Index m, bool init_lambda, Number* lambda){
 
-// function checked on 20120724 on a subset of 3 regions and 4 products. All variables initial values are correctly those outputed by gams in 2006.
+	// function checked on 20120724 on a subset of 3 regions and 4 products. All variables initial values are correctly those outputed by gams in 2006.
 
-	msgOut(MSG_DEBUG,"Giving optimising variables previous years value as starting point");
+	//msgOut(MSG_DEBUG,"Giving optimising variables previous years value as starting point");
 	// Here, we assume we only have starting values for x, if you code
 	// your own NLP, you can provide starting values for the others if
 	// you wish.
@@ -615,15 +618,10 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 		}
 	}
 
-	msgOut(MSG_DEBUG,"Finisced initial value assignments");
+	//msgOut(MSG_DEBUG,"Finisced initial value assignments");
 
 	return true;
 }
-
-
-
-
-
 
 
 void
@@ -685,17 +683,23 @@ Opt::finalize_solution(SolverReturn status,
 
 
 
-// Memory deallocation for ADOL-C variables
+// memory deallocation of ADOL-C variables
 
-	delete[] x_lam;
+	delete x_lam;
+	delete rind_g;
+	delete cind_g;
+	delete rind_L;
+	delete cind_L;
+	delete rind_L_total;
+	delete cind_L_total;
+	delete jacval;
+	delete hessval;
 
-	for(Index i=0;i<m;i++)
-		delete[] Jac[i];
-	delete[] Jac;
+	for (int i=0;i<n+m+1;i++) {
+		 free(HP_t[i]);
+	 }
+	free(HP_t);
 
-	for(Index i=0;i<n+m+1;i++)
-		delete[] Hess[i];
-	delete[] Hess;
 }
 
 //*************************************************************************
@@ -734,75 +738,25 @@ bool
 Opt::eval_jac_g(Index n, const Number *x, bool new_x,Index m, Index nele_jac,
 								Index* iRow, Index *jCol, Number* values){
 	if (values == NULL) {
-		// return the structure of the jacobian,
-		// assuming that the Jacobian is dense
+		// return the structure of the jacobian
 
-
-		for(Index idx=0;idx<nzjelements.size();idx++){
-			iRow[idx] = nzjelements[idx][0];
-			jCol[idx] = nzjelements[idx][1];
-		}
-
-		/*
-		Index idx = 0;
-		for(Index i=0; i<m; i++)
-			for(Index j=0; j<n; j++)
-		{
-			iRow[idx] = i;
-			jCol[idx++] = j;
-		}
-			*/
- }
+		for(Index idx=0; idx<nnz_jac; idx++)
+			{
+	iRow[idx] = rind_g[idx];
+	jCol[idx] = cind_g[idx];
+			}
+	}
 	else {
 		// return the values of the jacobian of the constraints
 
-		jacobian(tag_g,m,n,x,Jac);
+		sparse_jac(tag_g, m, n, 1, x, &nnz_jac, &rind_g, &cind_g, &jacval, options_g);
 
-/*
-		vector < vector<double> > fakeJ;
-		for(Index r=0; r<nCons;r++){
-			vector<double> fakeJRow;
-			for (Index c=0; c<nVar; c++){
-				fakeJRow.push_back(Jac[r][c]);
-			}
-			fakeJ.push_back(fakeJRow);
-		}
+		for(Index idx=0; idx<nnz_jac; idx++)
+			{
+	values[idx] = jacval[idx];
 
-
-for(Index r=0; r<nCons; r++){
-	for (Index c=0; c<nVar; c++){
-		double val = Jac[r][c];
-		if (val != 0){
-			bool found = false;
-			//looping in the nzjelements to be sure we included it
-			for(uint i=0;i<nzjelements.size();i++){
-				if(nzjelements[i][0]==r && nzjelements[i][1]==c){
-					found=true;
-					break;
-				}
 			}
-			if(!found){
-				cout << "***** HERE WE ARE !!!! r/c/value: "<< r << " / " << c << " / " << Jac[r][c] << endl;
-			}
-		}
 	}
-}
-*/
-
-		for(Index idx=0;idx<nzjelements.size();idx++){
-			values[idx] = Jac[nzjelements[idx][0]][nzjelements[idx][1]];
-		}
-
-		/*
-		Index idx = 0;
-		for(Index i=0; i<m; i++)
-			for(Index j=0; j<n; j++){
-				values[idx++] = Jac[i][j];
-			}
-		*/
-
-	}
-
 	return true;
 }
 
@@ -811,69 +765,41 @@ Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, co
 						bool new_lambda, Index nele_hess, Index* iRow, Index* jCol, Number* values){
 
 
-	if(values == NULL) {
-		for(Index idx=0;idx<nzhelements.size();idx++){
-			iRow[idx] = nzhelements[idx][0];
-			jCol[idx] = nzhelements[idx][1];
-		}
-	} else {
-		for(Index i = 0; i<n ; i++)
-			x_lam[i] = x[i];
-		for(Index i = 0; i<m ; i++)
-			x_lam[n+i] = lambda[i];
-		x_lam[n+m] = obj_factor;
-
-		hessian(tag_L,n+m+1,x_lam,Hess);
-
-		for(Index idx=0;idx<nzhelements.size();idx++){
-			values[idx] = Hess[nzhelements[idx][0]][nzhelements[idx][1]];
-		}
-	}
-
-	return true;
-// ORIGINAL CODE FOR DENSE MATRIX:
-/*
 	if (values == NULL) {
 		// return the structure. This is a symmetric matrix, fill the lower left
 		// triangle only.
 
-		// the hessian for this problem is actually dense
-		Index idx=0;
-		for (Index row = 0; row < n; row++) {
-			for (Index col = 0; col <= row; col++) {
-				iRow[idx] = row;
-				jCol[idx] = col;
-				idx++;
+		for(Index idx=0; idx<nnz_L; idx++)
+			{
+	iRow[idx] = rind_L[idx];
+	jCol[idx] = cind_L[idx];
 			}
-		}
-
-		assert(idx == nele_hess);
 	}
 	else {
 		// return the values. This is a symmetric matrix, fill the lower left
 		// triangle only
 
-		for(Index i = 0; i<n ; i++)
-			x_lam[i] = x[i];
-		for(Index i = 0; i<m ; i++)
-			x_lam[n+i] = lambda[i];
+		for(Index idx = 0; idx<n ; idx++)
+			x_lam[idx] = x[idx];
+		for(Index idx = 0; idx<m ; idx++)
+			x_lam[n+idx] = lambda[idx];
 		x_lam[n+m] = obj_factor;
 
-		hessian(tag_L,n+m+1,x_lam,Hess);
+		sparse_hess(tag_L, n+m+1, 1, x_lam, &nnz_L_total, &rind_L_total, &cind_L_total, &hessval, options_L);
 
 		Index idx = 0;
-
-		for(Index i = 0; i<n ; i++)
+		for(Index idx_total = 0; idx_total <nnz_L_total ; idx_total++)
 			{
-		for(Index j = 0; j<=i ; j++)
-			{
-				values[idx++] = Hess[i][j];
-			}
+	if((rind_L_total[idx_total] < (unsigned int) n) && (cind_L_total[idx_total] < (unsigned int) n))
+		{
+			values[idx] = hessval[idx_total];
+			idx++;
+		}
 			}
 	}
 
 	return true;
-*/
+
 	//return false;
 }
 
@@ -881,7 +807,7 @@ Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, co
 //***************    ADOL-C part ***********************************
 
 void
-Opt::generate_tapes(Index n, Index m){
+Opt::generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h_lag){
 	Number *xp    = new double[n];
 	Number *lamp  = new double[m];
 	Number *zl    = new double[m];
@@ -894,24 +820,18 @@ Opt::generate_tapes(Index n, Index m){
 	adouble obj_value;
 
 	double dummy;
+	double *jacval;
 
-	//TODO: remove the next
-	Jac = new double*[m];
-	for(Index i=0;i<m;i++)
-		Jac[i] = new double[n];
+	int i,j,k,l,ii;
 
 	x_lam   = new double[n+m+1];
-
-	Hess = new double*[n+m+1];
-	for(Index i=0;i<n+m+1;i++)
-		Hess[i] = new double[i+1];
 
 	get_starting_point(n, 1, xp, 0, zl, zu, m, 0, lamp);
 
 	trace_on(tag_f);
 
-		for(Index i=0;i<n;i++)
-			xa[i] <<= xp[i];
+		for(Index idx=0;idx<n;idx++)
+			xa[idx] <<= xp[idx];
 
 		eval_obj(n,xa,obj_value);
 
@@ -921,23 +841,23 @@ Opt::generate_tapes(Index n, Index m){
 
 	trace_on(tag_g);
 
-		for(Index i=0;i<n;i++)
-			xa[i] <<= xp[i];
+		for(Index idx=0;idx<n;idx++)
+			xa[idx] <<= xp[idx];
 
 		eval_constraints(n,xa,m,g);
 
 
-		for(Index i=0;i<m;i++)
-			g[i] >>= dummy;
+		for(Index idx=0;idx<m;idx++)
+			g[idx] >>= dummy;
 
 	trace_off();
 
-	 trace_on(tag_L);
+	trace_on(tag_L);
 
-		for(Index i=0;i<n;i++)
-			xa[i] <<= xp[i];
-		for(Index i=0;i<m;i++)
-			lam[i] <<= 1.0;
+		for(Index idx=0;idx<n;idx++)
+			xa[idx] <<= xp[idx];
+		for(Index idx=0;idx<m;idx++)
+			lam[idx] <<= 1.0;
 		sig <<= 1.0;
 
 		eval_obj(n,xa,obj_value);
@@ -945,20 +865,240 @@ Opt::generate_tapes(Index n, Index m){
 		obj_value *= sig;
 		eval_constraints(n,xa,m,g);
 
-		for(Index i=0;i<m;i++)
-			obj_value += g[i]*lam[i];
+		for(Index idx=0;idx<m;idx++)
+			obj_value += g[idx]*lam[idx];
 
 		obj_value >>= dummy;
 
 	trace_off();
 
-	delete[] xa;
-	delete[] xp;
-	delete[] g;
+	rind_g = NULL;
+	cind_g = NULL;
+
+	options_g[0] = 0;          /* sparsity pattern by index domains (default) */
+	options_g[1] = 0;          /*                         safe mode (default) */
+	options_g[2] = -1;         /*                     &jacval is not computed */
+	options_g[3] = 0;          /*                column compression (default) */
+
+	this->jacval=NULL;
+	this->hessval=NULL;
+	sparse_jac(tag_g, m, n, 0, xp, &nnz_jac, &rind_g, &cind_g, &jacval, options_g);
+
+	options_g[2] = 0;
+	nnz_jac_g = nnz_jac;
+
+	unsigned int  **JP_f=NULL;                /* compressed block row storage */
+	unsigned int  **JP_g=NULL;                /* compressed block row storage */
+	unsigned int  **HP_f=NULL;                /* compressed block row storage */
+	unsigned int  **HP_g=NULL;                /* compressed block row storage */
+	unsigned int  *HP_length=NULL;            /* length of arrays */
+	unsigned int  *temp=NULL;                 /* help array */
+
+	int ctrl_H;
+
+	JP_f = (unsigned int **) malloc(sizeof(unsigned int*));
+	JP_g = (unsigned int **) malloc(m*sizeof(unsigned int*));
+	HP_f = (unsigned int **) malloc(n*sizeof(unsigned int*));
+	HP_g = (unsigned int **) malloc(n*sizeof(unsigned int*));
+	HP_t = (unsigned int **) malloc((n+m+1)*sizeof(unsigned int*));
+	HP_length = (unsigned int *) malloc((n)*sizeof(unsigned int));
+	ctrl_H = 0;
+
+	hess_pat(tag_f, n, xp, HP_f, ctrl_H);
+
+	indopro_forward_safe(tag_f, 1, n, xp, JP_f);
+	indopro_forward_safe(tag_g, m, n, xp, JP_g);
+	nonl_ind_forward_safe(tag_g, m, n, xp, HP_g);
+
+
+	for (i=0;i<n;i++)
+		{
+			if (HP_f[i][0]+HP_g[i][0]!=0)
+	{
+		if (HP_f[i][0]==0)
+			{
+				HP_t[i] = (unsigned int *) malloc((HP_g[i][0]+HPOFF)*sizeof(unsigned int));
+				for(j=0;j<=(int) HP_g[i][0];j++)
+		{
+			HP_t[i][j] = HP_g[i][j];
+		}
+				HP_length[i] = HP_g[i][0]+HPOFF;
+			}
+		else
+			{
+				if (HP_g[i][0]==0)
+		{
+			HP_t[i] = (unsigned int *) malloc((HP_f[i][0]+HPOFF)*sizeof(unsigned int));
+			for(j=0;j<=(int) HP_f[i][0];j++)
+				{
+					HP_t[i][j] = HP_f[i][j];
+				}
+			HP_length[i] = HP_f[i][0]+HPOFF;
+		}
+				else
+		{
+			HP_t[i] = (unsigned int *) malloc((HP_f[i][0]+HP_g[i][0]+HPOFF)*sizeof(unsigned int));
+			k = l = j = 1;
+			while ((k<=(int) HP_f[i][0]) && (l <= (int) HP_g[i][0]))
+				{
+					if (HP_f[i][k] < HP_g[i][l])
+			{
+				HP_t[i][j]=HP_f[i][k];
+				j++; k++;
+			}
+					else
+			{
+				if (HP_f[i][k] == HP_g[i][l])
+					{
+						HP_t[i][j]=HP_f[i][k];
+						l++;j++;k++;
+					}
+				else
+					{
+						HP_t[i][j]=HP_g[i][l];
+						j++;l++;
+					}
+			}
+				} // end while
+			for(ii=k;ii<=(int) HP_f[i][0];ii++)
+				{
+					HP_t[i][j] = HP_f[i][ii];
+					j++;
+				}
+			for(ii=l;ii<=(int) HP_g[i][0];ii++)
+				{
+					HP_t[i][j] = HP_g[i][ii];
+					j++;
+				}
+
+		}
+			}
+		HP_t[i][0]=j-1;
+		HP_length[i] = HP_f[i][0]+HP_g[i][0]+HPOFF;
+	}
+			else
+	{
+		HP_t[i] = (unsigned int *) malloc((HPOFF+1)*sizeof(unsigned int));
+		HP_t[i][0]=0;
+		HP_length[i]=HPOFF;
+	}
+		}
+
+	for (i=0;i<m;i++)
+		{
+			HP_t[n+i] = (unsigned int *) malloc((JP_g[i][0]+1)*sizeof(unsigned int));
+			HP_t[n+i][0]=JP_g[i][0];
+			for(j=1;j<= (int) JP_g[i][0];j++)
+	{
+		HP_t[n+i][j]=JP_g[i][j];
+		if (HP_length[JP_g[i][j]] < HP_t[JP_g[i][j]][0]+1)
+			{
+				temp = (unsigned int *) malloc((HP_t[JP_g[i][j]][0])*sizeof(unsigned int));
+				for(l=0;l<=(int)HP_t[JP_g[i][j]][0];l++)
+		temp[l] = HP_t[JP_g[i][j]][l];
+				free(HP_t[JP_g[i][j]]);
+				HP_t[JP_g[i][j]] = (unsigned int *) malloc(2*HP_length[JP_g[i][j]]*sizeof(unsigned int));
+				HP_length[JP_g[i][j]] = 2*HP_length[JP_g[i][j]];
+				for(l=0;l<=(int)temp[0];l++)
+		HP_t[JP_g[i][j]][l] =temp[l];
+				free(temp);
+			}
+		HP_t[JP_g[i][j]][0] = HP_t[JP_g[i][j]][0]+1;
+		HP_t[JP_g[i][j]][HP_t[JP_g[i][j]][0]] = i+n;
+	}
+		}
+
+
+	for(j=1;j<= (int) JP_f[0][0];j++)
+		{
+			if (HP_length[JP_f[0][j]] < HP_t[JP_f[0][j]][0]+1)
+	{
+		temp = (unsigned int *) malloc((HP_t[JP_f[0][j]][0])*sizeof(unsigned int));
+		for(l=0;l<=(int)HP_t[JP_f[0][j]][0];l++)
+			temp[l] = HP_t[JP_f[0][j]][l];
+		free(HP_t[JP_f[0][j]]);
+		HP_t[JP_f[0][j]] = (unsigned int *) malloc(2*HP_length[JP_f[0][j]]*sizeof(unsigned int));
+		HP_length[JP_f[0][j]] = 2*HP_length[JP_f[0][j]];
+		for(l=0;l<=(int)temp[0];l++)
+			HP_t[JP_f[0][j]][l] =temp[l];
+		free(temp);
+	}
+			HP_t[JP_f[0][j]][0] = HP_t[JP_f[0][j]][0]+1;
+			HP_t[JP_f[0][j]][HP_t[JP_f[0][j]][0]] = n+m;
+		}
+
+
+	HP_t[n+m] = (unsigned int *) malloc((JP_f[0][0]+2)*sizeof(unsigned int));
+	HP_t[n+m][0]=JP_f[0][0]+1;
+	for(j=1;j<= (int) JP_f[0][0];j++)
+		HP_t[n+m][j]=JP_f[0][j];
+	HP_t[n+m][JP_f[0][0]+1]=n+m;
+
+
+
+	set_HP(tag_L,n+m+1,HP_t);
+
+	nnz_h_lag = 0;
+	 for (i=0;i<n;i++) {
+		for (j=1;j<=(int) HP_t[i][0];j++)
+			if ((int) HP_t[i][j] <= i)
+	nnz_h_lag++;
+		 free(HP_f[i]);
+		 free(HP_g[i]);
+	 }
+	nnz_L = nnz_h_lag;
+
+	options_L[0] = 0;
+	options_L[1] = 1;
+
+	sparse_hess(tag_L, n+m+1, -1, xp, &nnz_L_total, &rind_L_total, &cind_L_total, &hessval, options_L);
+
+	rind_L = new unsigned int[nnz_L];
+	cind_L = new unsigned int[nnz_L];
+	rind_L_total = new unsigned int[nnz_L_total];
+	cind_L_total = new unsigned int[nnz_L_total];
+
+	unsigned int ind = 0;
+
+	for (int i=0;i<n;i++)
+		for (unsigned int j=1;j<=HP_t[i][0];j++)
+			{
+	if (((int) HP_t[i][j]>=i) &&((int) HP_t[i][j]<n))
+		{
+			rind_L[ind] = i;
+			cind_L[ind++] = HP_t[i][j];
+		}
+			}
+
+	 ind = 0;
+	 for (int i=0;i<n+m+1;i++)
+		 for (unsigned int j=1;j<=HP_t[i][0];j++)
+			 {
+	if ((int) HP_t[i][j]>=i)
+		{
+			rind_L_total[ind] = i;
+			cind_L_total[ind++] = HP_t[i][j];
+		}
+			 }
+
+	for (i=0;i<m;i++) {
+		 free(JP_g[i]);
+	 }
+
+	free(JP_f[0]);
+	free(JP_f);
+	free(JP_g);
+	free(HP_f);
+	free(HP_g);
+	free(HP_length);
+
 	delete[] lam;
-	delete[] lamp;
+	delete[] g;
+	delete[] xa;
 	delete[] zu;
 	delete[] zl;
+	delete[] lamp;
+	delete[] xp;
 
 }
 
@@ -1369,6 +1509,21 @@ Opt::tempDebug(){
 	cout << "Dense hessian:  " << nVar*(nVar-1)/2+nVar << " elements" << endl;
 	//exit(0);
 
-
 }
 
+
+const  Number&
+Opt::mymax(const Number& a, const Number& b){
+	return (a<b)?b:a;
+}
+const adouble&
+Opt::mymax(const adouble& a, const adouble& b){
+	return (a<b)?b:a;
+}
+
+/*
+template <class T> const T&
+Opt::mymax ( const T& a, const T& b ){
+	return (a<b)?b:a;
+}
+*/

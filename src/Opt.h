@@ -23,6 +23,7 @@
 
 #include "IpTNLP.hpp"
 #include <adolc.h>
+#include <adolc_sparse.h>
 
 //regmas headers
 #include "BaseClass.h"
@@ -32,6 +33,7 @@
 #define tag_f 1
 #define tag_g 2
 #define tag_L 3
+#define HPOFF 30
 
 
 
@@ -117,7 +119,7 @@ public:
 	//***************    start ADOL-C part ***********************************
 
 	/** Method to generate the required tapes */
-	virtual void generate_tapes(Index n, Index m);
+	virtual void generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h_lag);
 
 	//***************    end   ADOL-C part ***********************************
 
@@ -135,14 +137,14 @@ template<class T> vector < vector < vector < vector <int> > > > buildPositionVec
 void                  calculateSparsityPatternJ();
 void                  calculateSparsityPatternH();
 
+
+const Number& mymax(const Number& a, const Number& b);
+const adouble& mymax(const adouble& a, const adouble& b);
+
+//template <class T> const T& mymax ( const T& a, const T& b );
+
 	// **************   end PYTHIA part **************************************
 
-
-	//************** start constrains (MODELLER PART) *******************************************
-	template<class T> static void mkteq2f (const T *x, T *g, Index *cix);
-	template<class T> static void mkteq3f (const T *x, T *g, Index *cix);
-
-	//************** end constrains (MODELLER PART) *****************************************
 
 protected:
 
@@ -218,10 +220,25 @@ protected:
 	//@}
 
 	//@{
-	double **Jac;
 
 	double *x_lam;
-	double **Hess;
+
+	//** variables for sparsity exploitation
+	unsigned int **HP_t;         /* compressed block row storage */
+	unsigned int *rind_g;        /* row indices    */
+	unsigned int *cind_g;        /* column indices */
+	double *jacval;              /* values         */
+	unsigned int *rind_L;        /* row indices    */
+	unsigned int *cind_L;        /* column indices */
+	unsigned int *rind_L_total;  /* row indices    */
+	unsigned int *cind_L_total;  /* column indices */
+	double *hessval;             /* values */
+	int nnz_jac;
+	int nnz_L, nnz_L_total;
+	int options_g[4];
+	int options_L[4];
+
+
 	//@}
 
 };
@@ -232,7 +249,7 @@ struct constrain{
 	string                                 comment;
 	int                                     domain;
 	int                                  direction;
-	//std::function < template <class T> void (const T *, T *, Index *) >  evaluate; // std::function can't hold templates
+
 };
 
 
