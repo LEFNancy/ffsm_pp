@@ -436,7 +436,7 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 									Index& nnz_h_lag, IndexStyleEnum& index_style){
 
 
-//	if(initOpt){
+	if(initOpt){
 		// does this initialisation code only once
 		priPr = MTHREAD->MD->getStringVectorSetting("priProducts");
 		secPr = MTHREAD->MD->getStringVectorSetting("secProducts");
@@ -482,7 +482,7 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 
 		//debugPrintParameters();
 
-//	} // finish initialisation things to be done only the first year
+	} // finish initialisation things to be done only the first year
 
 	previousYear = MTHREAD->SCD->getYear()-1; // this has to be done EVERY years !!
 

@@ -70,7 +70,7 @@ public:
 	Output*             DO;   ///< data output
 	ModelCore*          CORE; ///< Core of the model
 	Sandbox*            TEST; ///< Various debugging code for development
-	//Ipopt::SmartPtr <Ipopt::TNLP>      OPT;  ///< Market optimisation
+	Ipopt::SmartPtr <Ipopt::TNLP>      OPT;  ///< Market optimisation
 
 	void                setMessage(const QString &message);
 	void                stop();
@@ -105,7 +105,7 @@ public:
 	/// Perform the algorithm of the model
 	void                setCOREPointer(ModelCore* CORE_h){CORE=CORE_h;};
 	/// Perform the market optimisation
-	//void                setOPTPointer(Ipopt::SmartPtr<Ipopt::TNLP> OPT_h){OPT=OPT_h;};
+	void                setOPTPointer(Ipopt::SmartPtr<Ipopt::TNLP> OPT_h){OPT=OPT_h;};
 
 	//public slots:
 	void                setInputFileName(QString inputFileName_h);

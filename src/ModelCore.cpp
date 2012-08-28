@@ -330,7 +330,7 @@ ModelCore::runSimulationYear(){
 
 	// Create an instance of the IpoptApplication
 	//Opt *OPTa = new Opt(MTHREAD);
-	SmartPtr<TNLP> OPTa = new Opt(MTHREAD);
+	//SmartPtr<TNLP> OPTa = new Opt(MTHREAD);
 	SmartPtr<IpoptApplication> application = new IpoptApplication();
 	//application->Options()->SetStringValue("linear_solver", "mumps"); // default in ipopt is ma27
 	//application->Options()->SetStringValue("hessian_approximation", "limited-memory"); // quasi-newton approximation of the hessian
@@ -345,7 +345,7 @@ ModelCore::runSimulationYear(){
 		return;
 	}
 
-	status = application->OptimizeTNLP(OPTa);
+	status = application->OptimizeTNLP(MTHREAD->OPT);
 
 
 	// *** POST OPTIMISATION....
