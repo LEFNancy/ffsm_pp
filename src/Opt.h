@@ -33,7 +33,7 @@
 #define tag_f 1
 #define tag_g 2
 #define tag_L 3
-#define HPOFF 30
+#define HPOFF 30 //original: 30
 
 
 
@@ -116,6 +116,21 @@ public:
 									 IpoptCalculatedQuantities* ip_cq);
 	//@}
 
+    /** Return information on each iteration */
+    virtual bool intermediate_callback(AlgorithmMode mode,
+                                       Index iter,
+                                       Number obj_value,
+                                       Number inf_pr,
+                                       Number inf_du,
+                                       Number mu,
+                                       Number d_norm,
+                                       Number regularization_size,
+                                       Number alpha_du,
+                                       Number alpha_pr,
+                                       Index ls_trials,
+                                       const IpoptData *ip_data,
+                                       IpoptCalculatedQuantities *ip_cq);
+
 	//***************    start ADOL-C part ***********************************
 
 	/** Method to generate the required tapes */
@@ -133,9 +148,9 @@ public:
 template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, int dType); ///< build the matrix of the positions for a given variable or contrain
 template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, vector<string> &prVector);
 
-///< build the matrix of the positions for a given variable or contrain
-void                  calculateSparsityPatternJ();
-void                  calculateSparsityPatternH();
+    ///< build the matrix of the positions for a given variable or contrain
+    void                calculateSparsityPatternJ();
+    void                calculateSparsityPatternH();
 
 
 const Number& mymax(const Number& a, const Number& b);

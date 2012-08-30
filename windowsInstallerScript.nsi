@@ -5,7 +5,7 @@
 ;--------------------------------
 ; General
 	; Things that will likelly need to be changed...
-	!define VERSIONSTRING "0.9.5"               ; Pythiaversion number (as string). Used to put each version on a separate folder.
+	!define VERSIONSTRING "1.0.0"               ; Pythiaversion number (as string). Used to put each version on a separate folder.
 
 	OutFile "pythia_${VERSIONSTRING}_setup.exe" ; Filename of the outputted installer
 	!define MINGWDIR "C:\MinGW\bin" ; Directory where thre MinGW DLL is located
@@ -166,8 +166,8 @@ SectionEnd
 
 Section "Uninstall"
 	RMDir /r "$INSTDIR" ; Recursivelly remove all files in the install directory
-	RMDir /r "${SMPROGRAMS}\${SM_Folder}" ; Remove links in the Start Menu ..doesn't works !!!
-	Delete "$DESKTOP\${APP_FNAME}.lnk" ; Remove desktop link
+	RMDir /r "$SMPROGRAMS\$SM_Folder" ; Remove links in the Start Menu ..doesn't works !!!
+	Delete "$DESKTOP\${APP_NAME}.lnk" ; Remove desktop link
 	;DeleteRegKey /ifempty HKCU "Software\Pythia"
 SectionEnd
 

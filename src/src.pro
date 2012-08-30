@@ -40,6 +40,7 @@ win32 {
     LIBS += -L win32/lib -lcoinlapack
     LIBS += -L win32/lib -ladolc
     LIBS += -lpthread -lgfortran -lcoinmetis -lcoinblas
+    CONFIG +=  console
 }
 
 

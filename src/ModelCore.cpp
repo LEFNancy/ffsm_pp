@@ -345,6 +345,7 @@ ModelCore::runSimulationYear(){
 		return;
 	}
 
+    msgOut(MSG_INFO,"Running optimisation problem for this year (it may take a few minutes for large models)..");
 	status = application->OptimizeTNLP(MTHREAD->OPT);
 
 
@@ -363,6 +364,7 @@ ModelCore::runSimulationYear(){
 
 		Number final_obj = application->Statistics()->FinalObjective();
 		printf("\n\n*** The final value of the objective function is %e.\n", final_obj);
+        msgOut(MSG_INFO, "The problem solved successfully in "+i2s(iter_count)+" iterations.");
 	}
 
 	for(uint r2= 0; r2<regIds2.size();r2++){  // you can use r2<=regIds2.size() to try an out-of range memory error that is not detected other than by valgrind (with a message "Invalid read of size 4 in ModelCore::runSimulationYear() in src/ModelCore.cpp:351")
