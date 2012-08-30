@@ -5,7 +5,7 @@
 ;--------------------------------
 ; General
 	; Things that will likelly need to be changed...
-	!define VERSIONSTRING "0.9.0"               ; Pythiaversion number (as string). Used to put each version on a separate folder.
+	!define VERSIONSTRING "0.9.5"               ; Pythiaversion number (as string). Used to put each version on a separate folder.
 
 	OutFile "pythia_${VERSIONSTRING}_setup.exe" ; Filename of the outputted installer
 	!define MINGWDIR "C:\MinGW\bin" ; Directory where thre MinGW DLL is located

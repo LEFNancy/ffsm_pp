@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
  ADOL-C -- Automatic Differentiation by Overloading in C++
 
- Revision: $Id: adouble.h 320 2012-05-15 08:57:45Z kulshres $
+ Revision: $Id: adouble.h 207 2011-04-08 10:47:18Z kulshres $
  Contents: adouble.h contains the basis for the class of adouble
            included here are all the possible functions defined on
            the adouble class.  Notice that, as opposed to ealier versions,
@@ -67,6 +67,11 @@ void ADOLC_DLL_EXPORT condassign( double &res, const double &cond,
                                   const double &arg1, const double &arg2 );
 void ADOLC_DLL_EXPORT condassign( double &res, const double &cond,
                                   const double &arg );
+
+//#if !defined(_ISOC99_SOURCE) && !defined(__USE_ISOC99) && !defined(__APPLE_CC__)
+//double ADOLC_DLL_EXPORT fmin( const double &x, const double &y );
+//double ADOLC_DLL_EXPORT fmax( const double &x, const double &y );
+//#endif
 
 
 /****************************************************************************/
@@ -492,17 +497,17 @@ extern int ADOLC_numDir;
 #  define V_I                  v
 #endif
 
-#if !defined(_ISOC99_SOURCE) && !defined(__USE_ISOC99)
-inline double fmin( const double &x, const double &y ) {
-    if (x<y) return x;
-    else return y;
-}
-
-inline double fmax( const double &x, const double &y ) {
-    if (x>y) return x;
-    else return y;
-}
-#endif
+//#if !defined(_ISOC99_SOURCE) && !defined(__USE_ISOC99)
+//inline double fmin( const double &x, const double &y ) {
+//    if (x<y) return x;
+//    else return y;
+//}
+//
+//inline double fmax( const double &x, const double &y ) {
+//    if (x>y) return x;
+//    else return y;
+//}
+//#endif
 
 inline double makeNaN() {
     return ADOLC_MATH_NSP::numeric_limits<double>::quiet_NaN();
