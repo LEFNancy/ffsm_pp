@@ -89,9 +89,11 @@ void
 Init::setInitLevel1(){
 	//Loading data from file.
 	InitState=1;
-	ostringstream out;
-	out<<"OK, Entering Init state "<<InitState<<"...";
-	msgOut(MSG_DEBUG,out.str());
+	msgOut(MSG_DEBUG,"Entering Init state "+i2s(InitState));
+	time(&now);
+	current = localtime(&now);
+	string timemessage = "Local time is "+i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
+	msgOut(MSG_INFO, timemessage);
 	MTHREAD->MD->setDefaultSettings();
 	MTHREAD->MD->setScenarioSettings();
 	MTHREAD->TEST->fullTest(); // normally empty function
@@ -150,6 +152,10 @@ Init::setInitLevel6(){
 	InitState=6;
 	MTHREAD->DO->printFinalOutput();
 	msgOut(MSG_INFO, "Model has ended scheduled simulation in a regular way.");
+	time(&now);
+	current = localtime(&now);
+	string timemessage = "Local time is "+i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
+	msgOut(MSG_INFO, timemessage);
 }
 
 
