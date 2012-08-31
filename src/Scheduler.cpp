@@ -59,5 +59,5 @@ Scheduler::run(){
 
 int
 Scheduler::getYear(){
-	return (iteration+MTHREAD->MD->getIntSetting("initialYear"));
+	return (iteration+MTHREAD->MD->getCachedInitialYear());
 }

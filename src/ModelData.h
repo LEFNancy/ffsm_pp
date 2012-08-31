@@ -109,28 +109,28 @@ public:
 	/// A simple function to assess if a specified product can be made by a certain forest type and diameter class
 	const bool          assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
 
-	double              getTimedData(const vector <double> &dated_vector, const int& year_h); ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
+	double              getTimedData(const vector <double> &dated_vector, const int& year_h) const; ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
 	void                setTimedData(const double& value_h, vector<double> &dated_vector, const int& year_h, const int& MSG_LEVEL=MSG_WARNING);
 
-	int                 getIntSetting          (const string &name_h, int position=0);
-	double              getDoubleSetting       (const string &name_h, int position=0);
-	string              getStringSetting       (const string &name_h, int position=0);
-	bool                getBoolSetting         (const string &name_h, int position=0);
-	vector <int>        getIntVectorSetting    (const string &name_h);
-	vector <double>     getDoubleVectorSetting (const string &name_h);
-	vector <string>     getStringVectorSetting (const string &name_h);
-	vector <bool>       getBoolVectorSetting   (const string &name_h);
+	int                 getIntSetting          (const string &name_h, int position=0) const;
+	double              getDoubleSetting       (const string &name_h, int position=0) const;
+	string              getStringSetting       (const string &name_h, int position=0) const;
+	bool                getBoolSetting         (const string &name_h, int position=0) const;
+	vector <int>        getIntVectorSetting    (const string &name_h) const;
+	vector <double>     getDoubleVectorSetting (const string &name_h) const;
+	vector <string>     getStringVectorSetting (const string &name_h) const;
+	vector <bool>       getBoolVectorSetting   (const string &name_h) const;
 
 
-	const double        getProdData(const string &type_h, const int& regId_h, const string &prodId_h, int year=DATA_NOW, const string &freeDim_h="");
-	const double        getForData(const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW);
+	const double        getProdData(const string &type_h, const int& regId_h, const string &prodId_h, const int &year=DATA_NOW, const string &freeDim_h="");
+	const double        getForData(const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year=DATA_NOW);
 
 
-	void                setProdData(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, int year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h=""); // Remember default arguments must be at the end
-	void                setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, int year=DATA_NOW, const bool& allowCreate=false); // Remember default arguments must be at the end
+	void                setProdData(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h=""); // Remember default arguments must be at the end
+	void                setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year=DATA_NOW, const bool& allowCreate=false); // Remember default arguments must be at the end
 
-string                makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="");
-void                  unpackKeyProdData(const string& key, string& parName, int &regId, string& prod, string& freeDim);
+string                makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="") const {return parName+"#"+regId+"#"+prod+"#"+freeDim+"#";};
+void                  unpackKeyProdData(const string& key, string& parName, int &regId, string& prod, string& freeDim) const;
 
 double                calculateAnnualisedEquivalent(double amount_h, int years_h); ///< Calculate the annual equivalent flow
 double                calculateAnnualisedEquivalent(double amount_h, double years_h); ///< Transform the double to the highest integer and call calculateAnnualisedEquivalent(double amount_h, int years_h)
@@ -141,6 +141,8 @@ double                calculateAnnualisedEquivalent(double amount_h, double year
 	void                setBaseDiretory(string baseDirectory_h){baseDirectory=baseDirectory_h;};
 	void                addSetting(string name_h, vector <string> values_h, int type_h, string comment_h);
 	void                addSetting(string name_h, string value_h, int type_h, string comment_h);
+	void                cacheFrequentData(); ///< Called after input reading, it fix frequently used data;
+	int                 getCachedInitialYear(){return cached_initialYear;};
 
 	void                setBasicData(const string &name_h, int value, int position=0);
 	void                setBasicData(const string &name_h, double value, int position=0);
@@ -154,11 +156,12 @@ private:
 	vector <string>     getVectorBaseData (const string &name_h, int type_h);
 	void                setBasicData(const string &name_h, string value, int type_h, int position);
 
-	bool                dataMapCheckExist(const DataMap& map, const string& search_for, bool exactMatch=false);
-	double              dataMapGetValue(const DataMap& map, const string& search_for, int year_h, bool exactMatch=false);
-	void                dataMapSetValue(DataMap& map, const string& search_for, double value_h, int year_h, bool exactMatch=false);
+	bool                dataMapCheckExist(const DataMap& map, const string& search_for, const bool& exactMatch=false) const;
+	double              dataMapGetValue(const DataMap& map, const string& search_for, const int& year_h, const bool& exactMatch=false);
+	void                dataMapSetValue(DataMap& map, const string& search_for, const double& value_h, const int& year_h, const bool& exactMatch=false);
 
 	bool                tempBool; ///< a temporary bool variable used for various functions
+	int                 cached_initialYear;
 
 	string                                   inputFilename; // from Qt fileOpen dialog
 	string                                   outputDirname; // from main config files

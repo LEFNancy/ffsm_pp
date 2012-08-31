@@ -1162,7 +1162,7 @@ Opt::generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h_lag){
 // ***************    PYTHIA OPT specific part ***********************************
 
 const int
-Opt::gip(const string &varName){ // get initial position
+Opt::gip(const string &varName) const{ // get initial position
 	map<string, int>::const_iterator p;
 	p=initPos.find(varName);
 	if(p != initPos.end()) {
@@ -1175,7 +1175,7 @@ Opt::gip(const string &varName){ // get initial position
 }
 
 const int
-Opt::gip(const int &cn){ // get initial position
+Opt::gip(const int &cn) const { // get initial position
 	return cInitPos.at(cn);
 }
 
@@ -1237,7 +1237,7 @@ Opt::gix_uncached(const T &v_or_c, int r1Ix, int r2Ix, int prIx, int r2IxTo){
 
 
 const int
-Opt::gix(const string &varName, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo){
+Opt::gix(const string &varName, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo) const{
 	// attenction, for computational reasons we are not checking the call is within vectors limits!!!
 	map <string, vector < vector < vector < vector <int> > > > >::const_iterator p;
 	p=vpositions.find(varName);
@@ -1251,7 +1251,7 @@ Opt::gix(const string &varName, const int& r1Ix, const int& r2Ix, const int& prI
 }
 
 const int
-Opt::gix(const int &cn, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo){
+Opt::gix(const int &cn, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo) const{
 	return cpositions[cn][r1Ix][r2Ix][prIx][r2IxTo];
 }
 

@@ -24,6 +24,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 // regmas headers...
 
@@ -163,40 +164,41 @@ public:
 	                    BaseClass();
 	                   ~BaseClass();
 
-	void                msgOut(int msgCode_h, string msg_h, bool refreshGUI_h=true) const; ///< Overloaded function to print the output log
-	void                msgOut(int msgCode_h, int msg_h, bool refreshGUI_h=true) const;    ///< Overloaded function to print the output log
-	void                msgOut(int msgCode_h, double msg_h, bool refreshGUI_h=true) const; ///< Overloaded function to print the output log	
+	void                msgOut(const int& msgCode_h, const string& msg_h, const bool& refreshGUI_h=true) const; ///< Overloaded function to print the output log
+	void                msgOut(const int& msgCode_h, const int& msg_h, const bool& refreshGUI_h=true)    const; ///< Overloaded function to print the output log
+	void                msgOut(const int& msgCode_h, const double& msg_h, const bool& refreshGUI_h=true) const; ///< Overloaded function to print the output log
 
-	int                 s2i ( string string_h)         const; ///<  string  to integer conversion
-	double              s2d (string string_h)          const; ///<  string  to double  conversion
-	bool                s2b (string string_h)          const; ///<  string  to bool    conversion
-	string              i2s (int int_h)                const; ///<  integer to string  conversion
-	string              d2s (double double_h)          const; ///<  double  to string  conversion
-	string              b2s (bool bool_h)              const; ///<  bool    to string  conversion
-	vector<int>         s2i ( vector<string> string_h) const; ///<  string  to integer conversion (vector)
-	vector<double>      s2d (vector<string> string_h)  const; ///<  string  to double  conversion (vector)
-	vector<bool>        s2b (vector<string> string_h)  const; ///<  string  to bool    conversion (vector)
-	vector<string>      i2s (vector<int> int_h)        const; ///<  integer to string  conversion (vector)
-	vector<string>      d2s (vector<double> double_h)  const; ///<  double  to string  conversion (vector)
-	vector<string>      b2s (vector<bool> bool_h)      const; ///<  bool    to string  conversion (vector)
+	int                 s2i (const string &string_h) const {return atoi(string_h.c_str());}; ///<  string  to integer conversion
+	double              s2d (const string& string_h) const {return atof(string_h.c_str());}; ///<  string  to double  conversion
+	double              s2d (const string& string_h, const bool& replaceComma) const; ///<  string  to double  conversion
+	bool                s2b (const string& string_h)          const; ///<  string  to bool    conversion
+	string              i2s (const int& int_h)       const {return to_string(int_h);}; ///<  integer to string  conversion
+	string              d2s (const double& double_h) const {return to_string(double_h);}; ///<  double  to string  conversion
+	string              b2s (const bool& bool_h)              const; ///<  bool    to string  conversion
+	vector<int>         s2i (const vector<string>& string_h)  const; ///<  string  to integer conversion (vector)
+	vector<double>      s2d (const vector<string>& string_h, const bool& replaceComma = false)  const; ///<  string  to double  conversion (vector)
+	vector<bool>        s2b (const vector<string>& string_h)  const; ///<  string  to bool    conversion (vector)
+	vector<string>      i2s (const vector<int>& int_h)        const; ///<  integer to string  conversion (vector)
+	vector<string>      d2s (const vector<double>& double_h)  const; ///<  double  to string  conversion (vector)
+	vector<string>      b2s (const vector<bool>& bool_h)      const; ///<  bool    to string  conversion (vector)
 
 	/**
 	Return a type according to enum TYPE_* from a string (eg: "string" -> TYPE_STRING (2)).
 	<br>If we pass it an unknow type it generates an error.
 	*/
-	int                 getType(string &type_h);
+	int                 getType(const string &type_h) const;
 
 	void                refreshGUI() const;  ///< Ping to periodically return the control to the GUI
 	
 	//string intToString(int x);
-	template<typename T> string toString(const T& x);      // string s = toString(x);
-	template<typename T> T stringTo(const std::string& s); // e.g. int x = stringTo<int>("123");
+	template<typename T> string toString(const T& x) const;      // string s = toString(x);
+	template<typename T> T stringTo(const std::string& s) const; // e.g. int x = stringTo<int>("123");
 
-	int                 iVSum (const vector<int> &intVector_h);       ///< integer vector sum - sum of an vector of integer;
-	double              dVSum (const vector<double> &doubleVector_h); ///< double vector sum - sum of a vectr of double;
+	int                 iVSum (const vector<int> &intVector_h) const;       ///< integer vector sum - sum of an vector of integer;
+	double              dVSum (const vector<double> &doubleVector_h) const; ///< double vector sum - sum of a vectr of double;
 
 	/// Tokenize a string using a delimiter (default is space)
-	void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ");
+	void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ") const;
 
 protected:
 
@@ -207,7 +209,7 @@ protected:
 	ThreadManager*                       MTHREAD;                       ///< Pointer to the Thread manager.
 
 private:
-	void msgOut2(int msgCode_h, string msg_h, bool refreshGUI_h) const; ///< Do the job of the overloaded functions
+	void msgOut2(const int& msgCode_h, const string& msg_h, const bool& refreshGUI_h) const; ///< Do the job of the overloaded functions
 
 };
 

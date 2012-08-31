@@ -231,6 +231,10 @@ ModelData::addSetting(string name_h, string value_h, int type_h, string comment_
 	addSetting(name_h, values, type_h, comment_h);
 }
 
+void
+ModelData::cacheFrequentData(){
+	cached_initialYear = getIntSetting("initialYear");
+}
 
 // ###############################################################################
 
@@ -807,35 +811,35 @@ ModelData::getVectorBaseData (const string &name_h, int type_h){
 
 // ------------- start getSetting() amd getMacro() functions ....... -----------------
 int
-ModelData::getIntSetting(const string &name_h, int position){
+ModelData::getIntSetting(const string &name_h, int position) const{
 	return s2i( MTHREAD->MD->getBaseData(name_h,TYPE_INT,position) );
 }
 double
-ModelData::getDoubleSetting(const string &name_h, int position){
+ModelData::getDoubleSetting(const string &name_h, int position) const{
 	return s2d( MTHREAD->MD->getBaseData(name_h,TYPE_DOUBLE,position) );
 }
 string
-ModelData::getStringSetting(const string &name_h, int position){
+ModelData::getStringSetting(const string &name_h, int position) const{
 	return MTHREAD->MD->getBaseData(name_h,TYPE_STRING,position);
 }
 bool
-ModelData::getBoolSetting(const string &name_h, int position){
+ModelData::getBoolSetting(const string &name_h, int position) const{
 	return s2b( MTHREAD->MD->getBaseData(name_h,TYPE_BOOL,position) );
 }
 vector<int>
-ModelData::getIntVectorSetting(const string &name_h){
+ModelData::getIntVectorSetting(const string &name_h) const{
 	return s2i(MTHREAD->MD->getVectorBaseData(name_h,TYPE_INT));
 }
 vector<double>
-ModelData::getDoubleVectorSetting(const string &name_h){
+ModelData::getDoubleVectorSetting(const string &name_h) const{
 	return s2d(MTHREAD->MD->getVectorBaseData(name_h,TYPE_DOUBLE));
 }
 vector<string>
-ModelData::getStringVectorSetting(const string &name_h){
+ModelData::getStringVectorSetting(const string &name_h) const{
 	return MTHREAD->MD->getVectorBaseData(name_h,TYPE_STRING);
 }
 vector<bool>
-ModelData::getBoolVectorSetting(const string &name_h){
+ModelData::getBoolVectorSetting(const string &name_h) const{
 	return s2b(MTHREAD->MD->getVectorBaseData(name_h,TYPE_BOOL));
 }
 
@@ -902,10 +906,8 @@ It addmits the following "filters":
 
 */
 const double
-ModelData::getProdData(const string &type_h, const int& regId_h, const string &prodId_h, int year, const string &freeDim_h){
-	if(year==DATA_NOW){
-		year=MTHREAD->SCD->getYear();
-	}
+ModelData::getProdData(const string &type_h, const int& regId_h, const string &prodId_h, const int& year, const string &freeDim_h) {
+
 	double value=0;
 
 	/*
@@ -992,12 +994,9 @@ It addmits the following "filters":
 */
 
 const double
-ModelData::getForData(const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, int year){
+ModelData::getForData(const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year){
 	vector <string> dClasses = getStringVectorSetting("dClasses");
 
-	if(year==DATA_NOW){
-		year=MTHREAD->SCD->getYear();
-	}
 	bool found = false;
 	double value=0;
 	for(uint i=0;i<forDataVector.size();i++){
@@ -1036,7 +1035,7 @@ It addmits the following "filters":
 
 */
 void
-ModelData::setProdData(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, int year, const bool& allowCreate, const string &freeDim_h){
+ModelData::setProdData(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, const int& year, const bool& allowCreate, const string &freeDim_h){
 	vector<int> regIds;
 	vector <string> priProducts;
 	vector <string> secProducts;
@@ -1055,9 +1054,6 @@ ModelData::setProdData(const double& value_h, const string &type_h, const int& r
 		msgOut(MSG_CRITICAL_ERROR, "Error in setProdData(). Setting a value for the whole World is not supported.");
 	}
 
-	if(year==DATA_NOW){
-		year=MTHREAD->SCD->getYear();
-	}
 	bool found = false;	
 
 	for(uint r=0;r< regIds.size();r++){
@@ -1099,7 +1095,7 @@ ModelData::setProdData(const double& value_h, const string &type_h, const int& r
 }
 
 void
-ModelData::setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, int year, const bool& allowCreate){
+ModelData::setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year, const bool& allowCreate){
 
 	vector<int> regIds;
 	vector <string> dClasses = getStringVectorSetting("dClasses");
@@ -1115,9 +1111,6 @@ ModelData::setForData(const double& value_h, const string &type_h, const int& re
 		msgOut(MSG_CRITICAL_ERROR, "Error in setProdData(). Setting a value for the whole World is not supported.");
 	}
 
-	if(year==DATA_NOW){
-		year=MTHREAD->SCD->getYear();
-	}
 	bool found = false;
 
 	for(uint i=0;i<forDataVector.size();i++){
@@ -1156,9 +1149,14 @@ ModelData::setForData(const double& value_h, const string &type_h, const int& re
 
 
 double
-ModelData::getTimedData(const vector<double> &dated_vector, const int& year_h){
+ModelData::getTimedData(const vector<double> &dated_vector, const int& year_h) const{
 
-	int position = year_h-getIntSetting("initialYear");
+	int position;
+	if(year_h==DATA_NOW){
+		position = MTHREAD->SCD->getYear()-cached_initialYear;
+	} else {
+		position = year_h-cached_initialYear;
+	}
 
 	if(dated_vector.size() > position) {
 		return dated_vector[position];
@@ -1174,7 +1172,13 @@ ModelData::getTimedData(const vector<double> &dated_vector, const int& year_h){
 void
 ModelData::setTimedData(const double& value_h, vector<double> &dated_vector, const int& year_h, const int& MSG_LEVEL){
 
-	int position = year_h-getIntSetting("initialYear");
+	int position;
+	if(year_h==DATA_NOW){
+		position = MTHREAD->SCD->getYear()-cached_initialYear;
+	} else {
+		position = year_h-cached_initialYear;
+	}
+
 	int originalVectorSize = dated_vector.size();
 	if(dated_vector.size() > position) {
 		dated_vector[position]=value_h;
@@ -1461,7 +1465,7 @@ ModelData::getTable(string tableName_h, int debugLevel){
 
 
 bool
-ModelData::dataMapCheckExist(const DataMap& map, const string& search_for, bool exactMatch){
+ModelData::dataMapCheckExist(const DataMap& map, const string& search_for, const bool& exactMatch) const {
 	/*int dummyYear=MTHREAD->SCD->getYear();
 	if(dataMapGetValue(map, search_for, dummyYear, exactMatch)==DATA_ERROR) {
 		return false;
@@ -1493,7 +1497,7 @@ ModelData::dataMapCheckExist(const DataMap& map, const string& search_for, bool 
 
 
 double
-ModelData::dataMapGetValue(const DataMap& map, const string& search_for, int year_h, bool exactMatch) {
+ModelData::dataMapGetValue(const DataMap& map, const string& search_for, const int& year_h, const bool& exactMatch) {
 	double toReturn = 0;
 	tempBool = false;
 	DataMap::const_iterator i;
@@ -1521,7 +1525,7 @@ ModelData::dataMapGetValue(const DataMap& map, const string& search_for, int yea
 
 
 void
-ModelData::dataMapSetValue( DataMap& map, const string& search_for, double value_h, int year_h, bool exactMatch){
+ModelData::dataMapSetValue( DataMap& map, const string& search_for, const double& value_h, const int& year_h, const bool& exactMatch){
 	tempBool = false;
 	DataMap::iterator i;
 	if(!exactMatch){
@@ -1549,13 +1553,8 @@ ModelData::dataMapSetValue( DataMap& map, const string& search_for, double value
 	}
 }
 
-string
-ModelData::makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim){
-	return parName+"#"+regId+"#"+prod+"#"+freeDim+"#";
-}
-
 void
-ModelData::unpackKeyProdData(const string& key, string& parName, int& regId, string& prod, string& freeDim){
+ModelData::unpackKeyProdData(const string& key, string& parName, int& regId, string& prod, string& freeDim) const{
 
 	int parNameDelimiter = key.find("#",0);
 	int regIdDelimiter = key.find("#",parNameDelimiter+1);

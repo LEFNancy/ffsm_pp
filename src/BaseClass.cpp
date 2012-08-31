@@ -42,7 +42,7 @@ Overloaded method for the output log:
 
 */
 void
-BaseClass::msgOut(int msgCode_h, string msg_h, bool refreshGUI_h) const {
+BaseClass::msgOut(const int& msgCode_h, const string& msg_h, const bool& refreshGUI_h) const {
 
 	msgOut2(msgCode_h, msg_h, refreshGUI_h);
 
@@ -52,15 +52,13 @@ BaseClass::msgOut(int msgCode_h, string msg_h, bool refreshGUI_h) const {
 Overloaded method for the output log:
 
 @param msgCode_h:    MSG_DEBUG, MSG_INFO, MSG_WARNING, MSG_ERROR, MSG_CRITICAL_ERROR
-@param msg_h:        message text (int) 
+@param msg_h:        message text (int)
 @param refreshGUI_h: use this call to "ping" the GUI (optional, default=true)
 
 */
 void
-BaseClass::msgOut(int msgCode_h, int msg_h, bool refreshGUI_h) const {
-	ostringstream out;
-	out<<msg_h;
-	msgOut2(msgCode_h, out.str(), refreshGUI_h);
+BaseClass::msgOut(const int& msgCode_h, const int& msg_h, const bool& refreshGUI_h) const {
+	msgOut2(msgCode_h, i2s(msg_h), refreshGUI_h);
 }
 
 /**
@@ -72,11 +70,8 @@ Overloaded method for the output log:
 
 */
 void
-BaseClass::msgOut(int msgCode_h, double msg_h, bool refreshGUI_h) const {
-
-	ostringstream out;
-	out<<msg_h;
-	msgOut2(msgCode_h, out.str(), refreshGUI_h);
+BaseClass::msgOut(const int& msgCode_h, const double& msg_h, const bool& refreshGUI_h) const {
+	msgOut2(msgCode_h, d2s(msg_h), refreshGUI_h);
 
 }
 
@@ -85,8 +80,8 @@ Convenient (private) function to actually do the job of the overloaded functions
 
 */
 void
-BaseClass::msgOut2(int msgCode_h, string msg_h, bool refreshGUI_h) const {
-	
+BaseClass::msgOut2(const int& msgCode_h, const string& msg_h, const bool& refreshGUI_h) const {
+
 	string prefix;
 	switch (msgCode_h){
 	case MSG_NO_MSG:
@@ -121,7 +116,7 @@ BaseClass::msgOut2(int msgCode_h, string msg_h, bool refreshGUI_h) const {
 	}
 
 	if(refreshGUI_h) {refreshGUI();}
-	
+
 	if(msgCode_h==MSG_CRITICAL_ERROR){
 		if (MTHREAD && MTHREAD->usingGUI()){
 			throw(2);
@@ -130,7 +125,7 @@ BaseClass::msgOut2(int msgCode_h, string msg_h, bool refreshGUI_h) const {
 			//throw(2);
 			exit(EXIT_FAILURE);
 		}
-	}	
+	}
 }
 
 void
@@ -140,32 +135,36 @@ BaseClass::refreshGUI()const{
 	}
 }
 
-int
-BaseClass::s2i ( string string_h) const {
-	if (string_h == "") return 0;
-	int valueAsInteger;
-	string valueAsString = string_h;
-	istringstream totalSString( valueAsString );
-	totalSString >> valueAsInteger;
-	return valueAsInteger;
-}
+// other ways of converting string to integers :
+// -- 1 (not tested) :
+// (int)strtol(token_start, (char **)NULL, 10);
+// -- 2 (old used method, everyone say slow) :
+// int valueAsInteger;
+// string valueAsString = string_h;
+// istringstream totalSString( valueAsString );
+// totalSString >> valueAsInteger;
+// return valueAsInteger;
+// -- 3 (C++11) :
+// String to integer: int n = std::stoi(s);
+// Integer to string: std::string s = std::to_string(n);
+// the if string_h=="" return 0 is no longer needed.
+
 
 /// Includes comma to dot conversion if needed.
 double
-BaseClass::s2d ( string string_h) const {
-	if (string_h == "") return 0;
-	double valueAsDouble;
-	string valueAsString = string_h;
-	// replace commas with dots. This is not needed when directly reading the input nodes as double, as the Qt function to Double does the same.
-	replace(valueAsString.begin(), valueAsString.end(), ',', '.');
-	istringstream totalSString( valueAsString );
-	totalSString >> valueAsDouble;
-	return valueAsDouble;
+BaseClass::s2d (const  string& string_h, const bool& replaceComma) const {
+	if(replaceComma){
+		string valueAsString = string_h;
+		// replace commas with dots. This is not needed when directly reading the input nodes as double, as the Qt function to Double does the same.
+		replace(valueAsString.begin(), valueAsString.end(), ',', '.');
+		return atof(valueAsString.c_str());
+	}
+	return atof(string_h.c_str());
 }
 
 /// Includes conversion checks.
 bool
-BaseClass::s2b ( string string_h) const {
+BaseClass::s2b (const string& string_h) const {
 	if (string_h == "true" || string_h == "vero" || string_h == "TRUE" || string_h == "1" || string_h == "True")
 		return true;
 	else if (string_h == "false" || string_h == "falso" || string_h == "FALSE" || string_h == "0" || string_h == "")
@@ -175,112 +174,101 @@ BaseClass::s2b ( string string_h) const {
 	return true;
 }
 
-string
-BaseClass::i2s (int int_h) const{
-	ostringstream out;
-	out<<int_h;
-	return out.str();
-}
+//string
+//BaseClass::i2s (const int& int_h) const{
+	//ostringstream out;
+	//out<<int_h;
+	//return out.str();
+
+	// return to_string(int_h);
+
+	//char* result;
+	//sprintf( result, "%d", int_h );
+	//string str(result);
+	//return str;
+
+//}
+
+//string
+//BaseClass::d2s (const double& double_h) const{
+//	ostringstream out;
+//	out<<double_h;
+//	return out.str();
+//}
 
 string
-BaseClass::d2s (double double_h) const{
-	ostringstream out;
-	out<<double_h;
-	return out.str();
-}
-
-string
-BaseClass::b2s (bool bool_h) const{
-	string out;
-	if(bool_h)
-		out = "true";
-	else
-		out = "false";
-	return out;
+BaseClass::b2s (const bool& bool_h) const{
+	if (bool_h) return "true";
+	else return "false";
 }
 
 vector <int>
-BaseClass::s2i( vector <string> string_h) const{
+BaseClass::s2i(const  vector <string>& string_h) const{
 	vector <int> valuesAsInteger;
 	for (uint i=0;i<string_h.size();i++){
-		if (string_h.at(i) == "") {
-			valuesAsInteger.push_back(0);
-			continue;
-		}
-		int valueAsInteger;
-		istringstream totalSString( string_h.at(i));
-		totalSString >> valueAsInteger;
-		valuesAsInteger.push_back(valueAsInteger);
+		valuesAsInteger.push_back(atof(string_h[i].c_str()));
 	}
 	return valuesAsInteger;
 }
 
 /// Includes comma to dot conversion if needed.
 vector <double>
-BaseClass::s2d (vector <string> string_h) const{
+BaseClass::s2d (const vector <string>& string_h, const bool& replaceComma) const{
 	vector <double> valuesAsDouble;
 	for (uint i=0;i<string_h.size();i++){
-		if (string_h.at(i) == "") {
-			valuesAsDouble.push_back(0);
-			continue;
+		if(replaceComma){
+			string valueAsString = string_h[i];
+			// replace commas with dots. This is not needed when directly reading the input nodes as double, as the Qt function to Double does the same.
+			replace(valueAsString.begin(), valueAsString.end(), ',', '.');
+			valuesAsDouble.push_back(::atof(valueAsString.c_str()));
+		} else {
+			valuesAsDouble.push_back(::atof(string_h[i].c_str()));
 		}
-		double valueAsDouble;
-		// replace commas with dots. This is not needed when directly reading the input nodes as double, as the Qt function to Double does the same.
-		replace(string_h.at(i).begin(), string_h.at(i).end(), ',', '.');
-		istringstream totalSString( string_h.at(i));
-		totalSString >> valueAsDouble;
-		valuesAsDouble.push_back(valueAsDouble);
 	}
 	return valuesAsDouble;
 }
 
 /// Includes conversion checks.
 vector <bool>
-BaseClass::s2b( vector <string> string_h) const{
+BaseClass::s2b(const vector <string> &string_h) const{
 	vector <bool> valuesAsBool;
 	for (uint i=0;i<string_h.size();i++){
-		valuesAsBool.push_back(s2b(string_h.at(i)));
+		valuesAsBool.push_back(s2b(string_h[i]));
 	}
 	return valuesAsBool;
 }
 
 vector <string>
-BaseClass::i2s (vector <int> int_h) const{
+BaseClass::i2s (const vector <int> &int_h) const{
 	vector <string> valuesAsString;
 	for (uint i=0;i<int_h.size();i++){
-		ostringstream valueAsString;
-		valueAsString<<int_h.at(i);
-		valuesAsString.push_back(valueAsString.str());
+		valuesAsString.push_back(to_string(int_h[i]));
 	}
 	return valuesAsString;
 }
 
 vector <string>
-BaseClass::d2s (vector <double> double_h) const{
+BaseClass::d2s (const vector <double> &double_h) const{
 	vector <string> valuesAsString;
 	for (uint i=0;i<double_h.size();i++){
-		ostringstream valueAsString;
-		valueAsString<<double_h.at(i);
-		valuesAsString.push_back(valueAsString.str());
+		valuesAsString.push_back(to_string(double_h[i]));
 	}
 	return valuesAsString;
 }
 
 vector <string>
-BaseClass::b2s (vector <bool> bool_h) const{
+BaseClass::b2s (const vector <bool> &bool_h) const{
 	vector <string> valuesAsString;
 	for (uint i=0;i<bool_h.size();i++){
-		string temp;
-		if(bool_h.at(i)) temp = "true";
-		else temp = "false";
-		valuesAsString.push_back(temp);
+		if(bool_h[i]) valuesAsString.push_back("true");
+		else valuesAsString.push_back("false");
 	}
 	return valuesAsString;
 }
 
 
 int
-BaseClass::getType(string &type_h){
+BaseClass::getType(const string &type_h) const{
 	int toReturn=0;
 	if (type_h == "int")         toReturn = TYPE_INT;
 	else if (type_h == "double") toReturn = TYPE_DOUBLE;
@@ -292,14 +280,14 @@ BaseClass::getType(string &type_h){
 
 
 template<typename T> std::string
-BaseClass::toString(const T& x) {
+BaseClass::toString(const T& x) const {
   std::ostringstream oss;
   oss << x;
   return oss.str();
 }
 
 template<typename T> T 
-BaseClass::stringTo(const std::string& s) {
+BaseClass::stringTo(const std::string& s) const{
   std::istringstream iss(s);
   T x;
   iss >> x;
@@ -308,7 +296,7 @@ BaseClass::stringTo(const std::string& s) {
 
 
 int
-BaseClass::iVSum (const vector<int> &intVector_h){
+BaseClass::iVSum (const vector<int> &intVector_h) const{
 	int toReturn=0;
 	for(uint i=0;i<intVector_h.size();i++){
 		toReturn += intVector_h[i];
@@ -317,7 +305,7 @@ BaseClass::iVSum (const vector<int> &intVector_h){
 }
 
 double
-BaseClass::dVSum (const vector<double> &doubleVector_h){
+BaseClass::dVSum (const vector<double> &doubleVector_h) const{
 	double toReturn=0;
 	for(uint i=0;i<doubleVector_h.size();i++){
 		toReturn += doubleVector_h[i];
@@ -327,7 +315,7 @@ BaseClass::dVSum (const vector<double> &doubleVector_h){
 
 
 void
-BaseClass::tokenize(const string& str, vector<string>& tokens, const string& delimiter){
+BaseClass::tokenize(const string& str, vector<string>& tokens, const string& delimiter) const{
     // Skip delimiters at beginning.
     string::size_type lastPos = str.find_first_not_of(delimiter, 0);
     // Find first "non-delimiter".

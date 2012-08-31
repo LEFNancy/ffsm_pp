@@ -114,7 +114,7 @@ Init::setInitLevel1(){
 	}
 	MTHREAD->GIS->setSpace();
 	MTHREAD->GIS->applyForestReclassification();
-
+	MTHREAD->MD->cacheFrequentData();
 
 }
 
