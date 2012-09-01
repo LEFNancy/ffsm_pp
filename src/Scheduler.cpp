@@ -46,7 +46,6 @@ Scheduler::run(){
 
 		MTHREAD->CORE->runSimulationYear();
 
-		MTHREAD->DO->collectData();
 		MTHREAD->DO->print();
 
 		for(int i=0;i<MTHREAD->GIS->getXNPixels();i++){

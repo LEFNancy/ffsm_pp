@@ -38,16 +38,10 @@ Output::~Output(){
 
 // ---- functions ... ----------------------
 
-void
-Output::collectData(){
-
-}
 
 void
 Output::initOutput(){
-	//initOutputAggregatedData();
 	initOutputMaps();
-	//initOutputDetailedData();
 	initOutputForestData();
 	initOutputProductData();
 
@@ -69,9 +63,12 @@ Output::initOutputForestData(){
 		ofstream out(outFileName.c_str(), ios::out);
 		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
 		out << "scen" << d << "parName" << d << "region" << d << "forType" << d << "diamClass" << d;
-
-		for(int i=0;i<nYears;i++){
-			out << i+inYear << d;
+		if(MTHREAD->MD->getBoolSetting("outputHumanReadable")){
+			for(int i=0;i<nYears;i++){
+				out << i+inYear << d;
+			}
+		} else {
+			out << "year" << d << "value" << d;
 		}
 		out << "\n";
 		out.close();
@@ -92,59 +89,17 @@ Output::initOutputProductData(){
 		ofstream out(outFileName.c_str(), ios::out);
 		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
 		out << "scen" << d << "parName" << d << "region" << d << "prod" << d << "freeDim" << d;
-		for(int i=0;i<nYears;i++){
-			out << i+inYear << d;
-		}
-		out << "\n";
-		out.close();
-}
-
-void
-Output::initOutputAggregatedData(){
-	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
-
-
-	char d = getOutputFieldDelimiter();
-
-	string outFileName;
-
-
-	if(MTHREAD->MD->getBoolSetting("aggregatedOutputHumanReadable")) {
-		outFileName = MTHREAD->MD->getBaseDirectory()
-					  + MTHREAD->MD->getOutputDirectory()
-		              + "results/aggregatedOutput_"
-		              + MTHREAD->getScenarioName()
-					  + MTHREAD->MD->getStringSetting("outputFileExtension");
-		ofstream out(outFileName.c_str(), ios::out);
-		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
-		out << "YEAR"                << d << "\n";
-		out.close();	
-	} else { // output is for database processing...
-		outFileName = MTHREAD->MD->getBaseDirectory()
-					  + MTHREAD->MD->getOutputDirectory()
-		              + "results/aggregatedOutput"
-					  + MTHREAD->MD->getStringSetting("outputFileExtension");
-		ifstream in(outFileName.c_str(), ios::in);
-		if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
-			in.close();
-			cleanScenario(outFileName, MTHREAD->getScenarioName(), d);
-			return;
+		if(MTHREAD->MD->getBoolSetting("outputHumanReadable")){
+			for(int i=0;i<nYears;i++){
+				out << i+inYear << d;
+			}
 		} else {
-			in.close();
+			out << "year" << d << "value" << d;
 		}
-		ofstream out(outFileName.c_str(), ios::out);
-		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
-		out << "SCENARIO" << d ;
-		out << "YEAR"                << d ;
 		out << "\n";
 		out.close();
-	}
-
-
-
-
-
 }
+
 /**
 Resetting the list of printed layers and the scenario name..
 <br>Printing scenario name for post-processing scripts
@@ -176,58 +131,13 @@ Output::initOutputMaps(){
 	
 }
 
-void
-Output::initOutputDetailedData(){
-	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_DETAILED) return;
-
-	char d = getOutputFieldDelimiter();
-	vector<int> landTypes;
-
-
-	if(MTHREAD->MD->getBoolSetting("detailedOutputHumanReadable")){
-		string outFileName =     MTHREAD->MD->getBaseDirectory()
-							   + MTHREAD->MD->getOutputDirectory()
-							   + "results/ag_"
-							   + "detailID"
-							   + "_"
-							   + MTHREAD->getScenarioName()
-							   + MTHREAD->MD->getStringSetting("outputFileExtension");
-		ofstream out(outFileName.c_str(), ios::out);
-		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+".");}
-		out << "RECORDID"             << d << "\n"
-			<< "YEAR"                 << d << "\n";
-		    out.close();
-	} else { // output is on one big file....
-		string outFileName =     MTHREAD->MD->getBaseDirectory()
-								   + MTHREAD->MD->getOutputDirectory()
-			                       + "results/agentsDetails"
-								   + MTHREAD->MD->getStringSetting("outputFileExtension");
-		ifstream in(outFileName.c_str(), ios::in);
-		if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
-			in.close();
-			cleanScenario(outFileName, MTHREAD->getScenarioName(), d);
-			return;
-		} else {
-			in.close();
-		}
-		ofstream out(outFileName.c_str(), ios::out);
-		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+".");}
-		out << "SCENARIO"             << d ;
-		out << "RECORDID"             << d ;
-		out << "YEAR"                 << d ;
-		out.close();
-	}
-}
-
-
 
 
 void
 Output::print(){
-	//printAggregatedData();
 	printMaps();
-	//printDetailedData();
-	//printDebugMatrices();
+	printForestData(false);
+	printProductData(false);
 }
 
 void
@@ -240,69 +150,25 @@ Output::printMaps(){
 }
 
 void
-Output::printDetailedData(){
-	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_DETAILED) return;
-
-	char           d         = getOutputFieldDelimiter();
-
-	string out;
-
-	vector <string> sData; //surveyData
-	//sData.push_back(surveyID);
-	//sData.push_back(i2s(surveys[i].year));
-
-
-	if(MTHREAD->MD->getBoolSetting("detailedOutputHumanReadable")){
-		string inOutFileName =     MTHREAD->MD->getBaseDirectory()
-								 + MTHREAD->MD->getOutputDirectory()
-								 + "results/ag_"
-								 + "detailID"
-								 + "_"
-								 + MTHREAD->getScenarioName()
-								 + MTHREAD->MD->getStringSetting("outputFileExtension");
-
-		ifstream inFile (inOutFileName.c_str(), ios::in);
-		if (!inFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for reading.");}
-		for(uint i=0;i<sData.size();i++) {
-			string tempString;
-			getline (inFile,tempString);
-			out.append(tempString);
-			out.append(sData[i]+d);
-			out.append("\n");
-		}
-		inFile.close();
-
-		ofstream outFile (inOutFileName.c_str(), ios::out);
-		if (!outFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for writing.");}
-			outFile << out ;
-			outFile.close();
-	} else {  // one big file...
-		string outFileName =     MTHREAD->MD->getBaseDirectory()
-								 + MTHREAD->MD->getOutputDirectory()
-								 + "results/agentsDetails"
-								 //+ MTHREAD->getScenarioName()
-								 + MTHREAD->MD->getStringSetting("outputFileExtension");
-		ofstream outFile (outFileName.c_str(), ios::app);
-		if (!outFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+".");}
-		outFile << MTHREAD->getScenarioName() << d ;
-		for (uint i=0;i<sData.size();i++){
-			outFile << sData[i] << d ;
-		}
-		outFile << "\n" ;
-		outFile.close();
-	}
-}
-
-void
 Output::printFinalOutput(){
-	printForestData();
-	printProductData();
+	// we do this only if we choosed the outputHumanReadable settings, as we flush the data all in ones at the end.
+	// oterwise we flush data every year
+	if(MTHREAD->MD->getBoolSetting("outputHumanReadable")){
+		printForestData(true);
+		printProductData(true);
+	}
+
 }
 
 void
-Output::printForestData(){
-	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
+Output::printForestData(bool finalFlush){
+
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_DETAILED) return;
+	bool outputHumanReadable = MTHREAD->MD->getBoolSetting("outputHumanReadable");
+	if(outputHumanReadable && !finalFlush) return;
+
 	msgOut(MSG_INFO, "Printing forest data..");
+	int currentYear = MTHREAD->SCD->getYear();
 	string inOutFileName;
 	char d = getOutputFieldDelimiter();
 	int inYear = MTHREAD->MD->getIntSetting("initialYear");
@@ -321,18 +187,28 @@ Output::printForestData(){
 		out << MTHREAD->MD->forDataVector[i].region << d;
 		out << MTHREAD->MD->forDataVector[i].forType << d;
 		out << MTHREAD->MD->forDataVector[i].diamClass << d;
-		for(int y=0;y<nYears;y++){
-			out << MTHREAD->MD->getTimedData(MTHREAD->MD->forDataVector[i].values,y+inYear) << d;
+		if (outputHumanReadable){
+			for(int y=0;y<nYears;y++){
+				out << MTHREAD->MD->getTimedData(MTHREAD->MD->forDataVector[i].values,y+inYear) << d;
+			}
+			out << "\n";
+		} else {
+			out << currentYear << d;
+			out << MTHREAD->MD->getTimedData(MTHREAD->MD->forDataVector[i].values,currentYear) << d;
+			out << "\n";
 		}
-		out << "\n";
 	}
 	out.close();
 }
 
 void
-Output::printProductData(){
-	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
+Output::printProductData(bool finalFlush){
+	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_DETAILED) return;
+	bool outputHumanReadable = MTHREAD->MD->getBoolSetting("outputHumanReadable");
+	if(outputHumanReadable && !finalFlush) return;
+
 	msgOut(MSG_INFO, "Printing product data..");
+	int currentYear = MTHREAD->SCD->getYear();
 	string inOutFileName;
 	char d = getOutputFieldDelimiter();
 	int inYear = MTHREAD->MD->getIntSetting("initialYear");
@@ -361,76 +237,21 @@ Output::printProductData(){
 		out << regId << d;
 		out << prod << d;
 		out << freeDim << d;
-		for(int y=0;y<nYears;y++){
-			out << MTHREAD->MD->getTimedData(values,y+inYear) << d;
+		if (outputHumanReadable){
+			for(int y=0;y<nYears;y++){
+				out << MTHREAD->MD->getTimedData(values,y+inYear) << d;
+			}
+			out << "\n";
+		} else {
+			out << currentYear << d;
+			out << MTHREAD->MD->getTimedData(values,currentYear) << d;
+			out << "\n";
 		}
-		out << "\n";
 	}
 	out.close();
 }
 
-void
-Output::printAggregatedData(){
-	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_AGGREGATED) return;
 
-	string inOutFileName;
-
-	char                 d               = getOutputFieldDelimiter();
-
-
-	string out;
-	vector<string> data; // vector of the newly added data
-	//double          SUMcapital=0;
-
-	data.push_back(i2s(MTHREAD->SCD->getYear()));
-
-
-	if (MTHREAD->MD->getBoolSetting("aggregatedOutputHumanReadable")){
-		inOutFileName = MTHREAD->MD->getBaseDirectory()
-						+ MTHREAD->MD->getOutputDirectory()
-		                + "results/aggregatedOutput_"
-		                + MTHREAD->getScenarioName()
-						+ MTHREAD->MD->getStringSetting("outputFileExtension");
-		ifstream inFile (inOutFileName.c_str(), ios::in);
-		if (!inFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for reading.");}
-		for(uint i=0;i<data.size();i++) {
-			string tempString;
-			getline (inFile,tempString);
-			out.append(tempString);
-			out.append(data[i]+d);
-			out.append("\n");
-		}
-		inFile.close();
-
-		ofstream outFile (inOutFileName.c_str(), ios::out);
-		if (!outFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for writing.");}
-		outFile << out ;
-		outFile.close();
-	} else { // outpout for DB...
-
-		inOutFileName = MTHREAD->MD->getBaseDirectory()
-						+ MTHREAD->MD->getOutputDirectory()
-		                + "results/aggregatedOutput"
-		                //+ MTHREAD->getScenarioName()
-						+ MTHREAD->MD->getStringSetting("outputFileExtension");
-
-		ofstream outFile (inOutFileName.c_str(), ios::app);
-		if (!outFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for writing.");}
-		outFile << MTHREAD->getScenarioName() << d ;
-		for (uint i=0;i<data.size();i++){
-				outFile << data[i] << d ;
-		}
-		outFile << "\n" ;
-		outFile.close();
-	}
-}
-
-
-
-void
-Output::printDebugMatrices(){
-	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_ALL) return;
-}
 
 
 char
@@ -487,35 +308,5 @@ Output::cleanScenario(string fileName, string scenarioName, char d){
 		out << rows[i];
 		out << "\n";
 	}
-	
-	/*QFile infile(fileName.c_str());
-	if (!infile.open(QFile::ReadOnly)) {
-		//cerr << "Cannot open file for reading: "
-		//	<< qPrintable(file.errorString()) << endl;
-		//msgOut(MSG_ERROR, "Cannot open map file "+fileName+" for reading.");
-		return;
-	}
-	QTextStream in(&file);
-	int countRow = 0;
-	while (!in.atEnd()) {
-		QString line = in.readLine();
-		QStringList fields = line.split(' ');
-
-	*/
-
-	/*		for(uint i=0;i<sData.size();i++) {
-				string tempString;
-				getline (inFile,tempString);
-				out.append(tempString);
-				out.append(sData[i]+d);
-				out.append("\n");
-			}
-			inFile.close();
-
-			ofstream outFile (inOutFileName.c_str(), ios::out);
-			if (!outFile){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for writing.");}
-			outFile << out ;
-			outFile.close(); 
-	*/
 }
 

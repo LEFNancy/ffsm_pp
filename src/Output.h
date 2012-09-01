@@ -47,20 +47,14 @@ public:
 	                   ~Output();
 
 	void                initOutput();
-		void                initOutputAggregatedData();
 		void                initOutputMaps();
-		void                initOutputDetailedData();
 		void                initOutputForestData();
 		void                initOutputProductData();
-	void                collectData();
 	void                print();
-		void                printAggregatedData();
-		void                printMaps();
-		void                printDetailedData();
-		void                printDebugMatrices();
+	void                printMaps();
 	void                printFinalOutput();
-		void                printForestData();
-		void                printProductData();
+	void                printForestData(bool finalFlush=false);
+	void                printProductData(bool finalFlush=false);
 	char                getOutputFieldDelimiter();
 	void                cleanScenario(string fileName, string scenarioName, char d);
 

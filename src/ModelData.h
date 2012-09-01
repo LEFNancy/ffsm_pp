@@ -148,8 +148,8 @@ double                calculateAnnualisedEquivalent(double amount_h, double year
 	void                setBasicData(const string &name_h, double value, int position=0);
 	void                setBasicData(const string &name_h, string value, int position=0);
 	void                setBasicData(const string &name_h, bool value, int position=0);
-	friend void         Output::printForestData();
-	friend void         Output::printProductData();
+	friend void         Output::printForestData(bool finalFlush=false);
+	friend void         Output::printProductData(bool finalFlush=false);
 
 private:
 	string              getBaseData (const string &name_h, int type_h, int position=0);
