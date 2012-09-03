@@ -181,20 +181,30 @@ Output::printForestData(bool finalFlush){
 	ofstream out (inOutFileName.c_str(), ios::app);
 	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+inOutFileName+" for writing.");}
 
-	for(uint i=0;i<MTHREAD->MD->forDataVector.size();i++){
+	DataMap::const_iterator i;
+	string key;
+	vector <double> values;
+	string parName;
+	int regId;
+	string forType;
+	string diamClass;
+	for(i=MTHREAD->MD->forDataMap.begin();i!=MTHREAD->MD->forDataMap.end();i++){
+		key = i->first;
+		values = i->second;
+		MTHREAD->MD->unpackKeyForData(key, parName, regId, forType, diamClass);
 		out << MTHREAD->getScenarioName() << d;
-		out << MTHREAD->MD->forDataVector[i].parName << d;
-		out << MTHREAD->MD->forDataVector[i].region << d;
-		out << MTHREAD->MD->forDataVector[i].forType << d;
-		out << MTHREAD->MD->forDataVector[i].diamClass << d;
+		out << parName << d;
+		out << regId << d;
+		out << forType << d;
+		out << diamClass << d;
 		if (outputHumanReadable){
 			for(int y=0;y<nYears;y++){
-				out << MTHREAD->MD->getTimedData(MTHREAD->MD->forDataVector[i].values,y+inYear) << d;
+				out << MTHREAD->MD->getTimedData(values,y+inYear) << d;
 			}
 			out << "\n";
 		} else {
 			out << currentYear << d;
-			out << MTHREAD->MD->getTimedData(MTHREAD->MD->forDataVector[i].values,currentYear) << d;
+			out << MTHREAD->MD->getTimedData(values,currentYear) << d;
 			out << "\n";
 		}
 	}

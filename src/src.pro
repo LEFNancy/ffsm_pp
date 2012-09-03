@@ -72,7 +72,20 @@ QMAKE_CXXFLAGS += -std=c++0x
 #INCLUDEPATH += ". agents"
 
 
-OBJECTS_DIR = ../bin
+#OBJECTS_DIR = ../bin
+
+#Release:DESTDIR = ../build/release
+Release:OBJECTS_DIR = ../build/release
+Release:MOC_DIR = ../build/release
+Release:RCC_DIR = ../build/release
+Release:UI_DIR = ../build/release
+
+#Debug:DESTDIR = ../build/debug
+Debug:OBJECTS_DIR = ../build/debug
+Debug:MOC_DIR = ../build/debug
+Debug:RCC_DIR = ../build/debug
+Debug:UI_DIR = ../build/debug
+
 
 # Input
 HEADERS += Adolc_debugtest.h \

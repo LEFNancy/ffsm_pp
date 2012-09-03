@@ -232,8 +232,13 @@ ModelData::addSetting(string name_h, string value_h, int type_h, string comment_
 }
 
 void
-ModelData::cacheFrequentData(){
+ModelData::cacheSettings(){
 	cached_initialYear = getIntSetting("initialYear");
+	diamClasses = getStringVectorSetting("dClasses");
+	priProducts = getStringVectorSetting("priProducts");
+	secProducts = getStringVectorSetting("secProducts");
+	allProducts = priProducts;
+	allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
 }
 
 // ###############################################################################
@@ -346,15 +351,9 @@ ModelData::assessProdPossibility(const string &prod_h, const string &forType_h, 
 
 void
 ModelData::setDefaultForData(){
-
 	msgOut(MSG_DEBUG,"Loading forest sector data..");
 	LLData table = getTable("forData");
 	for (int i=0; i< table.nrecords();i++){
-		forData FDATA;
-		FDATA.parName = table.getData(i,"parName");
-		FDATA.region = s2i(table.getData(i,"region"));
-		FDATA.forType = table.getData(i,"forType");
-		FDATA.diamClass = table.getData(i,"diamClass");
 		vector <double> values;
 		for (int z=0;z<100;z++){
 			string toSearch = "value_"+i2s(z);
@@ -363,10 +362,8 @@ ModelData::setDefaultForData(){
 				values.push_back(s2d(value));
 			}
 		}
-		FDATA.values = values;
-		forDataVector.push_back(FDATA);
-		//giving a link to it to its own region:
-		getRegion(FDATA.region)->addForData(&FDATA);
+		string keys = makeKeyForData(table.getData(i,"parName"), table.getData(i,"region"),table.getData(i,"forType"),table.getData(i,"diamClass"));
+		forDataMap.insert(std::pair<string, vector<double> >(keys, values));
 	}
 }
 
@@ -378,12 +375,8 @@ ModelData::setScenarioForData(){
 	if(table.getTableName() == "") return;
 
 	for(int i=0; i< table.nrecords(); i++){
-		forData FDATA;
 		bool found = false;
-		FDATA.parName = table.getData(i,"parName");
-		FDATA.region = s2i(table.getData(i,"region"));
-		FDATA.forType = table.getData(i,"forType");
-		FDATA.diamClass = table.getData(i,"diamClass");
+		string key = makeKeyForData(table.getData(i,"parName"),table.getData(i,"region"),table.getData(i,"forType"),table.getData(i,"diamClass"));
 		vector <double> values;
 		for (int z=0;z<100;z++){
 			string toSearch = "value_"+i2s(z);
@@ -392,23 +385,15 @@ ModelData::setScenarioForData(){
 				values.push_back(s2d(value));
 			}
 		}
-		FDATA.values = values;
-		for(uint i=0;i<forDataVector.size();i++){
-			if(forDataVector[i].parName == FDATA.parName
-			   && forDataVector[i].region == FDATA.region
-			   && forDataVector[i].forType == FDATA.forType
-			   && forDataVector[i].diamClass == FDATA.diamClass){
-				// existing forData..
-				forDataVector[i].values = FDATA.values;
-				found = true;
-				break;
-			}
+		map <string, vector < double > >::iterator p;
+		p=forDataMap.find(key);
+		if(p != forDataMap.end()) {
+			// updating an existing record
+			p->second = values;
 		}
-		if(!found){
+		else {
 			// new one, adding it
-			forDataVector.push_back(FDATA);
-			//giving a link to it to its own region:
-			getRegion(FDATA.region)->addForData(&FDATA);
+			forDataMap.insert(std::pair<string, vector<double> >(key, values));
 		}
 	}
 }
@@ -451,7 +436,7 @@ ModelData::setScenarioProdData(){
 	for(int i=0; i< table.nrecords(); i++){
 		//prodData PDATA;
 		bool found = false;
-		string keys = makeKeyProdData(table.getData(i,"parName"),table.getData(i,"region"),table.getData(i,"prod"),table.getData(i,"freeDim"));
+		string key = makeKeyProdData(table.getData(i,"parName"),table.getData(i,"region"),table.getData(i,"prod"),table.getData(i,"freeDim"));
 
 		//PDATA.parName = table.getData(i,"parName");
 		//PDATA.region = s2i(table.getData(i,"region"));
@@ -485,14 +470,14 @@ ModelData::setScenarioProdData(){
 		//}
 
 		map <string, vector < double > >::iterator p;
-		p=prodDataMap.find(keys);
+		p=prodDataMap.find(key);
 		if(p != prodDataMap.end()) {
 			// updating an existing record
 			p->second = values;
 		}
 		else {
 			// new one, adding it
-			prodDataMap.insert(std::pair<string, vector<double> >(keys, values));
+			prodDataMap.insert(std::pair<string, vector<double> >(key, values));
 		}
 	}
 }
@@ -547,73 +532,64 @@ ModelData::applyOverrides(){
 	msgOut(MSG_INFO, "Starting regional overriding analysis..");
 
 	DataMap::iterator p;
-	string parName,prod,freeDim,key;
+	string parName,prod,freeDim,forType,diamClass, key;
 	int regId;
 	DataMap toBeAdded;
 	vector <string> keysToRemove;
 
 
 	//apply override from level 0 to level 1 for forestry data
-	for(uint i=0;i<forDataVector.size();i++){
-		if(forDataVector[i].region == 0){
-			vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren(false);
+	toBeAdded.clear();
+	keysToRemove.clear();
+	for(p=forDataMap.begin();p!=forDataMap.end();p++){
+		unpackKeyForData(p->first,parName,regId,forType,diamClass);
+		if(getRegion(regId)->getRegLevel() == 0){
+			vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
 			for(uint j=0;j<childs.size();j++){
-				bool found = 0;
-				for(uint z=0;z<forDataVector.size();z++){
-					if(   forDataVector[z].parName == forDataVector[i].parName
-					   && forDataVector[z].region == childs[j]->getRegId()
-					   && forDataVector[z].forType == forDataVector[i].forType
-					   && forDataVector[z].diamClass == forDataVector[i].diamClass
-					){
-						found = true; // do nothing, this child has been already manually overritten
-						break;
-					}
-				}
-				if(!found){
-					forData FD;
-					FD.parName   = forDataVector[i].parName;
-					FD.region    = childs[j]->getRegId();
-					FD.forType   = forDataVector[i].forType;
-					FD.diamClass = forDataVector[i].diamClass;
-					FD.values    = forDataVector[i].values;
-					forDataVector.push_back(FD);
+				bool found = false;
+				key = makeKeyForData(parName,i2s(childs[j]->getRegId()),forType,diamClass);
+				if (!dataMapCheckExist(forDataMap,key,true)){
+					toBeAdded.insert(DataPair(key,p->second));
 				}
 			}
-			forDataVector.erase(forDataVector.begin()+i);
-			i--;
+			keysToRemove.push_back(p->first);
 		}
 	}
-	//apply override from level 1 to level 2 for forestry data
-	for(uint i=0;i<forDataVector.size();i++){
-		if(getRegion(forDataVector[i].region)->getRegLevel() == 1){
-			vector<ModelRegion*> childs = getRegion(forDataVector[i].region)->getChildren(false);
-			for(uint j=0;j<childs.size();j++){
-				bool found = 0;
-				for(uint z=0;z<forDataVector.size();z++){
-					if(   forDataVector[z].parName == forDataVector[i].parName
-					   && forDataVector[z].region == childs[j]->getRegId()
-					   && forDataVector[z].forType == forDataVector[i].forType
-					   && forDataVector[z].diamClass == forDataVector[i].diamClass
-					){
-						found = true; // do nothing, this child has been already manually overritten
-						break;
-					}
-				}
-				if(!found){
-					forData FD;
-					FD.parName   = forDataVector[i].parName;
-					FD.region    = childs[j]->getRegId();
-					FD.forType   = forDataVector[i].forType;
-					FD.diamClass = forDataVector[i].diamClass;
-					FD.values    = forDataVector[i].values;
-					forDataVector.push_back(FD);
-				}
-			}
-			forDataVector.erase(forDataVector.begin()+i);
-			i--;
+	forDataMap.insert(toBeAdded.begin(),toBeAdded.end());
+	for(uint i=0;i<keysToRemove.size();i++){
+		DataMap::iterator rem = forDataMap.find(keysToRemove[i]);
+		if(rem != forDataMap.end()){
+			forDataMap.erase(rem);
 		}
 	}
 
+
+
+
+	//apply override from level 1 to level 2 for forestry data
+	toBeAdded.clear();
+	keysToRemove.clear();
+	for(p=forDataMap.begin();p!=forDataMap.end();p++){
+		unpackKeyForData(p->first,parName,regId,forType,diamClass);
+		if(getRegion(regId)->getRegLevel() == 1){
+			vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
+			for(uint j=0;j<childs.size();j++){
+				bool found = false;
+				key = makeKeyForData(parName,i2s(childs[j]->getRegId()),forType,diamClass);
+				if (!dataMapCheckExist(forDataMap,key,true)){
+					toBeAdded.insert(DataPair(key,p->second));
+				}
+			}
+			keysToRemove.push_back(p->first);
+		}
+	}
+	forDataMap.insert(toBeAdded.begin(),toBeAdded.end());
+	for(uint i=0;i<keysToRemove.size();i++){
+		DataMap::iterator rem = forDataMap.find(keysToRemove[i]);
+		if(rem != forDataMap.end()){
+			forDataMap.erase(rem);
+		}
+	}
 
 	//apply override from level 0 to level 1 for production data
 	toBeAdded.clear();
@@ -906,11 +882,26 @@ ModelData::getFilenameByType(std::string type_h){
 	return filename_complete;
 }
 
+vector <string>
+ModelData::getDiameterClasses(bool productionOnly){
+	int i;
+	if(productionOnly){
+		i=1;
+	} else {
+		i=0;
+	}
+	vector <string> toReturn;
+	for (i;i<diamClasses.size();i++){
+		toReturn.push_back(diamClasses[i]);
+	}
+	return toReturn;
+}
+
 /**
 Basic function to retrieve products-related data.
 It addmits the following "filters":
 @type_h Name of the specific parameter requested
-@regId_h Look for specific level 2 region.
+@regId_h Look for level1 or level 2 region.
 @prodId_h Product. It accept three keywords, for summing up all products, primary products or secondary products, namelly PROD_ALL, PROD_PRI, PROD_SEC.
 @year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
 @freeDim_h If specified, look exactly for it, otherwise simply doesn't filter for it.
@@ -920,70 +911,45 @@ const double
 ModelData::getProdData(const string &type_h, const int& regId_h, const string &prodId_h, const int& year, const string &freeDim_h) {
 
 	double value=0;
-
-	/*
-	vector <string> priProducts = getStringVectorSetting("priProducts");
-	vector <string> secProducts = getStringVectorSetting("secProducts");
-
-	bool found = false;
-
-	for(uint i=0;i<prodDataVector.size();i++){
-		if(prodDataVector[i].parName == type_h // name of parameter filter
-		  && (prodDataVector[i].prod == prodId_h
-			|| prodId_h == PROD_ALL // product filter
-			|| (prodId_h == PROD_PRI  && find(priProducts.begin(), priProducts.end(), prodDataVector[i].prod)!= priProducts.end() )
-			|| (prodId_h == PROD_SEC  && find(secProducts.begin(), secProducts.end(), prodDataVector[i].prod)!= secProducts.end() ) )
-		 // && (regId_h == prodDataVector[i].region || prodDataVector[i].region == getRegion(regId_h)->getParRegId()) // region filter
-		  && (regId_h == prodDataVector[i].region) // region filter
-		  && (freeDim_h == "" || freeDim_h == prodDataVector[i].freeDim) // free dimension filter
-		){
-		 value += getTimedData(prodDataVector[i].values, year);
-		 found = true;
-		}
-	}
-	if(!found){
-		msgOut(MSG_ERROR, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
-	}
-	return value;
-	*/
-	string keys;
+	vector <int> regIds;
+	string key;
 	DataMap::const_iterator p;
-	vector <string> priProducts;
-	vector <string> secProducts;
-	vector <string> allProducts;
+
 	bool found = false;
+	vector <string> products;
+	bool exactMatch=true;
 
-	if (prodId_h == PROD_PRI){
-		priProducts = getStringVectorSetting("priProducts");
-		for(uint i=0;i<priProducts.size();i++){
-			keys = makeKeyProdData(type_h,i2s(regId_h),priProducts[i],freeDim_h);
-			value += dataMapGetValue(prodDataMap,keys,year);
-			if(tempBool) found = true;
-
-		}
+	if(prodId_h == PROD_PRI){
+		products = priProducts;
 	} else if (prodId_h == PROD_SEC){
-		secProducts = getStringVectorSetting("secProducts");
-		for(uint i=0;i<secProducts.size();i++){
-			keys = makeKeyProdData(type_h,i2s(regId_h),secProducts[i],freeDim_h);
-			value += dataMapGetValue(prodDataMap,keys,year);
-			if(tempBool) found = true;
-		}
-	}  else if (prodId_h == PROD_ALL){
-		priProducts = getStringVectorSetting("priProducts");
-		secProducts = getStringVectorSetting("secProducts");
-		allProducts = priProducts;
-		allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
-		for(uint i=0;i<allProducts.size();i++){
-			keys = makeKeyProdData(type_h,i2s(regId_h),allProducts[i],freeDim_h);
-			value += dataMapGetValue(prodDataMap,keys,year);
-			if(tempBool) found = true;
+		products = secProducts;
+	} else if (prodId_h == PROD_ALL || prodId_h == ""){
+		products = allProducts;
+		products.push_back("");
+	} else	{
+		products.push_back(prodId_h);
+	}
+	if(freeDim_h=="") exactMatch=false;
 
+	// Make sure to set the new value to all l2 regions if requested for a reg1 level
+	if(getRegion(regId_h)->getRegLevel()==2){
+		regIds.push_back(regId_h);
+	} else if (getRegion(regId_h)->getRegLevel()==1) {
+		for(uint i=0;i<getRegion(regId_h)->getNChildren();i++){
+			regIds.push_back(getRegion(regId_h)->getChildren()[i]->getRegId());
 		}
-
 	} else {
-		keys = makeKeyProdData(type_h,i2s(regId_h),prodId_h,freeDim_h);
-		value = dataMapGetValue(prodDataMap,keys,year);
-		if(tempBool) return value;
+		msgOut(MSG_CRITICAL_ERROR, "Error in setProdData(). Setting a value for the whole World is not supported.");
+	}
+	int regIdsS = regIds.size();
+
+
+	for(uint r=0;r<regIdsS;r++){
+		for(uint i=0;i<products.size();i++){
+			key = makeKeyProdData(type_h,i2s(regIds[r]),products[i],freeDim_h);
+			value += dataMapGetValue(prodDataMap,key,year,exactMatch);
+			if(tempBool) found = true;
+		}
 	}
 
 	if(!found){
@@ -998,40 +964,67 @@ ModelData::getProdData(const string &type_h, const int& regId_h, const string &p
 Basic function to retrieve forest-related data.
 It addmits the following "filters":
 @type_h Name of the specific parameter requested
-@regId_h Look for specific level 2 region.
+@regId_h Look for a level1 or level2 region
 @forType_h If specified, look exactly for the specified forest type, otherwise accept the keyword FT_ALL for summing all of them
 @diamClass_h Diameter class. It accept three keywords, for summing up all diameters, production-ready diameters or sub-production ones, namelly DIAM_ALL, DIAM_PROD, DIAM_FIRST.
 @year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
 */
-
 const double
 ModelData::getForData(const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year){
-	vector <string> dClasses = getStringVectorSetting("dClasses");
-	int forDataVectorS =forDataVector.size();
-
+	vector<int> regIds;
+	vector <string> dClasses;
+	vector <string> fTypes;
+	string key;
+	DataMap::const_iterator p;
 	bool found = false;
-	double value=0;
-	for(uint i=0;i<forDataVectorS;i++){
-		if(forDataVector[i].parName == type_h // name of parameter filter
-		  && (regId_h == forDataVector[i].region) // region filter
-			&& (forType_h == FT_ALL || forType_h == forDataVector[i].forType) // forestry type
-		  && (forDataVector[i].diamClass == diamClass_h // diameter class filter
-			|| diamClass_h == DIAM_ALL
-			|| (diamClass_h == DIAM_PROD  && find(dClasses.begin()+1, dClasses.end(), forDataVector[i].diamClass)!= dClasses.end() )
-			|| (diamClass_h == DIAM_FIRST  && forDataVector[i].diamClass == dClasses[1]))
-		 // && (regId_h == forDataVector[i].region || forDataVector[i].region == getRegion(regId_h)->getParRegId()) // region filter
+	double value = 0;
 
-		){
-		 value += getTimedData(forDataVector[i].values, year);
-		 found = true;
+	// creating the arrays to look up if keywords were specified..
+	if (forType_h == FT_ALL){
+		fTypes = getForTypeIds();
+		fTypes.push_back("");
+	} else {
+		fTypes.push_back(forType_h);
+	}
+	if(diamClass_h == DIAM_ALL){
+		dClasses = diamClasses;
+		dClasses.push_back("");
+	} else if (diamClass_h == DIAM_PROD){
+		dClasses = getDiameterClasses(true);
+	} else if (diamClass_h == DIAM_FIRST){
+		dClasses.push_back(diamClasses.at(0));
+	} else	{
+		dClasses.push_back(diamClass_h);
+	}
+	// Make sure to set the new value to all l2 regions if requested for a reg1 level
+	if(getRegion(regId_h)->getRegLevel()==2){
+		regIds.push_back(regId_h);
+	} else if (getRegion(regId_h)->getRegLevel()==1) {
+		for(uint i=0;i<getRegion(regId_h)->getNChildren();i++){
+			regIds.push_back(getRegion(regId_h)->getChildren()[i]->getRegId());
+		}
+	} else {
+		msgOut(MSG_CRITICAL_ERROR, "Error in setProdData(). Setting a value for the whole World is not supported.");
+	}
+	int regIdsS = regIds.size();
+
+	// getting the actual data...
+	for(uint r=0;r< regIds.size();r++){
+		for(uint i=0;i<dClasses.size();i++){
+			for (uint y=0;y<fTypes.size();y++){
+				key = makeKeyForData(type_h,i2s(regIds[r]),fTypes[y],dClasses[i]);
+				value += dataMapGetValue(forDataMap,key,year,true);
+				if(tempBool) found = true;
+			}
 		}
 	}
+
 	if(!found){
-		msgOut(MSG_ERROR, "Error in getForData: no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+diamClass_h+". Returning 0, but double check that this is ok for your model.");
+		msgOut(MSG_ERROR, "Error in getForData(): no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+diamClass_h+". Returning 0, but double check that this is ok for your model.");
 	}
 	return value;
-
 }
+
 
 /**
 Basic function to set products-related data.
@@ -1048,12 +1041,21 @@ It addmits the following "filters":
 */
 void
 ModelData::setProdData(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, const int& year, const bool& allowCreate, const string &freeDim_h){
+
 	vector<int> regIds;
-	vector <string> priProducts;
-	vector <string> secProducts;
-	vector <string> allProducts;
-	string keys;
+	string key;
 	DataMap::const_iterator p;
+	vector <string> products;
+
+	if(prodId_h == PROD_PRI){
+		products = priProducts;
+	} else if (prodId_h == PROD_SEC){
+		products = secProducts;
+	} else if (prodId_h == PROD_ALL){
+		products = allProducts;
+	} else	{
+		products.push_back(prodId_h);
+	}
 
 	// Make sure to set the new value to all l2 regions if requested fora reg1 level
 	if(getRegion(regId_h)->getRegLevel()==2){
@@ -1066,54 +1068,65 @@ ModelData::setProdData(const double& value_h, const string &type_h, const int& r
 		msgOut(MSG_CRITICAL_ERROR, "Error in setProdData(). Setting a value for the whole World is not supported.");
 	}
 
-	bool found = false;	
+	bool found = false;
+	bool tempFound = false;
 
 	for(uint r=0;r< regIds.size();r++){
-		if (prodId_h == PROD_PRI){
-			priProducts = getStringVectorSetting("priProducts");
-			for(uint i=0;i<priProducts.size();i++){
-				keys = makeKeyProdData(type_h,i2s(regIds[r]),priProducts[i],freeDim_h);
-				dataMapSetValue(prodDataMap,keys,value_h, year);
-				if(tempBool) found = true;
-			}
-		} else if (prodId_h == PROD_SEC){
-			secProducts = getStringVectorSetting("secProducts");
-			for(uint i=0;i<secProducts.size();i++){
-				keys = makeKeyProdData(type_h,i2s(regIds[r]),secProducts[i],freeDim_h);
-				dataMapSetValue(prodDataMap,keys,value_h, year);
-				if(tempBool) found = true;
-			}
-		} else if (prodId_h == PROD_ALL){
-			priProducts = getStringVectorSetting("priProducts");
-			secProducts = getStringVectorSetting("secProducts");
-			allProducts = priProducts;
-			allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
-			for(uint i=0;i<allProducts.size();i++){
-				keys = makeKeyProdData(type_h,i2s(regIds[r]),allProducts[i],freeDim_h);
-				dataMapSetValue(prodDataMap,keys,value_h,year);
-				if(tempBool) found = true;
-			}
-		} else {
-			keys = makeKeyProdData(type_h,i2s(regIds[r]),prodId_h,freeDim_h);
-			dataMapSetValue(prodDataMap,keys,value_h,year);
-			if(tempBool) found = true;
+		for(uint i=0;i<products.size();i++){
+			key = makeKeyProdData(type_h,i2s(regIds[r]),products[i],freeDim_h);
+			tempFound = dataMapSetValue(prodDataMap,key,value_h, year,true);
+			if(tempFound) found = true;
 		}
 	}
 
-
-	if(!found && !allowCreate ){
-		msgOut(MSG_CRITICAL_ERROR, "Error in setProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
+	if(!found){
+		if(!allowCreate){
+			msgOut(MSG_CRITICAL_ERROR, "Error in setProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
+		} else {
+			for(uint r=0;r< regIds.size();r++){
+				for(uint i=0;i<products.size();i++){
+					key = makeKeyProdData(type_h,i2s(regIds[r]),products[i],freeDim_h);
+					vector <double> values;
+					setTimedData(value_h,values,year,MSG_NO_MSG);
+					prodDataMap.insert(DataPair(key,values));
+				}
+			}
+		}
 	}
+
 }
+
+
+
 
 void
 ModelData::setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year, const bool& allowCreate){
 
 	vector<int> regIds;
-	vector <string> dClasses = getStringVectorSetting("dClasses");
-	int forDataVectorS = forDataVector.size();
+	vector <string> dClasses;
+	vector <string> fTypes;
+	string key;
+	DataMap::const_iterator p;
+	bool found = false;
+	bool tempFound = false;
 
-	// Make sure to set the new value to all l2 regions if requested fora reg1 level
+	if (forType_h == FT_ALL){
+		fTypes = getForTypeIds();
+	} else {
+		fTypes.push_back(forType_h);
+	}
+
+	if(diamClass_h == DIAM_ALL){
+		dClasses = diamClasses;
+	} else if (diamClass_h == DIAM_PROD){
+		dClasses = getDiameterClasses(true);
+	} else if (diamClass_h == DIAM_FIRST){
+		dClasses.push_back(diamClasses.at(0));
+	} else	{
+		dClasses.push_back(diamClass_h);
+	}
+
+	// Make sure to set the new value to all l2 regions if requested for a reg1 level
 	if(getRegion(regId_h)->getRegLevel()==2){
 		regIds.push_back(regId_h);
 	} else if (getRegion(regId_h)->getRegLevel()==1) {
@@ -1125,38 +1138,30 @@ ModelData::setForData(const double& value_h, const string &type_h, const int& re
 	}
 	int regIdsS = regIds.size();
 
-	bool found = false;
-
-	for(uint i=0;i<forDataVectorS;i++){
-		if(forDataVector[i].parName == type_h // name of parameter filter
-		  && (find(regIds.begin(), regIds.end(), forDataVector[i].region)!= regIds.end()) // region filter
-		  && (forType_h == "" || forType_h == forDataVector[i].forType) // forType dimension filter
-		  && (forDataVector[i].diamClass == diamClass_h // diameter class filter
-			|| diamClass_h == DIAM_ALL
-			|| (diamClass_h == DIAM_PROD  && find(dClasses.begin()+1, dClasses.end(), forDataVector[i].diamClass)!= dClasses.end() )
-			|| (diamClass_h == DIAM_FIRST  && forDataVector[i].diamClass == dClasses[1]))
-		){
-		 setTimedData(value_h, forDataVector[i].values, year);
-		 found = true;
+	for(uint r=0;r< regIds.size();r++){
+		for(uint i=0;i<dClasses.size();i++){
+			for (uint y=0;y<fTypes.size();y++){
+				key = makeKeyForData(type_h,i2s(regIds[r]),fTypes[y],dClasses[i]);
+				tempFound = dataMapSetValue(forDataMap,key,value_h, year,true);
+				if(tempFound) found = true;
+			}
 		}
 	}
+
 	if(!found){
 		if(!allowCreate){
 			msgOut(MSG_CRITICAL_ERROR, "Error in setForData: no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+diamClass_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
-		}
-		if(diamClass_h  == DIAM_ALL || diamClass_h  == DIAM_PROD || diamClass_h  == DIAM_FIRST){
-			msgOut(MSG_CRITICAL_ERROR, "Keywords for multiple diameter classes not allowed in new forData generation.");
-		}
-		for(uint i=0; i<regIdsS; i++){
-			forData FD;
-			FD.parName = type_h;
-			FD.region = regIds[i];
-			FD.forType = forType_h;
-			FD.diamClass = diamClass_h;
-			vector<double> emptyVector;
-			FD.values = emptyVector;
-			setTimedData(value_h, FD.values, year, MSG_NO_MSG); // don't warning if we are making a multi-year value vector, as it is a new one
-			forDataVector.push_back(FD); // TODO: testing
+		} else {
+			for(uint r=0;r< regIds.size();r++){
+				for(uint i=0;i<dClasses.size();i++){
+					for (uint y=0;y<fTypes.size();y++){
+						key = makeKeyForData(type_h,i2s(regIds[r]),fTypes[y],dClasses[i]);
+						vector <double> values;
+						setTimedData(value_h,values,year,MSG_NO_MSG);
+						forDataMap.insert(DataPair(key,values));
+					}
+				}
+			}
 		}
 	}
 }
@@ -1538,16 +1543,16 @@ ModelData::dataMapGetValue(const DataMap& map, const string& search_for, const i
 
 
 
-void
+int
 ModelData::dataMapSetValue( DataMap& map, const string& search_for, const double& value_h, const int& year_h, const bool& exactMatch){
-	tempBool = false;
+	bool found = false;
 	DataMap::iterator i;
 	if(!exactMatch){
 		i = map.lower_bound(search_for);
 		for(;i != map.end();i++){
 			const string& key = i->first;
 			if (key.compare(0, search_for.size(), search_for) == 0) {// Really a prefix?
-					tempBool = true;
+					found = true;
 					setTimedData(value_h, i->second, year_h);
 			} else {
 				break;
@@ -1556,15 +1561,17 @@ ModelData::dataMapSetValue( DataMap& map, const string& search_for, const double
 	} else {
 		i = map.find(search_for);
 		if (i!=map.end()){
-			tempBool = true;
+			found = true;
 			setTimedData(value_h, i->second, year_h);
 		}
 	}
-	if(!tempBool){
+	// removed 20120903 as the insertion of new values must be explicitly done, not in all cases we want a new insertion
+	/*if(!found){
 		vector < double> newValues;
 		setTimedData(value_h, newValues, year_h, MSG_NO_MSG); // don't warning if we are making a multi-year value vector, as it is a new one
 		map.insert(DataPair (search_for,newValues));
-	}
+	}*/
+	return found;
 }
 
 void
@@ -1585,6 +1592,25 @@ ModelData::unpackKeyProdData(const string& key, string& parName, int& regId, str
 	freeDim.assign(key,prodDelimiter+1,freeDimDelimiter-prodDelimiter-1);
 
 }
+
+void
+ModelData::unpackKeyForData(const string& key, string& parName, int &regId, string& forType, string& diamClass) const{
+	int parNameDelimiter = key.find("#",0);
+	int regIdDelimiter = key.find("#",parNameDelimiter+1);
+	int forTypeDelimiter = key.find("#",regIdDelimiter+1);
+	int diamClassDelimiter = key.find("#",forTypeDelimiter+1);
+	if (diamClassDelimiter == string::npos){
+		msgOut(MSG_CRITICAL_ERROR, "Error in unpacking a key in the map of production data.");
+	}
+	parName.assign(key,0,parNameDelimiter);
+	string regIdString="";
+	regIdString.assign(key,parNameDelimiter+1,regIdDelimiter-parNameDelimiter-1);
+	regId = s2i(regIdString);
+	forType.assign(key,regIdDelimiter+1,forTypeDelimiter-regIdDelimiter-1);
+	diamClass.assign(key,forTypeDelimiter+1,diamClassDelimiter-forTypeDelimiter-1);
+
+}
+
 
 /**
 // calculating the discount factor

@@ -66,7 +66,6 @@ class ModelData: public BaseClass{
 public:
 						ModelData(ThreadManager* MTHREAD_h);
 					   ~ModelData();
-	
 
 	/// Unzip the OpenOffice input file (NEW 2008.05.13)
 	void                loadInput();
@@ -107,6 +106,7 @@ public:
 	forType*            getForType(string forTypeId_h);
 	vector <string>     getForTypeIds(bool all=false); ///< By default it doesn't return forTypes used only as input
 	reclRule*           getReclRule(int position){return &reclRules[position];};
+	vector <string>     getDiameterClasses(bool productionOnly=false);
 	/// A simple function to assess if a specified product can be made by a certain forest type and diameter class
 	const bool          assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
 
@@ -131,7 +131,9 @@ public:
 	void                setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year=DATA_NOW, const bool& allowCreate=false); // Remember default arguments must be at the end
 
 string                makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="") const {return parName+"#"+regId+"#"+prod+"#"+freeDim+"#";};
+string                makeKeyForData(const string& parName, const string& regId, const string& forType, const string& diamClass) const {return parName+"#"+regId+"#"+forType+"#"+diamClass+"#";};
 void                  unpackKeyProdData(const string& key, string& parName, int &regId, string& prod, string& freeDim) const;
+void                  unpackKeyForData(const string& key, string& parName, int &regId, string& forType, string& diamClass) const;
 
 double                calculateAnnualisedEquivalent(double amount_h, int years_h); ///< Calculate the annual equivalent flow
 double                calculateAnnualisedEquivalent(double amount_h, double years_h); ///< Transform the double to the highest integer and call calculateAnnualisedEquivalent(double amount_h, int years_h)
@@ -142,7 +144,7 @@ double                calculateAnnualisedEquivalent(double amount_h, double year
 	void                setBaseDiretory(string baseDirectory_h){baseDirectory=baseDirectory_h;};
 	void                addSetting(string name_h, vector <string> values_h, int type_h, string comment_h);
 	void                addSetting(string name_h, string value_h, int type_h, string comment_h);
-	void                cacheFrequentData(); ///< Called after input reading, it fix frequently used data;
+	void                cacheSettings(); ///< Called after input reading, it fix frequently used data;
 	int                 getCachedInitialYear(){return cached_initialYear;};
 
 	void                setBasicData(const string &name_h, int value, int position=0);
@@ -157,20 +159,15 @@ private:
 	vector <string>     getVectorBaseData (const string &name_h, int type_h);
 	void                setBasicData(const string &name_h, string value, int type_h, int position);
 
-	bool                dataMapCheckExist(const DataMap& map, const string& search_for, const bool& exactMatch=false) const;
-	double              dataMapGetValue(const DataMap& map, const string& search_for, const int& year_h, const bool& exactMatch=false);
-	void                dataMapSetValue(DataMap& map, const string& search_for, const double& value_h, const int& year_h, const bool& exactMatch=false);
-
-	bool                tempBool; ///< a temporary bool variable used for various functions
-	int                 cached_initialYear;
+	bool                dataMapCheckExist(const DataMap& map, const string& search_for, const bool& exactMatch=true) const;
+	double              dataMapGetValue(const DataMap& map, const string& search_for, const int& year_h, const bool& exactMatch=true);
+	int                 dataMapSetValue(DataMap& map, const string& search_for, const double& value_h, const int& year_h, const bool& exactMatch=true);
 
 	string                                   inputFilename; // from Qt fileOpen dialog
 	string                                   outputDirname; // from main config files
 	string                                   baseDirectory; // from Qt fileOpen dialog
 
-	vector <forData>                         forDataVector; ///< Forestry data
 	map <string, vector<double> >               forDataMap; ///< Forestry data
-	//vector <prodData>                       prodDataVector; ///< Product data
 	map <string, vector<double> >              prodDataMap; ///< Product data
 	vector <forToProd>                     forToProdVector; ///< Vector of coefficients from forest resources to primary products
 
@@ -183,6 +180,14 @@ private:
 	vector <reclRule>                            reclRules; ///< Vector of reclassification rules
 	vector < vector <int> >                            l2r; ///< Region2 ids
 
+	// cahced setting data..
+	vector <string>                            diamClasses; ///< Diameter classes
+	int                                 cached_initialYear;
+	vector <string>                            priProducts;
+	vector <string>                            secProducts;
+	vector <string>                            allProducts;
+
+		bool                                         tempBool; ///< a temporary bool variable used for various functions
 
 	 /// For each agricultural soil type (as defined in the setting "agrLandTypes") this list define the objects that can be placed on that soil type
 	InputNode                                 mainDocument;  ///< the main input document, loaded in memory at unzipping stage
@@ -216,30 +221,6 @@ struct BasicData {
 	string                                         comment;
 };
 
-/// Forestry data (struct)
-/**
-Struct containing the forestry data. This data is stored here but also each region has a link to its own data.
-*/
-
-struct forData {
-	string                                         parName;
-	int                                             region;
-	string                                         forType;
-	string                                       diamClass;
-	vector <double>                                 values;
-};
-
-/// Product data (struct)
-/**
-Struct containing the product-based data. This data is stored here but also each region has a link to its own data.
-*/
-/*struct prodData {
-	string                                         parName;
-	int                                             region;
-	string                                            prod;
-	string                                         freeDim;
-	vector<double>                                  values;
-};*/
 /// IO production matrix between the forest resources and the primary products (struct)
 /**
 Struct containing the io matrix between the forest resources and the primary products. Not to be confunded with the IO matrix between primary products and secondary products.

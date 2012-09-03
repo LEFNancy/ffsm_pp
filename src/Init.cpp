@@ -96,6 +96,7 @@ Init::setInitLevel1(){
 	msgOut(MSG_INFO, timemessage);
 	MTHREAD->MD->setDefaultSettings();
 	MTHREAD->MD->setScenarioSettings();
+	MTHREAD->MD->cacheSettings();
 	MTHREAD->TEST->fullTest(); // normally empty function
 	MTHREAD->MD->createRegions();
 	MTHREAD->MD->setDefaultForData();
@@ -114,7 +115,6 @@ Init::setInitLevel1(){
 	}
 	MTHREAD->GIS->setSpace();
 	MTHREAD->GIS->applyForestReclassification();
-	MTHREAD->MD->cacheFrequentData();
 
 }
 
