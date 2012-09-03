@@ -85,7 +85,7 @@ public:
 	/// Print a binary reppresentation of the data (a standard image, e.g. a .png file). It prints only the subregion if this is active.
 	void                printBinMap();
 
-	string              getName(){return name;};
+	string              getName() const {return name;};
 	/// Return the filename of the associated dataset
 	string              getFilename(){return fullFileName;}
 	/// Return true if the content may change during simulation period

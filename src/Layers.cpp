@@ -139,7 +139,7 @@ This function take as input the value stored in the pixel for the specific layer
 QColor
 Layers::getColor(double ID_h){
 	QColor nocolor(255,255,255);
-	if (ID_h == MTHREAD->MD->getDoubleSetting("noValue")){
+	if (ID_h == MTHREAD->GIS->getNoValue()){
 		return nocolor;
 	}
 	if (isInteger){
@@ -168,7 +168,7 @@ This function take as input the value stored in the pixel for the specific layer
 */
 string
 Layers::getCategory(double ID_h){
-	if (ID_h == MTHREAD->MD->getDoubleSetting("noValue")){
+	if (ID_h == MTHREAD->GIS->getNoValue()){
 		return "";
 	}
 	if (isInteger){

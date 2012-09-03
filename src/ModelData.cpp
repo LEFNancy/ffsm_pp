@@ -290,6 +290,17 @@ ModelData::getRegionIds(int level_h, bool excludeResidual){
 	return toReturn;
 }
 
+vector <ModelRegion*>
+ModelData::getAllRegions(bool excludeResidual){
+	vector <ModelRegion*> toReturn;
+	for(uint i=0;i<regionsVector.size();i++){
+		if( (!excludeResidual) || (!regionsVector[i].getIsResidual())){
+			toReturn.push_back(&regionsVector[i]);
+		}
+	}
+	return toReturn;
+}
+
 vector < vector <int> >
 ModelData::getRegionIds( bool excludeResidual){
 	vector < vector <int> > toReturn;
@@ -996,10 +1007,11 @@ It addmits the following "filters":
 const double
 ModelData::getForData(const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year){
 	vector <string> dClasses = getStringVectorSetting("dClasses");
+	int forDataVectorS =forDataVector.size();
 
 	bool found = false;
 	double value=0;
-	for(uint i=0;i<forDataVector.size();i++){
+	for(uint i=0;i<forDataVectorS;i++){
 		if(forDataVector[i].parName == type_h // name of parameter filter
 		  && (regId_h == forDataVector[i].region) // region filter
 			&& (forType_h == FT_ALL || forType_h == forDataVector[i].forType) // forestry type
@@ -1099,6 +1111,7 @@ ModelData::setForData(const double& value_h, const string &type_h, const int& re
 
 	vector<int> regIds;
 	vector <string> dClasses = getStringVectorSetting("dClasses");
+	int forDataVectorS = forDataVector.size();
 
 	// Make sure to set the new value to all l2 regions if requested fora reg1 level
 	if(getRegion(regId_h)->getRegLevel()==2){
@@ -1110,10 +1123,11 @@ ModelData::setForData(const double& value_h, const string &type_h, const int& re
 	} else {
 		msgOut(MSG_CRITICAL_ERROR, "Error in setProdData(). Setting a value for the whole World is not supported.");
 	}
+	int regIdsS = regIds.size();
 
 	bool found = false;
 
-	for(uint i=0;i<forDataVector.size();i++){
+	for(uint i=0;i<forDataVectorS;i++){
 		if(forDataVector[i].parName == type_h // name of parameter filter
 		  && (find(regIds.begin(), regIds.end(), forDataVector[i].region)!= regIds.end()) // region filter
 		  && (forType_h == "" || forType_h == forDataVector[i].forType) // forType dimension filter
@@ -1133,7 +1147,7 @@ ModelData::setForData(const double& value_h, const string &type_h, const int& re
 		if(diamClass_h  == DIAM_ALL || diamClass_h  == DIAM_PROD || diamClass_h  == DIAM_FIRST){
 			msgOut(MSG_CRITICAL_ERROR, "Keywords for multiple diameter classes not allowed in new forData generation.");
 		}
-		for(uint i=0; i<regIds.size(); i++){
+		for(uint i=0; i<regIdsS; i++){
 			forData FD;
 			FD.parName = type_h;
 			FD.region = regIds[i];
@@ -1649,12 +1663,14 @@ LLData::clean(){
 }
 
 string
-LLData::getData(int pos_h, string header_h, int debugLevel){
+LLData::getData(const int &pos_h, const string &header_h, const int &debugLevel) const{
+
 	if (records.size()<= pos_h){
 		msgOut(debugLevel, "Requested position "+i2s(pos_h)+" too high! Not enought records !!");
 		return "";
 	}
-	for (uint i=0;i<headers.size();i++){
+	int hsize = headers.size();
+	for (uint i=0;i<hsize;i++){
 		if(headers[i] == header_h) return records[pos_h][i];
 	}
 	msgOut(debugLevel, "Header string "+header_h+" not found!");

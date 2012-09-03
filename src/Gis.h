@@ -82,9 +82,9 @@ public:
 	///< Fill a layer with empty values
 	void                resetLayer(string layerName_h);
 	///< Check if a layer with a certain name is loaded in the model. Used e.g. to check if the dtm layer (optional) exist.
-	bool                layerExist(string layerName_h);
+	bool                layerExist(const string & layerName_h) const;
 	///< Return a pointer to a layer given its name
-	Layers*              getLayer(string layerName_h);
+	Layers*              getLayer(const string& layerName_h);
 	///< Add a legend item to an existing layer
 	void                addLegendItem (
 	                        string       name_h,
@@ -98,7 +98,7 @@ public:
 	/// Add a reclassification rule to an existing layer
 	void                addReclassificationRule(string name_h, int inCode_h, int outCode_h, double p_h);
 	/// Count the pixels within each legend item for the selected layer
-	void                countItems(string layerName_h, bool debug=false);
+	void                countItems(const string& layerName_h, const bool& debug=false);
 	/// Return a pointer to a plot with a specific value for the specified layer, optionally filtering only the free plots 
 	Pixel*              getRandomPlotByValue(string layer_h, int layerValue__h);
 	/// Return the vector (shuffled) of all plots with a specific value for a specified layer, optionally filtering only the free ones. It is also possible to specify the level in case of failure (no free plots available)

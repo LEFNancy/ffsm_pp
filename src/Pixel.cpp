@@ -125,14 +125,13 @@ Pixel::changeValue(string layerName_h, double value_h, bool setNoValueForZero){
 }
 
 double
-Pixel::getDoubleValue(string layerName_h, bool returnZeroForNoValue) const{
-	map<string, double>::const_iterator p;
-	p=values.find(layerName_h);
-	if(p != values.end()) {
-		if(returnZeroForNoValue && p->second==MTHREAD->GIS->getNoValue()){
+Pixel::getDoubleValue(const string &layerName_h, const bool &returnZeroForNoValue) const{
+	vIter=values.find(layerName_h);
+	if(vIter != values.end()) {
+		if(returnZeroForNoValue && vIter->second==MTHREAD->GIS->getNoValue()){
 			return 0.0;
 		} else {
-			return p->second;
+			return vIter->second;
 		}
 	} else {
 		msgOut(MSG_WARNING, "No layer \""+layerName_h+"\" found on pixel ("+i2s(getX())+","+i2s(getY())+"). Sure you didn't mispelled it?");

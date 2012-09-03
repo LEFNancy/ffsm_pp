@@ -98,6 +98,7 @@ public:
 	vector <IFiles>     getIFilesVector() const {return iFilesVector;};
 	string              getBaseDirectory() const {return baseDirectory;};
 	ModelRegion*        getRegion(int regId_h);
+	vector <ModelRegion*> getAllRegions(bool excludeResidual=true);
 	vector<int>         getRegionIds(int level_h, bool excludeResidual=true);
 	vector < vector <int> > getRegionIds( bool excludeResidual=true);
 	int                 getNForTypes(){return forTypes.size();};
@@ -283,7 +284,7 @@ public:
 	void                clean(); // clean the data from empty headers
 	string              getTableName(){return tableName;};
 	int                 nrecords(){return records.size();};
-	string              getData(int pos_h, string header_h, int debugLevel=MSG_CRITICAL_ERROR);
+	string              getData(const int& pos_h, const string& header_h, const int& debugLevel=MSG_CRITICAL_ERROR) const;
 	friend void ModelData::loadInput();
 	friend void ModelData::loadDataFromCache(string tablename);
 

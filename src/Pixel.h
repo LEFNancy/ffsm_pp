@@ -46,7 +46,7 @@ public:
 	                   ~Pixel();
 
 	/// Return the value for a specific layer
-	double              getDoubleValue ( string layerName_h , bool returnZeroForNoValue = false) const;
+	double              getDoubleValue (const string& layerName_h, const  bool& returnZeroForNoValue = false) const;
 	void                newYear();
 
 
@@ -72,6 +72,7 @@ public:
 
 private:	
 	map<string, double>            values;  ///< Map of values for each layer
+	mutable map<string, double>::const_iterator vIter; //< Iterator for the map of values
 	double                             ID;
 	int                               pxX;
 	int                               pxY;

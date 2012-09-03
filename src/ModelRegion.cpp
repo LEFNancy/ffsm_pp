@@ -93,7 +93,6 @@ ModelRegion::getVolumes(int fType_h, string dClass_h){
 
 double
 ModelRegion::getValue(string layerName, int op){
-	vector<Pixel*> myPixels = MTHREAD->GIS->getAllPlotsByRegion(regId);
 	int nPx = myPixels.size();
 	double sumvalue=0;
 	for(uint i=0;i<nPx; i++){
@@ -109,5 +108,17 @@ ModelRegion::getValue(string layerName, int op){
 	}
 	return 0.;
 }
+
+void
+ModelRegion::setMyPixels(){
+	int xyNPixels = MTHREAD->GIS->getXyNPixels();
+	for(uint i=0;i<xyNPixels;i++){
+			Pixel* px = MTHREAD->GIS->getPixel(i);
+			if(px->getDoubleValue("regLev_1")==regId || px->getDoubleValue("regLev_2")==regId){
+				myPixels.push_back(px);
+			}
+		}
+}
+
 
 

@@ -38,6 +38,7 @@ using namespace std;
 
 struct forData;
 struct prodData;
+class Pixel;
 
 class ModelRegion : public BaseClass{
 
@@ -56,6 +57,7 @@ public:
 	void                setChildren(vector<ModelRegion*> children_h) {chRegions = children_h;}; ///< Childrens are all the lvel-1 region that are parts of this region.
 	void                addForData(forData* data_h){forDataVector.push_back(data_h);};
 	void                addProdData(prodData* data_h){prodDataVector.push_back(data_h);};
+	void                setMyPixels();
 
 	// "get" methods..
 	int                 getRegId() {return regId;};
@@ -71,6 +73,7 @@ public:
 	double              getValue(string layerName, int op=OP_SUM); ///< return the values of its own pixels for the specified layer. Possible operations: OP_SUM or OP_AVG
 	vector < vector <double> > getVolumes(int fType_h, string dClass_h);
 	int                 getNChildren(bool excludeResidual = true);
+	vector<Pixel*>      getMyPixels(){return myPixels;};
 
 private:
 	int                                regId; ///< Regional unique ID
@@ -83,6 +86,7 @@ private:
 	vector<ModelRegion*>           chRegions; ///< Vector of level-1 children regions
 	vector<forData*>           forDataVector; ///< Vector of pointers of forestry data (owned by ModelData)
 	vector<prodData*>         prodDataVector; ///< Vector of pointers of product data (owned by ModelData)
+	vector<Pixel*>                  myPixels; ///< Vector of pixels for this region
 
 
 };

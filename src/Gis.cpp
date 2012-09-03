@@ -82,6 +82,14 @@ Gis::setSpace(){
 	}
 	initLayers();
 	loadLayersDataFromFile();
+
+	// Cashing the pixels owned by each region..
+	vector <ModelRegion*> regions = MTHREAD->MD->getAllRegions();
+	int nRegions = regions.size();
+	for(uint i=0;i<nRegions;i++){
+		regions[i]->setMyPixels();
+	}
+
 	MTHREAD->fitInWindow(); // tell the gui to fit the map to the widget
 //	countItems("landUse",false); // count the various records assigned to each legendItem. Do not print debug infos
 	return;
@@ -160,7 +168,7 @@ Gis::initLayers(){
 }
 
 Layers*
-Gis::getLayer(string layerName_h){
+Gis::getLayer(const string& layerName_h){
 	for(uint i=0;i<layerVector.size();i++){
 		if(layerVector[i].getName() == layerName_h){
 			return &layerVector[i];
@@ -177,6 +185,16 @@ Gis:: applyForestReclassification(){
  - passa le info dal layerr ereditato al nuovo
  per ogni pixel
  */
+
+	// caching
+	int nReclassRules = MTHREAD->MD->getNReclRules();
+	vector <reclRule*> RRs;
+	for(uint z=0;z<nReclassRules;z++){
+		RRs.push_back(MTHREAD->MD->getReclRule(z));
+	}
+
+
+
 	for (uint i=0;i< MTHREAD->MD->getNForTypes();i++){
 		forType* FT = MTHREAD->MD->getForType(i);
 		if(!layerExist(FT->forLayer)){
@@ -196,8 +214,8 @@ Gis:: applyForestReclassification(){
 			//int regL1 =  PX->getDoubleValue ("regLev_1");
 			int regL2 =  PX->getDoubleValue ("regLev_2");
 			double value =  PX->getDoubleValue (FT->forLayer, true);
-			for(uint z=0;z<MTHREAD->MD->getNReclRules();z++){
-				reclRule* RR = MTHREAD->MD->getReclRule(z);
+			for(uint z=0;z<nReclassRules;z++){
+				reclRule* RR = RRs[z];
 				//if( (RR->regId == regL2 || RR->regId == regL1) && RR->forTypeOut == FT->forTypeId ){ // we found a reclassification rule for the region where is located this pixel and that output on the for type we are using
 				if( RR->regId == regL2  && RR->forTypeOut == FT->forTypeId ){ // we found a reclassification rule for the region where is located this pixel and that output on the for type we are using
 					string debugForTypeIn = RR->forTypeIn;
@@ -268,7 +286,7 @@ Gis::resetLayer(string layerName_h){
 }
 
 bool
-Gis::layerExist(string layerName_h){
+Gis::layerExist(const string& layerName_h) const{
 	for(uint i=0; i<layerVector.size(); i++){
 		if (layerVector.at(i).getName() == layerName_h){
 			return true;
@@ -305,7 +323,7 @@ Search within the layerVector and call countMyPixels(...) to the appropriate one
 @see Layers::countMyPixels
 */
 void
-Gis::countItems(string layerName_h, bool debug){
+Gis::countItems(const string &layerName_h, const bool &debug){
 
 	for(uint i=0; i<layerVector.size(); i++){
 		if (layerVector.at(i).getName() == layerName_h){
@@ -559,16 +577,13 @@ Gis::getAllPlots(int outputLevel){
 /// Return the vector of all plots by a specific region (main region or subregion), optionally shuffled;
 vector <Pixel*>
 Gis::getAllPlotsByRegion(ModelRegion &region_h, bool shuffle){
-	int regId = region_h.getRegId();
-	vector <Pixel* > regionalPixels;
-		for(uint i=0;i<xyNPixels;i++){
-			Pixel* px = getPixel(i);
-			if(px->getDoubleValue("regLev_1")==regId || px->getDoubleValue("regLev_2")==regId){
-				regionalPixels.push_back(px);
-			}
-		}
+	vector <Pixel*> regionalPixels = region_h.getMyPixels();
+	if(shuffle){
+		random_shuffle(regionalPixels.begin(), regionalPixels.end()); // randomize the elements of the array.
+	}
 	return regionalPixels;
 }
+
 vector <Pixel*>
 Gis::getAllPlotsByRegion(int regId_h, bool shuffle){
 		ModelRegion* reg = MTHREAD->MD->getRegion(regId_h);
@@ -602,7 +617,7 @@ Gis::printDebugValues (string layerName_h, int min_h, int max_h){
 	int ID, X, Y;
 	string out;
 	double value;
-	double noValue = MTHREAD->MD->getDoubleSetting("noValue");
+	//double noValue = MTHREAD->MD->getDoubleSetting("noValue");
 	if (max_h==0){
 		max= pxVector.size();
 	}
