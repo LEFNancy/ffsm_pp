@@ -1619,9 +1619,6 @@ ModelData::unpackKeyForData(const string& key, string& parName, int &regId, stri
 */
 double
 ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
-	// calculating the discount factor
-	// revenues at years n will be transforemed as average year rate as
-	// av.y.rev = rev(n)/ ( (1+ir)^(n-1)+(1+ir)^(n-2)+(1+ir)^(n-3)+...+(1+ir)^(n-n) )
 	//loop(fy$(ord(fy)=1),
 	//	df(fy)= (1+ir)**(ord(fy));
 	//);
@@ -1639,7 +1636,7 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
 		} else {
 			df = df_by.at(y-2)+pow((1+ir),y);
 		}
-		if (y==years_h) return df;
+		if (y==years_h) return amount_h/df; // big bug 20120904
 		df_by.push_back(df);
 	}
 	exit(1);

@@ -497,6 +497,11 @@ ModelCore::runSimulationYear(){
 			//loop( (u,i,lambda,essence),
 			//  cumTp(u,i,lambda,essence) =   ceil(cumTp(u,i,lambda,essence));
 			//);
+			/**
+			param futureTPBelief Specify how the forest owners (those that make the investments) behave will be the time of passage in the future in order to calculate the cumulative time of passage in turn used to discount future revenues.
+			Will forest owners behave adaptively believing the time of passage between diameter classes will be like the observed one at time they make decision (0) or they will have full expectations believing forecasts (1) or something in the middle ?
+For compatibility with the GAMS code, a -1 value means using initial simulation tp values (fixed cumTp)."
+			*/
 			vector <double> cumTp; //cumulative time of passage to REACH a diameter class (tp is to LEAVE to the next one)
 			for (uint u=0; u<dClasses.size(); u++){
 				string dc = dClasses[u];
@@ -553,7 +558,9 @@ ModelCore::runSimulationYear(){
 							double pw    = gpd("pw",regId,priProducts[pp]);
 							double hv2fa = gfd("hv2fa",regId,ft,dc);
 							double raw_amount = pw*hv2fa*hV_byDiamAndPrd.at(u).at(pp)/hV_byFT;
-
+							/**
+							see @ModelData::calculateAnnualisedEquivalent
+							*/
 							expReturns += MD->calculateAnnualisedEquivalent(raw_amount,cumTp.at(u+1)); //comTp is on diamClasses, u here is on pDiamClasses
 						}
 						//expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
@@ -610,6 +617,16 @@ ModelCore::runSimulationYear(){
 
 /**
 This function take for each region the difference for each forest type between the harvested area and the new regeneration one and apply such delta to each pixel of the region proportionally to the area that it already hosts.
+
+\f[
+EXPR_{e,%lambda,t} = sum from{u} { sum from{ppr}{ {PW_{ppr, t-1}*hv2fa_{e,%lambda,u}} over {(1+i)^{tp_u}} *~ {hv_{e,%lambda,u,ppr,t-1}} over { sum from{u} { sum from{ppr}{hv_{e,%lambda,u,ppr,t-1}}}}}}
+\f]
+
+aaa
+
+\image html example.png "An example image" width=3cm
+\image latex example.eps "An example image" width=10cm
+
 */
 void
 ModelCore::updateMapAreas(){
