@@ -47,6 +47,7 @@ public:
 	                   ~Output();
 
 	void                initOutput();
+		void                commonInit();
 		void                initOutputMaps();
 		void                initOutputForestData();
 		void                initOutputProductData();
@@ -59,7 +60,19 @@ public:
 	void                cleanScenario(string fileName, string scenarioName, char d);
 
 private:
-	
+	int                                      oLevel;
+	char                                          d;
+	int                                      inYear;
+	int                                      nYears;
+	string                                  baseDir;
+	string                                     oDir;
+	string                             scenarioName;
+	string                                 oFileExt;
+	bool                                 oHRedeable;
+	bool                                oSingleFile;
+	int                                   wRegId_l1;
+	int                                   wRegId_l2;
+	string                              outFileName;
 };
 
 #endif
