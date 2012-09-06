@@ -211,10 +211,11 @@ Output::printForestData(bool finalFlush){
 		out << scenarioName << d;
 		out << parName << d;
 		if (REG->getRegLevel()==2){
-			out << REG->getParRegId() << d;
-			out << regId << d;
+			ModelRegion* pREG = MTHREAD->MD->getRegion(REG->getParRegId());
+			out << pREG->getRegSName() << d;
+			out << REG->getRegSName() << d;
 		} else if (REG->getRegLevel()==1){
-			out << regId << d;
+			out << REG->getRegSName() << d;
 			out << d;
 		} else {
 			out << d << d;
@@ -269,10 +270,11 @@ Output::printProductData(bool finalFlush){
 		out << scenarioName << d;
 		out << parName << d;
 		if (REG->getRegLevel()==2){
-			out << REG->getParRegId() << d;
-			out << regId << d;
+			ModelRegion* pREG = MTHREAD->MD->getRegion(REG->getParRegId());
+			out << pREG->getRegSName() << d;
+			out << REG->getRegSName() << d;
 		} else if (REG->getRegLevel()==1){
-			out << regId << d;
+			out << REG->getRegSName() << d;
 			out << d;
 		} else {
 			out << d << d;
