@@ -3,7 +3,7 @@
 <gis>
 	<layer>
 		<!-- Keeps the names as forType_FORNAME -->
-		<name>forType_B</name>
+		<name>forType_broadL</name>
 		<label>Broad-leaved forest areas</label>
 		<comment>Derived from clc06, theme311. The area of Broad-leaved forest areas within each cell.</comment>
 		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
@@ -25,7 +25,7 @@
 		</legendItems>
 	</layer>
 	<layer>
-		<name>forType_C</name>
+		<name>forType_con</name>
 		<label>Coniferous forest areas</label>
 		<comment>Derived from clc06, theme312. The area of Broad-leaved forest areas within each cell.</comment>
 		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
@@ -48,7 +48,7 @@
 
 	</layer>
 	<layer>
-		<name>forType_M</name>
+		<name>forType_mixedBC</name>
 		<label>Mixed forest forest areas</label>
 		<comment>Derived from clc06, theme313. The area of Mixed Broad-leaved/Coniferous forest areas within each cell.</comment>
 		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
