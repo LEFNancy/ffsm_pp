@@ -168,19 +168,20 @@ public:
 	void                msgOut(const int& msgCode_h, const int& msg_h, const bool& refreshGUI_h=true)    const; ///< Overloaded function to print the output log
 	void                msgOut(const int& msgCode_h, const double& msg_h, const bool& refreshGUI_h=true) const; ///< Overloaded function to print the output log
 
-	int                 s2i (const string &string_h) const {return atoi(string_h.c_str());}; ///<  string  to integer conversion
-	double              s2d (const string& string_h) const {return atof(string_h.c_str());}; ///<  string  to double  conversion
+	int                 s2i (const string& string_h)         const; ///<  string  to integer conversion
+	double              s2d (const string& string_h) const; ///<  string  to double  conversion
 	double              s2d (const string& string_h, const bool& replaceComma) const; ///<  string  to double  conversion
 	bool                s2b (const string& string_h)          const; ///<  string  to bool    conversion
-	string              i2s (const int& int_h)       const {return to_string(int_h);}; ///<  integer to string  conversion
+	string              i2s (const int& int_h)       const {return to_string(int_h);};    ///<  integer to string  conversion
 	string              d2s (const double& double_h) const {return to_string(double_h);}; ///<  double  to string  conversion
-	string              b2s (const bool& bool_h)              const; ///<  bool    to string  conversion
-	vector<int>         s2i (const vector<string>& string_h)  const; ///<  string  to integer conversion (vector)
-	vector<double>      s2d (const vector<string>& string_h, const bool& replaceComma = false)  const; ///<  string  to double  conversion (vector)
-	vector<bool>        s2b (const vector<string>& string_h)  const; ///<  string  to bool    conversion (vector)
-	vector<string>      i2s (const vector<int>& int_h)        const; ///<  integer to string  conversion (vector)
-	vector<string>      d2s (const vector<double>& double_h)  const; ///<  double  to string  conversion (vector)
-	vector<string>      b2s (const vector<bool>& bool_h)      const; ///<  bool    to string  conversion (vector)
+	string              b2s (const bool& bool_h)             const; ///<  bool    to string  conversion
+
+	vector<int>         s2i (const vector<string>& string_h) const; ///<  string  to integer conversion (vector)
+	vector<double>      s2d (const vector<string>& string_h, const bool& replaceComma = false) const; ///<  string to double conversion (vector)
+	vector<bool>        s2b (const vector<string>& string_h) const; ///<  string  to bool    conversion (vector)
+	vector<string>      i2s (const vector<int>& int_h)       const; ///<  integer to string  conversion (vector)
+	vector<string>      d2s (const vector<double>& double_h) const; ///<  double  to string  conversion (vector)
+	vector<string>      b2s (const vector<bool>& bool_h)     const; ///<  bool    to string  conversion (vector)
 
 	/**
 	Return a type according to enum TYPE_* from a string (eg: "string" -> TYPE_STRING (2)).
@@ -189,7 +190,7 @@ public:
 	int                 getType(const string &type_h) const;
 
 	void                refreshGUI() const;  ///< Ping to periodically return the control to the GUI
-	
+
 	//string intToString(int x);
 	template<typename T> string toString(const T& x) const;      // string s = toString(x);
 	template<typename T> T stringTo(const std::string& s) const; // e.g. int x = stringTo<int>("123");
@@ -206,7 +207,7 @@ protected:
 	Pointer to the Thread Manager. \\	
 	Through this pointer each deribed subclass (the vast maiority of those used on Pythia) can "ask" for sending signals to the GUI, like append the log or modify the map.
 	*/
-	ThreadManager*                       MTHREAD;                       ///< Pointer to the Thread manager.
+	ThreadManager*                         MTHREAD; ///< Pointer to the Thread manager.
 
 private:
 	void msgOut2(const int& msgCode_h, const string& msg_h, const bool& refreshGUI_h) const; ///< Do the job of the overloaded functions

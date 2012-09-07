@@ -135,19 +135,40 @@ BaseClass::refreshGUI()const{
 	}
 }
 
-// other ways of converting string to integers :
-// -- 1 (not tested) :
-// (int)strtol(token_start, (char **)NULL, 10);
-// -- 2 (old used method, everyone say slow) :
-// int valueAsInteger;
-// string valueAsString = string_h;
-// istringstream totalSString( valueAsString );
-// totalSString >> valueAsInteger;
-// return valueAsInteger;
-// -- 3 (C++11) :
-// String to integer: int n = std::stoi(s);
-// Integer to string: std::string s = std::to_string(n);
-// the if string_h=="" return 0 is no longer needed.
+int
+BaseClass::s2i ( const string &string_h) const {
+	try {
+		return stoi(string_h);
+	} catch (...) {
+		if (string_h == "") return 0;
+		else {
+			msgOut(MSG_CRITICAL_ERROR,"Conversion string to integer failed. Some problems with the data? (got\""+string_h+"\")");
+		}
+	}
+	return 0;
+
+}
+
+double
+BaseClass::s2d (const string& string_h) const {
+	if (string_h == "") return 0.;
+	double valueAsDouble;
+	istringstream totalSString( string_h );
+	totalSString >> valueAsDouble;
+	return valueAsDouble;
+	/*
+	if (string_h == "") return 0.;
+	try {
+		return stod(string_h); // stod want dot as decimal separator in console mode and comma in gui mode. Further the decimal digits left are only 2 !!
+	} catch (...) {
+		if (string_h == "") return 0.;
+		else {
+			msgOut(MSG_CRITICAL_ERROR,"Conversion string to double failed. Some problems with the data? (got\""+string_h+"\")");
+		}
+	}
+	return 0.;
+	*/
+}
 
 
 /// Includes comma to dot conversion if needed.
@@ -157,9 +178,11 @@ BaseClass::s2d (const  string& string_h, const bool& replaceComma) const {
 		string valueAsString = string_h;
 		// replace commas with dots. This is not needed when directly reading the input nodes as double, as the Qt function to Double does the same.
 		replace(valueAsString.begin(), valueAsString.end(), ',', '.');
-		return atof(valueAsString.c_str());
+		return s2d(valueAsString);
 	}
-	return atof(string_h.c_str());
+	return s2d(string_h);
+	msgOut(MSG_CRITICAL_ERROR, "debug me please!");
+	return 0.;
 }
 
 /// Includes conversion checks.
@@ -167,34 +190,26 @@ bool
 BaseClass::s2b (const string& string_h) const {
 	if (string_h == "true" || string_h == "vero" || string_h == "TRUE" || string_h == "1" || string_h == "True")
 		return true;
-	else if (string_h == "false" || string_h == "falso" || string_h == "FALSE" || string_h == "0" || string_h == "")
+	else if (string_h == "false" || string_h == "falso" || string_h == "FALSE" || string_h == "0" || string_h == "" || string_h == "False")
 		return false;
 
-	msgOut(MSG_ERROR, "Sorry, I don't know how to convert "+string_h+" to a bool value. I return true... hope for the best");
+	msgOut(MSG_CRITICAL_ERROR,"Conversion string to bool failed. Some problems with the data? (got\""+string_h+"\")");
 	return true;
 }
 
-//string
-//BaseClass::i2s (const int& int_h) const{
-	//ostringstream out;
-	//out<<int_h;
-	//return out.str();
+/*string
+BaseClass::i2s (const int& int_h) const{
+	ostringstream out;
+	out<<int_h;
+	return out.str();
+}
 
-	// return to_string(int_h);
-
-	//char* result;
-	//sprintf( result, "%d", int_h );
-	//string str(result);
-	//return str;
-
-//}
-
-//string
-//BaseClass::d2s (const double& double_h) const{
-//	ostringstream out;
-//	out<<double_h;
-//	return out.str();
-//}
+string
+BaseClass::d2s (const double& double_h) const{
+	ostringstream out;
+	out<<double_h;
+	return out.str();
+}*/
 
 string
 BaseClass::b2s (const bool& bool_h) const{
@@ -206,7 +221,7 @@ vector <int>
 BaseClass::s2i(const  vector <string>& string_h) const{
 	vector <int> valuesAsInteger;
 	for (uint i=0;i<string_h.size();i++){
-		valuesAsInteger.push_back(atof(string_h[i].c_str()));
+		valuesAsInteger.push_back(s2i(string_h[i]));
 	}
 	return valuesAsInteger;
 }
@@ -220,9 +235,9 @@ BaseClass::s2d (const vector <string>& string_h, const bool& replaceComma) const
 			string valueAsString = string_h[i];
 			// replace commas with dots. This is not needed when directly reading the input nodes as double, as the Qt function to Double does the same.
 			replace(valueAsString.begin(), valueAsString.end(), ',', '.');
-			valuesAsDouble.push_back(::atof(valueAsString.c_str()));
+			valuesAsDouble.push_back(s2d(valueAsString));
 		} else {
-			valuesAsDouble.push_back(::atof(string_h[i].c_str()));
+			valuesAsDouble.push_back(s2d(string_h[i]));
 		}
 	}
 	return valuesAsDouble;
@@ -287,7 +302,7 @@ BaseClass::toString(const T& x) const {
 }
 
 template<typename T> T 
-BaseClass::stringTo(const std::string& s) const{
+BaseClass::stringTo(const std::string& s) const {
   std::istringstream iss(s);
   T x;
   iss >> x;
@@ -305,7 +320,7 @@ BaseClass::iVSum (const vector<int> &intVector_h) const{
 }
 
 double
-BaseClass::dVSum (const vector<double> &doubleVector_h) const{
+BaseClass::dVSum (const vector<double> &doubleVector_h) const {
 	double toReturn=0;
 	for(uint i=0;i<doubleVector_h.size();i++){
 		toReturn += doubleVector_h[i];
@@ -315,7 +330,7 @@ BaseClass::dVSum (const vector<double> &doubleVector_h) const{
 
 
 void
-BaseClass::tokenize(const string& str, vector<string>& tokens, const string& delimiter) const{
+BaseClass::tokenize(const string& str, vector<string>& tokens, const string& delimiter) const {
     // Skip delimiters at beginning.
     string::size_type lastPos = str.find_first_not_of(delimiter, 0);
     // Find first "non-delimiter".

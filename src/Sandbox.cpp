@@ -141,6 +141,26 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+	/*
+	// testing stod() ..
+	// this is giving different results if gui or console mode !!
+	vector<string> numbers;
+	numbers.push_back("123.1234567890");
+	numbers.push_back("123.1234");
+	numbers.push_back("123,1234567890");
+	numbers.push_back("123,1234");
+	double outd;
+	for(uint i=0;i<numbers.size();i++){
+		try {
+			outd =  stod(numbers[i]);
+			cout << "Conversion passed: " << numbers[i] << "  -  " << outd << endl;
+		} catch (...) {
+			cout << "Conversion DID NOT passed: " << numbers[i] << "  -  " <<endl;
+		}
+	}
+	exit(0);
+ */
+
 /*
 // ------------------------------------
 // Testing makeKeyProdData() and unpackKeyProdData()
