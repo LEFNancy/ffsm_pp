@@ -117,6 +117,8 @@ MainWindow::MainWindow() {
 	connect(actionAboutRegMAS, SIGNAL(triggered()), this, SLOT(about()));
 	connect(actionRegMASDocumentation, SIGNAL(triggered()), this, SLOT(showDocumentation()));
 	connect(actionFitMap, SIGNAL(triggered()), mapBox, SLOT(fitInWindow()));
+	connect(this, SIGNAL(resized()),mapBox, SLOT(fitInWindow()));
+	connect(viewResultsButton, SIGNAL(clicked()),this, SLOT(openResults()));
 
 	connect(&modelMainThread, SIGNAL(upgradeLogArea(const QString&)), this, SLOT(processLogArea(const QString&)));
 	connect(&modelMainThread, SIGNAL(addLayerToGui(QString, QString)), this, SLOT( addLayer(QString, QString)));	
@@ -180,6 +182,11 @@ MainWindow::closeEvent(QCloseEvent *event) {
 		event->ignore();
     }
 } 
+
+void
+MainWindow::resizeEvent (QResizeEvent *event) {
+	emit resized();
+}
 
 
 // ***************  open model / log saving functions..  ************************
@@ -660,5 +667,17 @@ MainWindow::receiveScenarioOptions(const QVector<QString> &scenarios_h){
 	//scenarioWidget->scenarioSelector->grabMouse();
 	//scenarioWidget->scenarioSelector->grabKeyboard();
 
+
+}
+
+void
+MainWindow::openResults() {
+	//QLabel *label = new QLabel("Hello World!");
+	//label->show();
+	string aaa = curBaseDirectory.toStdString();
+	cout << "curBaseDirectory " << aaa << endl;
+	cout << "outputDirName: " << outputDirName.toStdString() << endl;
+	QUrl resultsUrl(curBaseDirectory+outputDirName+"results/results.ods", QUrl::TolerantMode);
+	QDesktopServices::openUrl(resultsUrl);
 
 }

@@ -81,9 +81,11 @@ public slots:
 signals:
 	void                currentModelFilenameChanged (QString);
 	void                selectedScenarioName(const QString &scenarioName_h);
+	void                resized();
 
 protected:
 	void                closeEvent(QCloseEvent *event); ///< Manage the event of closing the application
+	void                resizeEvent(QResizeEvent *event); ///< Manage the event of resizing the application
 
 private slots:
 	void                open();
@@ -96,6 +98,7 @@ private slots:
 	void                hideDebugMsgs(bool hide);
 	void                about();
 	void                showDocumentation();
+	void                openResults();
 
 private:
 
