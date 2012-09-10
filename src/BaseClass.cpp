@@ -275,7 +275,7 @@ vector <string>
 BaseClass::i2s (const vector <int> &int_h) const{
 	vector <string> valuesAsString;
 	for (uint i=0;i<int_h.size();i++){
-		valuesAsString.push_back(to_string(int_h[i]));
+        valuesAsString.push_back(i2s(int_h[i]));
 	}
 	return valuesAsString;
 }
@@ -284,7 +284,7 @@ vector <string>
 BaseClass::d2s (const vector <double> &double_h) const{
 	vector <string> valuesAsString;
 	for (uint i=0;i<double_h.size();i++){
-		valuesAsString.push_back(to_string(double_h[i]));
+        valuesAsString.push_back(d2s(double_h[i]));
 	}
 	return valuesAsString;
 }

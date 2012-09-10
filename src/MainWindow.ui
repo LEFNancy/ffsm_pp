@@ -109,6 +109,9 @@ p, li { white-space: pre-wrap; }
          </item>
          <item>
           <widget class="QPushButton" name="viewResultsButton">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;You will need a recent version of LibreOffice (or OpenOffice) installed on your system to view the results.&lt;/p&gt;&lt;p&gt;If you don't have it you can download it from &lt;a href=&quot;http://www.libreoffice.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.libreoffice.org.&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p/&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="locale">
             <locale language="English" country="UnitedKingdom"/>
            </property>
@@ -169,7 +172,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>667</width>
-     <height>25</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuView">

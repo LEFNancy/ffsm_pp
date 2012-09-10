@@ -78,13 +78,13 @@ QMAKE_CXXFLAGS += -std=c++0x
 Release:OBJECTS_DIR = ../build/release
 Release:MOC_DIR = ../build/release
 Release:RCC_DIR = ../build/release
-Release:UI_DIR = ../build/release
+#Release:UI_DIR = ../build/release # then th header file can't find the other headers!
 
 #Debug:DESTDIR = ../build/debug
 Debug:OBJECTS_DIR = ../build/debug
 Debug:MOC_DIR = ../build/debug
 Debug:RCC_DIR = ../build/debug
-Debug:UI_DIR = ../build/debug
+#Debug:UI_DIR = ../build/debug
 
 
 # Input
