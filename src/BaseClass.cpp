@@ -17,9 +17,13 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+#include <stdio.h>
+#include <algorithm>
+
 #include "BaseClass.h"
 #include "ThreadManager.h"
-#include <algorithm>
+
 
 
 using namespace std;
@@ -137,6 +141,13 @@ BaseClass::refreshGUI()const{
 
 int
 BaseClass::s2i ( const string &string_h) const {
+	if (string_h == "") return 0;
+	int valueAsInteger;
+	stringstream ss(string_h);
+	ss >> valueAsInteger;
+	return valueAsInteger;
+	/*
+	// I can't use stoi as of bug in MinGW
 	try {
 		return stoi(string_h);
 	} catch (...) {
@@ -146,6 +157,7 @@ BaseClass::s2i ( const string &string_h) const {
 		}
 	}
 	return 0;
+	*/
 
 }
 
@@ -197,19 +209,25 @@ BaseClass::s2b (const string& string_h) const {
 	return true;
 }
 
-/*string
+string
 BaseClass::i2s (const int& int_h) const{
-	ostringstream out;
-	out<<int_h;
-	return out.str();
+	//ostringstream out;
+	//out<<int_h;
+	//return out.str();
+	char  outChar[24];
+	snprintf ( outChar, sizeof(outChar), "%d", int_h );
+	return string(outChar);
 }
 
 string
 BaseClass::d2s (const double& double_h) const{
-	ostringstream out;
-	out<<double_h;
-	return out.str();
-}*/
+	//ostringstream out;
+	//out<<double_h;
+	//return out.str();
+	char  outChar[24];
+	snprintf ( outChar, sizeof(outChar), "%f", double_h );
+	return string(outChar);
+}
 
 string
 BaseClass::b2s (const bool& bool_h) const{

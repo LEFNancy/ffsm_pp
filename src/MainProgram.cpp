@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <iostream>
+#include <clocale>
 
 #include "MainProgram.h"
 #include "ThreadManager.h"
@@ -54,7 +55,9 @@ This is the main call of the program.
 void
 MainProgram::run(){
 
-    // GIS information and methods..
+	setlocale(LC_ALL, "C"); // force to use the dot as digital separator also if we are running under the GUI
+
+	// GIS information and methods..
 	Gis *GIS  = new Gis(MTHREAD);
 	MTHREAD->setGISPointer(GIS);
 	// a test object for various 0-effects tests (sandbox)..

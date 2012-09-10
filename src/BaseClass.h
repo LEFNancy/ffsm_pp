@@ -172,8 +172,12 @@ public:
 	double              s2d (const string& string_h) const; ///<  string  to double  conversion
 	double              s2d (const string& string_h, const bool& replaceComma) const; ///<  string  to double  conversion
 	bool                s2b (const string& string_h)          const; ///<  string  to bool    conversion
-	string              i2s (const int& int_h)       const {return to_string(int_h);};    ///<  integer to string  conversion
-	string              d2s (const double& double_h) const {return to_string(double_h);}; ///<  double  to string  conversion
+	// as of 20120909 c++11 to_string(), stoi and stod functions not working in MinGw, as bug http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52015
+	// reverting to old code :-(
+	//string              i2s (const int& int_h)       const {return to_string(int_h);};    ///<  integer to string  conversion
+	//string              d2s (const double& double_h) const {return to_string(double_h);}; ///<  double  to string  conversion
+	string              i2s (const int& int_h)               const; ///<  integer to string  conversion
+	string              d2s (const double& double_h)         const; ///<  double  to string  conversion
 	string              b2s (const bool& bool_h)             const; ///<  bool    to string  conversion
 
 	vector<int>         s2i (const vector<string>& string_h) const; ///<  string  to integer conversion (vector)
@@ -208,6 +212,8 @@ protected:
 	Through this pointer each deribed subclass (the vast maiority of those used on Pythia) can "ask" for sending signals to the GUI, like append the log or modify the map.
 	*/
 	ThreadManager*                         MTHREAD; ///< Pointer to the Thread manager.
+	// ATTENTION
+	// I can't create member variables to host return values as these would break all the const mechanism..
 
 private:
 	void msgOut2(const int& msgCode_h, const string& msg_h, const bool& refreshGUI_h) const; ///< Do the job of the overloaded functions

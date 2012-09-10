@@ -141,6 +141,34 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+
+	/*
+	// testing snprintf
+	vector <int> myintegers;
+	vector <double> mydoubles;
+	char  szResult[24];
+
+	myintegers.push_back(1);
+	myintegers.push_back(202);
+	myintegers.push_back(3003);
+	myintegers.push_back(400004);
+	myintegers.push_back(50000005);
+	myintegers.push_back(6000000006);
+	mydoubles.push_back(1.1234567890);
+	mydoubles.push_back(12345678.9);
+	mydoubles.push_back(12345678.90123456);
+	mydoubles.push_back(6000000006.123456789012);
+	for(uint i=0;i<myintegers.size();i++){
+		snprintf ( szResult, sizeof(szResult), "%d", myintegers[i] );  // "safe" version
+		cout << "int/string: " << myintegers[i] << "  /  " << szResult << endl;
+	}
+	for(uint i=0;i<mydoubles.size();i++){
+			snprintf ( szResult, sizeof(szResult), "%f", mydoubles[i] );  // "safe" version
+		cout << "double/string: " << mydoubles[i] << "  /  " << szResult << endl;
+	}
+	exit(0);
+	*/
+
 	/*
 	// testing stod() ..
 	// this is giving different results if gui or console mode !!
