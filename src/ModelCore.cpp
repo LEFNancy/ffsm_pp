@@ -527,7 +527,8 @@ For compatibility with the GAMS code, a -1 value means using initial simulation 
 
 
 
-			if(regType != "fixed" && regType != "fromHrLevel"){
+			//if(regType != "fixed" && regType != "fromHrLevel"){
+			// 20120910, Antonello: changed.. calculating the expected returns also for fixed and fromHrLevel regeneration (then not used but gives indication)
 				// calculating the expected returns..
 				//	loop ( (u,i,essence,lambda,p_pr),
 				//		if (sum(u2, hV(u2,i,essence,lambda,t))= 0,
@@ -568,7 +569,7 @@ For compatibility with the GAMS code, a -1 value means using initial simulation 
 				}
 				sfd(expReturns,"expReturns",regId, ft,"",DATA_NOW,true);
 				cachedExpectedReturnsByFt.push_back(expReturns);
-			}
+			//}
 
 		} // end foreach forest type
 
@@ -593,11 +594,14 @@ For compatibility with the GAMS code, a -1 value means using initial simulation 
 			string ft = fTypes[j];
 			double harvestedAreaForThisFT = gfd("harvestedArea",regId,ft,DIAM_ALL);
 			if(regType == "fixed" || regType == "fromHrLevel"){
+				// regeneration area is the harvested area..
 				double harvestedArea = harvestedAreaForThisFT;
 				sfd(harvestedArea,"regArea",regId,ft,"");
 			} else {
+				// regeneration area is a mix between harvested area and the harvested area of te most profitting forest type..
 				double regArea = 0;
 				if (!foundMaxExpReturns && cachedExpectedReturnsByFt[j] == maxExpReturns){
+					// I use the foundMaxExpReturns for the unlucky event that two forest types have the same expected return to avoid overcounting of the area
 					regArea += totalHarvestedArea*mr;
 					foundMaxExpReturns = true;
 				}
