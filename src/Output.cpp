@@ -187,9 +187,13 @@ Output::initOutputMaps(){
 void
 Output::print(){
 	int cYear = MTHREAD->SCD->getYear();
-	int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
+	int initialSimulationYear = MTHREAD->MD->getIntSetting("initialOptYear");
 
-	if ( (cYear-initialOptYear)%outStepRange != 0 && cYear != (inYear+nYears) ) return;
+	if ( (cYear-initialSimulationYear)%outStepRange != 0 && cYear != (initialSimulationYear+nYears)-1 ) {
+		cout << cYear << " not printed" << endl;
+		return;
+	}
+	cout << "printing " << cYear << endl;
 	printMaps();
 	MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
 	printForestData(false);
