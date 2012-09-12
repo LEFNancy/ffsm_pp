@@ -109,6 +109,7 @@ public:
 	vector <string>     getDiameterClasses(bool productionOnly=false);
 	/// A simple function to assess if a specified product can be made by a certain forest type and diameter class
 	const bool          assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
+	int                 setErrorLevel(int errorLevel_h){errorLevel=errorLevel_h;};
 
 	double              getTimedData(const vector <double> &dated_vector, const int& year_h) const; ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
 	void                setTimedData(const double& value_h, vector<double> &dated_vector, const int& year_h, const int& MSG_LEVEL=MSG_WARNING);
@@ -130,13 +131,13 @@ public:
 	void                setProdData(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h=""); // Remember default arguments must be at the end
 	void                setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year=DATA_NOW, const bool& allowCreate=false); // Remember default arguments must be at the end
 
-string                makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="") const {return parName+"#"+regId+"#"+prod+"#"+freeDim+"#";};
-string                makeKeyForData(const string& parName, const string& regId, const string& forType, const string& diamClass) const {return parName+"#"+regId+"#"+forType+"#"+diamClass+"#";};
-void                  unpackKeyProdData(const string& key, string& parName, int &regId, string& prod, string& freeDim) const;
-void                  unpackKeyForData(const string& key, string& parName, int &regId, string& forType, string& diamClass) const;
+	string                makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="") const {return parName+"#"+regId+"#"+prod+"#"+freeDim+"#";};
+	string                makeKeyForData(const string& parName, const string& regId, const string& forType, const string& diamClass) const {return parName+"#"+regId+"#"+forType+"#"+diamClass+"#";};
+	void                  unpackKeyProdData(const string& key, string& parName, int &regId, string& prod, string& freeDim) const;
+	void                  unpackKeyForData(const string& key, string& parName, int &regId, string& forType, string& diamClass) const;
 
-double                calculateAnnualisedEquivalent(double amount_h, int years_h); ///< Calculate the annual equivalent flow
-double                calculateAnnualisedEquivalent(double amount_h, double years_h); ///< Transform the double to the highest integer and call calculateAnnualisedEquivalent(double amount_h, int years_h)
+	double                calculateAnnualisedEquivalent(double amount_h, int years_h); ///< Calculate the annual equivalent flow
+	double                calculateAnnualisedEquivalent(double amount_h, double years_h); ///< Transform the double to the highest integer and call calculateAnnualisedEquivalent(double amount_h, int years_h)
 
 	/// Retrieve the list of objects type that can be placed on the specified soil type
 
@@ -191,6 +192,7 @@ private:
 
 	 /// For each agricultural soil type (as defined in the setting "agrLandTypes") this list define the objects that can be placed on that soil type
 	InputNode                                 mainDocument;  ///< the main input document, loaded in memory at unzipping stage
+	int                                         errorLevel;
 };
 
 /// Input files (struct)

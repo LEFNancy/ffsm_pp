@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <fstream>
-
+ 
 #include "Output.h"
 #include "ThreadManager.h"
 #include "Scheduler.h"
@@ -63,6 +63,37 @@ Output::commonInit(){
 	oSingleFile  = MTHREAD->MD->getBoolSetting("outputSingleFile");
 	wRegId_l1    = MTHREAD->MD->getIntSetting("worldCodeLev1");
 	wRegId_l2    = MTHREAD->MD->getIntSetting("worldCodeLev2");
+	outForVariables          = MTHREAD->MD->getStringVectorSetting("outForVariables");
+	outProdVariables         = MTHREAD->MD->getStringVectorSetting("outProdVariables");
+	dClasses                 = MTHREAD->MD->getStringVectorSetting("dClasses");
+	dClasses.push_back("");
+	outStepRange             = MTHREAD->MD->getIntSetting("outStepRange");
+	forestDiamDetailedOutput = MTHREAD->MD->getBoolSetting("forestDiamDetailedOutput");
+	fTypes                   = MTHREAD->MD->getForTypeIds();
+
+	priPr    = MTHREAD->MD->getStringVectorSetting("priProducts");
+	secPr    = MTHREAD->MD->getStringVectorSetting("secProducts");
+	allPr    = priPr;
+	allPr.insert( allPr.end(), secPr.begin(), secPr.end() );
+	nPriPr   = priPr.size();
+	nSecPr   = secPr.size();
+	nAllPr   = allPr.size();
+	l1regIds =  MTHREAD->MD->getRegionIds(1, true);
+	nL2r     =  MTHREAD->MD->getRegionIds(2, true).size();
+
+
+	for(uint i=0;i<l1regIds.size();i++){
+		std::vector<int> l2ChildrenIds;
+		ModelRegion* l1Region = MTHREAD->MD->getRegion(l1regIds[i]);
+		std::vector<ModelRegion*> l2Childrens = l1Region->getChildren(true);
+		for(uint j=0;j<l2Childrens.size();j++){
+			l2ChildrenIds.push_back(l2Childrens[j]->getRegId());
+		}
+		if(l2ChildrenIds.size()){
+			l2r.push_back(l2ChildrenIds);
+		}
+	}
+
 }
 
 void
@@ -155,9 +186,15 @@ Output::initOutputMaps(){
 
 void
 Output::print(){
+	int cYear = MTHREAD->SCD->getYear();
+	int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
+
+	if ( (cYear-initialOptYear)%outStepRange != 0 && cYear != (inYear+nYears) ) return;
 	printMaps();
+	MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
 	printForestData(false);
 	printProductData(false);
+	MTHREAD->MD->setErrorLevel(MSG_ERROR);
 }
 
 void
@@ -173,8 +210,10 @@ Output::printFinalOutput(){
 	// we do this only if we choosed the outputHumanReadable settings, as we flush the data all in ones at the end.
 	// oterwise we flush data every year
 	if(oHRedeable){
+		MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
 		printForestData(true);
 		printProductData(true);
+		MTHREAD->MD->setErrorLevel(MSG_ERROR);
 	}
 }
 
@@ -193,7 +232,57 @@ Output::printForestData(bool finalFlush){
 	}
 	ofstream out (outFileName.c_str(), ios::app);
 	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
-
+	double outvalue;
+	for(uint v=0;v<outForVariables.size();v++){
+		for (uint r1=0;r1<l2r.size();r1++){
+			for (uint r2=0;r2<l2r[r1].size();r2++){
+				for(uint ft=0;ft<fTypes.size();ft++){
+					if(forestDiamDetailedOutput){
+						for(uint dc=0;dc<dClasses.size();dc++){
+							out << scenarioName << d;
+							out << outForVariables[v] << d;
+							out << l1regIds.at(r1) << d;
+							out << l2r[r1][r2] << d;
+							out << fTypes[ft] << d;
+							out << dClasses[dc] << d;
+							if (oHRedeable){
+								for(int y=0;y<nYears;y++){
+									outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],dClasses[dc],y+inYear);
+									out << outvalue << d;
+								}
+								out << "\n";
+							} else {
+								outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],dClasses[dc]);
+								out << currentYear << d;
+								out << outvalue << d;
+								out << "\n";
+							}
+						}
+					} else {
+						out << scenarioName << d;
+						out << outForVariables[v] << d;
+						out << l1regIds.at(r1) << d;
+						out << l2r[r1][r2] << d;
+						out << fTypes[ft] << d;
+						out << d;
+						if (oHRedeable){
+							for(int y=0;y<nYears;y++){
+								outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],DIAM_ALL,y+inYear);
+								out << outvalue << d;
+							}
+							out << "\n";
+						} else {
+							outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],DIAM_ALL);
+							out << currentYear << d;
+							out << outvalue << d;
+							out << "\n";
+						}
+					}
+				}
+			}
+		}
+	}
+	/*
 	DataMap::const_iterator i;
 	string key;
 	vector <double> values;
@@ -233,6 +322,7 @@ Output::printForestData(bool finalFlush){
 			out << "\n";
 		}
 	}
+	*/
 	out.close();
 }
 
@@ -253,6 +343,41 @@ Output::printProductData(bool finalFlush){
 	ofstream out (outFileName.c_str(), ios::app);
 	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
 
+
+	double outvalue;
+	for(uint v=0;v<outProdVariables.size();v++){
+		for (uint r1=0;r1<l2r.size();r1++){
+			for (uint r2=0;r2<l2r[r1].size();r2++){
+				for(uint p=0;p<allPr.size();p++){
+
+						out << scenarioName << d;
+						out << outProdVariables[v] << d;
+						out << l1regIds.at(r1) << d;
+						out << l2r[r1][r2] << d;
+						out << allPr[p] << d;
+						out << d;
+						if (oHRedeable){
+							for(int y=0;y<nYears;y++){
+								outvalue = MTHREAD->MD->getProdData(outProdVariables[v],l2r[r1][r2],allPr[p],y+inYear);
+								out << outvalue << d;
+							}
+							out << "\n";
+						} else {
+							outvalue = MTHREAD->MD->getProdData(outProdVariables[v],l2r[r1][r2],allPr[p]);
+							out << currentYear << d;
+							out << outvalue << d;
+							out << "\n";
+						}
+
+				}
+			}
+		}
+	}
+
+
+
+
+/*
 	DataMap::const_iterator i;
 	string key;
 	vector <double> values;
@@ -292,6 +417,8 @@ Output::printProductData(bool finalFlush){
 			out << "\n";
 		}
 	}
+
+*/
 	out.close();
 }
 

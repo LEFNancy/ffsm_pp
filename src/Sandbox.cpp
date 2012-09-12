@@ -141,6 +141,15 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+	/*
+	// testing ModelData:: ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h)
+	cout << "Value:" << MTHREAD->MD->calculateAnnualisedEquivalent(500.,4) << endl;
+	cout << "Value:" << MTHREAD->MD->calculateAnnualisedEquivalent(500.,30) << endl;
+	cout << "Value:" << MTHREAD->MD->calculateAnnualisedEquivalent(107.035040105,10) << endl;
+	cout << "Value:" << MTHREAD->MD->calculateAnnualisedEquivalent(8.91507,1) << endl;
+	cout << "Done" << endl;
+	exit(0);
+	*/
 
 	/*
 	// testing snprintf

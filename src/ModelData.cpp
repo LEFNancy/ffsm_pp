@@ -48,6 +48,7 @@ typedef pair<string, vector <double> > DataPair;
 
 ModelData::ModelData(ThreadManager* MTHREAD_h){
 	MTHREAD = MTHREAD_h;
+	errorLevel = MSG_ERROR;
 }
 
 ModelData::~ModelData(){
@@ -953,7 +954,7 @@ ModelData::getProdData(const string &type_h, const int& regId_h, const string &p
 	}
 
 	if(!found){
-		msgOut(MSG_ERROR, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
+		msgOut(errorLevel, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
 	}
 	return value;
 
@@ -1020,7 +1021,7 @@ ModelData::getForData(const string &type_h, const int& regId_h, const string &fo
 	}
 
 	if(!found){
-		msgOut(MSG_ERROR, "Error in getForData(): no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+diamClass_h+". Returning 0, but double check that this is ok for your model.");
+		msgOut(errorLevel, "Error in getForData(): no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+diamClass_h+". Returning 0, but double check that this is ok for your model.");
 	}
 	return value;
 }
@@ -1613,12 +1614,28 @@ ModelData::unpackKeyForData(const string& key, string& parName, int &regId, stri
 
 
 /**
-// calculating the discount factor
-// revenues at years n will be transforemed as average year rate as
-// av.y.rev = rev(n)/ ( (1+ir)^(n-1)+(1+ir)^(n-2)+(1+ir)^(n-3)+...+(1+ir)^(n-n) )
+calculating the discount factor
+
+Revenues at years n will be transforemed as average year rate as
+
+av.y.rev = rev(n)/ ( (1+ir)^(n-1)+(1+ir)^(n-2)+(1+ir)^(n-3)+...+(1+ir)^(n-n) )
+
+Objective is to have the present value of the final harvestin (A) equal to the sum pf the present values of yearly activities (B):
+
+\image html diagram_calculateAnnualisedEquivalent.png "Comparing present values" width=10cm
+
+\f[ PV(A) = SUM(PV(B) \f]
+\f[ A/(1+r)^n = B/(1+r)^1 + B/(1+r)^2 + … + B/(1+r)^n \f]
+\f[ A/(1+r)^n = B * ( 1/(1+r)^1 + 1/(1+r)^2 + … + 1/(1+r)^n ) \f]
+\f[ A/(1+r)^n = B * ( (1+r)^(n-1) + (1+r)^(n-2) + … + (1+r)^(n-n) ) \f]
+\f[ B = A / ( (1+r)^(n-1) + (1+r)^(n-2) + … + (1+r)^(n-n) ) \f]
 */
 double
 ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
+	// modified and tested 20120912. Before it was running this formula instead:
+	// av.y.rev = rev(n)/ ( (1+ir)^1+(1+ir)^2+(1+ir)^3+...+(1+ir)^n )
+	// the difference is that in this way the annual equivalent that is calulated doesn't need to be further discounted for yearly activites (e.g. agric)
+
 	//loop(fy$(ord(fy)=1),
 	//	df(fy)= (1+ir)**(ord(fy));
 	//);
@@ -1629,19 +1646,22 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
 	if(years_h==0) return amount_h;
 	double ir = getDoubleSetting("ir");
 	vector <double> df_by;
-	for(int y=1;y<=years_h;y++){
+	for(int y=0;y<years_h;y++){
 		double df;
-		if(y==1){
+		if(y==0){
 			df = pow((1+ir),y);
 		} else {
-			df = df_by.at(y-2)+pow((1+ir),y);
+			df = df_by.at(y-1)+pow((1+ir),y);
 		}
-		if (y==years_h) return amount_h/df; // big bug 20120904
+		if (y==years_h-1) {
+		 return amount_h/df; // big bug 20120904
+		}
 		df_by.push_back(df);
 	}
 	exit(1);
 	return 0; // never reached, just to avoid compilation warnings
 }
+
 double
 ModelData::calculateAnnualisedEquivalent(double amount_h, double years_h){
 	//ceil(x) DNLP returns the smallest integer number greater than or equal to x

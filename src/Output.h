@@ -73,6 +73,21 @@ private:
 	int                                   wRegId_l1;
 	int                                   wRegId_l2;
 	string                              outFileName;
+	vector <string>                 outForVariables;
+	vector <string>                outProdVariables;
+	int                                outStepRange;
+	bool                   forestDiamDetailedOutput;
+	vector<string>                           priPr;
+	vector<string>                           secPr;
+	vector<string>                           allPr;
+	vector<int>                           l1regIds;
+	vector < vector <int> >                    l2r;
+	vector <string>                         fTypes;
+	vector <string>                       dClasses;
+	int                                     nPriPr;
+	int                                     nSecPr;
+	int                                     nAllPr;
+	int                                       nL2r;
 };
 
 #endif
