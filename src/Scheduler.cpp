@@ -17,6 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "time.h"
+
 #include "Scheduler.h"
 #include "ThreadManager.h"
 #include "Output.h"
@@ -42,6 +44,10 @@ Scheduler::run(){
 		iteration = it;
 		MTHREAD->upgradeMainSBLabel("New year started..");
 		msgOut(MSG_INFO, "### "+i2s(getYear())+ " year started.. ####");
+		time_t now;
+		time(&now);
+		struct tm *current = localtime(&now);
+		string timemessage = "("+i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec)+")";
 		MTHREAD->upgradeYearSBLabel(iteration+ MTHREAD->MD->getIntSetting("initialYear"));
 		MTHREAD->treeViewerChangeGeneralPropertyValue("year",i2s(iteration+ MTHREAD->MD->getIntSetting("initialYear")));
 

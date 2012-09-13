@@ -45,6 +45,7 @@ Output::initOutput(){
 	initOutputMaps();
 	initOutputForestData();
 	initOutputProductData();
+	initOptimisationLog();
 
 }
 
@@ -94,6 +95,39 @@ Output::commonInit(){
 		}
 	}
 
+}
+
+void
+Output::initOptimisationLog(){
+	if(oLevel<OUTVL_AGGREGATED) return;
+
+	logFilename = baseDir+oDir+"optimisationLog.txt";
+
+	ifstream in(logFilename.c_str(), ios::in);
+	if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
+		in.close();
+		cleanScenario(logFilename, scenarioName, d);
+		ofstream out(logFilename.c_str(), ios::app);
+		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+logFilename+" for writing.");}
+		time_t now;
+		time(&now);
+		struct tm *current = localtime(&now);
+		string timemessage = i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
+		out << scenarioName << d << "0000" << d << timemessage << d << d << d <<"\n";
+		out.close();
+		return;
+	} else { // file doesn't exist
+		in.close();
+		ofstream out(logFilename.c_str(), ios::out);
+		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+logFilename+" for writing.");}
+		out << "scenario" << d << "year" << d << "time" << d << "opt flag" << d << "iterations" << d <<"\n";
+		time_t now;
+		time(&now);
+		struct tm *current = localtime(&now);
+		string timemessage = i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
+		out << scenarioName << d << "0000" << d << timemessage << d << d << d <<"\n";
+		out.close();
+	}
 }
 
 void
@@ -449,6 +483,22 @@ Output::getOutputFieldDelimiter(){
 			msgOut(MSG_ERROR, "You have specified an unknow output file field delimiter. Using \";\".");
 			return ',';
 	}
+}
+
+void
+Output::printOptLog(bool optimal, int &nIterations, double &obj){
+	if(oLevel<OUTVL_AGGREGATED) return;
+
+	ofstream out(logFilename.c_str(), ios::app);
+	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+logFilename+" for writing.");}
+	time_t now;
+	time(&now);
+	struct tm *current = localtime(&now);
+	string timemessage = i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
+	out << scenarioName << d << MTHREAD->SCD->getYear() << d << timemessage << d << optimal;
+	out << d << nIterations << d << obj << "\n";
+	out.close();
+
 }
 
 /**

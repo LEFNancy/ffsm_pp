@@ -27,6 +27,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <time.h>
 
 //regmas headers
 #include "BaseClass.h"
@@ -51,11 +52,13 @@ public:
 		void                initOutputMaps();
 		void                initOutputForestData();
 		void                initOutputProductData();
+		void                initOptimisationLog();
 	void                print();
 	void                printMaps();
 	void                printFinalOutput();
 	void                printForestData(bool finalFlush=false);
 	void                printProductData(bool finalFlush=false);
+	void                printOptLog(bool optimal, int &nIterations, double &obj);
 	char                getOutputFieldDelimiter();
 	void                cleanScenario(string fileName, string scenarioName, char d);
 
@@ -88,6 +91,7 @@ private:
 	int                                     nSecPr;
 	int                                     nAllPr;
 	int                                       nL2r;
+	string                             logFilename;
 };
 
 #endif

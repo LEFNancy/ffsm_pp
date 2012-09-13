@@ -357,14 +357,24 @@ ModelCore::runSimulationYear(){
 	// ObjT(t)              =  Obj.l ;
 	// ==> in Opt::finalize_solution()
 
-	if (status == Solve_Succeeded) {
-		// Retrieve some statistics about the solve
-		Index iter_count = application->Statistics()->IterationCount();
-		printf("\n\n*** The problem solved in %d iterations!\n", iter_count);
+	// Retrieve some statistics about the solve
+	Index iter_count = application->Statistics()->IterationCount();
+	Number final_obj = application->Statistics()->FinalObjective();
 
-		Number final_obj = application->Statistics()->FinalObjective();
-		printf("\n\n*** The final value of the objective function is %e.\n", final_obj);
-        msgOut(MSG_INFO, "The problem solved successfully in "+i2s(iter_count)+" iterations.");
+	if (status == Solve_Succeeded) {
+
+		printf("\n*** The problem solved in %d iterations!\n", iter_count);
+		printf("\n*** The final value of the objective function is %e.\n", final_obj);
+		msgOut(MSG_INFO, "The problem solved successfully in "+i2s(iter_count)+" iterations.");
+		int icount = iter_count;
+		double obj = final_obj;
+		MTHREAD->DO->printOptLog(true, icount, obj);
+	} else {
+		cout << "***ERROR: MODEL DIDN'T SOLVE FOR THIS YEAR" << endl;
+		msgOut(MSG_ERROR, "After "+i2s(iter_count)+" iterations model DIDN'T SOLVE for this year");
+		int icount = iter_count;
+		double obj = final_obj;
+		MTHREAD->DO->printOptLog(false, icount, obj);
 	}
 
 	for(uint r2= 0; r2<regIds2.size();r2++){  // you can use r2<=regIds2.size() to try an out-of range memory error that is not detected other than by valgrind (with a message "Invalid read of size 4 in ModelCore::runSimulationYear() in src/ModelCore.cpp:351")
