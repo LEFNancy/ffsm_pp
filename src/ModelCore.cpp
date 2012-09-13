@@ -385,7 +385,7 @@ ModelCore::runSimulationYear(){
 		for (uint p=0;p<secProducts.size();p++){
 			double dl = gpd("dl",regId,secProducts[p]);
 			double pl = gpd("pl",regId,secProducts[p]);
-			double da = gpd("pl",regId,secProducts[p]);
+			double da = gpd("da",regId,secProducts[p]); // bug corrected 20120913
 			double pworld = gpd("pl", WL2,secProducts[p]);
 			double dt = gpd("dt",regId,secProducts[p]);
 			double pw = (dl*pl+da*pworld)/dt;
@@ -394,7 +394,7 @@ ModelCore::runSimulationYear(){
 		for (uint p=0;p<priProducts.size();p++){
 			double sl = gpd("sl",regId,priProducts[p]);
 			double pl = gpd("pl",regId,priProducts[p]);
-			double sa = gpd("sl",regId,priProducts[p]);
+			double sa = gpd("sa",regId,priProducts[p]);  // bug corrected 20120913
 			double pworld = gpd("pl", WL2,priProducts[p]);
 			double st = gpd("st",regId,priProducts[p]);
 			double pw = (sl*pl+sa*pworld)/st;
