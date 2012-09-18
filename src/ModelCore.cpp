@@ -258,9 +258,9 @@ ModelCore::runSimulationYear(){
 	//string fDC = MTHREAD->MD->getStringVectorSetting("dClasses")[0]; // name of first diameter class
 	vector <string> fTypes= MD->getForTypeIds();
 	string regType = MTHREAD->MD->getStringSetting("regType"); // how the regeneration should be computed (exogenous, from hr, from allocation choises)
-	double futureTPBelief = MD->getDoubleSetting("futureTPBelief");
-	if((futureTPBelief<0 || futureTPBelief>1) && futureTPBelief != -1){
-		msgOut(MSG_CRITICAL_ERROR, "futureTPBelief parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
+	double futureBelief = MD->getDoubleSetting("futureBelief");
+	if((futureBelief<0 || futureBelief>1) && futureBelief != -1){
+		msgOut(MSG_CRITICAL_ERROR, "futureBelief parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
 	}
 	double mr = MD->getDoubleSetting("mr");
 
@@ -508,7 +508,7 @@ ModelCore::runSimulationYear(){
 			//  cumTp(u,i,lambda,essence) =   ceil(cumTp(u,i,lambda,essence));
 			//);
 			/**
-			param futureTPBelief Specify how the forest owners (those that make the investments) behave will be the time of passage in the future in order to calculate the cumulative time of passage in turn used to discount future revenues.
+			param futureBelief Specify how the forest owners (those that make the investments) behave will be the time of passage in the future in order to calculate the cumulative time of passage in turn used to discount future revenues.
 			Will forest owners behave adaptively believing the time of passage between diameter classes will be like the observed one at time they make decision (0) or they will have full expectations believing forecasts (1) or something in the middle ?
 For compatibility with the GAMS code, a -1 value means using initial simulation tp values (fixed cumTp)."
 			*/
@@ -521,14 +521,14 @@ For compatibility with the GAMS code, a -1 value means using initial simulation 
 					sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
 					cumTp.push_back(cumTp_u);
 				} else {
-					if (futureTPBelief == -1){
+					if (futureBelief == -1){
 						cumTp_u = cumTp[u-1]+gfd("tp",regId,ft,dClasses[u-1],firstYear);
 						sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
 						cumTp.push_back(cumTp_u);
 					} else {
 						cumTp_u_noExp = cumTp[u-1]+gfd("tp",regId,ft,dClasses[u-1]);
 						cumTp_u_fullExp = cumTp[u-1]+gfd("tp",regId,ft,dClasses[u-1],thisYear+cumTp[u-1]); // it adds to the time of passage to reach the previous diameter class the time of passage that there should be to reach this diameter class in the year where the previous diameter class will be reached
-						cumTp_u = cumTp_u_fullExp*futureTPBelief+cumTp_u_noExp*(1-futureTPBelief);
+						cumTp_u = cumTp_u_fullExp*futureBelief+cumTp_u_noExp*(1-futureBelief);
 						sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
 						cumTp.push_back(cumTp_u);
 					}
