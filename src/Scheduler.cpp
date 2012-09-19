@@ -28,7 +28,7 @@
 
 Scheduler::Scheduler(ThreadManager* MTHREAD_h){
 	MTHREAD=MTHREAD_h;
-	iteration=-1;
+	iteration=0;
 }
 
 Scheduler::~Scheduler(){

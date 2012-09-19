@@ -1563,7 +1563,7 @@ ModelData::dataMapSetValue( DataMap& map, const string& search_for, const double
 		i = map.find(search_for);
 		if (i!=map.end()){
 			found = true;
-			setTimedData(value_h, i->second, year_h);
+			setTimedData(value_h, i->second, year_h, errorLevel);
 		}
 	}
 	// removed 20120903 as the insertion of new values must be explicitly done, not in all cases we want a new insertion
