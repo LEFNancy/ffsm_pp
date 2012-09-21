@@ -473,11 +473,9 @@ ModelCore::runSimulationYear(){
 	// ==> in Opt::finalize_solution()
 
 	// Retrieve some statistics about the solve
-	Index iter_count = application->Statistics()->IterationCount();
-	Number final_obj = application->Statistics()->FinalObjective();
-
 	if (status == Solve_Succeeded) {
-
+        Index iter_count = application->Statistics()->IterationCount();
+        Number final_obj = application->Statistics()->FinalObjective();
 		printf("\n*** The problem solved in %d iterations!\n", iter_count);
 		printf("\n*** The final value of the objective function is %e.\n", final_obj);
 		msgOut(MSG_INFO, "The problem solved successfully in "+i2s(iter_count)+" iterations.");
@@ -485,10 +483,14 @@ ModelCore::runSimulationYear(){
 		double obj = final_obj;
 		MTHREAD->DO->printOptLog(true, icount, obj);
 	} else {
+        //Number final_obj = application->Statistics()->FinalObjective();
 		cout << "***ERROR: MODEL DIDN'T SOLVE FOR THIS YEAR" << endl;
-		msgOut(MSG_ERROR, "After "+i2s(iter_count)+" iterations model DIDN'T SOLVE for this year");
-		int icount = iter_count;
-		double obj = final_obj;
+        msgOut(MSG_ERROR, "Model DIDN'T SOLVE for this year");
+        // IMPORTANT! Don't place the next two lines above the msgOut() function or it will crash in windows if the user press the stop button
+        Index iter_count = application->Statistics()->IterationCount();
+        Number final_obj = application->Statistics()->FinalObjective();
+        int icount = iter_count;
+        double obj = final_obj;
 		MTHREAD->DO->printOptLog(false, icount, obj);
 	}
 
