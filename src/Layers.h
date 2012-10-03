@@ -53,7 +53,8 @@ public:
 	                             string               label_h,
 	                             bool             isInteger_h,
 	                             bool        dynamicContent_h,
-	                             string        fullFilename_h  );
+															 string        fullFilename_h,
+															 bool               display_h=true);
 	                   ~Layers();
 	/// Add a legend item. @see LegendItems
 	void                addLegendItem( int             ID_h,
@@ -97,6 +98,7 @@ private:
 	string                                 label; ///< Label of the layer (spaces allowed)
 	bool                               isInteger; ///< Type of the layer (true==integer, false==double. If true, on each legend item: minValue==maxValue==ID)
 	bool                          dynamicContent; ///< True if the content may change during simulation year
+	bool                                 display; ///< Normally true, but some layers used to just keep data shoudn't be normally processed
 	string                          fullFileName; ///< Filename of the associated dataset (map)	
 	vector<LegendItems>              legendItems; ///< Vector of legend items. @see LegendItems
 	vector<ReclassRules>      reclassRulesVector; ///< Vector of initial reclassification rules. @see ReclassRules

@@ -28,16 +28,8 @@ This happen at the very beginning of the init period and after each simulated ye
 void
 ModelCore::computeCumulativeData(){
 
-	ModelData* MD = MTHREAD->MD;
 	int thisYear     =  MTHREAD->SCD->getYear();
-	int firstYear = MD->getIntSetting("initialYear");
-	vector <int> regIds2 = MD->getRegionIds(2);
-	vector <string> dClasses = MD->getStringVectorSetting("dClasses");
-	vector <string> fTypes= MD->getForTypeIds();
-	double expType = MD->getDoubleSetting("expType");
-	if((expType<0 || expType>1) && expType != -1){
-		msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (full expectations) and 0 (adaptative) or -1 (fixed).");
-	}
+
 
 	for(uint r2= 0; r2<regIds2.size();r2++){
 		int regId = regIds2[r2];
@@ -132,21 +124,28 @@ void
 ModelCore::runInitPeriod(){
 	msgOut(MSG_INFO, "Starting init simulation..");
 	int currentYear = MTHREAD->SCD->getYear();
-	ModelData* MD = MTHREAD->MD;
-	int firstYear = MD->getIntSetting("initialYear");
-	int secondYear = firstYear+1;
-	int thirdYear  = firstYear+2;
-	int WL2 = MD->getIntSetting("worldCodeLev2");
-	vector <int> regIds2 = MD->getRegionIds(2);
-	vector <string> priProducts = MD->getStringVectorSetting("priProducts");
-	vector <string> secProducts = MD->getStringVectorSetting("secProducts");
-	vector <string> allProducts = priProducts;
+
+	MD = MTHREAD->MD;
+	firstYear = MD->getIntSetting("initialYear");
+	secondYear = firstYear+1;
+	thirdYear  = firstYear+2;
+	WL2 = MD->getIntSetting("worldCodeLev2");
+	regIds2 = MD->getRegionIds(2);
+	priProducts = MD->getStringVectorSetting("priProducts");
+	secProducts = MD->getStringVectorSetting("secProducts");
+	allProducts = priProducts;
 	allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
-	vector <string> dClasses = MD->getStringVectorSetting("dClasses");
-	vector <string> pDClasses; // production diameter classes: exclude the fist diameter class below 15 cm
+	dClasses = MD->getStringVectorSetting("dClasses");
+	pDClasses; // production diameter classes: exclude the fist diameter class below 15 cm
 	pDClasses.insert(pDClasses.end(), dClasses.begin()+1, dClasses.end() );
-	vector <string> fTypes= MD->getForTypeIds();
-	vector <vector <int> > l2r = MD->getRegionIds();
+	fTypes= MD->getForTypeIds();
+	l2r = MD->getRegionIds();
+	regType = MTHREAD->MD->getStringSetting("regType"); // how the regeneration should be computed (exogenous, from hr, from allocation choises)
+	expType = MD->getDoubleSetting("expType");
+	if((expType<0 || expType>1) && expType != -1){
+		msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
+	}
+	mr = MD->getDoubleSetting("mr");
 
 	computeCumulativeData();
 
@@ -321,6 +320,7 @@ ModelCore::runInitPeriod(){
 					double pastYearVol_1 = gfd("vol",r2,ft,pDClasses[u-1],firstYear);
 					vol = (1-1/tp-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
 				}
+
 				//debug += hv2fa*hr*pastYearVol*100;
 				freeArea += finalHarvestFlag*1000000*hr*pastYearVol/vHa; // volumes are in Mm^3, area in ha, vHa in m^3/ha
 				//cout << "regId|ft|dc| debug | freeArea: " << r2 << "|"<<ft<<"|"<<dc<<"| "<< debug << " | " << freeArea << endl;
@@ -358,26 +358,7 @@ ModelCore::runSimulationYear(){
 	ModelData* MD = MTHREAD->MD;
 	int thisYear     =  MTHREAD->SCD->getYear();
 	int previousYear = MTHREAD->SCD->getYear()-1;
-	int firstYear = MD->getIntSetting("initialYear");
-	int secondYear = firstYear+1;
-	int thirdYear  = firstYear+2;
-	int WL2 = MD->getIntSetting("worldCodeLev2");
-	vector <int> regIds2 = MD->getRegionIds(2);
-	vector <string> priProducts = MD->getStringVectorSetting("priProducts");
-	vector <string> secProducts = MD->getStringVectorSetting("secProducts");
-	vector <string> allProducts = priProducts;
-	allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
-	vector <string> dClasses = MD->getStringVectorSetting("dClasses");
-	vector <string> pDClasses; // production diameter classes: exclude the fist diameter class below 15 cm
-	pDClasses.insert(pDClasses.end(), dClasses.begin()+1, dClasses.end() );
-	//string fDC = MTHREAD->MD->getStringVectorSetting("dClasses")[0]; // name of first diameter class
-	vector <string> fTypes= MD->getForTypeIds();
-	string regType = MTHREAD->MD->getStringSetting("regType"); // how the regeneration should be computed (exogenous, from hr, from allocation choises)
-	double expType = MD->getDoubleSetting("expType");
-	if((expType<0 || expType>1) && expType != -1){
-		msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
-	}
-	double mr = MD->getDoubleSetting("mr");
+
 
 	computeCumulativeData();
 
@@ -773,6 +754,11 @@ ModelCore::updateMapAreas(){
 
 		}
 	}
+}
+
+void
+ModelCore::updateVolumes(){
+
 
 }
 

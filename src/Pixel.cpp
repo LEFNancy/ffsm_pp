@@ -123,6 +123,10 @@ Pixel::changeValue(string layerName_h, double value_h, bool setNoValueForZero){
 	}
 	return;
 }
+void
+Pixel::changeValue (const string& parName, const string& forName, const string& dClass, const int& year, double value_h, bool setNoValueForZero){
+	changeValue(MTHREAD->GIS->pack(parName, forName, dClass, year), value_h, setNoValueForZero=false);
+}
 
 double
 Pixel::getDoubleValue(const string &layerName_h, const bool &returnZeroForNoValue) const{
@@ -143,6 +147,10 @@ Pixel::getDoubleValue(const string &layerName_h, const bool &returnZeroForNoValu
 	}
 }
 
+double
+Pixel::getDoubleValue (const string& parName, const string& forName, const string& dClass, const int& year, const  bool& returnZeroForNoValue){
+	return getDoubleValue(MTHREAD->GIS->pack(parName, forName, dClass, year), returnZeroForNoValue);
+}
 
 void
 Pixel::newYear(){

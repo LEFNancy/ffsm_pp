@@ -832,6 +832,7 @@ Opt::generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h_lag){
     get_starting_point(n, 1, xp, 0, zl, zu, m, 0, lamp);
 //   cout << " Apres get_start" << endl;
 
+		//if(initOpt){ // that's funny, if I use this I get it slighly longer times, whatever I then use trace_off() or trace_off(1) (save to disk, seems unnecessary). If I use regenerated tapes I have also slighly inaccurate results.
     trace_on(tag_f);
 
     for(Index idx=0;idx<n;idx++)
@@ -841,7 +842,7 @@ Opt::generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h_lag){
 
     obj_value >>= dummy;
 
-    trace_off();
+		trace_off();
 
     trace_on(tag_g);
 
@@ -854,7 +855,7 @@ Opt::generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h_lag){
     for(Index idx=0;idx<m;idx++)
         g[idx] >>= dummy;
 
-    trace_off();
+		trace_off();
 
     trace_on(tag_L);
 
@@ -874,7 +875,8 @@ Opt::generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h_lag){
 
     obj_value >>= dummy;
 
-    trace_off();
+		trace_off();
+		//} // end of if initOpt()
 
 
 

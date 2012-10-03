@@ -27,7 +27,7 @@
 #include "ThreadManager.h"
 #include "Scheduler.h"
 
-Layers::Layers(ThreadManager* MTHREAD_h, string name_h, string label_h, bool isInteger_h, bool dynamicContent_h, string fullFilename_h)
+Layers::Layers(ThreadManager* MTHREAD_h, string name_h, string label_h, bool isInteger_h, bool dynamicContent_h, string fullFilename_h, bool display_h)
 {
 	MTHREAD=MTHREAD_h;
 	name = name_h;
@@ -35,6 +35,7 @@ Layers::Layers(ThreadManager* MTHREAD_h, string name_h, string label_h, bool isI
 	isInteger = isInteger_h;
 	dynamicContent = dynamicContent_h;
 	fullFileName = fullFilename_h;
+	display = display_h;
 }
 
 Layers::~Layers()

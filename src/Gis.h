@@ -143,6 +143,8 @@ public:
 	int                 getSubYB() const {return subYB;};
 	/// Transform the ID of a pixel in subregion coordinates to the real (and model used) coordinates
 	int                 sub2realID(int id_h);
+	string  pack(const string& parName, const string& forName, const string& dClass, const int& year) const {return parName+"#"+forName+"#"+dClass+"#"+i2s(year)+"#";};
+	void unpack(const string& key, string& parName, string& forName, string& dClass, int& year) const;
 
 private:
 	void                loadLayersDataFromFile(); ///< Load the data of a layer its datafile
@@ -164,6 +166,7 @@ private:
 	int                                    subYT; ///< sub region top Y
 	int                                    subYB; ///< sub region bottom Y
 	bool                           subRegionMode;
+
 
 };
 

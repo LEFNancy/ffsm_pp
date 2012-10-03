@@ -739,3 +739,19 @@ Gis::sub2realID(int id_h){
 
 }
 
+void
+Gis::unpack(const string& key, string& parName, string& forName, string& dClass, int& year) const{
+	int parNameDelimiter = key.find("#",0);
+	int forNameDelimiter = key.find("#",parNameDelimiter+1);
+	int dClassDelimiter = key.find("#",forNameDelimiter+1);
+	int yearDelimiter = key.find("#",dClassDelimiter+1);
+	if (yearDelimiter == string::npos){
+		msgOut(MSG_CRITICAL_ERROR, "Error in unpacking the key for the layer.");
+	}
+	parName.assign(key,0,parNameDelimiter);
+	forName.assign(key,parNameDelimiter+1,forNameDelimiter-parNameDelimiter-1);
+	dClass.assign(key,forNameDelimiter+1,dClassDelimiter-forNameDelimiter-1);
+	string yearString="";
+	yearString.assign(key,dClassDelimiter+1,yearDelimiter-dClassDelimiter-1);
+	year = s2i(yearString);
+}
