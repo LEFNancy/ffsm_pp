@@ -157,13 +157,17 @@ Gis::initLayers(){
 		}
 	}
 
-	int mByPx;
-	if(xMetersByPixel>yMetersByPixel){
-		mByPx = xMetersByPixel;
+	if (MTHREAD->MD->getBoolSetting("usePixelData")){ // loading data layers from data subfolder
+
+
+
+
 	}
-	else {
-		mByPx = yMetersByPixel;
-	}
+
+
+
+
+
 
 }
 
@@ -755,3 +759,4 @@ Gis::unpack(const string& key, string& parName, string& forName, string& dClass,
 	yearString.assign(key,dClassDelimiter+1,yearDelimiter-dClassDelimiter-1);
 	year = s2i(yearString);
 }
+

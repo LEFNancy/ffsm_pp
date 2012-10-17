@@ -17,6 +17,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+#include <sys/types.h>
+#include <dirent.h>
+#include <errno.h>
+#include <iostream>
+
+#include <vector>
+#include <string>
 #include <sstream>
 #include <stdexcept>
 #include <algorithm> //alghoritm used to reverse an array ( reverse(v.begin(), v.end()); )
@@ -1670,6 +1678,23 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, double years_h){
 	//);
 	int ceiledYear = ceil(years_h);
 	return calculateAnnualisedEquivalent(amount_h, ceiledYear);
+}
+
+/** Get a list of files in a directory */
+int
+ModelData::getFilenamesByDir (const string & dir, vector<string> &files){
+		DIR *dp;
+		struct dirent *dirp;
+		if((dp  = opendir(dir.c_str())) == NULL) {
+				cout << "Error(" << errno << ") opening " << dir << endl;
+				return errno;
+		}
+
+		while ((dirp = readdir(dp)) != NULL) {
+				files.push_back(string(dirp->d_name));
+		}
+		closedir(dp);
+		return 0;
 }
 
 // ========================== LLData =======================================

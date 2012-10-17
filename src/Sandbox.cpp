@@ -141,6 +141,18 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+	// testing reading a directory
+
+	string dir = MTHREAD->MD->getBaseDirectory()+"/"+MTHREAD->MD->getStringSetting("spatialDataSubfolder");
+	vector<string> files = vector<string>();
+
+	MTHREAD->MD->getFilenamesByDir (dir,files);
+
+	for (unsigned int i = 0;i < files.size();i++) {
+		cout << files[i] << endl;
+	}
+
+
 	/*
 	// testing ModelData:: ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h)
 	cout << "Value:" << MTHREAD->MD->calculateAnnualisedEquivalent(500.,4) << endl;
@@ -793,6 +805,13 @@ Sandbox::testThreads(){
 					//cout <<myAgents[i]->cachedOffer<<endl;
 
 					double random =  (0+( (double)rand() / ((double)(RAND_MAX)+(double)(1)) )*(10-0+1))/ (double)100;
+
+					// important !
+					// for random integer see also std::uniform_int_distribution :
+					// http://stackoverflow.com/questions/7780918/stduniform-int-distributionint-range-in-g-and-msvc
+					// in regmas:
+					// int randomRed = int (50+( (double)rand() / ((double)(RAND_MAX)+(double)(1)) )*(255-50+1)); // randomRed is [50,255] Don't use "randomNumber % range" !!
+
 					//cout <<random<<endl;
 				}
 

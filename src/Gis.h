@@ -57,7 +57,7 @@ Gis class is responsable to provide all methods for spatial analysis.
 <br>	--->
 <br>	 /
 <br>	--->
-<p>Pixel origin (0,0) on the top left corner is also the system used by the underlying liraries, but put attencion that instead geographical coordinates, if we are on the North emisfere, are increasing along the up-right direction.
+<p>Pixel origin (0,0) on the top left corner is also the system used by the underlying libraries, but put attencion that instead geographical coordinates, if we are on the North emisfere, are increasing along the up-right direction.
 
 @author Antonello Lobianco
 */
@@ -99,13 +99,13 @@ public:
 	void                addReclassificationRule(string name_h, int inCode_h, int outCode_h, double p_h);
 	/// Count the pixels within each legend item for the selected layer
 	void                countItems(const string& layerName_h, const bool& debug=false);
-	/// Return a pointer to a plot with a specific value for the specified layer, optionally filtering only the free plots 
+	/// Return a pointer to a plot with a specific value for the specified layer
 	Pixel*              getRandomPlotByValue(string layer_h, int layerValue__h);
-	/// Return the vector (shuffled) of all plots with a specific value for a specified layer, optionally filtering only the free ones. It is also possible to specify the level in case of failure (no free plots available)
+	/// Return the vector (shuffled) of all plots with a specific value for a specified layer. It is also possible to specify the level in case of failure
 	vector <Pixel*>     getAllPlotsByValue(string layer_h, int layerValue_h, int outputLevel=MSG_WARNING);
-	/// Return the vector (shuffled) of all plots with specific values for a specified layer, optionally filtering only the free ones. It is also possible to specify the level in case of failure (no free plots available)
+	/// Return the vector (shuffled) of all plots with specific values for a specified layer. It is also possible to specify the level in case of failure
 	vector <Pixel*>     getAllPlotsByValue(string layer_h, vector<int> layerValues_h, int outputLevel=MSG_WARNING);
-	/// Return the vector (shuffled) of all plots, optionally filtering only the free ones. It is also possible to specify the level in case of failure (no free plots available)
+	/// Return the vector (shuffled) of all plots. It is also possible to specify the level in case of failure
 	vector <Pixel*>     getAllPlots(int outputLevel=MSG_WARNING);
 	/// Return the vector of all plots by a specific region (main region or subregion), optionally shuffled;
 	vector <Pixel*>     getAllPlotsByRegion(ModelRegion &region_h, bool shuffle=false);
