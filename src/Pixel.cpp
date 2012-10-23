@@ -103,13 +103,26 @@ Pixel::getPixelsAtDistLevel(int distLevel_h) const{
 	return toReturn;
 } 
 
-void
-Pixel::setValue(string layerName_h, double value_h){
+/*void //moved as inline function
+Pixel::setValue(const string & layerName_h, const double & value_h){
+
+	//tempValuePair.first = layerName_h;     // type of first is string
+	//tempValuePair.second = value_h;            // type of second is double
+	//tempValuePair = make_pair (layerName_h,value_h);
 	values.insert(pair<string, double>(layerName_h, value_h));
+	//values.insert(tempValuePair);
+
+
+}*/
+
+inline void
+Pixel::setValue (const string& parName, const string& forName, const string& dClass, const int& year, const double& value_h){
+	values.insert(pair<string, double>(MTHREAD->GIS->pack(parName, forName, dClass, year), value_h));
 }
 
+
 void
-Pixel::changeValue(string layerName_h, double value_h, bool setNoValueForZero){
+Pixel::changeValue(const string &layerName_h, const double &value_h, const bool &setNoValueForZero){
 	map<string, double>::iterator p;
 	p=values.find(layerName_h);
 	if(p != values.end()){
@@ -124,8 +137,8 @@ Pixel::changeValue(string layerName_h, double value_h, bool setNoValueForZero){
 	return;
 }
 void
-Pixel::changeValue (const string& parName, const string& forName, const string& dClass, const int& year, double value_h, bool setNoValueForZero){
-	changeValue(MTHREAD->GIS->pack(parName, forName, dClass, year), value_h, setNoValueForZero=false);
+Pixel::changeValue (const string& parName, const string& forName, const string& dClass, const int& year, const double &value_h, const bool &setNoValueForZero){
+	changeValue(MTHREAD->GIS->pack(parName, forName, dClass, year), value_h, setNoValueForZero);
 }
 
 double

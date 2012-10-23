@@ -71,6 +71,8 @@ public:
 	void                setSpace();
 	/// Init the layers
 	void                initLayers();
+	void                initLayersPixelData();
+	void                initLayersPixelVolumes();
 	/// Apply the forest reclassification with the rules defined in reclRules sheet
 	void                applyForestReclassification();
 	/// If subregion mode is on, this function place noValues on the selected layer for all out-of-region pixels
@@ -78,7 +80,7 @@ public:
 	///< Update the image behind a layer to the GUI;
 	void                updateImage(string layerName_h);
 	///< Add one layer to the system
-	void                addLayer(string name_h, string label_h, bool isInteger_h, bool dynamicContent_h, string fullFileName_h = "");
+	void                addLayer(string name_h, string label_h, bool isInteger_h, bool dynamicContent_h, string fullFileName_h = "", bool display_h=true);
 	///< Fill a layer with empty values
 	void                resetLayer(string layerName_h);
 	///< Check if a layer with a certain name is loaded in the model. Used e.g. to check if the dtm layer (optional) exist.

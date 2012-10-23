@@ -326,10 +326,14 @@ ThreadManager::computeQuery(int px_ID, int currentLayerIndex){
 	result += i2s(px->getY()).c_str();
 	result += ")";
 	result +="<p><table>";
+	uint countVisibleLayers = 0;
 	for (uint i=0;i<layers.size();i++){
+		if(!layers[i]->getDisplay()){
+			continue;
+		}
 		QString boldStart="";
 		QString boldEnd = "";
-		if (i == currentLayerIndex){
+		if (countVisibleLayers == currentLayerIndex){
 			boldStart = "<b>";
 			boldEnd   = "</b>";
 		}
@@ -348,6 +352,9 @@ ThreadManager::computeQuery(int px_ID, int currentLayerIndex){
 		result += boldEnd;
 		result += "</td>";
 		result += "</tr>";
+		if(layers[i]->getDisplay()){ // if not really needed, but ok if we decide to change and get displayed also hidden layers
+			countVisibleLayers++;
+		}
 	}
 	result += "</table>";
 	emit activateTab(2); // tell the gui to activate the 3rd page, those with the pixel info

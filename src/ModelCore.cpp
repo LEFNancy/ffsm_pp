@@ -344,7 +344,19 @@ ModelCore::runInitPeriod(){
 		}
 	}
 
+	//initPxVolumes();
+
 }
+
+
+/*void
+ModelCore::initPxVolumes(){
+	if(!MD->getBoolSetting("usePixelData")){ return;}
+
+
+
+}
+*/
 
 /**
 IMPORTANT NOTE: Volumes in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2

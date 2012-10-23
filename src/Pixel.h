@@ -29,7 +29,6 @@
 // regmas headers...
 #include "BaseClass.h"
 #include "ModelData.h"
-#include "Gis.h"
 
 class Gis;        //forward declaration
 
@@ -63,10 +62,11 @@ public:
 
 
 	/// Insert a new layer and its value
-	void                setValue ( string layerName_h, double value_h );
-	/// Change the value of an existing layer
-	void                changeValue ( string layerName_h, double value_h, bool setNoValueForZero=false );
-	void                changeValue (const string& parName, const string& forName, const string& dClass, const int& year, double value_h, bool setNoValueForZero=false);
+	void                setValue ( const string& layerName_h, const double& value_h ){values.insert(pair<string, double>(layerName_h, value_h));}
+	inline void         setValue ( const string& parName, const string& forName, const string& dClass, const int& year, const double& value_h);
+	/// Change the value of an existing layerMTHREAD->GIS->pack(parName, forName, dClass, year), value_h,
+	void                changeValue (const string& layerName_h, const double& value_h, const bool& setNoValueForZero=false );
+	void                changeValue (const string& parName, const string& forName, const string& dClass, const int& year, const double& value_h, const bool& setNoValueForZero=false);
 	void                setCoordinates ( int x_h, int y_h ) {pxX=x_h; pxY=y_h;};
 	void                setPxComments ( std::string pxComments_h ) {pxComments = pxComments_h;};
 	void                setCachedDouble(double cachedDouble_h){cachedDouble=cachedDouble_h;};

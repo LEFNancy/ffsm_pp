@@ -92,7 +92,7 @@ public:
 
 	/// Return a vector of objects that together provide the specified resource in the specified quantity
 	string              getOutputDirectory() const {return outputDirname;};
-	int                 getFilenamesByDir (const string & dir, vector<string> &files); ///< Return a list of files in a directory
+	int                 getFilenamesByDir (const string & dir, vector<string> &files, const string &filter = ""); ///< Return a list of files in a directory
 	string              getFilenameByType(string type_h);
 	LLData              getTable(string tableName_h, int debugLevel=MSG_CRITICAL_ERROR);
 	vector <IFiles>     getIFilesVector() const {return iFilesVector;};

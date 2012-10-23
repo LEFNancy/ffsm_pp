@@ -158,18 +158,58 @@ Gis::initLayers(){
 	}
 
 	if (MTHREAD->MD->getBoolSetting("usePixelData")){ // loading data layers from data subfolder
-
-
-
-
+		initLayersPixelData();
+		initLayersPixelVolumes();
 	}
 
 
+}
 
+/** Init the layers of exogenous data at pixel level (e.g. time of passage)
+		These layers will then be read from datafile
+*/
+void
+Gis::initLayersPixelData(){
 
+	string dir = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getStringSetting("spatialDataSubfolder");
+	string fileExt = MTHREAD->MD->getStringSetting("spatialDataFileExtension");
+	vector<string> files = vector<string>();
+	string fullFilename, filename, fullPath;
+	string parName, forName, dClass, yearString;
+	int year;
 
+	MTHREAD->MD->getFilenamesByDir (dir,files, fileExt);
+
+	for (unsigned int i = 0;i < files.size();i++) {
+		fullFilename = files[i];
+		fullPath = dir+"/"+fullFilename;
+		filename = fullFilename.substr(0,fullFilename.find_last_of("."));
+		addLayer(filename,filename,false,false,fullPath,false);
+	}
+}
+
+/** Init the layers of exogenous data at pixel level (e.g. time of passage)
+		These layers will NOT be read by datafile, but volume for each pixel will be calculated from regional data and area map
+*/
+void
+Gis::initLayersPixelVolumes(){
+	vector <string> dClasses = MTHREAD->MD->getStringVectorSetting("dClasses");
+	vector <string> fTypes = MTHREAD->MD->getForTypeIds();
+	int initialYear = MTHREAD->MD->getIntSetting("initialYear");
+	int simYears = MTHREAD->MD->getIntSetting("simulationYears");
+	string layerName;
+	for(uint i=0;i< fTypes.size();i++){
+		for (uint j=0;j<dClasses.size();j++){
+			for(int y=initialYear;y<initialYear+simYears;y++){
+				layerName = pack("vol",fTypes[i],dClasses[j],y);
+				addLayer(layerName,layerName,false,true,"",false);
+			}
+		}
+	}
+	string debug = "done";
 
 }
+
 
 Layers*
 Gis::getLayer(const string& layerName_h){
@@ -257,7 +297,7 @@ Called at init time from initLayers, or during model run-time, this function wil
  - let the GUI know we have a new layer
 */
 void
-Gis::addLayer(string name_h, string label_h, bool isInteger_h, bool dynamicContent_h, string fullFileName_h){
+Gis::addLayer(string name_h, string label_h, bool isInteger_h, bool dynamicContent_h, string fullFileName_h, bool display_h){
 
 	for(uint i=0; i<layerVector.size(); i++){
 		if (layerVector.at(i).getName() == name_h){
@@ -265,13 +305,15 @@ Gis::addLayer(string name_h, string label_h, bool isInteger_h, bool dynamicConte
 			return;
 		}
 	}
-	Layers LAYER (MTHREAD, name_h, label_h, isInteger_h, dynamicContent_h, fullFileName_h);	
+	Layers LAYER (MTHREAD, name_h, label_h, isInteger_h, dynamicContent_h, fullFileName_h, display_h);
 	layerVector.push_back(LAYER);
 
 	for (uint i=0;i<xyNPixels; i++){
-		pxVector.at(i).setValue(name_h,noValue);
+		pxVector[i].setValue(name_h,noValue);
 	}
-	MTHREAD->addLayer(name_h,label_h);
+	if(display_h){
+		MTHREAD->addLayer(name_h,label_h);
+	}
 	
 }
 
@@ -378,7 +420,7 @@ Gis::loadLayersDataFromFile(){
 	for(uint i=0;i<layerVector.size();i++){
 		string layerName =layerVector.at(i).getName();
 		string fileName=layerVector.at(i).getFilename();
-		if(fileName == "") return;
+		if(fileName == "") continue; // BUGGED !!! 20121017, Antonello. It was "return", so it wasn't reading any layers following a layer with no filename
 		QFile file(fileName.c_str());
 		if (!file.open(QFile::ReadOnly)) {
 			cerr << "Cannot open file for reading: "
@@ -428,10 +470,12 @@ Gis::loadLayersDataFromFile(){
 		if (MTHREAD->MD->getBoolSetting("initialRandomShuffle") ){
 			layerVector.at(i).randomShuffle();
 		}
-		MTHREAD->updateImage(layerName,image);
 		this->filterSubRegion(layerName);
-		//send the image to the gui...
-		refreshGUI();
+		if(layerVector.at(i).getDisplay()){
+			MTHREAD->updateImage(layerName,image);
+			//send the image to the gui...
+			refreshGUI();
+		}
 
 
 	}

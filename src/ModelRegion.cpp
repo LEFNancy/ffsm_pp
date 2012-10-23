@@ -22,6 +22,7 @@
 #include "ModelRegion.h"
 #include "ModelData.h"
 #include "Pixel.h"
+#include "Gis.h"
 
 
 /**

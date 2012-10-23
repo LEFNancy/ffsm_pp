@@ -1682,19 +1682,25 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, double years_h){
 
 /** Get a list of files in a directory */
 int
-ModelData::getFilenamesByDir (const string & dir, vector<string> &files){
-		DIR *dp;
-		struct dirent *dirp;
-		if((dp  = opendir(dir.c_str())) == NULL) {
-				cout << "Error(" << errno << ") opening " << dir << endl;
-				return errno;
+ModelData::getFilenamesByDir (const string & dir, vector<string> &files, const string & filter){
+	DIR *dp;
+	struct dirent *dirp;
+	if((dp  = opendir(dir.c_str())) == NULL) {
+		msgOut(MSG_ERROR, "Error " + i2s(errno) + " opening the " + dir + " directory.");
+		//cout << "Error(" << errno << ") opening " << dir << endl;
+		return errno;
+	}
+	while ((dirp = readdir(dp)) != NULL) {
+		string filename = dirp->d_name;
+		if(
+			(filter != "" && filename.substr(filename.find_last_of(".")) == filter) // there is a filter and the last bit of the filename match the filter
+			|| (filter == "" && filename.substr(filename.find_last_of(".") + 1) != "") // there isn't any filter but we don't want stuff like ".." or "."
+		) {
+			files.push_back(string(dirp->d_name));
 		}
-
-		while ((dirp = readdir(dp)) != NULL) {
-				files.push_back(string(dirp->d_name));
-		}
-		closedir(dp);
-		return 0;
+	}
+	closedir(dp);
+	return 0;
 }
 
 // ========================== LLData =======================================

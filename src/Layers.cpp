@@ -260,6 +260,7 @@ void
 Layers::print(){
 
 	if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_MAPS) return;
+	if(!display || !dynamicContent) return;
 	string mapBaseDirectory = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getOutputDirectory()+"maps/";
 	string mapGridOutputDirectory = mapBaseDirectory+"asciiGrids/";
 	string catsOutputDirectory = mapBaseDirectory+"cats/";
@@ -360,6 +361,8 @@ Layers::print(){
 
 void
 Layers::printBinMap(){
+
+	if(!display || !dynamicContent) return;
 
 	int xNPixels            = MTHREAD->GIS->getXNPixels();
 	int subXR               = MTHREAD->GIS->getSubXR();

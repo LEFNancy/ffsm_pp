@@ -80,17 +80,18 @@ public:
 	/// For some sensitivity analisys, random the values for this layer for not-empty values (only integer layers)
 	void                randomShuffle();
 	/// Return if the layer is integer or not (If integer on each legend item: minValue==maxValue==ID)
-	bool                getIsInteger() {return isInteger;};
+	bool                getIsInteger() {return isInteger;}
 	/// Print the layer content as an ASCII grid map with its companion files (classification and colors). It always print the whole region, even when subregion is actived.
 	void                print();
 	/// Print a binary reppresentation of the data (a standard image, e.g. a .png file). It prints only the subregion if this is active.
 	void                printBinMap();
 
-	string              getName() const {return name;};
+	string              getName() const {return name;}
 	/// Return the filename of the associated dataset
 	string              getFilename(){return fullFileName;}
 	/// Return true if the content may change during simulation period
 	bool                getDynamicContent(){return dynamicContent;}
+	bool                getDisplay(){return display;}
 
 
 private:

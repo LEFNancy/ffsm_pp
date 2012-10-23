@@ -141,17 +141,17 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+	/*
 	// testing reading a directory
-
-	string dir = MTHREAD->MD->getBaseDirectory()+"/"+MTHREAD->MD->getStringSetting("spatialDataSubfolder");
+	string dir = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getStringSetting("spatialDataSubfolder");
 	vector<string> files = vector<string>();
 
-	MTHREAD->MD->getFilenamesByDir (dir,files);
+	MTHREAD->MD->getFilenamesByDir (dir,files, ".grd");
 
 	for (unsigned int i = 0;i < files.size();i++) {
 		cout << files[i] << endl;
 	}
-
+	*/
 
 	/*
 	// testing ModelData:: ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h)
