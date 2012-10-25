@@ -26,7 +26,7 @@
 #include "Sandbox.h"
 #include "ThreadManager.h"
 #include "ModelData.h"
-
+#include "Gis.h"
 
 
 
@@ -106,7 +106,13 @@ struct GccTest
 void
 Sandbox::basicTest(){
 
-	//testPartMatching();
+
+	/*
+	// Test on two different type of partial matching over map values
+	testPartMatching2();
+	testPartMatching();
+	*/
+
 	/*
 	// -------------------------------------------------------------------
 	// Testing how to erase elements from a vector according to conditions
@@ -140,6 +146,21 @@ Sandbox::basicTest(){
 
 void
 Sandbox::fullTest(){
+
+
+	/*
+	// testing Pixel::getMultiplier (const string& multiplierName, const string& forName, int year)
+	Pixel* px = MTHREAD->GIS->getPixel(0);
+	double debug1 = px->getMultiplier("tp_multiplier","broadL_highF",2012);
+	double debug2 = px->getMultiplier("tp_multiplier","broadL_highF",2008);
+	double debug3 = px->getMultiplier("tp_multiplier","broadL_highF",2009);
+	double debug4 = px->getMultiplier("tp_multiplier","broadL_highF",2010);
+	double debug5 = px->getMultiplier("mortCoeff_multiplier","broadL_highF",2012);
+	double debug6 = px->getMultiplier("mortCoeff_multiplier","con_copp",2012);
+	double debug7 = px->getMultiplier("blaaaa","broadL_highF",2012);
+
+	double debug10 = debug1;
+*/
 
 	/*
 	// testing reading a directory
@@ -991,8 +1012,55 @@ Sandbox::testPartMatching(){
 		testSearchMap(tMap, "Perr");
 		testSearchMap(tMap, "Jo");
 
+	exit(0);
 		return;
 }
 
+void
+Sandbox::testSearchMap2(const TStrStrMap& map_h, const string& search_for) {
+	TStrStrMap::const_iterator i = map_h.upper_bound(search_for);
+	if(i!= map_h.begin())	i--;
+	const string& key = i->first;
+	string search_base = search_for.substr(0,search_for.size()-4);
+	if (key.compare(0, search_base.size(), search_base) == 0){
+		cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
+	} else {
+		cout << "NOTM:  " << search_for <<", "<< i->first << endl;
+	}
+
+}
+
+void
+Sandbox::testPartMatching2(){
+
+		TStrStrMap tMap;
+
+
+	tMap.insert(TStrStrPair("mortCoeff_multiplier#broadL_highF##2005", "2005"));
+	tMap.insert(TStrStrPair("regLev_1", "-9999"));
+	tMap.insert(TStrStrPair("regLev_2", "-9999"));
+	tMap.insert(TStrStrPair("tp_multiplier#broadL_copp##2005", "-9999"));
+	tMap.insert(TStrStrPair("tp_multiplier#broadL_highF##2005", "50"));
+	tMap.insert(TStrStrPair("tp_multiplier#broadL_highF##2010", "2010"));
+	tMap.insert(TStrStrPair("tp_multiplier#broadL_mixedF##2005", "-9999"));
+	tMap.insert(TStrStrPair("tp_multiplier#con_copp##2005", "-9999"));
+	tMap.insert(TStrStrPair("tp_multiplier#con_highF##2005", "-9999"));
+	tMap.insert(TStrStrPair("tp_multiplier#con_mixedF##2005", "aa"));
+
+	TStrStrMap::const_iterator i;
+
+	for(i=tMap.begin();i!=tMap.end();i++){
+		cout << i->first << ", " << i->second << endl;
+	}
+	cout << endl;
+
+		testSearchMap2(tMap, "mortCoeff_multiplier#broadL_highF##2006");
+		testSearchMap2(tMap, "tp_multiplier#broadL_highF##2008");
+		testSearchMap2(tMap, "aaaaaa");
+		testSearchMap2(tMap, "zzzzzz");
+
+	exit(0);
+		return;
+}
 
 

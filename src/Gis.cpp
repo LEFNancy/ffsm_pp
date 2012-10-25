@@ -156,13 +156,8 @@ Gis::initLayers(){
 			addReclassificationRule(name, inCode, outCode, p);
 		}
 	}
-
-	if (MTHREAD->MD->getBoolSetting("usePixelData")){ // loading data layers from data subfolder
-		initLayersPixelData();
-		initLayersPixelVolumes();
-	}
-
-
+	initLayersPixelData();
+	initLayersPixelVolumes(DATA_INIT); // only the layers relative to the initial years are inserted now. All the simulation year layers will be added each year before mainSimulationyear()
 }
 
 /** Init the layers of exogenous data at pixel level (e.g. time of passage)
@@ -170,7 +165,7 @@ Gis::initLayers(){
 */
 void
 Gis::initLayersPixelData(){
-
+	if (!MTHREAD->MD->getBoolSetting("usePixelData")){return;}
 	string dir = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getStringSetting("spatialDataSubfolder");
 	string fileExt = MTHREAD->MD->getStringSetting("spatialDataFileExtension");
 	vector<string> files = vector<string>();
@@ -192,16 +187,33 @@ Gis::initLayersPixelData(){
 		These layers will NOT be read by datafile, but volume for each pixel will be calculated from regional data and area map
 */
 void
-Gis::initLayersPixelVolumes(){
+Gis::initLayersPixelVolumes(const int& year_h){
+
+	if (!MTHREAD->MD->getBoolSetting("usePixelData")) return;
+
+	vector <int> years;
+	if(year_h==DATA_NOW){
+		years.push_back(MTHREAD->SCD->getYear());
+	} else if (year_h==DATA_INIT){
+		int initialYear = MTHREAD->MD->getIntSetting("initialYear");
+		int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
+		for(int y=initialYear;y<initialOptYear;y++){
+			years.push_back(y);
+		}
+	} else {
+		years.push_back(year_h);
+	}
+
 	vector <string> dClasses = MTHREAD->MD->getStringVectorSetting("dClasses");
 	vector <string> fTypes = MTHREAD->MD->getForTypeIds();
-	int initialYear = MTHREAD->MD->getIntSetting("initialYear");
-	int simYears = MTHREAD->MD->getIntSetting("simulationYears");
+	//int initialYear = MTHREAD->MD->getIntSetting("initialYear");
+	//int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
+	//int simYears = MTHREAD->MD->getIntSetting("simulationYears");
 	string layerName;
 	for(uint i=0;i< fTypes.size();i++){
 		for (uint j=0;j<dClasses.size();j++){
-			for(int y=initialYear;y<initialYear+simYears;y++){
-				layerName = pack("vol",fTypes[i],dClasses[j],y);
+			for(int y=0;y<years.size();y++){
+				layerName = pack("vol",fTypes[i],dClasses[j],years[y]);
 				addLayer(layerName,layerName,false,true,"",false);
 			}
 		}
@@ -332,12 +344,22 @@ Gis::resetLayer(string layerName_h){
 }
 
 bool
-Gis::layerExist(const string& layerName_h) const{
-	for(uint i=0; i<layerVector.size(); i++){
-		if (layerVector.at(i).getName() == layerName_h){
-			return true;
+Gis::layerExist(const string& layerName_h, bool exactMatch) const{
+
+	if(exactMatch){
+		for(uint i=0; i<layerVector.size(); i++){
+			if (layerVector.at(i).getName() == layerName_h){
+				return true;
+			}
+		}
+	} else { // partial matching (stored layer name begin with search parameter)
+		for(uint i=0; i<layerVector.size(); i++){
+			if (layerVector.at(i).getName().compare(0, layerName_h.size(),layerName_h )){
+				return true;
+			}
 		}
 	}
+
 	return false;
 }
 

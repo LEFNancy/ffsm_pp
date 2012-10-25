@@ -72,6 +72,7 @@ enum {
 	DATA_VECTOR            =1,
 	DATA_NOW               =-1, // asking for data (settings) at current time
 	DATA_ERROR             = -99999999999, // error in retrieving data
+	DATA_INIT              = -2, // data referring to the init years
 
 	OUTVL_NONE             =0, //output verbosity level
 	OUTVL_MAPS             =5,

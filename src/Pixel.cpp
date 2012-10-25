@@ -136,8 +136,9 @@ Pixel::changeValue(const string &layerName_h, const double &value_h, const bool 
 	}
 	return;
 }
+
 void
-Pixel::changeValue (const string& parName, const string& forName, const string& dClass, const int& year, const double &value_h, const bool &setNoValueForZero){
+Pixel::changeValue (const double &value_h, const string& parName, const string& forName, const string &dClass, const int &year, const bool &setNoValueForZero){
 	changeValue(MTHREAD->GIS->pack(parName, forName, dClass, year), value_h, setNoValueForZero);
 }
 
@@ -157,6 +158,33 @@ Pixel::getDoubleValue(const string &layerName_h, const bool &returnZeroForNoValu
 		} else {
 			return MTHREAD->GIS->getNoValue();
 		}
+	}
+}
+
+/**
+getMultiplier() returns the value of the multiplier as memorized in the spatialDataSubfolder layers.
+It will look for exact match or for lower years if available.
+If no layers are available or the usePixelData option is not used, it will return 1.
+*/
+double
+Pixel::getMultiplier (const string& multiplierName, const string& forName, int year){
+
+	// return 1 if not using pixel mode
+	if(!MTHREAD->MD->getBoolSetting("usePixelData")) return 1.0;
+
+	if(year==DATA_NOW){year = MTHREAD->SCD->getYear();}
+
+	string search_for = multiplierName+"#"+forName+"##"+i2s(year);
+	map <string,double>::const_iterator i = values.upper_bound(search_for); //return the position always upper to the found one, even if it's an equal match.
+	if(i!= values.begin())	i--; // this rewind the position to the one just before or equal
+	const string& key = i->first;
+	string search_base = search_for.substr(0,search_for.size()-4);
+	if (key.compare(0, search_base.size(), search_base) == 0){
+		cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
+		return i->second;
+	} else {
+		cout << "NOTM:  " << search_for <<", "<< i->first << endl;
+		return 1.0;
 	}
 }
 

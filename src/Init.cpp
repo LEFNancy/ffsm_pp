@@ -97,7 +97,7 @@ Init::setInitLevel1(){
 	MTHREAD->MD->setDefaultSettings();
 	MTHREAD->MD->setScenarioSettings();
 	MTHREAD->MD->cacheSettings();
-	MTHREAD->TEST->fullTest(); // normally empty function
+
 	MTHREAD->MD->createRegions();
 	MTHREAD->MD->setDefaultForData();
 	MTHREAD->MD->setScenarioForData();
@@ -115,7 +115,7 @@ Init::setInitLevel1(){
 	}
 	MTHREAD->GIS->setSpace();
 	MTHREAD->GIS->applyForestReclassification();
-
+	MTHREAD->TEST->fullTest(); // normally empty function
 }
 
 void

@@ -50,7 +50,7 @@ Scheduler::run(){
 		string timemessage = "("+i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec)+")";
 		MTHREAD->upgradeYearSBLabel(iteration+ MTHREAD->MD->getIntSetting("initialYear"));
 		MTHREAD->treeViewerChangeGeneralPropertyValue("year",i2s(iteration+ MTHREAD->MD->getIntSetting("initialYear")));
-
+		MTHREAD->GIS->initLayersPixelVolumes();
 		MTHREAD->CORE->runSimulationYear();
 
 		MTHREAD->DO->print();

@@ -52,6 +52,8 @@ private:
 	void                sfd(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year=DATA_NOW, const bool& allowCreate=false) const {MTHREAD->MD->setForData(value_h, type_h, regId_h, forType_h, diamClass_h, year, allowCreate);};
 	bool                app(const string &prod_h, const string &forType_h, const string &dClass_h) const {return MTHREAD->MD->assessProdPossibility(prod_h, forType_h, dClass_h);};
 	void                updateMapAreas();
+	void                initializeVolumesOnPixels();
+
 	void                updateVolumes(); ///< Update Vt f(Vt-1,hr,mort,tp,Vt-1,d-1,beta)
 	//vector <vector <vector <double> cumTp; /// cumulative time to reach a certain diameter class;
 	//vector <vector <vector <double> vHa;   /// volumes at hectar [m^3/ha];

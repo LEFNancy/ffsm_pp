@@ -72,7 +72,7 @@ public:
 	/// Init the layers
 	void                initLayers();
 	void                initLayersPixelData();
-	void                initLayersPixelVolumes();
+	void                initLayersPixelVolumes(const int& year_h=DATA_NOW);
 	/// Apply the forest reclassification with the rules defined in reclRules sheet
 	void                applyForestReclassification();
 	/// If subregion mode is on, this function place noValues on the selected layer for all out-of-region pixels
@@ -84,7 +84,7 @@ public:
 	///< Fill a layer with empty values
 	void                resetLayer(string layerName_h);
 	///< Check if a layer with a certain name is loaded in the model. Used e.g. to check if the dtm layer (optional) exist.
-	bool                layerExist(const string & layerName_h) const;
+	bool                layerExist(const string & layerName_h, bool exactMatch = true) const;
 	///< Return a pointer to a layer given its name
 	Layers*              getLayer(const string& layerName_h);
 	///< Add a legend item to an existing layer

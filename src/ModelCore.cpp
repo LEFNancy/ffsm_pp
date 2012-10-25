@@ -147,6 +147,7 @@ ModelCore::runInitPeriod(){
 	}
 	mr = MD->getDoubleSetting("mr");
 
+	initializeVolumesOnPixels();
 	computeCumulativeData();
 
 	// starting the GAMS code
@@ -357,6 +358,8 @@ ModelCore::initPxVolumes(){
 
 }
 */
+
+
 
 /**
 IMPORTANT NOTE: Volumes in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2
@@ -752,16 +755,16 @@ ModelCore::updateMapAreas(){
 		ModelRegion* reg = MTHREAD->MD->getRegion(regId);
 		for(uint j=0;j<nFTypes;j++){
 			string ft = fTypes[j];
-			double regForArea = reg->getValue("forType_"+ft);
+			double regForArea = reg->getValue("forArea_"+ft);
 			double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL);
 			double regArea = gfd("regArea",regId,ft,DIAM_ALL);
 			//cout << "Regid/ft/area/harvested/regeneration: " <<regId<<";"<<ft<<";"<<regForArea<<";"<<harvestedArea<<";" <<regArea<<endl;
 			double newAreaNet = regArea-harvestedArea;
 			double newAreaRatio =  newAreaNet / regForArea;
 			for(uint z=0;z<rpx.size();z++){
-				double oldValue = rpx[z]->getDoubleValue("forType_"+ft,true);
+				double oldValue = rpx[z]->getDoubleValue("forArea_"+ft,true);
 				double newValue = oldValue*(1. + newAreaRatio);
-				rpx[z]->changeValue("forType_"+ft, newValue);
+				rpx[z]->changeValue("forArea_"+ft, newValue);
 			}
 
 		}
@@ -774,6 +777,24 @@ ModelCore::updateVolumes(){
 
 }
 
-
-
-
+void
+ModelCore::initializeVolumesOnPixels(){
+	// pxVol = regVol * pxArea/regForArea
+	// this function can be done only at the beginning of the model, as it assume that the distribution of volumes by diameter class in the pixels within a certain region is homogeneous, but as the model progress along the time dimension this is no longer true.
+	if(!MD->getBoolSetting("usePixelData")) return;
+	for(uint i=0;i<regIds2.size();i++){
+		ModelRegion* reg = MD->getRegion(regIds2[i]);
+		vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
+		for(uint y=0;y<fTypes.size();y++){
+			double regForArea = reg->getValue("forArea_"+fTypes[y]);
+			for (uint z=0;z<pDClasses.size();z++){
+				double regVol = gfd("vol",regIds2[i],fTypes[y],pDClasses[z],firstYear);
+				for (uint j=0;j<rpx.size();j++){
+					double pxArea = rpx[j]->getDoubleValue("forArea_"+fTypes[y]);
+					double pxVol = regVol * pxArea/regForArea;
+					rpx[j]->changeValue(pxVol,"vol",fTypes[y],pDClasses[z],firstYear);
+				}
+			}
+		}
+	}
+}

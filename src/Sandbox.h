@@ -53,14 +53,14 @@ public:
 	void                     testIpopt();
 	int                      testAdolc();
 	void                     testPartMatching(); ///< How to partial matching the key of a map
-
+	void                     testPartMatching2(); ///< How to partial matching the key of a map
 
 private:
 	vector <TestStructure>  testVector;
 	// How to partial matching the key of a map
 //	map<string, string>::iterator FindPrefix(const map<string, string>& map, const string& search_for);
 	void                       testSearchMap(const map<string, string>& map, const string& search_for);
-
+	void                       testSearchMap2(const map<string, string>& map_h, const string& search_for);
 };
 
 struct TestStructure {

@@ -91,26 +91,27 @@ public:
 	void                debug();
 
 	/// Return a vector of objects that together provide the specified resource in the specified quantity
-	string              getOutputDirectory() const {return outputDirname;};
+	string              getOutputDirectory() const {return outputDirname;}
 	int                 getFilenamesByDir (const string & dir, vector<string> &files, const string &filter = ""); ///< Return a list of files in a directory
 	string              getFilenameByType(string type_h);
 	LLData              getTable(string tableName_h, int debugLevel=MSG_CRITICAL_ERROR);
-	vector <IFiles>     getIFilesVector() const {return iFilesVector;};
-	string              getBaseDirectory() const {return baseDirectory;};
+	vector <IFiles>     getIFilesVector() const {return iFilesVector;}
+	string              getBaseDirectory() const {return baseDirectory;}
 	ModelRegion*        getRegion(int regId_h);
 	vector <ModelRegion*> getAllRegions(bool excludeResidual=true);
 	vector<int>         getRegionIds(int level_h, bool excludeResidual=true);
 	vector < vector <int> > getRegionIds( bool excludeResidual=true);
-	int                 getNForTypes(){return forTypes.size();};
-	int                 getNReclRules(){return reclRules.size();};
-	forType*            getForType(int position){return &forTypes[position];};
+	int                 getNForTypes(){return forTypes.size();}
+	int                 getNReclRules(){return reclRules.size();}
+	forType*            getForType(int position){return &forTypes[position];}
 	forType*            getForType(string forTypeId_h);
 	vector <string>     getForTypeIds(bool all=false); ///< By default it doesn't return forTypes used only as input
-	reclRule*           getReclRule(int position){return &reclRules[position];};
+	reclRule*           getReclRule(int position){return &reclRules[position];}
 	vector <string>     getDiameterClasses(bool productionOnly=false);
 	/// A simple function to assess if a specified product can be made by a certain forest type and diameter class
 	const bool          assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
-	int                 setErrorLevel(int errorLevel_h){errorLevel=errorLevel_h;};
+	int                 setErrorLevel(int errorLevel_h){errorLevel=errorLevel_h;}
+	bool                getTempBool(){return tempBool;}
 
 	double              getTimedData(const vector <double> &dated_vector, const int& year_h) const; ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
 	void                setTimedData(const double& value_h, vector<double> &dated_vector, const int& year_h, const int& MSG_LEVEL=MSG_WARNING);
@@ -132,8 +133,8 @@ public:
 	void                setProdData(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h=""); // Remember default arguments must be at the end
 	void                setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year=DATA_NOW, const bool& allowCreate=false); // Remember default arguments must be at the end
 
-	string                makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="") const {return parName+"#"+regId+"#"+prod+"#"+freeDim+"#";};
-	string                makeKeyForData(const string& parName, const string& regId, const string& forType, const string& diamClass) const {return parName+"#"+regId+"#"+forType+"#"+diamClass+"#";};
+	string                makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="") const {return parName+"#"+regId+"#"+prod+"#"+freeDim+"#";}
+	string                makeKeyForData(const string& parName, const string& regId, const string& forType, const string& diamClass) const {return parName+"#"+regId+"#"+forType+"#"+diamClass+"#";}
 	void                  unpackKeyProdData(const string& key, string& parName, int &regId, string& prod, string& freeDim) const;
 	void                  unpackKeyForData(const string& key, string& parName, int &regId, string& forType, string& diamClass) const;
 
@@ -143,11 +144,11 @@ public:
 	/// Retrieve the list of objects type that can be placed on the specified soil type
 
 	void                setOutputDirectory(const char* output_dirname_h);
-	void                setBaseDiretory(string baseDirectory_h){baseDirectory=baseDirectory_h;};
+	void                setBaseDiretory(string baseDirectory_h){baseDirectory=baseDirectory_h;}
 	void                addSetting(string name_h, vector <string> values_h, int type_h, string comment_h);
 	void                addSetting(string name_h, string value_h, int type_h, string comment_h);
 	void                cacheSettings(); ///< Called after input reading, it fix frequently used data;
-	int                 getCachedInitialYear(){return cached_initialYear;};
+	int                 getCachedInitialYear(){return cached_initialYear;}
 
 	void                setBasicData(const string &name_h, int value, int position=0);
 	void                setBasicData(const string &name_h, double value, int position=0);
@@ -266,8 +267,8 @@ public:
 	                    LLData(ThreadManager* MTHREAD_h, string tableName_h);
 	                   ~LLData();
 	void                clean(); // clean the data from empty headers
-	string              getTableName(){return tableName;};
-	int                 nrecords(){return records.size();};
+	string              getTableName(){return tableName;}
+	int                 nrecords(){return records.size();}
 	string              getData(const int& pos_h, const string& header_h, const int& debugLevel=MSG_CRITICAL_ERROR) const;
 	friend void ModelData::loadInput();
 	friend void ModelData::loadDataFromCache(string tablename);
