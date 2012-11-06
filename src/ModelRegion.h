@@ -58,6 +58,7 @@ public:
 	void                addForData(forData* data_h){forDataVector.push_back(data_h);};
 	void                addProdData(prodData* data_h){prodDataVector.push_back(data_h);};
 	void                setMyPixels();
+	void                swap(const int& swap_what);
 
 	// "get" methods..
 	int                 getRegId() {return regId;};

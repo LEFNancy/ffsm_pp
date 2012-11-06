@@ -25,6 +25,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 
 // regmas headers...
 
@@ -110,8 +111,11 @@ enum {
 
 	// operations possible in certain contexts
 	OP_SUM                 =1,
-	OP_AVG                 =5
+	OP_AVG                 =5,
 
+	VAR_VOL                =1,
+	VAR_AREA               =2,
+	VAR_IN                 =3
 
 };
 
@@ -200,8 +204,11 @@ public:
 	template<typename T> string toString(const T& x) const;      // string s = toString(x);
 	template<typename T> T stringTo(const std::string& s) const; // e.g. int x = stringTo<int>("123");
 
-	int                 iVSum (const vector<int> &intVector_h) const;       ///< integer vector sum - sum of an vector of integer;
-	double              dVSum (const vector<double> &doubleVector_h) const; ///< double vector sum - sum of a vectr of double;
+	// vector and vector of vector sums
+	int                   vSum(const vector<int>& vector_h) const {return accumulate(vector_h.begin(),vector_h.end(),0);};
+	double                vSum(const vector<double>& vector_h) const {return accumulate(vector_h.begin(),vector_h.end(),0.);};
+	int                   vSum(const vector< vector <int> >& vector_h) const;
+	double                vSum(const vector< vector <double> >& vector_h) const;
 
 	/// Tokenize a string using a delimiter (default is space)
 	void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ") const;

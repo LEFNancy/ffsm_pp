@@ -180,10 +180,10 @@ Pixel::getMultiplier (const string& multiplierName, const string& forName, int y
 	const string& key = i->first;
 	string search_base = search_for.substr(0,search_for.size()-4);
 	if (key.compare(0, search_base.size(), search_base) == 0){
-		cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
+		//cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
 		return i->second;
 	} else {
-		cout << "NOTM:  " << search_for <<", "<< i->first << endl;
+		//cout << "NOTM:  " << search_for <<", "<< i->first << endl;
 		return 1.0;
 	}
 }
@@ -195,7 +195,54 @@ Pixel::getDoubleValue (const string& parName, const string& forName, const strin
 
 void
 Pixel::newYear(){
-	
 
+}
+
+double
+Pixel::getPastRegArea(const int& ft_idx, const int& year){
+	map <int,vector<double> >::const_iterator i=regArea.find(year);
+	if(i != regArea.end()) {
+		return i->second.at(ft_idx);
+	} else {
+		msgOut(MSG_ERROR, "Asking for a pastRegArea of a not-registered year. I don't have year "+i2s(year)+"!");
+	}
+}
+
+void
+Pixel::setPastRegArea(const double& value, const int& ft_idx, const int& year){
+	msgOut(MSG_CRITICAL_ERROR,"TODO");
+	/*map <int,vector<double> >::const_iterator i=regArea.find(year);
+	if(i != regArea.end()) {
+		// we already have this year, let's see if the vector is bif enough
+		int currsize = i->second.size();
+		for(j=0;j<ft_idx-currside;j++){
+
+		}
+		return i->second.at(ft_idx);
+	} else {
+		// new year
+	}
+
+
+	pair<int,vector<double> newRegArea;
+	*/
+
+}
+
+void
+Pixel::swap(const int& swap_what){
+	switch (swap_what){
+		case VAR_VOL:
+			vol_l = vol;
+			break;
+		case VAR_AREA:
+			area_l = area;
+			break;
+		case VAR_IN:
+			in_l = in;
+			break;
+		default:
+			msgOut(MSG_CRITICAL_ERROR,"Don't know how to swap "+swap_what);
+	}
 }
 

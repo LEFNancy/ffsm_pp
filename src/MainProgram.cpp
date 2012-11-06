@@ -72,6 +72,9 @@ MainProgram::run(){
 	// the core of the model
 	ModelCore *CORE = new ModelCore(MTHREAD);
 	MTHREAD->setCOREPointer(CORE);
+	// the core of the model (spatial version)
+	ModelCoreSpatial *SCORE = new ModelCoreSpatial(MTHREAD);
+	MTHREAD->setSCOREPointer(SCORE);
 	// the market optimisation algorithm
 	Opt *OPT = new Opt(MTHREAD);
 	MTHREAD->setOPTPointer(OPT);

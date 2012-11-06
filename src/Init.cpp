@@ -25,6 +25,8 @@
 #include "ThreadManager.h"
 #include "Output.h"
 #include "ModelCore.h"
+#include "ModelCoreSpatial.h"
+
 #include "Opt.h"
 #include "Sandbox.h"
 
@@ -96,6 +98,7 @@ Init::setInitLevel1(){
 	msgOut(MSG_INFO, timemessage);
 	MTHREAD->MD->setDefaultSettings();
 	MTHREAD->MD->setScenarioSettings();
+	MTHREAD->SCD->setYear(MTHREAD->MD->getIntSetting("initialYear"));
 	MTHREAD->MD->cacheSettings();
 
 	MTHREAD->MD->createRegions();
@@ -130,7 +133,11 @@ void
 Init::setInitLevel3(){
 	InitState=3;
 	MTHREAD->DO->initOutput();       // initialize the output files
-	MTHREAD->CORE->runInitPeriod();
+	if(MTHREAD->MD->getBoolSetting("usePixelData")){
+		MTHREAD->SCORE->runInitPeriod();
+	} else {
+		MTHREAD->CORE->runInitPeriod();
+	}
 }
 
 void

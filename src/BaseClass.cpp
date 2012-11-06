@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <algorithm>
+#include <numeric>
 
 #include "BaseClass.h"
 #include "ThreadManager.h"
@@ -327,25 +328,23 @@ BaseClass::stringTo(const std::string& s) const {
   return x;
 }
 
-
 int
-BaseClass::iVSum (const vector<int> &intVector_h) const{
-	int toReturn=0;
-	for(uint i=0;i<intVector_h.size();i++){
-		toReturn += intVector_h[i];
+BaseClass::vSum (const vector <vector<int> > &vector_h) const{
+	int toReturn = 0;
+	for(vector < vector<int> >::const_iterator j=vector_h.begin();j!=vector_h.end();++j){
+		toReturn += accumulate(j->begin(),j->end(),0);
 	}
 	return toReturn;
 }
 
 double
-BaseClass::dVSum (const vector<double> &doubleVector_h) const {
-	double toReturn=0;
-	for(uint i=0;i<doubleVector_h.size();i++){
-		toReturn += doubleVector_h[i];
+BaseClass::vSum (const vector<vector<double> > &vector_h) const{
+	double toReturn = 0.0;
+	for(vector < vector<double> >::const_iterator j=vector_h.begin();j!=vector_h.end();++j){
+		toReturn += accumulate(j->begin(),j->end(),0.0);
 	}
 	return toReturn;
 }
-
 
 void
 BaseClass::tokenize(const string& str, vector<string>& tokens, const string& delimiter) const {

@@ -27,21 +27,23 @@ unix {
 
 win32 {
 
-    INCLUDEPATH += win32/include/coin
-    INCLUDEPATH += win32/include/coin/ThirdParty
-    INCLUDEPATH += win32/include
-    INCLUDEPATH += win32/include/adolc
+    INCLUDEPATH += ThirdParty/win32/include/coin
+    INCLUDEPATH += ThirdParty/win32/include/coin/ThirdParty
+    INCLUDEPATH += ThirdParty/win32/include
+    INCLUDEPATH += ThirdParty/win32/include/adolc
     INCLUDEPATH += $$[QT_INSTALL_DATA]/src/3rdparty/zlib
-    LIBS += -L win32/lib -lipopt
-    LIBS += -L win32/lib -lcoinmetis
-    LIBS += -L win32/lib -lcoinmumps
-    LIBS += -L win32/lib -lcoinhsl
-    LIBS += -L win32/lib -lcoinblas
-    LIBS += -L win32/lib -lcoinlapack
-    LIBS += -L win32/lib -ladolc
+    LIBS += -L ThirdParty/win32/lib -lipopt
+    LIBS += -L ThirdParty/win32/lib -lcoinmetis
+    LIBS += -L ThirdParty/win32/lib -lcoinmumps
+    LIBS += -L ThirdParty/win32/lib -lcoinhsl
+    LIBS += -L ThirdParty/win32/lib -lcoinblas
+    LIBS += -L ThirdParty/win32/lib -lcoinlapack
+    LIBS += -L ThirdParty/win32/lib -ladolc
     LIBS += -lpthread -lgfortran -lcoinmetis -lcoinblas
     #CONFIG +=  console
 }
+
+INCLUDEPATH += ThirdParty/allos/include
 
 
 TEMPLATE = app
@@ -113,7 +115,8 @@ HEADERS += Adolc_debugtest.h \
            zipentry_p.h \
            anyoption.h \
            ScenarioSelectionWidget.h \
-           ModelCore.h
+           ModelCore.h \
+    ModelCoreSpatial.h
 FORMS   += MainWindow.ui
 SOURCES += Adolc_debugtest.cpp \
            BaseClass.cpp \
@@ -138,6 +141,7 @@ SOURCES += Adolc_debugtest.cpp \
            zip.cpp \
            anyoption.cpp \
            ScenarioSelectionWidget.cpp \
-           ModelCore.cpp
+           ModelCore.cpp \
+    ModelCoreSpatial.cpp
 
 RESOURCES += resources.qrc

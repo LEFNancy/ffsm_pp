@@ -72,7 +72,7 @@ public:
 	/// Init the layers
 	void                initLayers();
 	void                initLayersPixelData();
-	void                initLayersPixelVolumes(const int& year_h=DATA_NOW);
+	void                initLayersModelData(const int& year_h=DATA_NOW);
 	/// Apply the forest reclassification with the rules defined in reclRules sheet
 	void                applyForestReclassification();
 	/// If subregion mode is on, this function place noValues on the selected layer for all out-of-region pixels
@@ -147,6 +147,8 @@ public:
 	int                 sub2realID(int id_h);
 	string  pack(const string& parName, const string& forName, const string& dClass, const int& year) const {return parName+"#"+forName+"#"+dClass+"#"+i2s(year)+"#";};
 	void unpack(const string& key, string& parName, string& forName, string& dClass, int& year) const;
+
+	void                swap(const int &swap_what);
 
 private:
 	void                loadLayersDataFromFile(); ///< Load the data of a layer its datafile

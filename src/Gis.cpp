@@ -157,7 +157,7 @@ Gis::initLayers(){
 		}
 	}
 	initLayersPixelData();
-	initLayersPixelVolumes(DATA_INIT); // only the layers relative to the initial years are inserted now. All the simulation year layers will be added each year before mainSimulationyear()
+	//initLayersModelData(DATA_INIT); // only the layers relative to the initial years are inserted now. All the simulation year layers will be added each year before mainSimulationyear()
 }
 
 /** Init the layers of exogenous data at pixel level (e.g. time of passage)
@@ -186,8 +186,9 @@ Gis::initLayersPixelData(){
 /** Init the layers of exogenous data at pixel level (e.g. time of passage)
 		These layers will NOT be read by datafile, but volume for each pixel will be calculated from regional data and area map
 */
+/*
 void
-Gis::initLayersPixelVolumes(const int& year_h){
+Gis::initLayersModelData(const int& year_h){
 
 	if (!MTHREAD->MD->getBoolSetting("usePixelData")) return;
 
@@ -209,19 +210,27 @@ Gis::initLayersPixelVolumes(const int& year_h){
 	//int initialYear = MTHREAD->MD->getIntSetting("initialYear");
 	//int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
 	//int simYears = MTHREAD->MD->getIntSetting("simulationYears");
-	string layerName;
+	string layerName_vol,layerName_cumTp,layerName_regArea,layerName_area;
 	for(uint i=0;i< fTypes.size();i++){
-		for (uint j=0;j<dClasses.size();j++){
-			for(int y=0;y<years.size();y++){
-				layerName = pack("vol",fTypes[i],dClasses[j],years[y]);
-				addLayer(layerName,layerName,false,true,"",false);
+		for(int y=0;y<years.size();y++){
+			layerName_regArea = pack("regArea",fTypes[i],"",years[y]);
+			addLayer(layerName_regArea,layerName_regArea,false,true,"",false);
+			for (uint j=0;j<dClasses.size();j++){
+				layerName_vol = pack("vol",fTypes[i],dClasses[j],years[y]);
+				layerName_cumTp = pack("cumTp",fTypes[i],dClasses[j],years[y]);
+				layerName_area = pack("area",fTypes[i],dClasses[j],years[y]);
+				addLayer(layerName_vol,layerName_vol,false,true,"",false);
+				addLayer(layerName_cumTp,layerName_cumTp,false,true,"",false);
+				addLayer(layerName_area,layerName_area,false,true,"",false);
 			}
+
 		}
+
 	}
 	string debug = "done";
 
 }
-
+*/
 
 Layers*
 Gis::getLayer(const string& layerName_h){
@@ -826,3 +835,11 @@ Gis::unpack(const string& key, string& parName, string& forName, string& dClass,
 	year = s2i(yearString);
 }
 
+void
+Gis::swap(const int& swap_what){
+
+	for(uint i=0;i<pxVector.size();i++) {
+		pxVector[i].swap(swap_what);
+	}
+
+}

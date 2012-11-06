@@ -5,6 +5,7 @@
 #include "IpSolveStatistics.hpp"
 
 #include "ModelCore.h"
+#include "ModelCoreSpatial.h"
 #include "ModelData.h"
 #include "ThreadManager.h"
 #include "Opt.h"
@@ -147,7 +148,6 @@ ModelCore::runInitPeriod(){
 	}
 	mr = MD->getDoubleSetting("mr");
 
-	initializeVolumesOnPixels();
 	computeCumulativeData();
 
 	// starting the GAMS code
@@ -344,21 +344,7 @@ ModelCore::runInitPeriod(){
 			}
 		}
 	}
-
-	//initPxVolumes();
-
 }
-
-
-/*void
-ModelCore::initPxVolumes(){
-	if(!MD->getBoolSetting("usePixelData")){ return;}
-
-
-
-}
-*/
-
 
 
 /**
@@ -767,34 +753,6 @@ ModelCore::updateMapAreas(){
 				rpx[z]->changeValue("forArea_"+ft, newValue);
 			}
 
-		}
-	}
-}
-
-void
-ModelCore::updateVolumes(){
-
-
-}
-
-void
-ModelCore::initializeVolumesOnPixels(){
-	// pxVol = regVol * pxArea/regForArea
-	// this function can be done only at the beginning of the model, as it assume that the distribution of volumes by diameter class in the pixels within a certain region is homogeneous, but as the model progress along the time dimension this is no longer true.
-	if(!MD->getBoolSetting("usePixelData")) return;
-	for(uint i=0;i<regIds2.size();i++){
-		ModelRegion* reg = MD->getRegion(regIds2[i]);
-		vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
-		for(uint y=0;y<fTypes.size();y++){
-			double regForArea = reg->getValue("forArea_"+fTypes[y]);
-			for (uint z=0;z<pDClasses.size();z++){
-				double regVol = gfd("vol",regIds2[i],fTypes[y],pDClasses[z],firstYear);
-				for (uint j=0;j<rpx.size();j++){
-					double pxArea = rpx[j]->getDoubleValue("forArea_"+fTypes[y]);
-					double pxVol = regVol * pxArea/regForArea;
-					rpx[j]->changeValue(pxVol,"vol",fTypes[y],pDClasses[z],firstYear);
-				}
-			}
 		}
 	}
 }

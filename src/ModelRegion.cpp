@@ -121,5 +121,14 @@ ModelRegion::setMyPixels(){
 		}
 }
 
+void
+ModelRegion::swap(const int& swap_what){
+
+	for(uint i=0;i<myPixels.size();i++) {
+		myPixels[i]->swap(swap_what);
+	}
+
+}
+
 
 

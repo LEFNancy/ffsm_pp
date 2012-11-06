@@ -26,11 +26,15 @@
 #include <iostream>
 #include <sstream>
 
+#include <Eigen/Dense>
+
 // regmas headers...
 #include "BaseClass.h"
 #include "ModelData.h"
 
 class Gis;        //forward declaration
+
+using namespace Eigen;
 
 /// Pixel-level class
 
@@ -49,6 +53,8 @@ public:
 	double              getDoubleValue (const string& parName, const string& forName, const string& dClass, const int& year, const  bool& returnZeroForNoValue = false);
 	double              getMultiplier (const string& multiplierName, const string& forName, int year=DATA_NOW);
 	void                newYear();
+	double              getPastRegArea(const int& ft_idx, const int& year);
+	void                setPastRegArea(const double& value, const int& ft_idx, const int& year);
 
 
 	// space..
@@ -72,6 +78,49 @@ public:
 	void                setPxComments ( std::string pxComments_h ) {pxComments = pxComments_h;};
 	void                setCachedDouble(double cachedDouble_h){cachedDouble=cachedDouble_h;};
 	void                clearCache(){cachedDouble=0;};
+
+	void                swap(const int &swap_what);
+
+	// matrices of (ft,dc)
+	/*MatrixXd                                   vol;
+	MatrixXd                                  area;
+	MatrixXd                               regArea;
+	MatrixXd                                  hVol;
+	MatrixXd                                 vol_l;
+	MatrixXd                                area_l;
+	MatrixXd                             regArea_l;
+	MatrixXd                                hVol_l;
+	MatrixXd                                  beta;
+	MatrixXd                                  mort;
+	MatrixXd                                    tp;
+	MatrixXd                                 cumTp;*/
+
+	vector <vector <double> >                  vol; // by ft,dc
+	vector <vector <double> >                 area; // by ft,dc
+	vector <vector <double> >                hArea; // by ft, dc
+	vector <vector <double> >                 hVol; // by ft.dc
+	vector < vector <vector <double> > >hVol_byPrd; // by ft, dc, pp
+	map <int, vector <double> >            regArea; // by year, ft
+	vector <double>                             in; // by pp
+	vector <double>                             hr; // by pp
+	vector <double >                          vReg; // by ft
+	vector <double>                expectedReturns; // by ft
+
+	vector <vector <double> >                vol_l;
+	vector <vector <double> >               area_l;
+	vector <double>                      regArea_l;
+	vector <vector <double> >               hVol_l;
+	vector <vector <double> >              hArea_l;
+	vector <double>                           in_l;
+
+	vector <vector <double> >                 beta;
+	vector <vector <double> >                 mort;
+	vector <vector <double> >                   tp;
+	vector <vector <double> >            cumTp_exp;
+	vector <vector <double> >              vHa_exp; ///< This is the **expected** version, used for calculating profits
+	vector <vector <double> >                  vHa; ///< This is the actual version following forecasts
+
+
 
 private:	
 	map<string, double>            values;  ///< Map of values for each layer

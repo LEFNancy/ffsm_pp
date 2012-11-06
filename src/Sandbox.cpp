@@ -23,6 +23,8 @@
 #include <algorithm>
 #include <map>
 
+#include <Eigen/Dense>
+
 #include "Sandbox.h"
 #include "ThreadManager.h"
 #include "ModelData.h"
@@ -106,6 +108,41 @@ struct GccTest
 void
 Sandbox::basicTest(){
 
+
+	/*
+	// Testing vSum
+	vector <int> ivector(5,5);
+	vector <double> dvector(5,1.5);
+	vector < vector <int> > ivector2;
+	vector <vector <double > > dvector2;
+
+
+	for(uint i=0;i<5;i++){
+		ivector2.push_back(ivector);
+		dvector2.push_back(dvector);
+	}
+
+	int iSum = vSum(ivector);
+	int iSum2 = vSum(ivector2[2]);
+	double dSum = vSum(dvector);
+	double dSum2 = vSum(dvector2[1]);
+	int iSum3 = vSum(ivector2);
+	double dSum3 = vSum(dvector2);
+
+	cout << "hi there" << endl;
+	*/
+
+	/*
+	// Testing Eigen
+	using Eigen::MatrixXd;
+	MatrixXd m(2,2);
+	m(0,0) = 4;
+	m(1,0) = 2.5;
+	m(0,1) = -1;
+	m(1,1) = m(1,0) + m(0,1);
+	std::cout << m << std::endl;
+	exit(0);
+	*/
 
 	/*
 	// Test on two different type of partial matching over map values

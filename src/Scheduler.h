@@ -44,10 +44,13 @@ public:
 	                   ~Scheduler();
 	void                run();
 	int                 getIteration(){return iteration;};
-	int                 getYear();
+	int                 getYear(){return year;}
+	int                 setYear(const int& year_h){year = year_h;}
+	int                 advanceYear(){year += 1;}
 
 private:
 	int                                iteration;
+	int                                     year;
 
 };
 
