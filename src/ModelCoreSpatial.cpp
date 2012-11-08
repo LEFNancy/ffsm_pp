@@ -63,7 +63,7 @@ ModelCoreSpatial::initMarketModule(){
 		//RPAR('pl',i,p_tr,t-1)   =  sum(p_pr, a(p_pr,p_tr)*RPAR('pl',i,p_pr,t-1))+m(i,p_tr);
 		for(uint sp=0;sp<secProducts.size();sp++){
 			double value = 0;
-			for (uint pp=0;pp<priProducts.size();pp++){
+            for (uint pp=0;pp<priProducts.size();pp++){
 				value += gpd("pl",r2,priProducts[pp],secondYear)*
 						 gpd("a",r2,priProducts[pp],secondYear,secProducts[sp]);
 			}
@@ -412,7 +412,11 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 						vol = (1-1/tp-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
 						double debug = vol;
 					}
-					hArea_byDc.push_back(finalHarvestFlag*1000000*hr*pastYearVol_px/vHa); // volumes are in Mm^3, area in ha, vHa in m^3/ha
+					if(u != 0){ // this if is required to avoid a 0/0 and na error that then propage also in vSum()
+						hArea_byDc.push_back(finalHarvestFlag*1000000*hr*pastYearVol_px/vHa); // volumes are in Mm^3, area in ha, vHa in m^3/ha
+					} else {
+						hArea_byDc.push_back(0.);
+					}
 
 					//double debug = hv2fa*hr*pastYearVol*100;
 					//cout << "regId|ft|dc| debug | freeArea: " << r2 << "|"<<ft<<"|"<<dc<<"| "<< debug << " | " << freeArea_byU << endl;
@@ -607,7 +611,7 @@ ModelCoreSpatial::initializePixelValues(){
 		ModelRegion* reg = MD->getRegion(regIds2[i]);
 		vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
 		for (uint j=0;j<rpx.size();j++){
-			rpx[j]->vol.clear();
+            rpx[j]->vol.clear(); // not actually necessary
 			for(uint y=0;y<fTypes.size();y++){
 				vector <double> vol_byu;
 				double regForArea = reg->getValue("forArea_"+fTypes[y]);
@@ -633,7 +637,7 @@ ModelCoreSpatial::computeCumulativeData(){
 
 	for(uint r2= 0; r2<regIds2.size();r2++){
 		int regId = regIds2[r2];
-			regPx = MTHREAD->MD->getRegion(regId)->getMyPixels();
+        regPx = MTHREAD->MD->getRegion(regId)->getMyPixels();
 
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
@@ -666,9 +670,9 @@ ModelCoreSpatial::computeCumulativeData(){
 				vector <double> vHa_exp_temp; // volume at hectar by each diameter class [m^3/ha]
 				vector <double> vHa_temp;
 				MD->setErrorLevel(MSG_NO_MSG); // as otherwise on 2007 otherwise sfd() will complain that is filling multiple years (2006 and 2007)
-				for (uint u=0; u<dClasses.size(); u++){
+                for (uint u=0; u<dClasses.size(); u++){
 					string dc = dClasses[u];
-					double cumTp_u, cumTp_u_noExp, cumTp_u_fullExp;
+                    double cumTp_u, cumTp_u_noExp, cumTp_u_fullExp, tp_noExp, tp_fullExp;
 					double vHa_u, vHa_u_noExp, vHa_u_fullExp, vHa_u_real, beta, beta_noExp, beta_fullExp, mort, mort_noExp, mort_fullExp;
 
 					// only cumTp is depending for the expectations, as it is what it is used by owner to calculate return of investments.
@@ -718,25 +722,27 @@ ModelCoreSpatial::computeCumulativeData(){
 							vHa_exp_temp.push_back(vHa_u_real);
 							vHa_temp.push_back(vHa_u_real);
 						} else {
-							cumTp_u_noExp = cumTp_exp_temp[u-1]+gfd("tp",regId,ft,dClasses[u-1])*tp_multiplier_now;
+                            tp_noExp = gfd("tp",regId,ft,dClasses[u-1])*tp_multiplier_now;
+                            cumTp_u_noExp = cumTp_exp_temp[u-1]+tp_noExp;
 							double tp_multiplier_dynamic = px->getMultiplier("tp_multiplier",ft,thisYear+ceil(cumTp_exp_temp[u-1]));
-							cumTp_u_fullExp = cumTp_exp_temp[u-1]+gfd("tp",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*tp_multiplier_dynamic ; // it adds to the time of passage to reach the previous diameter class the time of passage that there should be to reach this diameter class in the year where the previous diameter class will be reached
-							cumTp_u = cumTp_u_fullExp*expType+cumTp_u_noExp*(1-expType);
+                            tp_fullExp = gfd("tp",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*tp_multiplier_dynamic ; // time of passage that there should be to reach this diameter class in the year where the previous diameter class will be reached
+                            cumTp_u_fullExp = cumTp_exp_temp[u-1]+tp_fullExp ; // it adds to the time of passage to reach the previous diameter class the time of passage that there should be to reach this diameter class in the year where the previous diameter class will be reached
+                            cumTp_u = cumTp_u_fullExp*expType+cumTp_u_noExp*(1-expType); // 20121108: it's math the same as cumTp_exp_temp[u-1] + tp
 							if(u==1) {
 								vHa_u_noExp   = gfd("entryVolHa",regId,ft,"",DATA_NOW);
 								vHa_u_fullExp = gfd("entryVolHa",regId,ft,"",thisYear+ceil(cumTp_u));
 								vHa_u = vHa_u_fullExp*expType+vHa_u_noExp*(1-expType);
-								vHa_u_real = vHa_u_fullExp;
+                                vHa_u_real = vHa_u_fullExp;
 							} else {
-								mort_noExp = gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW)*mortCoef_multiplier_now;
-								double mortCoef_multiplier_dynamic = px->getMultiplier("mortCoef_multiplier",ft,thisYear+ceil(cumTp_exp_temp[u-1]));
-								mort_fullExp = gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic; // mortality of the previous diameter class
+                                mort_noExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW)*mortCoef_multiplier_now, tp_noExp); // mortCoef is a yearly value. Mort coeff between class is 1-(1-mortCoeff)^tp
+                                double mortCoef_multiplier_dynamic = px->getMultiplier("mortCoef_multiplier",ft,thisYear+ceil(cumTp_exp_temp[u-1]));
+                                mort_fullExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic,tp_fullExp); // mortality of the previous diameter class
 								beta_noExp   = gfd("betaCoef",regId,ft,dc, DATA_NOW)*betaCoef_multiplier_now;
 								double betaCoef_multiplier_dynamic = px->getMultiplier("betaCoef_multiplier",ft,thisYear+ceil(cumTp_u));
 								beta_fullExp = gfd("betaCoef",regId,ft,dc, thisYear+ceil(cumTp_u))*betaCoef_multiplier_dynamic;
 								mort = mort_fullExp*expType+mort_noExp*(1-expType);
 								beta = beta_fullExp*expType+beta_noExp*(1-expType);
-								vHa_u = vHa_exp_temp[u-1]*beta*(1-mort);
+                                vHa_u = vHa_exp_temp[u-1]*beta*(1-mort); // BUG !!! mort is yearly value, not between diameter class. SOLVED 20121108
 								vHa_u_real = vHa_temp[u-1]*beta_fullExp*(1-mort_fullExp);
 							}
 							//sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
@@ -775,13 +781,13 @@ ModelCoreSpatial::resetPixelValues(){
 			px->swap(VAR_VOL);
 
 			px->vol.empty(); // by ft,dc
-			px->area.empty(); // by ft,dc
+            /*px->area.empty(); // by ft,dc*/
 			px->hArea.empty(); // by ft, dc
 			//px->regArea.empty(); // by year, ft NO, this one is a map, it doesn't need to be changed
 			px->hVol.empty(); // by ft, dc
 			px->hVol_byPrd.empty(); // by ft, dc, pp
-			px->in.empty(); // by pp
-			px->hr.empty(); // by pp
+            //px->in.empty(); // by pp
+            //px->hr.empty(); // by pp
 			px->vReg.empty(); // by ft
 			px->expectedReturns.empty(); // by ft
 
@@ -814,14 +820,14 @@ ModelCoreSpatial::cachePixelExogenousData(){
 				vector <double> beta_byu;
 				vector <double> mort_byu;
 
-				double tp_multiplier_now       = px->getMultiplier("tp_multiplier",ft,DATA_NOW);
+                double tp_multiplier_now       = px->getMultiplier("tp_multiplier",ft,DATA_NOW);
 				double mortCoef_multiplier_now = px->getMultiplier("mortCoef_multiplier",ft,DATA_NOW);
 				double betaCoef_multiplier_now = px->getMultiplier("betaCoef_multiplier",ft,DATA_NOW);
 
 				for (uint u=0; u<dClasses.size(); u++){
 					string dc = dClasses[u];
 					double tp, beta_real, mort_real;
-					tp        = gfd("tp",regId,ft,dClasses[u],DATA_NOW)*tp_multiplier_now;
+                    tp        = gfd("tp",regId,ft,dClasses[u],DATA_NOW)*tp_multiplier_now; // tp is defined also in the first diameter class, as it is the years to reach the NEXT diameter class
 					beta_real = u?gfd("betaCoef",regId,ft,dClasses[u],DATA_NOW)*betaCoef_multiplier_now:0;
 					mort_real = u?gfd("mortCoef",regId,ft,dClasses[u],DATA_NOW)*mortCoef_multiplier_now:0;
 					tp_byu.push_back(tp);
@@ -847,7 +853,7 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
 		vector <double> in_reg(priProducts.size(),0); // should have ceated a vector of size priProducts.size(), all filled with zeros
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
-			px->in.clear();
+            //px->in.clear();
 			for(uint pp=0;pp<priProducts.size();pp++){
 				double in = 0;
 				for(uint ft=0;ft<fTypes.size();ft++){
@@ -855,7 +861,7 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
 						in += app(priProducts[pp],fTypes[ft],dClasses[dc])*px->vol_l.at(ft).at(dc);
 					}
 				}
-				px->in.push_back(in);
+                //px->in.push_back(in);
 				in_reg.at(pp) += in;
 			} // end of each priProduct
 		} // end each pixel

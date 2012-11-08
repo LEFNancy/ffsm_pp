@@ -227,6 +227,7 @@ Pixel::setPastRegArea(const double& value, const int& ft_idx, const int& year){
 	pair<int,vector<double> newRegArea;
 	*/
 
+
 }
 
 void
@@ -234,12 +235,6 @@ Pixel::swap(const int& swap_what){
 	switch (swap_what){
 		case VAR_VOL:
 			vol_l = vol;
-			break;
-		case VAR_AREA:
-			area_l = area;
-			break;
-		case VAR_IN:
-			in_l = in;
 			break;
 		default:
 			msgOut(MSG_CRITICAL_ERROR,"Don't know how to swap "+swap_what);

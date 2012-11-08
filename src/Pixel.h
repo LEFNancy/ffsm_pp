@@ -96,27 +96,22 @@ public:
 	MatrixXd                                 cumTp;*/
 
 	vector <vector <double> >                  vol; // by ft,dc
-	vector <vector <double> >                 area; // by ft,dc
+    //vector <vector <double> >                 area; // by ft,dc
 	vector <vector <double> >                hArea; // by ft, dc
 	vector <vector <double> >                 hVol; // by ft.dc
 	vector < vector <vector <double> > >hVol_byPrd; // by ft, dc, pp
 	map <int, vector <double> >            regArea; // by year, ft
-	vector <double>                             in; // by pp
-	vector <double>                             hr; // by pp
+    //vector <double>                             in; // by pp
+    //vector <double>                             hr; // by pp
 	vector <double >                          vReg; // by ft
 	vector <double>                expectedReturns; // by ft
 
 	vector <vector <double> >                vol_l;
-	vector <vector <double> >               area_l;
-	vector <double>                      regArea_l;
-	vector <vector <double> >               hVol_l;
-	vector <vector <double> >              hArea_l;
-	vector <double>                           in_l;
 
 	vector <vector <double> >                 beta;
 	vector <vector <double> >                 mort;
 	vector <vector <double> >                   tp;
-	vector <vector <double> >            cumTp_exp;
+    vector <vector <double> >            cumTp_exp; ///< This is time of passage to REACH a diameter class (while the exogenous tp by diameter class is the time of passage to LEAVE to the next d class)
 	vector <vector <double> >              vHa_exp; ///< This is the **expected** version, used for calculating profits
 	vector <vector <double> >                  vHa; ///< This is the actual version following forecasts
 

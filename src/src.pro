@@ -116,7 +116,7 @@ HEADERS += Adolc_debugtest.h \
            anyoption.h \
            ScenarioSelectionWidget.h \
            ModelCore.h \
-    ModelCoreSpatial.h
+           ModelCoreSpatial.h
 FORMS   += MainWindow.ui
 SOURCES += Adolc_debugtest.cpp \
            BaseClass.cpp \
@@ -142,6 +142,6 @@ SOURCES += Adolc_debugtest.cpp \
            anyoption.cpp \
            ScenarioSelectionWidget.cpp \
            ModelCore.cpp \
-    ModelCoreSpatial.cpp
+           ModelCoreSpatial.cpp
 
 RESOURCES += resources.qrc
