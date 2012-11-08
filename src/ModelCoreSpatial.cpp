@@ -321,7 +321,7 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 		int r2 = regIds2[i];
 		int regId = r2;
 		ModelRegion* REG = MTHREAD->MD->getRegion(r2);
-		Gis* GIS = MTHREAD->GIS;
+        //Gis* GIS = MTHREAD->GIS;
 		regPx = REG->getMyPixels();
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
@@ -343,7 +343,7 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 				//		);
 				//	);
 				//);
-				int tp_u0 = px->tp.at(j).at(0); // time of passage to reach the first diameter class
+                int tp_u0 = px->tp.at(j).at(0); // time of passage to reach the first production diameter class
 				if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // TODO to be checked
 					double pastRegArea = px->getPastRegArea(j,thisYear-tp_u0);
 					//double entryVolHa = gfd("entryVolHa",regId,ft,"");
@@ -352,7 +352,11 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 				} else {
 					double regionArea = REG->getValue("forArea_"+ft,OP_SUM);
 					double pxArea     = px->getDoubleValue("forArea_"+ft);
-					px->vReg.push_back(gfd("entryVolHa",r2,ft,"")*pxArea/regionArea);
+                    px->vReg.push_back(gfd("vReg",r2,ft,"")*pxArea/regionArea); // 20121108 BUG !!! solved
+                    // vReg and entryVolHa are NOT the same thing. vReg is the yearly regeneration volumes
+                    // for the whole region. We can use them when we don't know the harvested area
+                    // entryVolHa can lead to vReg calculation only when we know the regeneration area. So in the
+                    // first years we use vReg and subsequently the endogenous one.
 				}
 
 				//double harvestedArea = 0;
@@ -672,7 +676,7 @@ ModelCoreSpatial::computeCumulativeData(){
 				MD->setErrorLevel(MSG_NO_MSG); // as otherwise on 2007 otherwise sfd() will complain that is filling multiple years (2006 and 2007)
                 for (uint u=0; u<dClasses.size(); u++){
 					string dc = dClasses[u];
-                    double cumTp_u, cumTp_u_noExp, cumTp_u_fullExp, tp_noExp, tp_fullExp;
+                    double cumTp_u, cumTp_u_noExp, cumTp_u_fullExp, tp_noExp, tp_fullExp, tp;
 					double vHa_u, vHa_u_noExp, vHa_u_fullExp, vHa_u_real, beta, beta_noExp, beta_fullExp, mort, mort_noExp, mort_fullExp;
 
 					// only cumTp is depending for the expectations, as it is what it is used by owner to calculate return of investments.
@@ -695,12 +699,14 @@ ModelCoreSpatial::computeCumulativeData(){
 						For compatibility with the GAMS code, a -1 value means using initial simulation tp values (fixed cumTp)."
 						*/
 						if (expType == -1){
-							cumTp_u = cumTp_exp_temp[u-1]+gfd("tp",regId,ft,dClasses[u-1],firstYear)*tp_multiplier_t0;
+                            tp = gfd("tp",regId,ft,dClasses[u-1],firstYear)*tp_multiplier_t0;
+                            //tp = px->tp.at(u); no. not possible, tp stored at pixel level is the current year one
+                            cumTp_u = cumTp_exp_temp[u-1]+tp;
 							if(u==1) {
 								vHa_u = gfd("entryVolHa",regId,ft,"",firstYear);
 								vHa_u_real = vHa_u;
 							} else {
-								mort = gfd("mortCoef",regId,ft,dClasses[u-1], firstYear)*mortCoef_multiplier_t0; // mortality rate of previous diameter class
+                                mort = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], firstYear)*mortCoef_multiplier_t0,cumTp_exp_temp[u-1]); // mortality rate of previous diameter class
 								beta = gfd("betaCoef",regId,ft,dc, firstYear)*betaCoef_multiplier_t0;
 								vHa_u = vHa_exp_temp[u-1]*beta*(1-mort);
 
@@ -709,7 +715,7 @@ ModelCoreSpatial::computeCumulativeData(){
 								double mortCoef_multiplier_dynamic = px->getMultiplier("mortCoef_multiplier",ft,thisYear+ceil(cumTp_exp_temp[u-1]));
 								double betaCoef_multiplier_dynamic = px->getMultiplier("betaCoef_multiplier",ft,thisYear+ceil(cumTp_u));
 								cumTp_u_fullExp = cumTp_exp_temp[u-1]+gfd("tp",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*tp_multiplier_dynamic ;
-								mort_fullExp = gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic; // mortality of the previous diameter class
+                                mort_fullExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic,cumTp_exp_temp[u-1]) ; // mortality of the previous diameter class
 								beta_fullExp = gfd("betaCoef",regId,ft,dc, thisYear+ceil(cumTp_u))*betaCoef_multiplier_dynamic;
 								vHa_u_real = vHa_temp[u-1]*beta_fullExp*(1-mort_fullExp);
 
