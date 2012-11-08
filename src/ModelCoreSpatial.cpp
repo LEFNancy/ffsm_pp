@@ -325,12 +325,13 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 		regPx = REG->getMyPixels();
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
-			px->expectedReturns.empty();
+            //px->expectedReturns.clear();
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
 				vector <double>            hV_byDiam;
 				vector < vector <double> > hV_byDiamAndPrd;
 				vector <double> hArea_byDc;
+                vector <double> newVol_byDiam;
 
 				// calculating the regeneration..
 				// if we are in a year where the time of passage has not yet been reached
@@ -362,11 +363,12 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 				//double harvestedArea = 0;
 
 
+
 				for (uint u=0; u<dClasses.size(); u++){
 					string dc = dClasses[u];
 					double hr =0;
-					double pastYearVol = u ? gfd("vol",r2,ft,dc,thisYear-1): 0;
-					double pastYearVol_px = px->vol_l.at(j).at(u);
+                    //double pastYearVol_reg = u ? gfd("vol",r2,ft,dc,thisYear-1): 0;
+                    double pastYearVol = px->vol_l.at(j).at(u);
 					vector <double> hV_byPrd;
 
 					// harvesting rate & volumes...
@@ -379,9 +381,9 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 						double in = gpd("in",r2,priProducts[pp]);
 						double hr_pr = app(priProducts[pp],ft,dc)*st/ in;
 						hr += hr_pr;
-						hV_byPrd.push_back( hr_pr*pastYearVol_px);
+                        hV_byPrd.push_back( hr_pr*pastYearVol);
 					}
-					double hV = hr*pastYearVol_px;
+                    double hV = hr*pastYearVol;
 					hV_byDiam.push_back(hV);
 					hV_byDiamAndPrd.push_back(hV_byPrd);
 
@@ -396,7 +398,7 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 					//	V(u,i,lambda,essence,t)=((1-1/(tp(u,i,lambda,essence))
 					//	                       -mort(u,i,lambda,essence) - hr(u,i,essence,lambda,t))*V(u,i,lambda,essence,t-1)
 					//	                       +(1/(tp(u-1,i,lambda,essence)))*beta(u,i,lambda,essence)*V(u-1,i,lambda,essence,t-1));
-					double vol;
+                    double vol;
 					double tp          = px->tp.at(j).at(u); //gfd("tp",regId,ft,dc);
 					double mort        = px->mort.at(j).at(u); //gfd("mortCoef",regId,ft,dc);
 					double vReg        = px->vReg.at(j); //gfd("vReg",regId,ft,""); // Taking it from the memory database as we could be in a fixed vReg scenario and not having calculated it from above!
@@ -407,7 +409,7 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 					if(u==0){
 						vol = 0.0;
 					}else if(u==1){
-						vol = (1-1/tp-mort)*pastYearVol+vReg;
+                        vol = (1-1/tp-mort)*pastYearVol+vReg;
 						double debug = vol;
 					} else {
 						// time of passage and volume of smaller diameter class
@@ -417,10 +419,11 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 						double debug = vol;
 					}
 					if(u != 0){ // this if is required to avoid a 0/0 and na error that then propage also in vSum()
-						hArea_byDc.push_back(finalHarvestFlag*1000000*hr*pastYearVol_px/vHa); // volumes are in Mm^3, area in ha, vHa in m^3/ha
+                        hArea_byDc.push_back(finalHarvestFlag*1000000*hV/vHa); // volumes are in Mm^3, area in ha, vHa in m^3/ha
 					} else {
 						hArea_byDc.push_back(0.);
 					}
+                    newVol_byDiam.push_back(vol);
 
 					//double debug = hv2fa*hr*pastYearVol*100;
 					//cout << "regId|ft|dc| debug | freeArea: " << r2 << "|"<<ft<<"|"<<dc<<"| "<< debug << " | " << freeArea_byU << endl;
@@ -434,6 +437,7 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 				px->hVol.push_back(hV_byDiam);
 				px->hVol_byPrd.push_back(hV_byDiamAndPrd);
 				px->hArea.push_back(hArea_byDc);
+                px->vol.push_back(newVol_byDiam);
 			} // end of each forest type
 		} // end of each pixel
 	} // end of each region
@@ -456,7 +460,7 @@ ModelCoreSpatial::runManagementModule(){
 		regPx = REG->getMyPixels();
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
-			px->expectedReturns.empty();
+            px->expectedReturns.clear();
 
 			// CALCULATING the expected returns for each forest type...
 			for(uint j=0;j<fTypes.size();j++){
@@ -786,23 +790,24 @@ ModelCoreSpatial::resetPixelValues(){
 			Pixel* px = regPx[p];
 			px->swap(VAR_VOL);
 
-			px->vol.empty(); // by ft,dc
-            /*px->area.empty(); // by ft,dc*/
-			px->hArea.empty(); // by ft, dc
-			//px->regArea.empty(); // by year, ft NO, this one is a map, it doesn't need to be changed
-			px->hVol.empty(); // by ft, dc
-			px->hVol_byPrd.empty(); // by ft, dc, pp
-            //px->in.empty(); // by pp
-            //px->hr.empty(); // by pp
-			px->vReg.empty(); // by ft
-			px->expectedReturns.empty(); // by ft
+            // 20121108 BUG! Solved, used empty (just return true if the vector is empty) instead of clear (it actually clears the vector)
+            px->vol.clear(); // by ft,dc
+            /*px->area.clear(); // by ft,dc*/
+            px->hArea.clear(); // by ft, dc
+            //px->regArea.clear(); // by year, ft NO, this one is a map, it doesn't need to be changed
+            px->hVol.clear(); // by ft, dc
+            px->hVol_byPrd.clear(); // by ft, dc, pp
+            //px->in.clear(); // by pp
+            //px->hr.clear(); // by pp
+            px->vReg.clear(); // by ft
+            px->expectedReturns.clear(); // by ft
 
-			px->beta.empty();
-			px->mort.empty();
-			px->tp.empty();
-			px->cumTp_exp.empty();
-			px->vHa_exp.empty();
-			px->vHa.empty();
+            px->beta.clear();
+            px->mort.clear();
+            px->tp.clear();
+            px->cumTp_exp.clear();
+            px->vHa_exp.clear();
+            px->vHa.clear();
 		}
 	}
 }

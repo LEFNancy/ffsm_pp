@@ -595,7 +595,7 @@ ModelCore::runSimulationYear(){
 					vol = (1-1/tp-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
 					double debug = vol;
 				}
-				double freeArea_byU = finalHarvestFlag*1000000*hr*pastYearVol/vHa; // volumes are in Mm^3, area in ha, vHa in m^3/ha
+                double freeArea_byU = finalHarvestFlag*1000000*hV/vHa; // volumes are in Mm^3, area in ha, vHa in m^3/ha
 				//double debug = hv2fa*hr*pastYearVol*100;
 				//cout << "regId|ft|dc| debug | freeArea: " << r2 << "|"<<ft<<"|"<<dc<<"| "<< debug << " | " << freeArea_byU << endl;
 
