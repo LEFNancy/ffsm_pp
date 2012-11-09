@@ -108,6 +108,34 @@ struct GccTest
 void
 Sandbox::basicTest(){
 
+	/*
+	// testing findMap
+	map<int,double> testMap;
+	for (uint i=0;i<5;i++){
+		pair<int,double> mypair(i,i*2.5);
+		testMap.insert(mypair);
+	}
+	double result = findMap(testMap,3,MSG_NO_MSG);
+	double result2 = findMap(testMap,1,MSG_ERROR);
+	double result3 = findMap(testMap,7,MSG_DEBUG);
+	cout << "Done" << endl;
+	map<int, vector <double> > testMap2;
+	for (uint i=0;i<5;i++){
+		vector <double> myvector;
+		for(uint j=0;j<10;j++) {
+			myvector.push_back(i*100+j);
+		}
+		pair<int,vector <double> > mypair2(i,myvector);
+		testMap2.insert(mypair2);
+	}
+	vector <double> resultb = findMap(testMap2,3,MSG_NO_MSG);
+	vector <double> resultb2 = findMap(testMap2,1,MSG_ERROR);
+	vector <double> resultb3 = findMap(testMap2,7);
+	cout << "Done2" << endl;
+	exit(1);
+	*/
+
+
 
 	/*
 	// Testing vSum

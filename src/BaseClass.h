@@ -24,6 +24,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <map>
 #include <algorithm>
 #include <numeric>
 
@@ -212,6 +213,19 @@ public:
 
 	/// Tokenize a string using a delimiter (default is space)
 	void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ") const;
+
+	/// Search for a value starting from a key in any type of map
+	template <typename K, typename V> V findMap(const map <K, V> &mymap, const K& key, const int& error_level=MSG_CRITICAL_ERROR){
+		typename map<K, V>::const_iterator p;
+		p=mymap.find(key);
+		if(p != mymap.end()) {
+			return p->second;
+		}
+		else {
+			msgOut(error_level, "Error in finding a value in a map (no value found)");
+
+		}
+	}
 
 protected:
 

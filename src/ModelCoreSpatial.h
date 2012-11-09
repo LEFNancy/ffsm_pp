@@ -30,6 +30,7 @@ public:
 	void                  runMarketModule();
 	void                  runBiologicalModule(const bool& init);
 	void                  runManagementModule();
+	void                  sumRegionalForData();
 
 	void                  cacheSettings();          ///< just cache exogenous settings
 	void                  initializePixelValues();  ///< distribuite regional exogenous volumes to pixel volumes using corine land cover area as weight
