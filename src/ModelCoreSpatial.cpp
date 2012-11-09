@@ -183,7 +183,7 @@ ModelCoreSpatial::runMarketModule(){
 	// *** PRE-OPTIMISATION YEARLY OPERATIONS..
 	for(uint i=0;i<regIds2.size();i++){
 		int r2 = regIds2[i];
-					for(uint sp=0;sp<secProducts.size();sp++){
+                    for(uint sp=0;sp<secProducts.size();sp++){
 			double g1    = gpd("g1",r2,secProducts[sp],previousYear);
 			double sigma = gpd("sigma",r2,secProducts[sp]);
 			double pc_1  = gpd("pc",r2,secProducts[sp],previousYear);
@@ -345,15 +345,16 @@ ModelCoreSpatial::runBiologicalModule(const bool &init){
 				//	);
 				//);
                 int tp_u0 = px->tp.at(j).at(0); // time of passage to reach the first production diameter class
-				if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // TODO to be checked
+                if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // T.O.D.O to be checked -> 20121109 OK
 					double pastRegArea = px->getPastRegArea(j,thisYear-tp_u0);
 					//double entryVolHa = gfd("entryVolHa",regId,ft,"");
 					double vHa = px->vHa.at(j).at(1);
 					px->vReg.push_back(pastRegArea*vHa/1000000); // TODO: check the 1000000. Should be ok, as area in ha vol in Mm^3
 				} else {
 					double regionArea = REG->getValue("forArea_"+ft,OP_SUM);
-					double pxArea     = px->getDoubleValue("forArea_"+ft);
-                    px->vReg.push_back(gfd("vReg",r2,ft,"")*pxArea/regionArea); // 20121108 BUG !!! solved
+                    double pxArea     = px->getDoubleValue("forArea_"+ft, true); // 20121109 bug solved (add get zero for not data)
+                    double newVReg = regionArea ? gfd("vReg",r2,ft,"")*pxArea/regionArea : 0;
+                    px->vReg.push_back(newVReg); // 20121108 BUG !!! solved
                     // vReg and entryVolHa are NOT the same thing. vReg is the yearly regeneration volumes
                     // for the whole region. We can use them when we don't know the harvested area
                     // entryVolHa can lead to vReg calculation only when we know the regeneration area. So in the
@@ -481,7 +482,7 @@ ModelCoreSpatial::runManagementModule(){
 			//	          expRetPondCoef(u,i,essence,lambda,p_pr)
 			//	          );
 			double hV_byFT = 0.; // gfd("hV",regId,ft,DIAM_PROD); // it must include only final harvested products in order to act as weightering agent
-			double expReturns = 0;
+            double expReturns = 0.;
 
 			for (uint u=0; u<dClasses.size(); u++){
 				string dc = dClasses[u];
@@ -513,9 +514,9 @@ ModelCoreSpatial::runManagementModule(){
 					double cumTp_u = px->cumTp_exp.at(j).at(u);
 					for (uint pp=0;pp<priProducts.size();pp++){
 						double pw    = gpd("pw",regId,priProducts[pp]);
-						double pl    = gpd("pl",regId,priProducts[pp]);
-						double pwor    = gpd("pl",99999,priProducts[pp]);
-						double hVol_byUPp = px->hVol_byPrd.at(j).at(u).at(pp); // harvested volumes for this product, diameter class on this region and forest type
+                        //double pl    = gpd("pl",regId,priProducts[pp]);
+                        //double pwor    = gpd("pl",99999,priProducts[pp]);
+                        double hVol_byUPp = px->hVol_byPrd.at(j).at(u).at(pp); // harvested volumes for this product, diameter class on this region and forest type
 						//double raw_amount_old = pw*hv2fa*    hVol_byUPp/hV_byFT; // old and wrong. it was in €/m^4
 						double raw_amount = finalHarvestFlag*pw*vHa* hVol_byUPp/hV_byFT; // now in €/ha if there is also thining volumes in hV_byFT, I underestimate expected returns !! T.O.D.O change it !! DONE, hV_byFT now excludes thinning volumes
 						/// see @ModelData::calculateAnnualisedEquivalent
@@ -619,6 +620,8 @@ ModelCoreSpatial::initializePixelValues(){
 		ModelRegion* reg = MD->getRegion(regIds2[i]);
 		vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
 		for (uint j=0;j<rpx.size();j++){
+            int debugPx = rpx[j]->getID();
+            int debug2 = debugPx;
             rpx[j]->vol.clear(); // not actually necessary
 			for(uint y=0;y<fTypes.size();y++){
 				vector <double> vol_byu;
@@ -626,8 +629,8 @@ ModelCoreSpatial::initializePixelValues(){
 				for (uint z=0;z<dClasses.size();z++){
 					double regVol;
 					regVol = z ? gfd("vol",regIds2[i],fTypes[y],dClasses[z],firstYear) : 0 ; // if z=0-> regVol= gfd(), otherwise regVol=0;
-					double pxArea = rpx[j]->getDoubleValue("forArea_"+fTypes[y]);
-					double pxVol = regVol * pxArea/regForArea;
+                    double pxArea = rpx[j]->getDoubleValue("forArea_"+fTypes[y], true); // bug solved 20121109. get zero for not data
+                    double pxVol = regForArea ? regVol * pxArea/regForArea: 0; // if we introduce new forest types without initial area we must avoid a 0/0 division
 					//rpx[j]->changeValue(pxVol,"vol",fTypes[y],dClasses[z],firstYear);
 					vol_byu.push_back(pxVol);
 				}
@@ -859,11 +862,13 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
 	for(uint i=0;i<regIds2.size();i++){
 		int r2 = regIds2[i];
 		ModelRegion* REG = MTHREAD->MD->getRegion(r2);
-		Gis* GIS = MTHREAD->GIS;
+        //Gis* GIS = MTHREAD->GIS;
 		regPx = REG->getMyPixels();
-		vector <double> in_reg(priProducts.size(),0); // should have ceated a vector of size priProducts.size(), all filled with zeros
+        vector <double> in_reg(priProducts.size(),0.); // should have ceated a vector of size priProducts.size(), all filled with zeros
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
+            //int debugPx = px->getID();
+            //int debug2 = debugPx;
             //px->in.clear();
 			for(uint pp=0;pp<priProducts.size();pp++){
 				double in = 0;
