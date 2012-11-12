@@ -26,18 +26,18 @@ public:
 	void                  runInitPeriod();
 	void                  runSimulationYear();
 
-	void                  initMarketModule();
-	void                  runMarketModule();
-	void                  runBiologicalModule(const bool& init);
-	void                  runManagementModule();
-	void                  sumRegionalForData();
+	void                  initMarketModule();       ///< computes st and pw for second year and several needed-only-at-t0-vars for the market module
+	void                  runMarketModule();        ///< computes st (supply total) and pw (weighted price). Optimisation inside.
+	void                  runBiologicalModule();    ///< computes hV, hArea and new vol at end of year
+	void                  runManagementModule();    ///< computes regArea and expectedReturns
+	void                  sumRegionalForData();     ///< computes vol, hV, harvestedArea, regArea and expReturns at reg level from the pixel level
 
-	void                  cacheSettings();          ///< just cache exogenous settings
+	void                  cacheSettings();          ///< just cache exogenous settings from ModelData
 	void                  initializePixelValues();  ///< distribuite regional exogenous volumes to pixel volumes using corine land cover area as weight
 	void                  resetPixelValues();       ///< swap volumes->lagged_volumes and reset the other pixel vectors
-	void                  cachePixelExogenousData();
+	void                  cachePixelExogenousData();///< compute pixel level tp, meta and mort
 	void                  computeInventary();       ///< in=f(vol_t-1)
-	void                  computeCumulativeData();
+	void                  computeCumulativeData();  ///< compute cumTp_exp, vHa_exp, vHa
 
 
 
