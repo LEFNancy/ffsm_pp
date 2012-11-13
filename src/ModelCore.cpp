@@ -23,135 +23,40 @@ ModelCore::~ModelCore(){
 
 
 /**
-Computing some fully exogenous parameters tat require complex operations, e.g. cumulative time of passage or volume per hectare.
-This happen at the very beginning of the init period and after each simulated year
-*/
-void
-ModelCore::computeCumulativeData(){
-
-	int thisYear     =  MTHREAD->SCD->getYear();
-
-
-	for(uint r2= 0; r2<regIds2.size();r2++){
-		int regId = regIds2[r2];
-		for(uint j=0;j<fTypes.size();j++){
-			string ft = fTypes[j];
-
-			// calculating the cumulative time of passage and the (cumulativelly generated) vHa for each diameter class (depending on forest owners diam growth expectations)
-			//loop(u$(ord(u)=1),
-			//   cumTp(u,i,lambda,essence) = tp_u1(i,essence,lambda);
-			//);
-			//loop(u$(ord(u)>1),
-			//   cumTp(u,i,lambda,essence) = cumTp(u-1,i,lambda,essence)+tp(u-1,i,lambda,essence);
-			//);
-			////ceil(x) DNLP returns the smallest integer number greater than or equal to x
-			//loop( (u,i,lambda,essence),
-			//  cumTp(u,i,lambda,essence) =   ceil(cumTp(u,i,lambda,essence));
-			//);
-			/**
-			param expType Specify how the forest owners (those that make the investments) behave will be the time of passage in the future in order to calculate the cumulative time of passage in turn used to discount future revenues.
-			Will forest owners behave adaptively believing the time of passage between diameter classes will be like the observed one at time they make decision (0) or they will have full expectations believing forecasts (1) or something in the middle ?
-For compatibility with the GAMS code, a -1 value means using initial simulation tp values (fixed cumTp)."
-			*/
-			vector <double> cumTp; //cumulative time of passage to REACH a diameter class (tp is to LEAVE to the next one)
-			vector <double> vHa; // volume at hectar by each diameter class [m^3/ha]
-			MD->setErrorLevel(MSG_NO_MSG); // as otherwise on 2007 otherwise sfd() will complain that is filling multiple years (2006 and 2007)
-			for (uint u=0; u<dClasses.size(); u++){
-				string dc = dClasses[u];
-				double cumTp_u, cumTp_u_noExp, cumTp_u_fullExp;
-				double vHa_u, vHa_u_noExp, vHa_u_fullExp, beta, beta_noExp, beta_fullExp, mort, mort_noExp, mort_fullExp;
-				if(u==0) {
-					cumTp_u = 0.;
-					vHa_u   = 0.;
-					sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
-					sfd(vHa_u,  "vHa",regId,ft,dc,DATA_NOW,true);
-					cumTp.push_back(cumTp_u);
-					vHa.push_back(vHa_u);
-				} else {
-					if (expType == -1){
-						cumTp_u = cumTp[u-1]+gfd("tp",regId,ft,dClasses[u-1],firstYear);
-						if(u==1) {
-							vHa_u = gfd("entryVolHa",regId,ft,"",firstYear);
-						} else {
-							mort = gfd("mortCoef",regId,ft,dClasses[u-1], firstYear); // mortality rate of previous diameter class
-							beta = gfd("betaCoef",regId,ft,dc, firstYear);
-							vHa_u = vHa[u-1]*beta*(1-mort);
-						}
-						sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
-						sfd(vHa_u,"vHa",regId,ft,dc,DATA_NOW,true);
-						cumTp.push_back(cumTp_u);
-						vHa.push_back(vHa_u);
-					} else {
-						cumTp_u_noExp = cumTp[u-1]+gfd("tp",regId,ft,dClasses[u-1]);
-						cumTp_u_fullExp = cumTp[u-1]+gfd("tp",regId,ft,dClasses[u-1],thisYear+ceil(cumTp[u-1])); // it adds to the time of passage to reach the previous diameter class the time of passage that there should be to reach this diameter class in the year where the previous diameter class will be reached
-						cumTp_u = cumTp_u_fullExp*expType+cumTp_u_noExp*(1-expType);
-						if(u==1) {
-							vHa_u_noExp   = gfd("entryVolHa",regId,ft,"",DATA_NOW);
-							vHa_u_fullExp = gfd("entryVolHa",regId,ft,"",thisYear+ceil(cumTp_u));
-							vHa_u = vHa_u_fullExp*expType+vHa_u_noExp*(1-expType);
-						} else {
-							mort_noExp = gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW);
-							mort_fullExp = gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp[u-1])); // mortality of the previous diameter class
-							beta_noExp   = gfd("betaCoef",regId,ft,dc, DATA_NOW);
-							beta_fullExp = gfd("betaCoef",regId,ft,dc, thisYear+ceil(cumTp_u));
-							mort = mort_fullExp*expType+mort_noExp*(1-expType);
-							beta = beta_fullExp*expType+beta_noExp*(1-expType);
-							vHa_u = vHa[u-1]*beta*(1-mort);
-						}
-						sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
-						sfd(vHa_u,  "vHa",regId,ft,dc,DATA_NOW,true);
-						cumTp.push_back(cumTp_u);
-						vHa.push_back(vHa_u);
-					}
-				}
-				// debug stuff on vHa
-				//double vHa_new = gfd("vHa",regId,ft,dc,DATA_NOW);
-				//double hv2fa_old = gfd("hv2fa",regId,ft,dc,DATA_NOW);
-				//cout << "Reg|Ft|dc|vHa (new)|1/hv2fa (old):   " << regId << " | " << ft;
-				//cout << " | " << dc << " | " << vHa_new << " | " << 1/hv2fa_old  << endl;
-
-			} // end of each diam class
-		} // end of each ft
-	} // end of each region
-	MD->setErrorLevel(MSG_ERROR);
-}
-
-
-
-/**
 IMPORTANT NOTE: Volumes in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2
 */
 void
 ModelCore::runInitPeriod(){
-	msgOut(MSG_INFO, "Starting init simulation..");
-	int currentYear = MTHREAD->SCD->getYear();
+	/**
+	Some importan notes:
+	V (volumes) -> at the end of the year
+	In (inventary) -> at the beginning of the year
+	Volumes are in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2
+	*/
+	cacheSettings();             // cashe things like first year, second year, dClasses...
+	initMarketModule();          // inside it uses first year, second year
+	MTHREAD->SCD->advanceYear(); // 2005->2006
+	computeInventary();          // in=f(vol_t-1)
+	computeCumulativeData();     // compute cumTp_exp, vHa_exp, vHa
+	runBiologicalModule();       //
+	runManagementModule();
+	updateMapAreas();            // update the forArea_{ft} layer on each pixel as old value-hArea+regArea
+}
 
-	MD = MTHREAD->MD;
-	firstYear = MD->getIntSetting("initialYear");
-	secondYear = firstYear+1;
-	thirdYear  = firstYear+2;
-	WL2 = MD->getIntSetting("worldCodeLev2");
-	regIds2 = MD->getRegionIds(2);
-	priProducts = MD->getStringVectorSetting("priProducts");
-	secProducts = MD->getStringVectorSetting("secProducts");
-	allProducts = priProducts;
-	allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
-	dClasses = MD->getStringVectorSetting("dClasses");
-	pDClasses; // production diameter classes: exclude the fist diameter class below 15 cm
-	pDClasses.insert(pDClasses.end(), dClasses.begin()+1, dClasses.end() );
-	fTypes= MD->getForTypeIds();
-	l2r = MD->getRegionIds();
-	regType = MTHREAD->MD->getStringSetting("regType"); // how the regeneration should be computed (exogenous, from hr, from allocation choises)
-	expType = MD->getDoubleSetting("expType");
-	if((expType<0 || expType>1) && expType != -1){
-		msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
-	}
-	mr = MD->getDoubleSetting("mr");
+void
+ModelCore::runSimulationYear(){
+	computeInventary();          // in=f(vol_t-1)
+	runMarketModule();
+	computeCumulativeData();     // compute cumTp_exp, vHa_exp
+	runBiologicalModule();
+	runManagementModule();
+	updateMapAreas();
+}
 
-	computeCumulativeData();
 
-	// starting the GAMS code
-
+void
+ModelCore::initMarketModule(){
+	msgOut(MSG_INFO, "Starting market module (init stage)..");
 	for(uint i=0;i<regIds2.size();i++){
 		int r2 = regIds2[i];
 
@@ -210,7 +115,7 @@ ModelCore::runInitPeriod(){
 							psi/(psi-1)
 						 );
 			double pc = (da/dc)*pWo
-					   +(dl/dc)*pl;
+						 +(dl/dc)*pl;
 			double pw = (dl*pl+da*pWo)/(dl+da);
 			double k = k1*sl;
 
@@ -239,9 +144,9 @@ ModelCore::runInitPeriod(){
 			double t1 = 1/ ( 1+(pow(sl/sa,1/eta))*(pl/pWo) );
 			double r1 = 1-t1;
 			double sc = pow(
-						   t1*pow(sa,(eta-1)/eta) + r1*pow(sl,(eta-1)/eta)
+							 t1*pow(sa,(eta-1)/eta) + r1*pow(sl,(eta-1)/eta)
 						,
-						   eta/(eta-1)
+							 eta/(eta-1)
 						);
 			double pc = (sa/sc)*pWo+(sl/sc)*pl;
 			double pw = (sl*pl+sa*pWo)/(sl+sa);
@@ -252,89 +157,10 @@ ModelCore::runInitPeriod(){
 			spd(pc,"pc",r2,priProducts[pp],secondYear,true);
 			spd(pw,"pw",r2,priProducts[pp],secondYear,true);
 		}
+	} // end of each region
 
-		// up to here tested with gams output on 20120628, that's fine !!
 
-		// //////////////////// BIOLOGICAL MODULE ////////////////////////////////////
-
-		// //////////////////// Inventary on t-2 and stock available on t-1 //////////
-		// In(i,p_pr,t-1)             =     sum((u,lambda,essence),prov(u,essence,lambda,p_pr)*V(u,i,lambda,essence,t-2));
-
-		for(uint pp=0;pp<priProducts.size();pp++){
-			double in = 0;
-			for(uint ft=0;ft<fTypes.size();ft++){
-				for(uint dc=0;dc<pDClasses.size();dc++){
-					double vol = gfd("vol",r2,fTypes[ft],pDClasses[dc],firstYear);
-					in += app(priProducts[pp],fTypes[ft],pDClasses[dc])*vol;
-				}
-			}
-			spd(in,"in",r2,priProducts[pp],secondYear,true);
-		}
-		for(uint j=0;j<fTypes.size();j++){
-			string ft = fTypes[j];
-			double freeArea = 0;
-			double debug = 0; // todo cancel me
-			for (uint u=0; u<pDClasses.size(); u++){
-				string dc = pDClasses[u];
-				//  // ////////// harvestry rate of t-1 //////////////////////////////////////////
-				// hr(u,i,essence,lambda,t-1) = sum(p_pr, prov(u,essence,lambda,p_pr)*RPAR('st',i,p_pr,t-1)/In(i,p_pr,t-1));
-				//hV(u,i,essence,lambda,t-1) = hr(u,i,essence,lambda,t-1) * V(u,i,lambda,essence,t-2) ;
-				// ////// volumes after harvesting on t-1 ////////////////////////////////////
-				// loop(u$(ord(u)=1),
-				// first diameter class, no harvesting and fixed regenaration..
-				// V(u,i,lambda,essence,t-1)=(1-1/(tp(u,i,lambda,essence))-mort(u,i,lambda,essence) )*V(u,i,lambda,essence,t-2)
-				//                           +Vregen(i,lambda,essence,t-1);
-				// );
-				// loop(u$(ord(u)>1),
-				//    // generic case..
-				//    V(u,i,lambda,essence,t-1)=((1-1/(tp(u,i,lambda,essence))
-				//                                 -mort(u,i,lambda,essence) - hr(u,i,essence,lambda,t-1))*V(u,i,lambda,essence,t-2)
-				//                                 +(1/(tp(u-1,i,lambda,essence)))*beta(u,i,lambda,essence)*V(u-1,i,lambda,essence,t-2));
-				//
-				// ///// MANAGEMENT MODULE ///////////////////////////////////////////////////
-				// calculating the free area after t-1 harvesting - our first year we calculare regenaration area!
-				// freeArea(i,essence, lambda)   = sum(u,hv2fa(i,essence,lambda,u)*hr(u,i,essence,lambda,t-1)*V(u,i,lambda,essence,t-2)*100);
-				// regArea(i,essence,lambda,t-1) = freeArea(i,essence, lambda);
-				// );
-				double hr = 0;
-				double pastYearVol = gfd("vol",r2,ft,dc,firstYear);
-				double vol;
-				double tp          = gfd("tp",r2,ft,dc,secondYear);
-				double mort        = gfd("mortCoef",r2,ft,dc,secondYear);
-				double vReg        = gfd("vReg",r2,ft,"",secondYear);
-				double beta        = gfd("betaCoef",r2,ft,dc,secondYear);
-				//double hv2fa       = gfd("hv2fa",r2,ft,dc,secondYear); // todo cancel me
-				double vHa         = gfd("vHa",r2,ft,dc,secondYear);
-				double finalHarvestFlag = gfd("finalHarvestFlag",r2,ft,dc,secondYear);
-
-				for(uint pp=0;pp<priProducts.size();pp++){
-					double st = gpd("st",r2,priProducts[pp],secondYear);
-					double in = gpd("in",r2,priProducts[pp],secondYear);
-					hr += app(priProducts[pp],ft,dc)*st/ in;
-				}
-				double hV = hr*pastYearVol;
-				if(u==0){
-					vol = (1-1/tp-mort)*pastYearVol+vReg;
-				} else {
-					// time of passage and volume of smaller diameter class
-					double tp_1 = gfd("tp",r2,ft,pDClasses[u-1],secondYear);
-					double pastYearVol_1 = gfd("vol",r2,ft,pDClasses[u-1],firstYear);
-					vol = (1-1/tp-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
-				}
-
-				//debug += hv2fa*hr*pastYearVol*100;
-				freeArea += finalHarvestFlag*1000000*hr*pastYearVol/vHa; // volumes are in Mm^3, area in ha, vHa in m^3/ha
-				//cout << "regId|ft|dc| debug | freeArea: " << r2 << "|"<<ft<<"|"<<dc<<"| "<< debug << " | " << freeArea << endl;
-				sfd(hr,"hr",r2,ft,dc,secondYear,true);
-				sfd(hV,"hV",r2,ft,dc,secondYear,true);
-				sfd(vol,"vol",r2,ft,dc,secondYear);
-			}
-			sfd(freeArea,"regArea",r2,ft,"",secondYear,true);
-		} // end foreach forest type
-
-	} // end for each region in level 2
-
-// initializing the exports to zero quantities
+	// initializing the exports to zero quantities
 	for(uint r1=0;r1<l2r.size();r1++){
 		for(uint r2=0;r2<l2r[r1].size();r2++){
 			for(uint p=0;p<allProducts.size();p++){
@@ -343,25 +169,11 @@ ModelCore::runInitPeriod(){
 				}
 			}
 		}
-	}
+	} // end of r1 region
 }
 
-
-/**
-IMPORTANT NOTE: Volumes in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2
-*/
 void
-ModelCore::runSimulationYear(){
-
-	using namespace Ipopt;
-
-	msgOut(MSG_INFO, "Starting model simulation for year "+i2s(MTHREAD->SCD->getYear())+ "...");
-	ModelData* MD = MTHREAD->MD;
-	int thisYear     =  MTHREAD->SCD->getYear();
-	int previousYear = MTHREAD->SCD->getYear()-1;
-
-
-	computeCumulativeData();
+ModelCore::runMarketModule(){
 
 	// *** PRE-OPTIMISATION YEARLY OPERATIONS..
 
@@ -369,20 +181,12 @@ ModelCore::runSimulationYear(){
 	// notes:
 	// - dispo_sup: not actually entering anywhere, forgiving it for now..
 	// - dc0: not needed, it is just the first year demand composite
+	int thisYear = MTHREAD->SCD->getYear();
+	int previousYear = thisYear-1;
 
 	for(uint i=0;i<regIds2.size();i++){
 		int r2 = regIds2[i];
-		// In(i,p_pr,t)   =   sum((u,lambda,essence),prov(u,essence,lambda,p_pr)*V(u,i,lambda,essence,t-1));
-		for(uint pp=0;pp<priProducts.size();pp++){
-			double in = 0;
-			for(uint ft=0;ft<fTypes.size();ft++){
-				for(uint dc=0;dc<pDClasses.size();dc++){
-					double vol = gfd("vol",r2,fTypes[ft],pDClasses[dc],previousYear);
-					in += app(priProducts[pp],fTypes[ft],pDClasses[dc])*vol;
-				}
-			}
-			spd(in,"in",r2,priProducts[pp]);
-		}
+
 		// K(i,p_tr,t)  =  (1+g1(i,p_tr))*K(i,p_tr,t-1);
 		// AA(i,p_tr)   =   (sigma(p_tr)/(sigma(p_tr)+1))*RPAR('pc',i,p_tr,t-1)*(RPAR('dc',i,p_tr,t-1)**(-1/sigma(p_tr)));
 		// GG(i,p_tr)   =   RPAR('dc',i,p_tr,t-1)*((RPAR('pc',i,p_tr,t-1))**(-sigma(p_tr))); //alpha
@@ -421,8 +225,6 @@ ModelCore::runSimulationYear(){
 
 	} // end for each region in level 2 (and updating variables)
 
-
-
 	// *** OPTIMISATION....
 
 	// Create an instance of the IpoptApplication
@@ -442,9 +244,8 @@ ModelCore::runSimulationYear(){
 		return;
 	}
 
-    msgOut(MSG_INFO,"Running optimisation problem for this year (it may take a few minutes for large models)..");
+	msgOut(MSG_INFO,"Running optimisation problem for this year (it may take a few minutes for large models)..");
 	status = application->OptimizeTNLP(MTHREAD->OPT);
-
 
 	// *** POST OPTIMISATION....
 
@@ -456,8 +257,8 @@ ModelCore::runSimulationYear(){
 
 	// Retrieve some statistics about the solve
 	if (status == Solve_Succeeded) {
-        Index iter_count = application->Statistics()->IterationCount();
-        Number final_obj = application->Statistics()->FinalObjective();
+		Index iter_count = application->Statistics()->IterationCount();
+		Number final_obj = application->Statistics()->FinalObjective();
 		printf("\n*** The problem solved in %d iterations!\n", iter_count);
 		printf("\n*** The final value of the objective function is %e.\n", final_obj);
 		msgOut(MSG_INFO, "The problem solved successfully in "+i2s(iter_count)+" iterations.");
@@ -465,14 +266,14 @@ ModelCore::runSimulationYear(){
 		double obj = final_obj;
 		MTHREAD->DO->printOptLog(true, icount, obj);
 	} else {
-        //Number final_obj = application->Statistics()->FinalObjective();
+		//Number final_obj = application->Statistics()->FinalObjective();
 		cout << "***ERROR: MODEL DIDN'T SOLVE FOR THIS YEAR" << endl;
-        msgOut(MSG_ERROR, "Model DIDN'T SOLVE for this year");
-        // IMPORTANT! Don't place the next two lines above the msgOut() function or it will crash in windows if the user press the stop button
-        Index iter_count = application->Statistics()->IterationCount();
-        Number final_obj = application->Statistics()->FinalObjective();
-        int icount = iter_count;
-        double obj = final_obj;
+		msgOut(MSG_ERROR, "Model DIDN'T SOLVE for this year");
+		// IMPORTANT! Don't place the next two lines above the msgOut() function or it will crash in windows if the user press the stop button
+		Index iter_count = application->Statistics()->IterationCount();
+		Number final_obj = application->Statistics()->FinalObjective();
+		int icount = iter_count;
+		double obj = final_obj;
 		MTHREAD->DO->printOptLog(false, icount, obj);
 	}
 
@@ -509,18 +310,26 @@ ModelCore::runSimulationYear(){
 			double pw = (sl*pl+sa*pworld)/st;
 			spd(pw,"pw",regId,priProducts[p]);
 		}
+	} // end of foreach region
+}
 
+void
+ModelCore::runBiologicalModule(){
 
+	msgOut(MSG_INFO, "Starting resource module..");
+	hV_byPrd.clear();
+	int thisYear = MTHREAD->SCD->getYear();
+	int previousYear = thisYear-1;
 
+	for(uint i=0;i<regIds2.size();i++){
+
+		int r2 = regIds2[i];
+		int regId = r2;
 		// Post optimisation biological mobule..
-
-		vector <double> cachedExpectedReturnsByFt;
+		vector < vector < vector <double> > > hV_byPrd_regional;
 		for(uint j=0;j<fTypes.size();j++){
 			string ft = fTypes[j];
-			vector < vector <double> > hV_byDiamAndPrd;
-
-
-
+			vector < vector <double> > hV_byPrd_ft;
 
 			// calculating the regeneration..
 			// if we are in a year where the time of passage has not yet been reached
@@ -534,22 +343,19 @@ ModelCore::runSimulationYear(){
 			//	);
 			//);
 			int tp_u0 = gfd("tp",regId,ft,dClasses[0]); // time of passage to reach the first diameter class
-			if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // TODO to be checked
+			if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // T.O.D.O to be checked -> 20121109 OK
 				double pastRegArea = gfd("regArea",regId,ft,"",thisYear-tp_u0);
-				double entryVolHa = gfd("entryVolHa",regId,ft,"");
 				double vHa = gfd("vHa",regId,ft,dClasses[1]);
 				//cout << "vHa - entryVolHa: " << vHa << " / " << entryVolHa << endl;
-				double vReg = pastRegArea*vHa/1000000; // TODO: check the 1000000. Should be ok, as area in ha vol in Mm^3
+				double vReg = pastRegArea*vHa/1000000; // T.O.D.O: check the 1000000. -> Should be ok, as area in ha vol in Mm^3
 				sfd(vReg,"vReg",regId,ft,"");
 			}
 
-
-			//double harvestedArea = 0;
-			for (uint u=0; u<pDClasses.size(); u++){
-				string dc = pDClasses[u];
+			for (uint u=0; u<dClasses.size(); u++){
+				string dc = dClasses[u];
 				double hr =0;
-				double pastYearVol = gfd("vol",regId,ft,dc,previousYear);
-				vector <double> hV_byPrd;
+				double pastYearVol = u?gfd("vol",regId,ft,dc,previousYear):0.;
+				vector <double> hV_byPrd_dc;
 
 				// harvesting rate & volumes...
 				//hr(u,i,essence,lambda,t) =    sum(p_pr, prov(u,essence,lambda,p_pr)*RPAR('st',i,p_pr,t)/In(i,p_pr,t));
@@ -558,12 +364,11 @@ ModelCore::runSimulationYear(){
 				for(uint pp=0;pp<priProducts.size();pp++){
 					double st = gpd("st",regId,priProducts[pp]);
 					double in = gpd("in",regId,priProducts[pp]);
-					double hr_pr = app(priProducts[pp],ft,dc)*st/ in;
+					double hr_pr = u?app(priProducts[pp],ft,dc)*st/ in:0;
 					hr += hr_pr;
-					hV_byPrd.push_back( hr_pr*pastYearVol);
+					hV_byPrd_dc.push_back( hr_pr*pastYearVol);
 				}
 				double hV = hr*pastYearVol;
-				hV_byDiamAndPrd.push_back(hV_byPrd);
 
 				// post harvesting remained volumes computation..
 				// loop(u$(ord(u)=1),
@@ -578,105 +383,132 @@ ModelCore::runSimulationYear(){
 				//	                       +(1/(tp(u-1,i,lambda,essence)))*beta(u,i,lambda,essence)*V(u-1,i,lambda,essence,t-1));
 				double vol;
 				double tp          = gfd("tp",regId,ft,dc);
-				double mort        = gfd("mortCoef",regId,ft,dc);
+				double mort        = u?gfd("mortCoef",regId,ft,dc):0.;
 				double vReg        = gfd("vReg",regId,ft,""); // Taking it from the memory database as we could be in a fixed vReg scenario and not having calculated it from above!
-				double beta        = gfd("betaCoef",regId,ft,dc);
+				double beta        = u?gfd("betaCoef",regId,ft,dc):0.;
 				//double hv2fa       = gfd("hv2fa",regId,ft,dc);
 				double vHa         = gfd("vHa",regId,ft,dc);
 				double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
 
 				if(u==0){
+					vol = 0.;
+				} else if(u==1){
 					vol = (1-1/tp-mort)*pastYearVol+vReg;
 					double debug = vol;
 				} else {
 					// time of passage and volume of smaller diameter class
-					double tp_1 = gfd("tp",regId,ft,pDClasses[u-1]);
-					double pastYearVol_1 = gfd("vol",regId,ft,pDClasses[u-1],previousYear);
+					double tp_1 = gfd("tp",regId,ft,dClasses[u-1]);
+					double pastYearVol_1 = gfd("vol",regId,ft,dClasses[u-1],previousYear);
 					vol = (1-1/tp-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
 					double debug = vol;
 				}
-                double freeArea_byU = finalHarvestFlag*1000000*hV/vHa; // volumes are in Mm^3, area in ha, vHa in m^3/ha
+				double freeArea_byU = u?finalHarvestFlag*1000000*hV/vHa:0; // volumes are in Mm^3, area in ha, vHa in m^3/ha
 				//double debug = hv2fa*hr*pastYearVol*100;
 				//cout << "regId|ft|dc| debug | freeArea: " << r2 << "|"<<ft<<"|"<<dc<<"| "<< debug << " | " << freeArea_byU << endl;
 
-				sfd(hr,"hr",regId,ft,dc);
-				sfd(hV,"hV",regId,ft,dc);
-				sfd(vol,"vol",regId,ft,dc);
+				sfd(hr,"hr",regId,ft,dc,DATA_NOW,true);
+				sfd(hV,"hV",regId,ft,dc,DATA_NOW,true);
+				sfd(vol,"vol",regId,ft,dc,DATA_NOW,true); // allowCreate needed for u==0
 
-				sfd(freeArea_byU,"harvestedArea",regId,ft,dc,DATA_NOW,true);
+				sfd(freeArea_byU,"harvestedArea",regId,ft,dc,DATA_NOW, true);
+				hV_byPrd_ft.push_back(hV_byPrd_dc);
 			} // end foreach diameter classes
+			hV_byPrd_regional.push_back(hV_byPrd_ft);
+		} // end of each forest type
+		hV_byPrd.push_back(hV_byPrd_regional);
+	} // end of for each region
 
+}
+
+void
+ModelCore::runManagementModule(){
+
+	msgOut(MSG_INFO, "Starting management module..");
+	int thisYear = MTHREAD->SCD->getYear();
+	int previousYear = thisYear-1;
+
+	for(uint i=0;i<regIds2.size();i++){
+		int r2 = regIds2[i];
+		int regId = r2;
+		vector <double> cachedExpectedReturnsByFt;
+
+		// PART 1: COMPUTING THE EXPECTED RETURNS FOR EACH FOREST TYPE
+
+		for(uint j=0;j<fTypes.size();j++){
+			string ft = fTypes[j];
 			// Post optimisation management mobule..
 
 			//if(regType != "fixed" && regType != "fromHrLevel"){
 			// 20120910, Antonello: changed.. calculating the expected returns also for fixed and fromHrLevel regeneration (then not used but gives indication)
-				// calculating the expected returns..
-				//	loop ( (u,i,essence,lambda,p_pr),
-				//		if (sum(u2, hV(u2,i,essence,lambda,t))= 0,
-				//			expRetPondCoef(u,i,essence,lambda,p_pr) = 0;
-				//		else
-				//			expRetPondCoef(u,i,essence,lambda,p_pr) = hV_byPrd(u,i,essence,lambda,p_pr,t)/ sum(u2, hV(u2,i,essence,lambda,t));
-				//		);
-				//	);
-				//	expReturns(i,essence,lambda) = sum( (u,p_pr),
-				//	          RPAR("pl",i,p_pr,t)*hv2fa(i,essence,lambda,u)*(1/df_byFT(u,i,lambda,essence))*        // df_byFT(u,i,lambda,essence)
-				//	          expRetPondCoef(u,i,essence,lambda,p_pr)
-				//	          );
-				double hV_byFT = 0.; // gfd("hV",regId,ft,DIAM_PROD); // it must include only final harvested products in order to act as weightering agent
-				double expReturns = 0;
+			// calculating the expected returns..
+			//	loop ( (u,i,essence,lambda,p_pr),
+			//		if (sum(u2, hV(u2,i,essence,lambda,t))= 0,
+			//			expRetPondCoef(u,i,essence,lambda,p_pr) = 0;
+			//		else
+			//			expRetPondCoef(u,i,essence,lambda,p_pr) = hV_byPrd(u,i,essence,lambda,p_pr,t)/ sum(u2, hV(u2,i,essence,lambda,t));
+			//		);
+			//	);
+			//	expReturns(i,essence,lambda) = sum( (u,p_pr),
+			//	          RPAR("pl",i,p_pr,t)*hv2fa(i,essence,lambda,u)*(1/df_byFT(u,i,lambda,essence))*        // df_byFT(u,i,lambda,essence)
+			//	          expRetPondCoef(u,i,essence,lambda,p_pr)
+			//	          );
+			double hV_byFT = 0.; // gfd("hV",regId,ft,DIAM_PROD); // it must include only final harvested products in order to act as weightering agent
+			double expReturns = 0;
 
-				for (uint u=0; u<pDClasses.size(); u++){
-					string dc = pDClasses[u];
+			for (uint u=0; u<dClasses.size(); u++){
+				string dc = dClasses[u];
+				double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
+				hV_byFT += finalHarvestFlag * gfd("hV",regId,ft,dc);
+			}
+
+			if(hV_byFT==0.){ // nothing has been harvested in this pixel for this specific forest type. Let's calculate the combination product/diameter class with the highest expected return
+				for (uint u=0; u<dClasses.size(); u++){
+					string dc = dClasses[u];
+					double vHa              = gfd("vHa_exp",regId,ft,dc);
 					double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
-					hV_byFT += finalHarvestFlag * gfd("hV",regId,ft,dc);
-				}
-
-
-
-				for (uint u=0; u<pDClasses.size(); u++){
-					//vector <double> expReturnsPondCoef_byPrd;
-					string dc = pDClasses[u];
+					double cumTp_u          = gfd("cumTp_exp",regId,ft,dc);
 					for (uint pp=0;pp<priProducts.size();pp++){
-						if(hV_byFT==0.){
-							//expReturnsPondCoef_byPrd.push_back(0.);
-							// I'll do an average of price of products that can be obtained from that FT TODO !!!
-							if(app(priProducts[pp],ft,dc)){
-								cout << "debug me !" << endl;
-								exit(1);
-							}
-						} else {
-							//expReturnsPondCoef_byPrd.push_back(hV_byDiamAndPrd.at(u).at(pp)/hV_byFT);
-							double pw    = gpd("pw",regId,priProducts[pp]);
-							double pl    = gpd("pl",regId,priProducts[pp]);
-							double pwor    = gpd("pl",99999,priProducts[pp]);
-
-							//double hv2fa = gfd("hv2fa",regId,ft,dc);
-							double vHa         = gfd("vHa",regId,ft,dc);
-							double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
-							double cumTp_u = gfd("cumTp",regId,ft,dc);
-							double hVol_byUPp = hV_byDiamAndPrd.at(u).at(pp); // harvested volumes for this product, diameter class on this region and forest type
-
-							//double raw_amount_old = pw*hv2fa*    hVol_byUPp/hV_byFT; // old and wrong. it was in €/m^4
-							double raw_amount = finalHarvestFlag*pw*vHa* hVol_byUPp/hV_byFT; // now in €/ha if there is also thining volumes in hV_byFT, I underestimate expected returns !! TODO change it !!
-							/**
-							see @ModelData::calculateAnnualisedEquivalent
-							*/
-							double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u); //comTp is on diamClasses, u here is on pDiamClasses
-							//cout << "reg|ft|dc|prd|raw amount|ann.amount|tp|hV|hVTot|pw|pl|pW|vHa|fHFlag;";
-							//cout << regId <<";"<< ft <<";"<< dc <<";" << priProducts[pp] <<";" << raw_amount <<";"<< anualised_amount<<";";
-							//cout << cumTp_u <<";"<< hVol_byUPp << ";" << hV_byFT << ";" << pw << ";" << pl << ";" << pwor << ";" << vHa << ";" << finalHarvestFlag << endl;
-							expReturns += anualised_amount;
-						}
-						//expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
+						double pw    = gpd("pw",regId,priProducts[pp]);
+						double raw_amount = finalHarvestFlag*pw*vHa;
+						double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
+						if (anualised_amount>expReturns) {expReturns=anualised_amount;}
 					}
 				}
-				double debug = expReturns;
-				sfd(expReturns,"expReturns",regId, ft,"",DATA_NOW,true);
-				cachedExpectedReturnsByFt.push_back(expReturns);
-			//}
+			} else {
+				for (uint u=0; u<dClasses.size(); u++){
+					string dc  = dClasses[u];
+					double vHa = gfd("vHa_exp",regId,ft,dc);
+					double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
+					double cumTp_u = gfd("cumTp_exp",regId,ft,dc);
 
+					for (uint pp=0;pp<priProducts.size();pp++){
+						double pw    = gpd("pw",regId,priProducts[pp]);
+						double pl    = gpd("pl",regId,priProducts[pp]);
+						double pwor    = gpd("pl",99999,priProducts[pp]);
+
+						double hVol_byUPp = hV_byPrd.at(i).at(j).at(u).at(pp); // harvested volumes for this product, diameter class on this region and forest type
+
+						//double raw_amount_old = pw*hv2fa*    hVol_byUPp/hV_byFT; // old and wrong. it was in €/m^4
+						double raw_amount = finalHarvestFlag*pw*vHa* hVol_byUPp/hV_byFT; // now in €/ha if there is also thining volumes in hV_byFT, I underestimate expected returns !! TODO change it !!
+						/**
+						see @ModelData::calculateAnnualisedEquivalent
+						*/
+						double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u); //comTp is on diamClasses, u here is on pDiamClasses
+						//cout << "reg|ft|dc|prd|raw amount|ann.amount|tp|hV|hVTot|pw|pl|pW|vHa|fHFlag;";
+						//cout << regId <<";"<< ft <<";"<< dc <<";" << priProducts[pp] <<";" << raw_amount <<";"<< anualised_amount<<";";
+						//cout << cumTp_u <<";"<< hVol_byUPp << ";" << hV_byFT << ";" << pw << ";" << pl << ";" << pwor << ";" << vHa << ";" << finalHarvestFlag << endl;
+						expReturns += anualised_amount;
+					}
+					//expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
+				}
+			}
+			double debug = expReturns;
+			sfd(expReturns,"expReturns",regId, ft,"",DATA_NOW,true);
+			cachedExpectedReturnsByFt.push_back(expReturns);
 		} // end foreach forest type
 
+
+		// PART 2: ALLOCATING THE HARVESTED AREA TO REGENERATION AREA BASED ON EXPECTED RETURNS
 
 		// calculating freeArea at the end of the year and choosing the new regeneration area..
 		//freeArea(i,essence,lambda) = sum(u, hv2fa(i,essence,lambda,u)*hr(u,i,essence,lambda,t)*V(u,i,lambda,essence,t-1)*100);
@@ -692,6 +524,7 @@ ModelCore::runSimulationYear(){
 		//		regArea(i,essence,lambda,t) = freeArea(i,essence, lambda)*(1-mr);   // here we could introduce in/out area from other land usages
 		//	);
 		double totalHarvestedArea = gfd("harvestedArea",regId,FT_ALL,DIAM_ALL);
+
 		double maxExpReturns = *( max_element( cachedExpectedReturnsByFt.begin(), cachedExpectedReturnsByFt.end() ) );
 		bool foundMaxExpReturns = false;
 		for(uint j=0;j<fTypes.size();j++){
@@ -700,7 +533,7 @@ ModelCore::runSimulationYear(){
 			if(regType == "fixed" || regType == "fromHrLevel"){
 				// regeneration area is the harvested area..
 				double harvestedArea = harvestedAreaForThisFT;
-				sfd(harvestedArea,"regArea",regId,ft,"");
+				sfd(harvestedArea,"regArea",regId,ft,"",DATA_NOW,true);
 			} else {
 				// regeneration area is a mix between harvested area and the harvested area of te most profitting forest type..
 				double regArea = 0;
@@ -710,18 +543,202 @@ ModelCore::runSimulationYear(){
 					foundMaxExpReturns = true;
 				}
 				regArea +=  harvestedAreaForThisFT*(1-mr);
-				sfd(regArea,"regArea",regId,ft,"");
+				sfd(regArea,"regArea",regId,ft,"",DATA_NOW,true);
 			}
-		}
+		}// end of foreach forest type
 		double totalRegArea = gfd("regArea",regId,FT_ALL,DIAM_ALL);
-
-
 	} // end of each r2 region
-
-	updateMapAreas();
-	return;
-
 }
+
+void
+ModelCore::computeInventary(){
+	msgOut(MSG_INFO, "Starting computing inventary available for this year..");
+	int thisYear = MTHREAD->SCD->getYear();
+
+	// In(i,p_pr,t)   =   sum((u,lambda,essence),prov(u,essence,lambda,p_pr)*V(u,i,lambda,essence,t-1));
+	for(uint i=0;i<regIds2.size();i++){
+		int r2 = regIds2[i];
+		for(uint pp=0;pp<priProducts.size();pp++){
+			double in = 0;
+			for(uint ft=0;ft<fTypes.size();ft++){
+				for(uint dc=0;dc<dClasses.size();dc++){
+					double vol = dc?gfd("vol",r2,fTypes[ft],dClasses[dc],thisYear-1):0.;
+					in += app(priProducts[pp],fTypes[ft],dClasses[dc])*vol;
+				}
+			}
+			spd(in,"in",r2,priProducts[pp],thisYear,true);
+		}
+	} // end of for each region
+}
+
+void
+ModelCore::cacheSettings(){
+	msgOut(MSG_INFO, "Cashing initial model settings..");
+	int currentYear = MTHREAD->SCD->getYear();
+
+	MD = MTHREAD->MD;
+	firstYear = MD->getIntSetting("initialYear");
+	secondYear = firstYear+1;
+	thirdYear  = firstYear+2;
+	WL2 = MD->getIntSetting("worldCodeLev2");
+	regIds2 = MD->getRegionIds(2);
+	priProducts = MD->getStringVectorSetting("priProducts");
+	secProducts = MD->getStringVectorSetting("secProducts");
+	allProducts = priProducts;
+	allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
+	dClasses = MD->getStringVectorSetting("dClasses");
+	pDClasses; // production diameter classes: exclude the fist diameter class below 15 cm
+	pDClasses.insert(pDClasses.end(), dClasses.begin()+1, dClasses.end() );
+	fTypes= MD->getForTypeIds();
+	l2r = MD->getRegionIds();
+	regType = MTHREAD->MD->getStringSetting("regType"); // how the regeneration should be computed (exogenous, from hr, from allocation choises)
+	expType = MD->getDoubleSetting("expType");
+	if((expType<0 || expType>1) && expType != -1){
+		msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
+	}
+	mr = MD->getDoubleSetting("mr");
+}
+
+/**
+Computing some fully exogenous parameters tat require complex operations, e.g. cumulative time of passage or volume per hectare.
+This happen at the very beginning of the init period and after each simulated year
+*/
+void
+ModelCore::computeCumulativeData(){
+
+		msgOut(MSG_INFO, "Starting computing some cumulative values..");
+		int thisYear     =  MTHREAD->SCD->getYear();
+
+		// debug
+		//cout << "cumTp and vHa by dc:" << endl;
+		//cout << "regId|ft|varName|0|15|25|35|45|55|65|75|85|95|150|" << endl;
+
+		for(uint r2= 0; r2<regIds2.size();r2++){
+			int regId = regIds2[r2];
+			for(uint j=0;j<fTypes.size();j++){
+				string ft = fTypes[j];
+				// calculating the cumulative time of passage and the (cumulativelly generated) vHa for each diameter class (depending on forest owners diam growth expectations)
+				//loop(u$(ord(u)=1),
+				//   cumTp(u,i,lambda,essence) = tp_u1(i,essence,lambda);
+				//);
+				//loop(u$(ord(u)>1),
+				//   cumTp(u,i,lambda,essence) = cumTp(u-1,i,lambda,essence)+tp(u-1,i,lambda,essence);
+				//);
+				////ceil(x) DNLP returns the smallest integer number greater than or equal to x
+				//loop( (u,i,lambda,essence),
+				//  cumTp(u,i,lambda,essence) =   ceil(cumTp(u,i,lambda,essence));
+				//);
+				/**
+				param expType Specify how the forest owners (those that make the investments) behave will be the time of passage in the future in order to calculate the cumulative time of passage in turn used to discount future revenues.
+				Will forest owners behave adaptively believing the time of passage between diameter classes will be like the observed one at time they make decision (0) or they will have full expectations believing forecasts (1) or something in the middle ?
+For compatibility with the GAMS code, a -1 value means using initial simulation tp values (fixed cumTp)."
+				*/
+				vector <double> cumTp_temp;     // cumulative time of passage to REACH a diameter class (tp is to LEAVE to the next one)
+				vector <double> vHa_temp;       // volume at hectar by each diameter class [m^3/ha]
+				vector <double> cumTp_exp_temp; // "expected" version of cumTp
+				vector <double> vHa_exp_temp;   // "expected" version of vHa
+
+				MD->setErrorLevel(MSG_NO_MSG); // as otherwise on 2007 otherwise sfd() will complain that is filling multiple years (2006 and 2007)
+				for (uint u=0; u<dClasses.size(); u++){
+					string dc = dClasses[u];
+					double cumTp_u, cumTp_u_exp, cumTp_u_noExp, cumTp_u_fullExp;
+					double vHa_u, vHa_u_exp, vHa_u_noExp, vHa_u_fullExp, beta, beta_exp, beta_noExp, beta_fullExp, mort, mort_exp, mort_noExp, mort_fullExp;
+					double tp_u, tp_exp;
+
+					if(u==0) {
+						// first diameter class.. expected  and real values are the same (0)
+						cumTp_u = 0.;
+						vHa_u   = 0.;
+						cumTp_temp.push_back(cumTp_u);
+						cumTp_exp_temp.push_back(cumTp_u);
+						vHa_temp.push_back(vHa_u);
+						vHa_exp_temp.push_back(vHa_u);
+						sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
+						sfd(cumTp_u,"cumTp_exp",regId,ft,dc,DATA_NOW,true);
+						sfd(vHa_u,  "vHa",regId,ft,dc,DATA_NOW,true);
+						sfd(vHa_u,  "vHa_exp",regId,ft,dc,DATA_NOW,true);
+					} else {
+						// other diameter classes.. first dealing with real values and then with expected ones..
+						// real values..
+						cumTp_u = cumTp_temp[u-1] + gfd("tp",regId,ft,dClasses[u-1],thisYear); // it adds to the time of passage to reach the previous diameter class the time of passage that there should be to reach this diameter class in the year where the previous diameter class will be reached
+						if (u==1){
+							vHa_u = gfd("entryVolHa",regId,ft,"",thisYear);
+						} else {
+							mort = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear),gfd("tp",regId,ft,dClasses[u-1],thisYear)); // mortality of the previous diameter class
+							beta = gfd("betaCoef",regId,ft,dc, thisYear);
+							vHa_u = vHa_temp[u-1]*beta*(1-mort);
+						}
+						cumTp_temp.push_back(cumTp_u);
+						vHa_temp.push_back(vHa_u);
+						sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
+						sfd(vHa_u,"vHa",regId,ft,dc,DATA_NOW,true);
+						// expected values..
+						if (expType == -1){
+							cumTp_u_exp = cumTp_exp_temp[u-1]+gfd("tp",regId,ft,dClasses[u-1],firstYear); // it adds to the time of passage to reach the previous diameter class the time of passage that there should be to reach this diameter class in the year where the previous diameter class will be reached
+							cumTp_exp_temp.push_back(cumTp_u_exp);
+							if(u==1) {
+								vHa_u_exp = gfd("entryVolHa",regId,ft,"",firstYear);
+							} else {
+								mort_exp  = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], firstYear),gfd("tp",regId,ft,dClasses[u-1],firstYear)) ; // mortality rate of previous diameter class
+								beta_exp  = gfd("betaCoef",regId,ft,dc, firstYear);
+								vHa_u_exp = vHa_exp_temp[u-1]*beta_exp*(1-mort_exp);
+							}
+						} else {
+							cumTp_u_noExp   = cumTp_exp_temp[u-1]+gfd("tp",regId,ft,dClasses[u-1]);
+							cumTp_u_fullExp = cumTp_exp_temp[u-1]+gfd("tp",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1])); // it adds to the time of passage to reach the previous diameter class the time of passage that there should be to reach this diameter class in the year where the previous diameter class will be reached
+							cumTp_u_exp     = cumTp_u_fullExp*expType+cumTp_u_noExp*(1-expType);
+							cumTp_exp_temp.push_back(cumTp_u_exp);
+							if(u==1) {
+								vHa_u_noExp   = gfd("entryVolHa",regId,ft,"",DATA_NOW);
+								vHa_u_fullExp = gfd("entryVolHa",regId,ft,"",thisYear+ceil(cumTp_u));
+								vHa_u_exp     = vHa_u_fullExp*expType+vHa_u_noExp*(1-expType);
+							} else {
+								mort_noExp   = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW),cumTp_exp_temp[u]-cumTp_exp_temp[u-1]);
+								mort_fullExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_temp[u-1])),cumTp_exp_temp[u]-cumTp_exp_temp[u-1]); // mortality of the previous diameter class
+								beta_noExp   = gfd("betaCoef",regId,ft,dc, DATA_NOW);
+								beta_fullExp = gfd("betaCoef",regId,ft,dc, thisYear+ceil(cumTp_u));
+								mort_exp     = mort_fullExp*expType+mort_noExp*(1-expType);
+								beta_exp     = beta_fullExp*expType+beta_noExp*(1-expType);
+								vHa_u_exp    = vHa_exp_temp[u-1]*beta_exp*(1-mort_exp);
+							}
+						}
+						vHa_exp_temp.push_back(vHa_u_exp);
+						sfd(cumTp_u_exp,"cumTp_exp",regId,ft,dc,DATA_NOW,true);
+						sfd(vHa_u_exp,  "vHa_exp",regId,ft,dc,DATA_NOW,true);
+					}
+
+				} // end of each diam class
+
+
+				//            // debug stuff on vHa
+				//            cout << regId << "|" << ft << "|cumTp_temp|";
+				//            for (uint u=0; u<dClasses.size(); u++){
+				//                cout << cumTp_temp.at(u)<<"|";
+				//            }
+				//            cout << endl;
+				//            cout << regId << "|" << ft << "|cumTp_exp|";
+				//            for (uint u=0; u<dClasses.size(); u++){
+				//                cout << cumTp_exp_temp.at(u)<<"|";
+				//            }
+				//            cout << endl;
+				//            cout << regId << "|" << ft << "|vHa_temp|";
+				//            for (uint u=0; u<dClasses.size(); u++){
+				//                cout << vHa_temp.at(u)<<"|";
+				//            }
+				//            cout << endl;
+				//            cout << regId << "|" << ft << "|vHa_exp|";
+				//            for (uint u=0; u<dClasses.size(); u++){
+				//                cout << vHa_exp_temp.at(u)<<"|";
+				//            }
+				//            cout << endl;
+
+
+			} // end of each ft
+		} // end of each region
+		MD->setErrorLevel(MSG_ERROR);
+}
+
+
 
 /**
 This function take for each region the difference for each forest type between the harvested area and the new regeneration one and apply such delta to each pixel of the region proportionally to the area that it already hosts.
@@ -729,6 +746,7 @@ This function take for each region the difference for each forest type between t
 void
 ModelCore::updateMapAreas(){
 
+	msgOut(MSG_INFO, "Updating map areas..");
 	map<int,double> forestArea; // foresta area by each region
 	pair<int,double > forestAreaPair;
 	vector<int> l2Regions =  MTHREAD->MD->getRegionIds(2, true);
@@ -756,3 +774,6 @@ ModelCore::updateMapAreas(){
 		}
 	}
 }
+
+
+

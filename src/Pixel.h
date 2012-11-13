@@ -111,9 +111,11 @@ public:
 	vector <vector <double> >                 beta;
 	vector <vector <double> >                 mort;
 	vector <vector <double> >                   tp;
-    vector <vector <double> >            cumTp_exp; ///< This is time of passage to REACH a diameter class (while the exogenous tp by diameter class is the time of passage to LEAVE to the next d class)
-	vector <vector <double> >              vHa_exp; ///< This is the **expected** version, used for calculating profits
-	vector <vector <double> >                  vHa; ///< This is the actual version following forecasts
+	vector <vector <double> >                cumTp; ///< This is time of passage to REACH a diameter class (while the exogenous tp by diameter class is the time of passage to LEAVE to the next d class)
+	vector <vector <double> >                  vHa; ///< Volume at hectar by each diameter class [m^3/ha]
+	vector <vector <double> >            cumTp_exp; ///< This is the **expected** version of cumTp, used for calculating profits
+	vector <vector <double> >              vHa_exp; ///< This is the **expected** version of vHa, used for calculating profits
+
 
 
 

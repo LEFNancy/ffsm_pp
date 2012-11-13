@@ -35,20 +35,10 @@ public:
 	void                  cacheSettings();          ///< just cache exogenous settings from ModelData
 	void                  initializePixelValues();  ///< distribuite regional exogenous volumes to pixel volumes using corine land cover area as weight
 	void                  resetPixelValues();       ///< swap volumes->lagged_volumes and reset the other pixel vectors
-	void                  cachePixelExogenousData();///< compute pixel level tp, meta and mort
+	void                  cachePixelExogenousData();///< computes pixel level tp, meta and mort
 	void                  computeInventary();       ///< in=f(vol_t-1)
-	void                  computeCumulativeData();  ///< compute cumTp_exp, vHa_exp, vHa
-
-
-
-
-
-
-
-
-
-
-	void                  updateMapAreas();
+	void                  computeCumulativeData();  ///< computes cumTp_exp, vHa_exp, vHa
+	void                  updateMapAreas();         ///< computes forArea_{ft}
 
 	// convenient handles to equivalent ModelData functions..
 	double              gpd(const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const string &freeDim_h="") const {return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};
