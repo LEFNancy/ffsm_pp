@@ -138,7 +138,7 @@ public:
 
 	//***************    end   ADOL-C part ***********************************
 
-	// **************   start PYTHIA part ************************************
+	// **************   start FFSM part ************************************
 	void                declareVariables(); ///< declare the variables and their domains
 	void                declareConstrains(); ///< declare the constrains, their domain, their direction and their associated evaluation function
 	void                cacheInitialPosition(); ///< cache the initial positions of the variables and the constrains
@@ -158,7 +158,7 @@ const adouble& mymax(const adouble& a, const adouble& b);
 
 //template <class T> const T& mymax ( const T& a, const T& b );
 
-	// **************   end PYTHIA part **************************************
+	// **************   end FFSM part **************************************
 
 
 protected:

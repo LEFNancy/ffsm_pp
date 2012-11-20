@@ -28,7 +28,7 @@
 #include <iostream>
 #include <sstream>
 
-// Pythia include stuff..
+// FFSM include stuff..
 #include "BaseClass.h"
 #include "ModelData.h"
 #include "Gis.h"

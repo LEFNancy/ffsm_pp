@@ -1161,7 +1161,7 @@ Opt::generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h_lag){
 }
 
 
-// ***************    PYTHIA OPT specific part ***********************************
+// ***************    FFSM OPT specific part ***********************************
 
 const int
 Opt::gip(const string &varName) const{ // get initial position

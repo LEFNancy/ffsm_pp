@@ -231,7 +231,7 @@ protected:
 
 	/**
 	Pointer to the Thread Manager. \\	
-	Through this pointer each deribed subclass (the vast maiority of those used on Pythia) can "ask" for sending signals to the GUI, like append the log or modify the map.
+	Through this pointer each deribed subclass (the vast maiority of those used on FFSM) can "ask" for sending signals to the GUI, like append the log or modify the map.
 	*/
 	ThreadManager*                         MTHREAD; ///< Pointer to the Thread manager.
 	// ATTENTION

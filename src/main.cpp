@@ -39,8 +39,8 @@ int main(int argc, char *argv[]){
 
 	cout << endl;
 	cout << "*******************************************************************" << endl;
-	cout << "***    !! Welcome to Pythia - The Forest Sector Simulator !!    ***" << endl;
-	cout << "***      For info & doc: http://www.pythia-project.org/doc      ***" << endl;
+	cout << "***    !! Welcome to FFSM - The Forest Sector Simulator !!    ***" << endl;
+	cout << "***      For info & doc: http://www.ffsm-project.org/doc      ***" << endl;
 	cout << "***         Compiled on: " << __DATE__ << " - " << __TIME__ << "                 ***" << endl;
 	cout << "*******************************************************************" << endl<<endl;
 
@@ -69,19 +69,19 @@ int main(int argc, char *argv[]){
 	//opt->autoUsagePrint(true); // print usage for bad options
 
 	// 3. SET THE USAGE/HELP
-	opt->addUsage( "*** Pythia - Forest Sector Simulator ***" );
+	opt->addUsage( "*** FFSM - Forest Sector Simulator ***" );
 	opt->addUsage( "Usage: " );
 	opt->addUsage( "" );
 	opt->addUsage( " -h  --help			Prints this help " );
 	opt->addUsage( " -c  --console 			Run in console mode (no gui, default: false) " );
-	opt->addUsage( " -i  --input_file [input_file_name]	Input file (relative path, default: 'data/pythiaInput.ods') " );
+	opt->addUsage( " -i  --input_file [input_file_name]	Input file (relative path, default: 'data/ffsmInput.ods') " );
 	opt->addUsage( " -s  --scenario [scenario_name]	Scenario name (default: the first defined in the input file) " );
 	opt->addUsage( "" );
 	opt->addUsage( "Notes:");
 	opt->addUsage( "	- input_file and scenario options have no effect in GUI mode;" );
 	opt->addUsage( "	- the working directory is the base path relative to the input file." );
 	opt->addUsage( "" );
-	opt->addUsage( "Read installed documentation or browse it at http://www.pythia-project.org/doc." );
+	opt->addUsage( "Read installed documentation or browse it at http://www.ffsm-project.org/doc." );
 	opt->addUsage( "" );
 
 	// 4. SET THE OPTION STRINGS/CHARACTERS
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]){
 			inputFileName = currentDir + "/" + tempdata;
 	}
 	else {
-			inputFileName = currentDir + "/data/pythiaInput.ods";
+			inputFileName = currentDir + "/data/ffsmInput.ods";
 	}
 
 	if( opt->getValue( 's' ) != NULL  || opt->getValue( "scenario" ) != NULL  ){

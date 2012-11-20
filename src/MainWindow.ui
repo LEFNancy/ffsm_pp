@@ -20,7 +20,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Pythia - Forest Sector Simulator</string>
+   <string>FFSM - Forest Sector Simulator</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">

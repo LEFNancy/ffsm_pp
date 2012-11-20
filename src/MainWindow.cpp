@@ -40,7 +40,7 @@ MainWindow::MainWindow() {
 
 	setupUi(this);
 	unsavedStatus=false;
-	curModelFileName="data/pythiaInput.ods";
+	curModelFileName="data/ffsmInput.ods";
 	curBaseDirectory = "data/";
 	outputDirName="output/";
 	setCurrentLogFileName("");
@@ -163,7 +163,7 @@ MainWindow::createStatusBar() {
 	statusBar()->addWidget(mainSBLabel, 1);
 
 	yearSBLabel->setText("0");
-	mainSBLabel->setText("Welcome to Pythia!");
+	mainSBLabel->setText("Welcome to FFSM!");
 
 	connect(&modelMainThread, SIGNAL(upgradeYearSBLabelToGui(const QString&)), yearSBLabel, SLOT(setText(const QString&)));
 	connect(&modelMainThread, SIGNAL(upgradeMainSBLabelToGui(const QString&)), mainSBLabel, SLOT(setText(const QString&)));
@@ -209,7 +209,7 @@ MainWindow::setCurrentModelFileName(const QString &fileName) {
 		recentFiles.prepend(curModelFileName);
 		updateRecentFileActions();
 	}
-	setWindowTitle(tr("%2 - [%1]").arg(shownName).arg(tr("Pythia - Forest Sector Simulator")));
+	setWindowTitle(tr("%2 - [%1]").arg(shownName).arg(tr("FFSM - Forest Sector Simulator")));
 }
 
 QString
@@ -246,7 +246,7 @@ MainWindow::okToContinue() {
 	if (modelMainThread.isRunning()) {
 		int t = QMessageBox::warning(
 			this,                                       // parent
-			tr("Pythia"),                               // title
+			tr("FFSM"),                               // title
 			tr("The model is still running.\n"    // message
 				"Do you want to stop it?"),
 			QMessageBox::Yes | QMessageBox::Default,    // 1st button
@@ -263,7 +263,7 @@ MainWindow::okToContinue() {
 	if (unsavedStatus) {
 		int r = QMessageBox::warning(
 			this,                                       // parent
-			tr("Pythia"),                               // title
+			tr("FFSM"),                               // title
 			tr("The model log has not been saved.\n"    // message
 				"Do you want to save it?"),
 			QMessageBox::Yes ,                          // 1st button
@@ -289,7 +289,7 @@ MainWindow::open() {
 			tr("OpenDocument Spreadsheet (*.ods)\n" "All files (*.*)")
 		);
 		if (!fileName.isEmpty()){
-			statusBar()->showMessage(tr("Loaded new Pythia model file"), 2000);
+			statusBar()->showMessage(tr("Loaded new FFSM model file"), 2000);
 			setCurrentModelFileName(fileName);
 			// getting the baseData path information...
 			QFileInfo info(fileName);
@@ -304,7 +304,7 @@ MainWindow::open() {
 
 void
 MainWindow::readSettings() {
-	QSettings settings("LEF", "Pythia");
+	QSettings settings("LEF", "FFSM");
 	recentFiles = settings.value("recentFiles").toStringList();
 	updateRecentFileActions();
 }
@@ -359,7 +359,7 @@ bool
 MainWindow::saveLogFile(const QString &logFileName) {
 	QFile file(logFileName);
 	if (!file.open(QIODevice::WriteOnly)) {
-	QMessageBox::warning(this, tr("Pythia"),
+	QMessageBox::warning(this, tr("FFSM"),
 		 tr("Cannot write log file file %1:\n%2.")
 		.arg(file.fileName())
 		.arg(file.errorString()));
@@ -378,7 +378,7 @@ MainWindow::saveLogFile(const QString &logFileName) {
 }
 
 void MainWindow::writeSettings() {
-	QSettings settings("LEF", "Pythia");
+	QSettings settings("LEF", "FFSM");
     settings.setValue("recentFiles", recentFiles);
 }
 
@@ -562,31 +562,31 @@ MainWindow::hideDebugMsgs(bool hide){
 
 void
 MainWindow::about(){
-	QMessageBox::about(this, tr("About Pythia"),
-		tr("<h2>Pythia</h2>"
+	QMessageBox::about(this, tr("About FFSM"),
+		tr("<h2>FFSM</h2>"
 		   "<p>Copyright &copy; 2012 Laboratoire d'Economie Forestière - LEF"
 		   "<br/>"
-		   "<p>Pythia is a flexible, spatially explicit, coupled resource and economic simulator of the Forest Sector, "
+		   "<p>FFSM is a flexible, spatially explicit, coupled resource and economic simulator of the Forest Sector, "
 		   "designed for long-term simulations of effects of government policies "
 		   "over different forest systems."
 		   "<br>It is released under the GNU GPL licence."
 		   "<p>For documentation and credits please refer to the project site:"
-		   "<br><a href=\"http://www.pythia-project.org\">http://www.pythia-project.org</a>"
+		   "<br><a href=\"http://www.ffsm-project.org\">http://www.ffsm-project.org</a>"
 		));
 }
 
 void
 MainWindow::showDocumentation(){
-	QMessageBox::question(this, tr("Pythia Documentation"), // QMessageBox::information or QMessageBox::question
-		tr("<h2>Pythia Documentation</h2>"
-		   "<p align=\"justify\">Pythia documentation is organised in three main categories: "
+	QMessageBox::question(this, tr("FFSM Documentation"), // QMessageBox::information or QMessageBox::question
+		tr("<h2>FFSM Documentation</h2>"
+		   "<p align=\"justify\">FFSM documentation is organised in three main categories: "
 		   "<p align=\"left\">(1) <b>official documentation</b> "
 		   "(comprising the <i>User Manual</i> and the <i>Reference Manual</i>); <br>(2) <b>contributed "
 		   "documentation</b> (<i>wiki</i>);<br>(3) <b>community project</b> (<i>forum</i> and <i>mailing list</i>). "
 		   "<p align=\"justify\">The documentation is located at "
-		   "<a href=\"http://www.pythia-project.org/doc\">http://www.pythia-project.org/doc</a>"
+		   "<a href=\"http://www.ffsm-project.org/doc\">http://www.ffsm-project.org/doc</a>"
 		   "<p align=\"justify\">If you have chosen to instal a local copy of the documentation, "
-		   "you can access it also from the <i>Start menu</i>-><i>Programs</i>-><i>Pythia</i> "
+		   "you can access it also from the <i>Start menu</i>-><i>Programs</i>-><i>FFSM</i> "
 		   "(MS Windows) or directly from the following links (Linux):"
 		   "<br><a href=\"doc/userManual/regmasUserManual.pdf\">User Manual</a> "
 		   "&nbsp;-&nbsp;<a href=\"doc/referenceManual/html/index.html\">Reference Manual</a> "
@@ -649,7 +649,7 @@ MainWindow::resetGUIForNewSimulation(){
 	logArea->clear();
 	// reset map
 
-	if (simulationCounter) logArea->append("***WARNING: You are running more simulations from the GUI without closing/reopening it. It should works, but there are no guarantees. The best way is to run only one simulation from the GUI, eventually closing and opening Pythia again for further simulations.");
+	if (simulationCounter) logArea->append("***WARNING: You are running more simulations from the GUI without closing/reopening it. It should works, but there are no guarantees. The best way is to run only one simulation from the GUI, eventually closing and opening FFSM again for further simulations.");
 	simulationCounter++;
 	
 }

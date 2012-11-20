@@ -1,12 +1,12 @@
 ######################################################################
-# Project file for the Pythia Forest Model
-# http://www.pythia-model.org
+# Project file for the FFSM Forest Model
+# http://www.ffsm-model.org
 #
 # You need the Qt GUI framework to use this file.
 ######################################################################
 
 QT += xml
-TARGET = pythia
+TARGET = ffsm
 DESTDIR = ..
 
 unix {

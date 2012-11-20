@@ -353,8 +353,9 @@ ModelCore::runBiologicalModule(){
 
 			for (uint u=0; u<dClasses.size(); u++){
 				string dc = dClasses[u];
-				double hr =0;
+				double hr = 0;
 				double pastYearVol = u?gfd("vol",regId,ft,dc,previousYear):0.;
+				double hV_mort = 0.; //harvested volumes from death trees TODO
 				vector <double> hV_byPrd_dc;
 
 				// harvesting rate & volumes...
@@ -382,6 +383,7 @@ ModelCore::runBiologicalModule(){
 				//	                       -mort(u,i,lambda,essence) - hr(u,i,essence,lambda,t))*V(u,i,lambda,essence,t-1)
 				//	                       +(1/(tp(u-1,i,lambda,essence)))*beta(u,i,lambda,essence)*V(u-1,i,lambda,essence,t-1));
 				double vol;
+				double newMortVol;    // new mortality volumes
 				double tp          = gfd("tp",regId,ft,dc);
 				double mort        = u?gfd("mortCoef",regId,ft,dc):0.;
 				double vReg        = gfd("vReg",regId,ft,""); // Taking it from the memory database as we could be in a fixed vReg scenario and not having calculated it from above!
@@ -394,12 +396,14 @@ ModelCore::runBiologicalModule(){
 					vol = 0.;
 				} else if(u==1){
 					vol = (1-1/tp-mort)*pastYearVol+vReg;
+					newMortVol = mort*pastYearVol;
 					double debug = vol;
 				} else {
 					// time of passage and volume of smaller diameter class
 					double tp_1 = gfd("tp",regId,ft,dClasses[u-1]);
 					double pastYearVol_1 = gfd("vol",regId,ft,dClasses[u-1],previousYear);
 					vol = (1-1/tp-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
+					newMortVol = mort*pastYearVol;
 					double debug = vol;
 				}
 				double freeArea_byU = u?finalHarvestFlag*1000000*hV/vHa:0; // volumes are in Mm^3, area in ha, vHa in m^3/ha
@@ -409,6 +413,7 @@ ModelCore::runBiologicalModule(){
 				sfd(hr,"hr",regId,ft,dc,DATA_NOW,true);
 				sfd(hV,"hV",regId,ft,dc,DATA_NOW,true);
 				sfd(vol,"vol",regId,ft,dc,DATA_NOW,true); // allowCreate needed for u==0
+				sfd(newMortVol,"mortV",regId,ft,dc,DATA_NOW,true);
 
 				sfd(freeArea_byU,"harvestedArea",regId,ft,dc,DATA_NOW, true);
 				hV_byPrd_ft.push_back(hV_byPrd_dc);

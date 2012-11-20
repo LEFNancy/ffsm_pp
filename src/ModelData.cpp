@@ -1252,7 +1252,7 @@ ModelData::debug(){
 void
 ModelData::loadInput(){
 	msgOut(MSG_INFO, "Loading input files (this can take a few minutes)...");
-	//QString iFile("data/pythiaInput.ods");
+	//QString iFile("data/ffsmInput.ods");
 	QString iFile(MTHREAD->getInputFileName().c_str());
 	//cout << "PIPPO !!!!! " << MTHREAD->getInputFileName().c_str() << endl;
 	QString oDir((MTHREAD->getBaseDirectory()+"tempInput").c_str());

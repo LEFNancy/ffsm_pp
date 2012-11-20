@@ -233,6 +233,8 @@ struct forToProd {
 	string                                         product;
 	string                                         forType;
 	string                                          dClass;
+ /// The maximum year for a tree collapse that this product can be harvested from. E.g. a 0 value means it can be obtained only from live trees, a 5 years value mean it can be obtained from trees death no longer than 5 years ago.
+	string                                        maxYears;
 };
 
 /// Forest types (struct)
