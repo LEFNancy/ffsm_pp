@@ -2,8 +2,8 @@
 
 *.o
 *~
-pythia
-pythia.exe
+ffsm
+ffsm.exe
 *.pro.user
 Makefile
 src/Makefile
