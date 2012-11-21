@@ -1,23 +1,23 @@
-; Pythia Windows Instal Script
+; FFSM Windows Instal Script
 ; Writen to be compiled with NSIS
 ; Antonello Lobianco, 2012 
 
 ;--------------------------------
 ; General
 	; Things that will likelly need to be changed...
-	!define VERSIONSTRING "1.0.2"               ; Pythiaversion number (as string). Used to put each version on a separate folder.
+	!define VERSIONSTRING "1.0.2"               ; Ffsm version number (as string). Used to put each version on a separate folder.
 
-	OutFile "pythia_${VERSIONSTRING}_setup.exe" ; Filename of the outputted installer
+	OutFile "ffsm_${VERSIONSTRING}_setup.exe" ; Filename of the outputted installer
 	!define MINGWDIR "C:\MinGW\bin" ; Directory where thre MinGW DLL is located
 	!define QTDIR "C:\Qt\4.8.2\bin"   ; Directory where the Qt run-time DLLs are located
 	!define EXEDIR "."                ; Directory where the EXE file is located
 
 	!include "MUI.nsh" ; Include Modern UI
-	Name "Pythia" ; Name (?)
-	InstallDir "$PROGRAMFILES\Pythia\${VERSIONSTRING}" ; Default installation directory
-	!define APP_NAME "Pythia" ; Application name (mainly for links)
-	!define APP_FNAME "Pythia ${VERSIONSTRING}" ; Application name with version(mainly for links)
-	!define MAIN_APP_EXE "pythia.exe" ; Filename of executable
+	Name "FFSM" ; Name (?)
+	InstallDir "$PROGRAMFILES\FFSM\${VERSIONSTRING}" ; Default installation directory
+	!define APP_NAME "FFSM" ; Application name (mainly for links)
+	!define APP_FNAME "FFSM ${VERSIONSTRING}" ; Application name with version(mainly for links)
+	!define MAIN_APP_EXE "ffsm.exe" ; Filename of executable
 	!define WEB_SITE "http://www.nancy.inra.fr/lef_eng" ; We-site address
 	Var OPTIONALDATA ; We'll use this variable to put links on sample data only if users have selected to intall sample data
 	Var LOCALDOC ;If user has selected to install documentation
@@ -35,9 +35,9 @@
 	!define MUI_UNWELCOMEFINISHPAGE_BITMAP "src\imgs\beech.bmp" ; image for the welcome and finish page (uninstaller)
 	!define MUI_COMPONENTSPAGE_SMALLDESC ; section description on the bottom instead on the default right
 	!define REG_START_MENU "Start Menu Folder" ; ??
-	!define MUI_STARTMENUPAGE_DEFAULTFOLDER "Pythia\${VERSIONSTRING}" ; Default folder where to prompt the user to place links
+	!define MUI_STARTMENUPAGE_DEFAULTFOLDER "Ffsm\${VERSIONSTRING}" ; Default folder where to prompt the user to place links
 	!define MUI_FINISHPAGE_RUN "$INSTDIR\${MAIN_APP_EXE}" ; What propose the user to do after the installation is completed
-	!define MUI_WELCOMEPAGE_TEXT "Version ${VERSIONSTRING}\n\n Pythia is a flexible, spatially explicit, coupled resource and economic simulator of the Forest Sector, designed for long-term simulations of effects of government policies over different forest systems.\n\n This Wizard will guide you the installation of Pythia. \n\n Press Next to start the installation."
+	!define MUI_WELCOMEPAGE_TEXT "Version ${VERSIONSTRING}\n\nFFSM is a flexible, spatially explicit, coupled resource and economic simulator of the Forest Sector, designed for long-term simulations of effects of government policies over different forest systems.\n\n This Wizard will guide you the installation of FFSM. \n\n Press Next to start the installation."
    
 ;--------------------------------
 ; Installer pages (steps)
@@ -63,19 +63,19 @@
 Section "Main program" MainProgram
 	SectionIn RO  ; Read only - the user can not delesect it !
 	SetOutPath "$INSTDIR" ; Where files need to be installed
-	File "${EXEDIR}\pythia.exe" ; Adding this file or directory to the list of files to be installed
+	File "${EXEDIR}\ffsm.exe" ; Adding this file or directory to the list of files to be installed
 	File "${MINGWDIR}\mingwm10.dll"
 	File "${MINGWDIR}\pthreadGC2.dll"
 	File "${MINGWDIR}\libgcc_s_dw2-1.dll"
 	File "${MINGWDIR}\libgfortran-3.dll"
 	File "${MINGWDIR}\libquadmath-0.dll"
 	File "${MINGWDIR}\libstdc++-6.dll"
-	File "src\win32\lib\libadolc-1.dll"
+	File "src\ThirdParty\win32\lib\libadolc-1.dll"
 	File "AUTHORS" 
 	File "COPYING" 
 	File "NEWS" 
 	File "README" 
-	WriteUninstaller "$INSTDIR\Uninstall_pythia.exe" ; Creating the uninstaller
+	WriteUninstaller "$INSTDIR\Uninstall_ffsm.exe" ; Creating the uninstaller
 SectionEnd
 
 Section "Run-time libraries" Qt
@@ -100,7 +100,7 @@ SectionEnd
 Section /o "Documentation" Doc   ;
 	;not yet ready...
 	;SetOutPath "$INSTDIR\doc\userManual"
-	;File "doc\userManual\pythiaUserManual.pdf"
+	;File "doc\userManual\ffsmUserManual.pdf"
 	;SetOutPath "$INSTDIR\doc\referenceManual\html"
 	;File "doc\referenceManual\html\*"
 	StrCpy $LOCALDOC "true" 
@@ -110,10 +110,10 @@ SectionEnd
 ; Component Descriptions
 
 	; Creating "Language strings" objects for each section...
-	LangString DESC_MainProgram ${LANG_ENGLISH} "Main Pythia files"
+	LangString DESC_MainProgram ${LANG_ENGLISH} "Main Ffsm files"
 	LangString DESC_Qt ${LANG_ENGLISH} "Run-time graphical libraries. Unselect this section only if you already have Qt >=4.8 installed on your PC"
 	LangString DESC_Data ${LANG_ENGLISH} "Sample input data (recommended)"
-	LangString DESC_Src ${LANG_ENGLISH} "Pythia C++ source code (not needed to run Pythia)"
+	LangString DESC_Src ${LANG_ENGLISH} "Ffsm C++ source code (not needed to run Ffsm)"
 	LangString DESC_Doc ${LANG_ENGLISH} "Local copy of the documentation (NOT YET READY)"
 
 	;Assign "Language strings" objects to sections
@@ -140,14 +140,14 @@ Section -Icons_Reg
 			; Desktop shortcut to the main program
 			CreateShortCut "$DESKTOP\${APP_FNAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}"
 			; Shortcut to the uninstaller
-			CreateShortCut "$SMPROGRAMS\$SM_Folder\Uninstall ${APP_NAME}.lnk" "$INSTDIR\Uninstall_pythia.exe"
+			CreateShortCut "$SMPROGRAMS\$SM_Folder\Uninstall ${APP_NAME}.lnk" "$INSTDIR\Uninstall_ffsm.exe"
 			${If} $OPTIONALDATA == 'true' ; If user has installed the sample data
 				; Shortcut to data file
-				CreateShortCut "$SMPROGRAMS\$SM_Folder\Edit sample data.lnk" "$INSTDIR\data\pythiaInput.ods"
+				CreateShortCut "$SMPROGRAMS\$SM_Folder\Edit sample data.lnk" "$INSTDIR\data\ffsmInput.ods"
 			${EndIf}
 			${If} $LOCALDOC == 'true' ; If user has installed a local copy of the documentation
 				; Shortcut to user manual file
-				CreateShortCut "$SMPROGRAMS\$SM_Folder\User Manual.lnk" "$INSTDIR\doc\userManual\pythiaUserManual.pdf"
+				CreateShortCut "$SMPROGRAMS\$SM_Folder\User Manual.lnk" "$INSTDIR\doc\userManual\ffsmUserManual.pdf"
 				; Shortcut to the reference manual
 				CreateShortCut "$SMPROGRAMS\$SM_Folder\Reference Manual.lnk" "$INSTDIR\doc\referenceManual\html\index.html"
 			${EndIf}
@@ -168,6 +168,6 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR" ; Recursivelly remove all files in the install directory
 	RMDir /r "$SMPROGRAMS\$SM_Folder" ; Remove links in the Start Menu ..doesn't works !!!
 	Delete "$DESKTOP\${APP_NAME}.lnk" ; Remove desktop link
-	;DeleteRegKey /ifempty HKCU "Software\Pythia"
+	;DeleteRegKey /ifempty HKCU "Software\Ffsm"
 SectionEnd
 
