@@ -6,8 +6,8 @@
 ######################################################################
 
 QT += xml
-TARGET = ffsm
 DESTDIR = ..
+#TARGET = ffsm
 
 unix {
      #LIBS += -lipopt
@@ -76,13 +76,25 @@ QMAKE_CXXFLAGS += -std=c++0x
 
 #OBJECTS_DIR = ../bin
 
+
+CONFIG(release, debug|release) {
+    #debug code here
+    TARGET = ffsm
+}
+CONFIG(debug, debug|release) {
+    #debug code here
+    TARGET = ffsm_debug
+}
+
 #Release:DESTDIR = ../build/release
+#Release:TARGET = ffsm
 Release:OBJECTS_DIR = ../build/release
 Release:MOC_DIR = ../build/release
 Release:RCC_DIR = ../build/release
 #Release:UI_DIR = ../build/release # then th header file can't find the other headers!
 
 #Debug:DESTDIR = ../build/debug
+#Debug:TARGET = ffsm_debug
 Debug:OBJECTS_DIR = ../build/debug
 Debug:MOC_DIR = ../build/debug
 Debug:RCC_DIR = ../build/debug
