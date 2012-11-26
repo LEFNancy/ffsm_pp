@@ -474,7 +474,7 @@ ModelCore::runManagementModule(){
 					double cumTp_u          = gfd("cumTp_exp",regId,ft,dc);
 					for (uint pp=0;pp<priProducts.size();pp++){
 						double pw    = gpd("pw",regId,priProducts[pp]);
-						double raw_amount = finalHarvestFlag*pw*vHa;
+						double raw_amount = finalHarvestFlag*pw*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
 						double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
 						if (anualised_amount>expReturns) {expReturns=anualised_amount;}
 					}
