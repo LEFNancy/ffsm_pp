@@ -41,6 +41,7 @@ win32 {
     LIBS += -L ThirdParty/win32/lib -ladolc
     LIBS += -lpthread -lgfortran -lcoinmetis -lcoinblas
     #CONFIG +=  console
+    CONFIG += exceptions
 }
 
 INCLUDEPATH += ThirdParty/allos/include
