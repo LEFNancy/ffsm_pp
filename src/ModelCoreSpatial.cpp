@@ -355,13 +355,13 @@ ModelCoreSpatial::runBiologicalModule(){
 					px->vReg.push_back(pastRegArea*vHa/1000000); // TODO: check the 1000000. Should be ok, as area in ha vol in Mm^3
 				} else {
 					double regionArea = REG->getValue("forArea_"+ft,OP_SUM);
-										double pxArea     = px->getDoubleValue("forArea_"+ft, true); // 20121109 bug solved (add get zero for not data)
-										double newVReg = regionArea ? gfd("vReg",r2,ft,"")*pxArea/regionArea : 0;
-										px->vReg.push_back(newVReg); // 20121108 BUG !!! solved
-										// vReg and entryVolHa are NOT the same thing. vReg is the yearly regeneration volumes
-										// for the whole region. We can use them when we don't know the harvested area
-										// entryVolHa can lead to vReg calculation only when we know the regeneration area. So in the
-										// first years we use vReg and subsequently the endogenous one.
+					double pxArea     = px->getDoubleValue("forArea_"+ft, true); // 20121109 bug solved (add get zero for not data)
+					double newVReg = regionArea ? gfd("vReg",r2,ft,"")*pxArea/regionArea : 0;
+					px->vReg.push_back(newVReg); // 20121108 BUG !!! solved
+					// vReg and entryVolHa are NOT the same thing. vReg is the yearly regeneration volumes
+					// for the whole region. We can use them when we don't know the harvested area
+					// entryVolHa can lead to vReg calculation only when we know the regeneration area. So in the
+					// first years we use vReg and subsequently the endogenous one.
 				}
 
 				//double harvestedArea = 0;
@@ -417,9 +417,10 @@ ModelCoreSpatial::runBiologicalModule(){
 						double debug = vol;
 					} else {
 						// time of passage and volume of smaller diameter class
+						double inc = (u==dClasses.size()-1)?0:1./tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
 						double tp_1 = px->tp.at(j).at(u-1); //gfd("tp",regId,ft,dClasses[u-1]);
 						double pastYearVol_1 = px->vol_l.at(j).at(u-1); //gfd("vol",regId,ft,dClasses[u-1],thisYear-1);
-						vol = (1-1/tp-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
+						vol = (1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
 						double debug = vol;
 					}
 					if(u != 0){ // this if is required to avoid a 0/0 and na error that then propage also in vSum()

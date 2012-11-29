@@ -399,14 +399,10 @@ ModelCore::runBiologicalModule(){
 					newMortVol = mort*pastYearVol;
 					double debug = vol;
 				} else {
-                    double inc = (u==dClasses.size()-1)?0:1./tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
-                    //if( u=dClasses.size()-1){
-                    //    inc =
-                    //}
-                    // time of passage and volume of smaller diameter class
+					double inc = (u==dClasses.size()-1)?0:1./tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
 					double tp_1 = gfd("tp",regId,ft,dClasses[u-1]);
 					double pastYearVol_1 = gfd("vol",regId,ft,dClasses[u-1],previousYear);
-                    vol = (1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
+					vol = (1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
 					newMortVol = mort*pastYearVol;
 					double debug = vol;
 				}

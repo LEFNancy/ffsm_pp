@@ -56,6 +56,11 @@ int main(int argc, char *argv[]){
 
 	QDir dir;
 	QString currentDir = dir.currentPath();
+	// it's ok to leave the current directory (relative as where we are starting the application) rather than the application
+	// path (relative to where ffsm is). This influence only the command line, where the -i option is always realtive to the local
+	// position we are calling it from.
+
+
 	QString inputFileName = "";
 	QString scenarioName = "";
 

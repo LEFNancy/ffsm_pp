@@ -21,6 +21,7 @@
 
 #include "MainWindow.h"
 #include "ScenarioSelectionWidget.h"
+#include "QApplication"
 
 using namespace std;
 
@@ -41,7 +42,9 @@ MainWindow::MainWindow() {
 	setupUi(this);
 	unsavedStatus=false;
 	curModelFileName="data/ffsmInput.ods";
-	curBaseDirectory = "data/";
+	curBaseDirectory = QApplication::applicationDirPath();
+	curBaseDirectory.append("/data/");
+	//curBaseDirectory = "data/";
 	outputDirName="output/";
 	setCurrentLogFileName("");
 	createStatusBar();
@@ -674,9 +677,9 @@ void
 MainWindow::openResults() {
 	//QLabel *label = new QLabel("Hello World!");
 	//label->show();
-	string aaa = curBaseDirectory.toStdString();
-	cout << "curBaseDirectory " << aaa << endl;
-	cout << "outputDirName: " << outputDirName.toStdString() << endl;
+	//string aaa = curBaseDirectory.toStdString();
+	//cout << "curBaseDirectory " << aaa << endl;
+	//cout << "outputDirName: " << outputDirName.toStdString() << endl;
 	QUrl resultsUrl(curBaseDirectory+outputDirName+"results/results.ods", QUrl::TolerantMode);
 	QDesktopServices::openUrl(resultsUrl);
 
