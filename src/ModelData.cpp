@@ -100,6 +100,7 @@ void
 ModelData::setDefaultSettings(){
 
 	LLData table = getTable("settings");
+	int nheaders = table.nheaders();
 	for (int i=0; i< table.nrecords();i++){
 		BasicData SETT;
 		SETT.name = table.getData(i,"name");
@@ -107,7 +108,7 @@ ModelData::setDefaultSettings(){
 		SETT.type = getType(type);
 		SETT.comment = table.getData(i,"comment");
 		vector <string> values;
-		for (int z=0;z<100;z++){
+		for (int z=0;z<nheaders-3;z++){ // don't consider name, type and comment headers
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
@@ -161,6 +162,7 @@ ModelData::setScenarioSettings(){
 	string scenarioName = MTHREAD->getScenarioName();
 	LLData table = getTable(scenarioName+"_settings", MSG_WARNING); //this scenario could not have an associated setting sheet
 	if(table.getTableName() == "") return;
+	int nheaders = table.nheaders();
 
 	for(int i=0; i< table.nrecords(); i++){
 		BasicData SETT;
@@ -169,7 +171,7 @@ ModelData::setScenarioSettings(){
 		int type = getType(stype);
 		string comment = table.getData(i,"comment");
 		vector <string> values;
-		for (int z=0;z<100;z++){
+		for (int z=0;z<nheaders-3;z++){ // don't consider name, type and comment headers
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
@@ -362,9 +364,10 @@ void
 ModelData::setDefaultForData(){
 	msgOut(MSG_DEBUG,"Loading forest sector data..");
 	LLData table = getTable("forData");
+	int nheaders = table.nheaders();
 	for (int i=0; i< table.nrecords();i++){
 		vector <double> values;
-		for (int z=0;z<100;z++){
+		for (int z=0;z<nheaders-4;z++){ // don't consider parName, region, forType and diamClass headers
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
@@ -382,12 +385,13 @@ ModelData::setScenarioForData(){
 	string scenarioName = MTHREAD->getScenarioName();
 	LLData table = getTable(scenarioName+"_forData", MSG_NO_MSG); //this scenario could not have an associated setting sheet
 	if(table.getTableName() == "") return;
+	int nheaders = table.nheaders();
 
 	for(int i=0; i< table.nrecords(); i++){
 		bool found = false;
 		string key = makeKeyForData(table.getData(i,"parName"),table.getData(i,"region"),table.getData(i,"forType"),table.getData(i,"diamClass"));
 		vector <double> values;
-		for (int z=0;z<100;z++){
+		for (int z=0;z<nheaders-4;z++){ // don't consider parName, region, forType and diamClass headers
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
@@ -412,6 +416,8 @@ ModelData::setDefaultProdData(){
 
 	msgOut(MSG_DEBUG,"Loading products data..");
 	LLData table = getTable("prodData");
+	int nheaders = table.nheaders();
+
 	for (int i=0; i< table.nrecords();i++){
 //		prodData PDATA;
 //		PDATA.parName = table.getData(i,"parName");
@@ -419,7 +425,7 @@ ModelData::setDefaultProdData(){
 //		PDATA.prod = table.getData(i,"prod");
 //		PDATA.freeDim = table.getData(i,"freeDim");
 		vector <double> values;
-		for (int z=0;z<100;z++){
+		for (int z=0;z<nheaders-4;z++){ // don't consider parName, region, prod and freeDim headers
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
@@ -441,6 +447,7 @@ ModelData::setScenarioProdData(){
 	string scenarioName = MTHREAD->getScenarioName();
 	LLData table = getTable(scenarioName+"_prodData", MSG_NO_MSG); //this scenario could not have an associated setting sheet
 	if(table.getTableName() == "") return;
+	int nheaders = table.nheaders();
 
 	for(int i=0; i< table.nrecords(); i++){
 		//prodData PDATA;
@@ -452,7 +459,7 @@ ModelData::setScenarioProdData(){
 		//PDATA.prod = table.getData(i,"prod");
 		//PDATA.freeDim = table.getData(i,"freeDim");
 		vector <double> values;
-		for (int z=0;z<100;z++){
+		for (int z=0;z<nheaders-4;z++){// don't consider parName, region, prod and freeDim headers
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
