@@ -271,6 +271,7 @@ public:
 	void                clean(); // clean the data from empty headers
 	string              getTableName(){return tableName;}
 	int                 nrecords(){return records.size();}
+	int                 nheaders(){return headers.size();}
 	string              getData(const int& pos_h, const string& header_h, const int& debugLevel=MSG_CRITICAL_ERROR) const;
 	friend void ModelData::loadInput();
 	friend void ModelData::loadDataFromCache(string tablename);
