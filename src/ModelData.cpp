@@ -108,7 +108,11 @@ ModelData::setDefaultSettings(){
 		SETT.type = getType(type);
 		SETT.comment = table.getData(i,"comment");
 		vector <string> values;
+<<<<<<< HEAD
 		for (int z=0;z<nheaders-3;z++){ // don't consider name, type and comment headers
+=======
+		for (int z=0;z<nheaders;z++){
+>>>>>>> 33bf7ecfaa8f6429e259ade2cc155ae28b26743a
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
@@ -171,7 +175,11 @@ ModelData::setScenarioSettings(){
 		int type = getType(stype);
 		string comment = table.getData(i,"comment");
 		vector <string> values;
+<<<<<<< HEAD
 		for (int z=0;z<nheaders-3;z++){ // don't consider name, type and comment headers
+=======
+		for (int z=0;z<nheaders;z++){
+>>>>>>> 33bf7ecfaa8f6429e259ade2cc155ae28b26743a
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
@@ -367,7 +375,11 @@ ModelData::setDefaultForData(){
 	int nheaders = table.nheaders();
 	for (int i=0; i< table.nrecords();i++){
 		vector <double> values;
+<<<<<<< HEAD
 		for (int z=0;z<nheaders-4;z++){ // don't consider parName, region, forType and diamClass headers
+=======
+		for (int z=0;z<nheaders;z++){
+>>>>>>> 33bf7ecfaa8f6429e259ade2cc155ae28b26743a
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
@@ -391,7 +403,11 @@ ModelData::setScenarioForData(){
 		bool found = false;
 		string key = makeKeyForData(table.getData(i,"parName"),table.getData(i,"region"),table.getData(i,"forType"),table.getData(i,"diamClass"));
 		vector <double> values;
+<<<<<<< HEAD
 		for (int z=0;z<nheaders-4;z++){ // don't consider parName, region, forType and diamClass headers
+=======
+		for (int z=0;z<nheaders;z++){
+>>>>>>> 33bf7ecfaa8f6429e259ade2cc155ae28b26743a
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
@@ -425,7 +441,11 @@ ModelData::setDefaultProdData(){
 //		PDATA.prod = table.getData(i,"prod");
 //		PDATA.freeDim = table.getData(i,"freeDim");
 		vector <double> values;
+<<<<<<< HEAD
 		for (int z=0;z<nheaders-4;z++){ // don't consider parName, region, prod and freeDim headers
+=======
+		for (int z=0;z<nheaders;z++){
+>>>>>>> 33bf7ecfaa8f6429e259ade2cc155ae28b26743a
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
@@ -459,7 +479,11 @@ ModelData::setScenarioProdData(){
 		//PDATA.prod = table.getData(i,"prod");
 		//PDATA.freeDim = table.getData(i,"freeDim");
 		vector <double> values;
+<<<<<<< HEAD
 		for (int z=0;z<nheaders-4;z++){// don't consider parName, region, prod and freeDim headers
+=======
+		for (int z=0;z<nheaders;z++){
+>>>>>>> 33bf7ecfaa8f6429e259ade2cc155ae28b26743a
 			string toSearch = "value_"+i2s(z);
 			string value = table.getData(i,toSearch);
 			if (value != ""){
