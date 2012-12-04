@@ -60,7 +60,7 @@ Scheduler::run(){
 		}
 
 
-		MTHREAD->DO->print();
+		//MTHREAD->DO->print(); // done within modelcore now
 
 		for(int i=0;i<MTHREAD->GIS->getXNPixels();i++){
 			MTHREAD->GIS->getPixel(i)->newYear(); //delete objects for the pixels, in the update the agents will do the same for their objects

@@ -28,6 +28,9 @@
 #include <iostream>
 #include <sstream>
 
+// External libraries headers
+#include "IpIpoptApplication.hpp"
+
 // Qt headers...
 
 // RegMAS headers...
@@ -84,7 +87,7 @@ private:
 	double expType;
 	double mr;
 	vector < vector < vector < vector <double> > > > hV_byPrd; // by regId, ft, dc, pp
-
+	//Ipopt::SmartPtr<Ipopt::IpoptApplication> application;
 
 
 };

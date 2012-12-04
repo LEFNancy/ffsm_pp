@@ -62,6 +62,7 @@ Output::commonInit(){
 	oFileExt     = MTHREAD->MD->getStringSetting("outputFileExtension");
 	oHRedeable   = MTHREAD->MD->getBoolSetting("outputHumanReadable");
 	oSingleFile  = MTHREAD->MD->getBoolSetting("outputSingleFile");
+	oYears       = MTHREAD->MD->getIntVectorSetting("outYears");
 	wRegId_l1    = MTHREAD->MD->getIntSetting("worldCodeLev1");
 	wRegId_l2    = MTHREAD->MD->getIntSetting("worldCodeLev2");
 	outForVariables          = MTHREAD->MD->getStringVectorSetting("outForVariables");
@@ -223,10 +224,17 @@ Output::print(){
 	int cYear = MTHREAD->SCD->getYear();
 	int initialSimulationYear = MTHREAD->MD->getIntSetting("initialOptYear");
 
-	if ( (cYear-initialSimulationYear)%outStepRange != 0 && cYear != (initialSimulationYear+nYears)-1 ) {
+	if (outStepRange != -1 && (cYear-initialSimulationYear)%outStepRange != 0 && cYear != (initialSimulationYear+nYears)-1 ) {
 		cout << cYear << " not printed" << endl;
 		return;
 	}
+	bool printThisYear = false;
+	for(uint i=0;i<oYears.size();i++){
+		if (outStepRange == -1 && oYears[i] == cYear) printThisYear = true;
+	}
+	if(!printThisYear) return;
+
+
 	cout << "printing " << cYear << endl;
 	printMaps();
 	MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
@@ -370,7 +378,7 @@ Output::printProductData(bool finalFlush){
 	if(oLevel<OUTVL_DETAILED) return;
 	if(oHRedeable && !finalFlush) return;
 
-	msgOut(MSG_INFO, "Printing forest data..");
+	msgOut(MSG_INFO, "Printing market data..");
 	int currentYear = MTHREAD->SCD->getYear();
 
 	if(oSingleFile){

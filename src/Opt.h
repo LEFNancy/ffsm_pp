@@ -147,16 +147,16 @@ public:
 	int                 getDomainElements(int domain); ///< return the number of elements of a domain
 template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, int dType); ///< build the matrix of the positions for a given variable or contrain
 template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, vector<string> &prVector);
+	int                 getVarInstances(const string& varName); ///< return the number of instances of a variable, given his domain type
+	///< build the matrix of the positions for a given variable or contrain
+	void                calculateSparsityPatternJ();
+	void                calculateSparsityPatternH();
 
-    ///< build the matrix of the positions for a given variable or contrain
-    void                calculateSparsityPatternJ();
-    void                calculateSparsityPatternH();
 
+	const Number& mymax(const Number& a, const Number& b);
+	const adouble& mymax(const adouble& a, const adouble& b);
 
-const Number& mymax(const Number& a, const Number& b);
-const adouble& mymax(const adouble& a, const adouble& b);
-
-//template <class T> const T& mymax ( const T& a, const T& b );
+	//template <class T> const T& mymax ( const T& a, const T& b );
 
 	// **************   end FFSM part **************************************
 

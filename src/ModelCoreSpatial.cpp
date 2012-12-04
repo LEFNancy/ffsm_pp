@@ -31,6 +31,7 @@ ModelCoreSpatial::runInitPeriod(){
 	cacheSettings();             // cashe things like first year, second year, dClasses...
 	initializePixelValues();     // compute px volumes vol for 2005
 	initMarketModule();          // inside it uses first year, second year
+	MTHREAD->DO->print();
 	MTHREAD->SCD->advanceYear(); // 2005->2006
 	resetPixelValues();          // swap volumes->lagged_volumes and reset the other pixel vectors
 	cachePixelExogenousData();   // compute pixel tp, meta and mort
@@ -40,6 +41,7 @@ ModelCoreSpatial::runInitPeriod(){
 	runManagementModule();
 	updateMapAreas();            // update the forArea_{ft} layer on each pixel as old value-hArea+regArea
 	sumRegionalForData();      // only for printing stats ad forest data is never used at regional level
+	MTHREAD->DO->print();
 }
 
 void
@@ -51,10 +53,10 @@ ModelCoreSpatial::runSimulationYear(){
 	computeCumulativeData();     // compute cumTp_exp, vHa_exp
 	cachePixelExogenousData();
 	runBiologicalModule();
-
 	runManagementModule();
 	updateMapAreas();
 	sumRegionalForData();      // only for printing stats as forest data is never used at regional level
+	MTHREAD->DO->print();
 }
 
 void
@@ -229,16 +231,20 @@ ModelCoreSpatial::runMarketModule(){
 	//Opt *OPTa = new Opt(MTHREAD);
 	//SmartPtr<TNLP> OPTa = new Opt(MTHREAD);
 	SmartPtr<IpoptApplication> application = new IpoptApplication();
-	//application->Options()->SetStringValue("linear_solver", "mumps"); // default in ipopt is ma27
+	string linearSolver = MTHREAD->MD->getStringSetting("linearSolver");
+	application->Options()->SetStringValue("linear_solver", linearSolver); // default in ipopt is ma27
 	//application->Options()->SetStringValue("hessian_approximation", "limited-memory"); // quasi-newton approximation of the hessian
 	//application->Options()->SetIntegerValue("mumps_mem_percent", 100);
 	application->Options()->SetNumericValue("obj_scaling_factor", -1); // maximisation
+	application->Options()->SetNumericValue("max_cpu_time", 1800); // max 1/2 hour to find the optimus for one single year
+	application->Options()->SetStringValue("check_derivatives_for_naninf", "yes");
 
 	// Initialize the IpoptApplication and process the options
 	ApplicationReturnStatus status;
 	status = application->Initialize();
 	if (status != Solve_Succeeded) {
 		printf("\n\n*** Error during initialization!\n");
+		msgOut(MSG_INFO,"Error during initialization! Do you have the solver compiled for the specified linear solver?");
 		return;
 	}
 

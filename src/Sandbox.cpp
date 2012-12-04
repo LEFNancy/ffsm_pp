@@ -212,6 +212,26 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+	/*
+	// Testing I have correctly the info about world price !!!
+	// yes, it seems ok here !!!
+	int firstYear = MTHREAD->MD->getIntSetting("initialYear");
+	int initialOptYear= MTHREAD->MD->getIntSetting("initialOptYear");
+	int simulationYears = MTHREAD->MD->getIntSetting("simulationYears");
+	int WL2 = MTHREAD->MD->getIntSetting("worldCodeLev2");
+	vector <string> priProducts = MTHREAD->MD->getStringVectorSetting("priProducts");
+	vector <string> secProducts = MTHREAD->MD->getStringVectorSetting("secProducts");
+	vector <string> allProducts = priProducts;
+	allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
+
+	for(uint i=0;i<allProducts.size();i++){
+		for(int y=firstYear; y<initialOptYear+simulationYears; y++){
+			double pw = MTHREAD->MD->getProdData("pl",WL2,allProducts[i],y);
+			cout << allProducts[i] << "	" << y << "	" << pw << endl;
+		}
+	}
+	exit (0);
+	*/
 
 	/*
 	// testing Pixel::getMultiplier (const string& multiplierName, const string& forName, int year)

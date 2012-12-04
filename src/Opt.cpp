@@ -520,21 +520,21 @@ Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Nu
 	// all variables have upper or equal than zero bound
 	for (Index i=0; i<n; i++) {
 	// removed 20120812, as not really needed.. doesn't actually change either obj or efforts to reach it
-//		if(
+		if(
 //					 ( n>=gip("dc")&& n<(gip("dc")+nSecPr*nL2r))
 //				|| ( n>=gip("sc")&& n<(gip("sc")+nPriPr*nL2r))
-//				 ( n>=gip("dl")&& n<gip("dl")+nAllPr)
-//			|| ( n>=gip("sa")&& n<gip("sa")+nPriPr)
-//			|| ( n>=gip("sl")&& n<gip("sl")+nAllPr)
-//			|| ( n>=gip("da")&& n<gip("da")+nSecPr)
-//			|| ( n>=gip("pl")&& n<gip("sa")+nAllPr)
-//		) {  // I could make a function to return the number of positions by a certain variable name, looking up the the map that define its domain
-//			x_l[i] = 0.00000001;
-//			x_u[i] =       1e20;
-//		} else {
+				 ( n>=gip("dl")&& n<gip("dl")+getVarInstances("dl"))
+			|| ( n>=gip("sa")&& n<gip("sa")+getVarInstances("sa"))
+			|| ( n>=gip("sl")&& n<gip("sl")+getVarInstances("sl"))
+			|| ( n>=gip("da")&& n<gip("da")+getVarInstances("da"))
+			|| ( n>=gip("pl")&& n<gip("sa")+getVarInstances("sa"))
+		) {  // I could make a function to return the number of positions by a certain variable name, looking up the the map that define its domain
+			x_l[i] = 0.00000001;
+			x_u[i] =       1e20;
+		} else {
 			x_l[i] =         0.;
 			x_u[i] =       1e20;
-//		}
+		}
 	}
 
 	// Set the bounds for the constraints
@@ -564,6 +564,9 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
 												Index m, bool init_lambda, Number* lambda){
 
 	// function checked on 20120724 on a subset of 3 regions and 4 products. All variables initial values are correctly those outputed by gams in 2006.
+	//int thisYear = MTHREAD->SCD->getYear();
+	//int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
+	//if(thisYear != initialOptYear) return true;
 
 	//msgOut(MSG_DEBUG,"Giving optimising variables previous years value as starting point");
 	// Here, we assume we only have starting values for x, if you code
@@ -1589,6 +1592,10 @@ Opt::intermediate_callback(AlgorithmMode mode, Index iter, Number obj_value, Num
     return true;
 }
 
+int
+Opt::getVarInstances(const string& varName){
+	return getDomainElements(gdt(varName));
+}
 
 /*
 template <class T> const T&

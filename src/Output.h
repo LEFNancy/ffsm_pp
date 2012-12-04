@@ -73,6 +73,7 @@ private:
 	string                                 oFileExt;
 	bool                                 oHRedeable;
 	bool                                oSingleFile;
+	vector<int>                              oYears;
 	int                                   wRegId_l1;
 	int                                   wRegId_l2;
 	string                              outFileName;

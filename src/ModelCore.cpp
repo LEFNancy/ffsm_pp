@@ -35,22 +35,26 @@ ModelCore::runInitPeriod(){
 	*/
 	cacheSettings();             // cashe things like first year, second year, dClasses...
 	initMarketModule();          // inside it uses first year, second year
+	MTHREAD->DO->print();
 	MTHREAD->SCD->advanceYear(); // 2005->2006
 	computeInventary();          // in=f(vol_t-1)
 	computeCumulativeData();     // compute cumTp_exp, vHa_exp, vHa
 	runBiologicalModule();       //
 	runManagementModule();
 	updateMapAreas();            // update the forArea_{ft} layer on each pixel as old value-hArea+regArea
+	MTHREAD->DO->print();
 }
 
 void
 ModelCore::runSimulationYear(){
+	int thisYear = MTHREAD->SCD->getYear();
 	computeInventary();          // in=f(vol_t-1)
 	runMarketModule();
 	computeCumulativeData();     // compute cumTp_exp, vHa_exp
 	runBiologicalModule();
 	runManagementModule();
 	updateMapAreas();
+	MTHREAD->DO->print();
 }
 
 
@@ -230,19 +234,30 @@ ModelCore::runMarketModule(){
 	// Create an instance of the IpoptApplication
 	//Opt *OPTa = new Opt(MTHREAD);
 	//SmartPtr<TNLP> OPTa = new Opt(MTHREAD);
+	//int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
 	SmartPtr<IpoptApplication> application = new IpoptApplication();
-	//application->Options()->SetStringValue("linear_solver", "mumps"); // default in ipopt is ma27
+	//if(thisYear == initialOptYear){
+		//application = new IpoptApplication();
+	//} else {
+	//	application->Options()->SetStringValue("warm_start_init_point", "yes");
+	//}
+	string linearSolver = MTHREAD->MD->getStringSetting("linearSolver");
+	application->Options()->SetStringValue("linear_solver", linearSolver); // default in ipopt is ma27
 	//application->Options()->SetStringValue("hessian_approximation", "limited-memory"); // quasi-newton approximation of the hessian
 	//application->Options()->SetIntegerValue("mumps_mem_percent", 100);
 	application->Options()->SetNumericValue("obj_scaling_factor", -1); // maximisation
-
+	application->Options()->SetNumericValue("max_cpu_time", 1800); // max 1/2 hour to find the optimus for one single year
+	application->Options()->SetStringValue("check_derivatives_for_naninf", "yes"); // detect error but may crash the application.. TODO catch this error!
+	//application->Options()->SetStringValue("nlp_scaling_method", "equilibration-based"); // much worster
 	// Initialize the IpoptApplication and process the options
 	ApplicationReturnStatus status;
 	status = application->Initialize();
 	if (status != Solve_Succeeded) {
 		printf("\n\n*** Error during initialization!\n");
+		msgOut(MSG_INFO,"Error during initialization! Do you have the solver compiled for the specified linear solver?");
 		return;
 	}
+
 
 	msgOut(MSG_INFO,"Running optimisation problem for this year (it may take a few minutes for large models)..");
 	status = application->OptimizeTNLP(MTHREAD->OPT);
@@ -572,6 +587,7 @@ ModelCore::computeInventary(){
 				}
 			}
 			spd(in,"in",r2,priProducts[pp],thisYear,true);
+
 		}
 	} // end of for each region
 }
