@@ -381,8 +381,9 @@ ModelCore::runBiologicalModule(){
 					double st = gpd("st",regId,priProducts[pp]);
 					double in = gpd("in",regId,priProducts[pp]);
 					double hr_pr = u?app(priProducts[pp],ft,dc)*st/ in:0;
+					double hV_byPrd_dc_prd = hr_pr*pastYearVol;
 					hr += hr_pr;
-					hV_byPrd_dc.push_back( hr_pr*pastYearVol);
+					hV_byPrd_dc.push_back( hV_byPrd_dc_prd);
 				}
 				double hV = hr*pastYearVol;
 
