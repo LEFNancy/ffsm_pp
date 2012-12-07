@@ -232,7 +232,7 @@ Output::print(){
 	for(uint i=0;i<oYears.size();i++){
 		if (outStepRange == -1 && oYears[i] == cYear) printThisYear = true;
 	}
-	if(!printThisYear) return;
+	if(outStepRange == -1 && !printThisYear) return;
 
 
 	cout << "printing " << cYear << endl;
