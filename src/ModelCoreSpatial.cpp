@@ -952,19 +952,30 @@ ModelCoreSpatial::sumRegionalForData(){
 					sfd(vol,"vol",regId,ft,dc,DATA_NOW);
 					sfd(hV,"hV",regId,ft,dc,DATA_NOW,true);
 					sfd(hArea,"harvestedArea",regId,ft,dc,DATA_NOW, true);
+					double vol_1 = gfd("vol",regId,ft,dc,currentYear-1);
+					if(vol_1){
+						sfd(hV/vol_1,"hr",regId,ft,dc,DATA_NOW, true);
+					} else {
+						sfd(0.,"hr",regId,ft,dc,DATA_NOW, true);
+					}
+
 				}
 			}
 			double regArea = 0.;
 			double sumExpReturns = 0.;
 			double sumArea = 0.;
+			double vReg = 0.;
 			for (uint p=0;p<regPx.size();p++){
 				Pixel* px = regPx[p];
+				vReg += px->vReg.at(j);
 				regArea += findMap(px->regArea,currentYear).at(j);
 				sumExpReturns += (px->expectedReturns.at(j)* px->getDoubleValue("forArea_"+ft,true));
 				sumArea += px->getDoubleValue("forArea_"+ft,true);
 			}
+			sfd(vReg,"vReg",regId,ft,"",DATA_NOW, true);
 			sfd(regArea,"regArea",regId,ft,"",DATA_NOW, true);
 			sfd(sumExpReturns/sumArea,"expReturns",regId,ft,"",DATA_NOW, true);
+			sfd(sumArea,"forArea",regId,ft,"",DATA_NOW, true);
 		}
 	}
 

@@ -781,15 +781,14 @@ ModelCore::updateMapAreas(){
 		ModelRegion* reg = MTHREAD->MD->getRegion(regId);
 		for(uint j=0;j<nFTypes;j++){
 			string ft = fTypes[j];
-			double regForArea = reg->getValue("forArea_"+ft);
+			double oldRegioForArea = reg->getValue("forArea_"+ft);
 			double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL);
 			double regArea = gfd("regArea",regId,ft,DIAM_ALL);
-			//cout << "Regid/ft/area/harvested/regeneration: " <<regId<<";"<<ft<<";"<<regForArea<<";"<<harvestedArea<<";" <<regArea<<endl;
-			double newAreaNet = regArea-harvestedArea;
-			double newAreaRatio =  newAreaNet / regForArea;
+			double newRegioForArea = oldRegioForArea + regArea - harvestedArea;
+			sfd(newRegioForArea,"forArea",regId,ft,"",DATA_NOW, true);
 			for(uint z=0;z<rpx.size();z++){
 				double oldValue = rpx[z]->getDoubleValue("forArea_"+ft,true);
-				double newValue = oldValue*(1. + newAreaRatio);
+				double newValue = oldValue*newRegioForArea/oldRegioForArea;
 				rpx[z]->changeValue("forArea_"+ft, newValue);
 			}
 
