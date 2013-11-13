@@ -23,6 +23,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <random>
+#include <cmath>
 
 #include <QtCore>
 #include <QThread>
@@ -73,6 +75,8 @@ public:
 	ModelCoreSpatial*   SCORE; ///< Core of the model (spatial version)
 	Sandbox*            TEST;  ///< Various debugging code for development
 	Ipopt::SmartPtr <Ipopt::TNLP>      OPT;  ///< Market optimisation
+	//std::random_device*                     randev; ///< used in the sampling from normal distribution
+	std::mt19937*                              gen; ///< used in the sampling from normal distribution
 
 	void                setMessage(const QString &message);
 	void                stop();

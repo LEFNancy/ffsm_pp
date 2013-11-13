@@ -90,10 +90,79 @@ Gis::setSpace(){
 		regions[i]->setMyPixels();
 	}
 
+	applySpatialStochasticValues(); // regional variance -> different tp in each pixel trought tp modifiers
+	applyStochasticRiskAdversion(); // risk adversion to each pixel
+
 	MTHREAD->fitInWindow(); // tell the gui to fit the map to the widget
 //	countItems("landUse",false); // count the various records assigned to each legendItem. Do not print debug infos
 	return;
 }
+
+
+/**
+ * Apply all stochastic modifications required by the model at init time.
+ * Currently used tu change time of passage devending on regional variance
+ **/
+
+void
+Gis::applySpatialStochasticValues(){
+	// apply regional volume growth st.dev. -> variance to pixel based t.p.
+	// - cashing value to the pixels
+	// - apply to the tp layers with change values
+
+	if(!MTHREAD->MD->getBoolSetting("usePixelData") || !MTHREAD->MD->getBoolSetting("useSpatialRegionalVariance")) return;
+
+	vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
+	//ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
+	//vector<Pixel*> regPixels = region->getMyPixels();
+
+	for(uint i=0;i<regIds2.size();i++){
+		ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
+		vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
+		vector <string> fTypes = MTHREAD->MD->getForTypeIds();
+		for(uint j=0; j<fTypes.size(); j++){
+			double sStDev = MTHREAD->MD->getForData("sStDev",regIds2[i],fTypes[j],"");
+			normal_distribution<double> d(1,sStDev); // default any how to double
+			for (uint z=0;z<rpx.size();z++){
+				double c = d(*MTHREAD->gen);
+				rpx[z]->correctInputMultiplier("tp_multiplier",fTypes[j],c);
+			}
+		}
+	}
+}
+
+/**
+ * Apply to each agent a random risk-adversion coefficient
+ *
+ *For now, 1 pixel = 1 agent, and avg and st.dev. are the same in the model, but eventually this can change
+ **/
+void
+Gis::applyStochasticRiskAdversion(){
+	// apply regional volume growth st.dev. -> variance to pixel based t.p.
+	// - cashing value to the pixels
+	// - apply to the tp layers with change values
+
+	if(!MTHREAD->MD->getBoolSetting("usePixelData")) return;
+
+	vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
+	bool raEnabled = MTHREAD->MD->getBoolSetting("heterogeneousRiskAversion");
+	for(uint i=0;i<regIds2.size();i++){
+		ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
+		vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
+		for (uint z=0;z<rpx.size();z++){
+			if(raEnabled){
+				double raStDev = MTHREAD->MD->getDoubleSetting("riskAversionAgentSd");
+				double avg = MTHREAD->MD->getDoubleSetting("riskAversionAgentAverage");
+				normal_distribution<double> d(avg,raStDev); // default any how to double
+				double c = d(*MTHREAD->gen);
+				rpx[z]->setValue ("ra", c);
+			} else {
+				rpx[z]->setValue ("ra", 0.0);
+			}
+		}
+	}
+}
+
 
 /**
 Called from setSpace(), initLayers() is responsable of:
@@ -102,7 +171,7 @@ Called from setSpace(), initLayers() is responsable of:
 <p>If the layer is to be read at start-up:
  - adding to the layer each legend item (ID, label, min-max values..) @see addLegendItem
  - eventually adding to the layer each reclassification rules @see addReclassificationRule
-*/
+**/
 void
 Gis::initLayers(){
 	// setting layers...
@@ -160,7 +229,7 @@ Gis::initLayers(){
 	//initLayersModelData(DATA_INIT); // only the layers relative to the initial years are inserted now. All the simulation year layers will be added each year before mainSimulationyear()
 }
 
-/** Init the layers of exogenous data at pixel level (e.g. time of passage)
+/** Init the layers of exogenous data at pixel level (e.g. time of passage, multipliers)
 		These layers will then be read from datafile
 */
 void
@@ -170,10 +239,10 @@ Gis::initLayersPixelData(){
 	string fileExt = MTHREAD->MD->getStringSetting("spatialDataFileExtension");
 	vector<string> files = vector<string>();
 	string fullFilename, filename, fullPath;
-	string parName, forName, dClass, yearString;
-	int year;
+	//string parName, forName, dClass, yearString;
+	//int year;
 
-	MTHREAD->MD->getFilenamesByDir (dir,files, fileExt);
+	MTHREAD->MD->getFilenamesByDir (dir,files, fileExt); // Ugly format. Files is the output (reference)
 
 	for (unsigned int i = 0;i < files.size();i++) {
 		fullFilename = files[i];

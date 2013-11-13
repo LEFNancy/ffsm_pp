@@ -115,10 +115,12 @@ Pixel::setValue(const string & layerName_h, const double & value_h){
 
 }*/
 
+/*
 inline void
 Pixel::setValue (const string& parName, const string& forName, const string& dClass, const int& year, const double& value_h){
 	values.insert(pair<string, double>(MTHREAD->GIS->pack(parName, forName, dClass, year), value_h));
 }
+*/
 
 
 void
@@ -137,10 +139,12 @@ Pixel::changeValue(const string &layerName_h, const double &value_h, const bool 
 	return;
 }
 
+/*
 void
 Pixel::changeValue (const double &value_h, const string& parName, const string& forName, const string &dClass, const int &year, const bool &setNoValueForZero){
 	changeValue(MTHREAD->GIS->pack(parName, forName, dClass, year), value_h, setNoValueForZero);
 }
+*/
 
 double
 Pixel::getDoubleValue(const string &layerName_h, const bool &returnZeroForNoValue) const{
@@ -181,10 +185,24 @@ Pixel::getMultiplier (const string& multiplierName, const string& forName, int y
 	string search_base = search_for.substr(0,search_for.size()-4);
 	if (key.compare(0, search_base.size(), search_base) == 0){
 		//cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
+		//if(i->second != 1){
+		//	cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
+		//	exit(0);
+		//}
 		return i->second;
 	} else {
 		//cout << "NOTM:  " << search_for <<", "<< i->first << endl;
 		return 1.0;
+	}
+}
+
+void
+Pixel::correctInputMultiplier (const string& multiplierName, const string& forName, double coefficient){
+	string search_for = multiplierName+"#"+forName+"#";
+	for (std::map<string,double>::iterator it=values.lower_bound(search_for); it!=values.end(); ++it){
+		if (it->first.compare(0, search_for.size(), search_for) == 0){
+			it->second = it->second * coefficient;
+		}
 	}
 }
 

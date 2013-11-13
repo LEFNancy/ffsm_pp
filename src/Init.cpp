@@ -98,6 +98,18 @@ Init::setInitLevel1(){
 	msgOut(MSG_INFO, timemessage);
 	MTHREAD->MD->setDefaultSettings();
 	MTHREAD->MD->setScenarioSettings();
+	if(MTHREAD->MD->getBoolSetting("newRandomSeed")){
+		// See here for how to use the new C++11 random functions:
+		// http://www.johndcook.com/cpp_TR1_random.html
+		// usage example:
+		// std::normal_distribution<double> d(100000,3);
+		// double x = d(*MTHREAD->gen);
+		srand(time(NULL));
+		std::random_device randev;
+		MTHREAD->gen = new std::mt19937(randev());
+	} else {
+		MTHREAD->gen = new std::mt19937(NULL);
+	}
 	MTHREAD->SCD->setYear(MTHREAD->MD->getIntSetting("initialYear"));
 	MTHREAD->MD->cacheSettings();
 

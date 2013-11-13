@@ -30,6 +30,13 @@
 #include "ModelData.h"
 #include "Gis.h"
 
+//Testing random distribution, using some new in C++ random generator seeds..
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <map>
+#include <random>
+#include <cmath>
 
 
 // Testing zip library...
@@ -107,6 +114,52 @@ struct GccTest
 // --------------------------------------
 void
 Sandbox::basicTest(){
+
+	/*
+	// -------------------------------------------------------------------
+	// Testing how to get all elements in a map by substrings
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	map <string,double> values;
+	pair <string,double> val1("AAAAAA",1);
+	pair <string,double> val2("AAABBB",2);
+	pair <string,double> val3("BBBAAA",3);
+	pair <string,double> val4("BBBBBB",4);
+	pair <string,double> val5("CCCAAA",5);
+	pair <string,double> val6("C",6);
+	pair <string,double> val7("BBB",7);
+
+	values.insert(val1);
+	values.insert(val2);
+	values.insert(val3);
+	values.insert(val4);
+	values.insert(val5);
+	values.insert(val6);
+	values.insert(val7);
+
+	cout << "Printing whole map" << endl;
+	for (std::map<string,double>::iterator it=values.begin(); it!=values.end(); ++it)
+			std::cout << it->first << " => " << it->second << '\n';
+
+	string search_for = "BBB";
+
+	cout << "Using lower bound " << endl;
+	for (std::map<string,double>::iterator it=values.lower_bound(search_for); it!=values.end(); ++it)
+			std::cout << it->first << " => " << it->second << '\n';
+	cout << "Using upper bound " << endl;
+	for (std::map<string,double>::iterator it=values.upper_bound(search_for); it!=values.end(); ++it)
+			std::cout << it->first << " => " << it->second << '\n';
+
+	cout << "Printing only substrings " << endl;
+	for (std::map<string,double>::iterator it=values.lower_bound(search_for); it!=values.end(); ++it){
+		string key = it->first;
+		if (key.compare(0, search_for.size(), search_for) == 0){
+			std::cout << it->first << " => " << it->second << '\n';
+		}
+	}
+
+
+	exit(0);
+	*/
 
 	/*
 	// testing findMap
@@ -211,6 +264,18 @@ Sandbox::basicTest(){
 
 void
 Sandbox::fullTest(){
+
+	/*
+	// Testing the new random distributions. Requires the pointer MTHREAD->gen to be initialised,
+	// so this test can't run in basic test.
+	std::normal_distribution<double> d(100000,3); // default any how to double
+	for(int n=0; n<20; ++n) {
+		double x = d(*MTHREAD->gen);
+		int i = round(d(*MTHREAD->gen));
+		cout << i << ';' << 1 << endl;
+	}
+	exit (0);
+	*/
 
 	/*
 	// Testing I have correctly the info about world price !!!

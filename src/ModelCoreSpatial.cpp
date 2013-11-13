@@ -539,8 +539,19 @@ ModelCoreSpatial::runManagementModule(){
 						//expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
 					}
 				} // end of hV_byFT!=0
-				//double debug = expReturns;
-				//sfd(expReturns,"expReturns",regId, ft,"",DATA_NOW,true);
+				if(MD->getBoolSetting("heterogeneousRiskAversion")){
+					double ra = px->getDoubleValue("ra");
+					double tStDev = gfd("tStDev",regId,ft,"",DATA_NOW);
+					cout << "******" << endl;
+					cout << "- pixID: " << px->getID() << endl;
+					cout << "- ft: " << ft << endl;
+					cout << "- orig expReturn: " << expReturns << endl;
+					cout << "- ra: " << ra << endl;
+					cout << "- tStDev: " << tStDev << endl;
+					double origExpReturns = expReturns;
+					expReturns = origExpReturns - ra*tStDev;
+					cout << "- new expReturn: " << expReturns << endl;
+				}
 				px->expectedReturns.push_back(expReturns);
 				//cachedExpectedReturnsByFt.push_back(expReturns);
 			//}

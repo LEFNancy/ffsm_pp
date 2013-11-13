@@ -36,14 +36,16 @@ ThreadManager::ThreadManager(){
 	layerQueryPos = -1;
 
 	// initializing pointers...
-	MD = NULL;
-	GIS = NULL;
-	INIT = NULL;
-	SCD = NULL;
-	DO = NULL;
-	CORE=NULL;
-	SCORE=NULL;
-	TEST=NULL;
+	MD     = NULL;
+	GIS    = NULL;
+	INIT   = NULL;
+	SCD    = NULL;
+	DO     = NULL;
+	CORE   = NULL;
+	SCORE  = NULL;
+	TEST   = NULL;
+	//randev = NULL;
+	gen    = NULL;
 	
 	GUI = false;
 
@@ -159,6 +161,8 @@ ThreadManager::deleteDeadOldPointers(){
 	if (SCORE){delete SCORE; SCORE=0;}
 	//if (OPT) {delete OPT; OPT=0;} // not needed, it's a "smart point"
 	if(TEST){delete TEST; TEST=0;}
+	//if(randev){delete randev; randev=0;}
+	if(gen){delete gen; gen=0;}
 }
 
 void

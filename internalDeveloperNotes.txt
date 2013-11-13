@@ -70,6 +70,20 @@ rpl -R "AAA" "BBB" /fullPath/
 http://rpl.sf.net
 
 
+**** UNPIVOT A TABLE ****
+To do the opposite of pivoting a table, use this extension:
+http://extensions.libreoffice.org/extension-center/decroise
+You will get output like this:
+dim1a dim2 value
+dim1a dim2a 0.3
+dim1a dim2b 0.2
+dim1b dim2a 0.7
+dim1b dim2b 0.9
+...
+
+I remember to have done something similar earlier for the main data sets without using any extensions, but I don't remember how! Any how, this extension solves the problem!
+
+
 
 
 

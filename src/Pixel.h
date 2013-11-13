@@ -52,6 +52,7 @@ public:
 	double              getDoubleValue (const string& layerName_h, const  bool& returnZeroForNoValue = false) const;
 	double              getDoubleValue (const string& parName, const string& forName, const string& dClass, const int& year, const  bool& returnZeroForNoValue = false);
 	double              getMultiplier (const string& multiplierName, const string& forName, int year=DATA_NOW);
+	void                correctInputMultiplier (const string& multiplierName, const string& forName, double coefficient=1); //< It apply a given coefficient to all the multipliers layers of a given ft
 	void                newYear();
 	double              getPastRegArea(const int& ft_idx, const int& year);
 	void                setPastRegArea(const double& value, const int& ft_idx, const int& year);
@@ -65,15 +66,15 @@ public:
 	vector <Pixel *>    getPixelsAtDistLevel (int distLevel_h) const;
 
 	string              getPxComments() const {return pxComments;};
-	double              getCachedDouble() const {return cachedDouble;};	
+	double              getCachedDouble() const {return cachedDouble;};
 
 
 	/// Insert a new layer and its value
 	void                setValue ( const string& layerName_h, const double& value_h ){values.insert(pair<string, double>(layerName_h, value_h));}
-	inline void         setValue ( const string& parName, const string& forName, const string& dClass, const int& year, const double& value_h);
+	//inline void         setValue ( const string& parName, const string& forName, const string& dClass, const int& year, const double& value_h); // never used ???
 	/// Change the value of an existing layerMTHREAD->GIS->pack(parName, forName, dClass, year), value_h,
 	void                changeValue (const string& layerName_h, const double& value_h, const bool& setNoValueForZero=false );
-	void                changeValue (const double& value_h, const string& parName, const string& forName, const string& dClass, const int& year, const bool& setNoValueForZero=false);
+	//void                changeValue (const double& value_h, const string& parName, const string& forName, const string& dClass, const int& year, const bool& setNoValueForZero=false);
 	void                setCoordinates ( int x_h, int y_h ) {pxX=x_h; pxY=y_h;};
 	void                setPxComments ( std::string pxComments_h ) {pxComments = pxComments_h;};
 	void                setCachedDouble(double cachedDouble_h){cachedDouble=cachedDouble_h;};
