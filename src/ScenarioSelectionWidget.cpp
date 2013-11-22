@@ -18,7 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QtGui>
+//#include <QtGui>   // Qt4
+#include <QtWidgets> // Qt5
+
 
 #include "ScenarioSelectionWidget.h"
 

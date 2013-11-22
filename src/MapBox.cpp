@@ -19,7 +19,8 @@
  ***************************************************************************/
 #include <iostream>
 
-#include <QtGui>
+//#include <QtGui>   // Qt4
+#include <QtWidgets> // Qt5
 #include <math.h>
 #include "MapBox.h"
 

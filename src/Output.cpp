@@ -58,7 +58,14 @@ Output::commonInit(){
 	nYears       = MTHREAD->MD->getIntSetting("simulationYears");
 	baseDir      = MTHREAD->MD->getBaseDirectory();
 	oDir         = MTHREAD->MD->getOutputDirectory();
-	scenarioName = MTHREAD->getScenarioName();
+    bool initSeed = MTHREAD->MD->getBoolSetting("newRandomSeed");
+    if (initSeed){
+        uniform_int_distribution<> d(1, 1000000);
+        int random = d(*MTHREAD->gen);
+        scenarioName = MTHREAD->getScenarioName()+"_"+i2s(random);
+    } else {
+        scenarioName = MTHREAD->getScenarioName();
+    }
 	oFileExt     = MTHREAD->MD->getStringSetting("outputFileExtension");
 	oHRedeable   = MTHREAD->MD->getBoolSetting("outputHumanReadable");
 	oSingleFile  = MTHREAD->MD->getBoolSetting("outputSingleFile");

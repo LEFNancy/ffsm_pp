@@ -728,14 +728,16 @@ exit(0);
 	ec = uz.openArchive(file);
 	if (ec != UnZip::Ok)
 	{
-		cout << "Failed to open archive: " << uz.formatError(ec).toAscii().data() << endl << endl;
+        //cout << "Failed to open archive: " << uz.formatError(ec).toAscii().data() << endl << endl; // Qt4
+        cout << "Failed to open archive: " << uz.formatError(ec).toLatin1().data() << endl << endl;  // Qt5
 		//return false;
 	}
 
 	ec = uz.extractAll(out);
 	if (ec != UnZip::Ok)
 	{
-		cout << "Extraction failed: " << uz.formatError(ec).toAscii().data() << endl << endl;
+        //cout << "Extraction failed: " << uz.formatError(ec).toAscii().data() << endl << endl; // Qt4
+        cout << "Extraction failed: " << uz.formatError(ec).toLatin1().data() << endl << endl;  // Qt5
 		uz.closeArchive();
 		//return false;
 	}

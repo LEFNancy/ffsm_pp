@@ -539,18 +539,21 @@ ModelCoreSpatial::runManagementModule(){
 						//expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
 					}
 				} // end of hV_byFT!=0
-				if(MD->getBoolSetting("heterogeneousRiskAversion")){
+                if(MD->getBoolSetting("heterogeneousRiskAversion")){
 					double ra = px->getDoubleValue("ra");
-					double tStDev = gfd("tStDev",regId,ft,"",DATA_NOW);
-					cout << "******" << endl;
-					cout << "- pixID: " << px->getID() << endl;
-					cout << "- ft: " << ft << endl;
-					cout << "- orig expReturn: " << expReturns << endl;
-					cout << "- ra: " << ra << endl;
-					cout << "- tStDev: " << tStDev << endl;
+                    double tStDev = gfd("tStDev",regId,ft,"",DATA_NOW);
+                    double tCV = gfd("tCV",regId,ft,"",DATA_NOW);
+                    //cout << "******" << endl;
+                    //cout << "- pixID: " << px->getID() << endl;
+                    //cout << "- ft: " << ft << endl;
+                    //cout << "- orig expReturn: " << expReturns << endl;
+                    //cout << "- ra: " << ra << endl;
+                    //cout << "- tStDev: " << tStDev << endl;
+                    //cout << "- tCV: " << tCV << endl;
 					double origExpReturns = expReturns;
-					expReturns = origExpReturns - ra*tStDev;
-					cout << "- new expReturn: " << expReturns << endl;
+                    //expReturns = origExpReturns - ra*tStDev;
+                    expReturns = origExpReturns * (1.0 - ra*tCV);
+                    //cout << "- new expReturn: " << expReturns << endl;
 				}
 				px->expectedReturns.push_back(expReturns);
 				//cachedExpectedReturnsByFt.push_back(expReturns);

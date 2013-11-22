@@ -6,12 +6,14 @@
 ######################################################################
 
 QT += xml
+QT += widgets
 DESTDIR = ..
 #TARGET = ffsm
 
 unix {
      #LIBS += -lipopt
      LIBS += -ladolc
+     LIBS += -lz # needed in Qt5/ ubuntu 13.10 64bit
      #LIBS += -lColPack
      INCLUDEPATH += /usr/include/coin
      INCLUDEPATH += /usr/include/coin/ThirdParty
@@ -22,6 +24,10 @@ unix {
      #LIBS += -lpthread -lgfortran -lcoinmetis -lblas
      #QMAKE_CXXFLAGS_RELEASE += -O3 -pipe -DNDEBUG -pedantic-errors -Wparentheses -Wreturn-type -Wcast-qual -Wall -Wpointer-arith -Wwrite-strings -Wconversion -Wno-unknown-pragmas -Wno-long-long   -DIPOPT_BUILD
      #QMAKE_LFLAGS_RELEASE +=  -Wl,--rpath -Wl,/usr/lib
+     #QMAKE_LFLAGS += -lz
+     #QMAKE_LFLAGS_RELEASE += -lz
+     #QMAKE_LFLAGS_DEBUG += -lz
+
 
 }
 
@@ -158,3 +164,4 @@ SOURCES += Adolc_debugtest.cpp \
            ModelCoreSpatial.cpp
 
 RESOURCES += resources.qrc
+

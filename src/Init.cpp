@@ -123,11 +123,6 @@ Init::setInitLevel1(){
 	MTHREAD->MD->applyOverrides();
 	MTHREAD->MD->setProductResourceMatrixLink();
 	MTHREAD->MD->applyDebugMode();
-
-
-	if(MTHREAD->MD->getBoolSetting("randomSimulation")){
-		srand(time(NULL));
-	}
 	MTHREAD->GIS->setSpace();
 	MTHREAD->GIS->applyForestReclassification();
 	MTHREAD->TEST->fullTest(); // normally empty function
