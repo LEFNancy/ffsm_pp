@@ -43,6 +43,7 @@ void
 Output::initOutput(){
 	commonInit();
 	initOutputMaps();
+    initDebugOutput();
 	initOutputForestData();
 	initOutputProductData();
 	initOptimisationLog();
@@ -75,7 +76,8 @@ Output::commonInit(){
 	outForVariables          = MTHREAD->MD->getStringVectorSetting("outForVariables");
 	outProdVariables         = MTHREAD->MD->getStringVectorSetting("outProdVariables");
 	dClasses                 = MTHREAD->MD->getStringVectorSetting("dClasses");
-	dClasses.push_back("");
+    pDClasses.insert(pDClasses.end(), dClasses.begin()+1, dClasses.end() ); // production diameter classes
+    dClasses.push_back(""); // needed for reporting of variables without diameter attribute
 	outStepRange             = MTHREAD->MD->getIntSetting("outStepRange");
 	forestDiamDetailedOutput = MTHREAD->MD->getBoolSetting("forestDiamDetailedOutput");
 	fTypes                   = MTHREAD->MD->getForTypeIds();
@@ -87,8 +89,12 @@ Output::commonInit(){
 	nPriPr   = priPr.size();
 	nSecPr   = secPr.size();
 	nAllPr   = allPr.size();
-	l1regIds =  MTHREAD->MD->getRegionIds(1, true);
-	nL2r     =  MTHREAD->MD->getRegionIds(2, true).size();
+    l1regIds = MTHREAD->MD->getRegionIds(1, true);
+    nL2r     = MTHREAD->MD->getRegionIds(2, true).size();
+    spMode   = MTHREAD->MD->getBoolSetting("usePixelData");
+    //if(spMode) {
+    //   pxIds =   getXyNPixels();
+    //}
 
 
 	for(uint i=0;i<l1regIds.size();i++){
@@ -137,6 +143,38 @@ Output::initOptimisationLog(){
 		out.close();
 	}
 }
+
+void
+Output::initDebugOutput(){
+    if(oLevel<OUTVL_ALL) return;
+
+    // init debugging the expected returns...
+    if(spMode) return;
+    expReturnsDebugVariables.push_back("hVol_byUPp");
+    expReturnsDebugVariables.push_back("hV_byFT");
+    expReturnsDebugVariables.push_back("finalHarvestFlag");
+    expReturnsDebugVariables.push_back("pondCoeff");
+    expReturnsDebugVariables.push_back("pW");
+    expReturnsDebugVariables.push_back("cumTp");
+    expReturnsDebugVariables.push_back("vHa");
+    expReturnsDebugVariables.push_back("expectedReturns");
+    expReturnsDebugVariables.push_back("weightedAvgCompModeFlag");
+
+    logFilename = baseDir+oDir+"debugOut.csv";
+    ifstream in(logFilename.c_str(), ios::in);
+    if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
+        in.close();
+        cleanScenario(logFilename, scenarioName, d);
+        return;
+    } else { // file doesn't exist
+        in.close();
+        ofstream out(logFilename.c_str(), ios::out);
+        if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+logFilename+" for writing.");}
+        out << "scenario" << d << "year" << d << "region or pixel" << d << "forType" << d << "diamClass" << d << "prod" << d << "parName" << d << "value" << d <<"\n";
+        out.close();
+    }
+}
+
 
 void
 Output::initOutputForestData(){
@@ -247,6 +285,7 @@ Output::print(){
 	MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
 	printForestData(false);
 	printProductData(false);
+    printDebugOutput();
 	MTHREAD->MD->setErrorLevel(MSG_ERROR);
 }
 
@@ -515,6 +554,46 @@ Output::printOptLog(bool optimal, int &nIterations, double &obj){
 	out.close();
 
 }
+
+void
+Output::printDebugOutput(){
+  if(oLevel<OUTVL_ALL) return;
+
+  // print debugging the expected returns...
+
+  if (!spMode && !expReturnsDebug.empty()){
+    outFileName = baseDir+oDir+"debugOut.csv";
+    ofstream out (outFileName.c_str(), ios::app);
+    if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
+    int currentYear = MTHREAD->SCD->getYear();
+    vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
+
+        for (uint r2=0;r2<regIds2.size();r2++){
+            for(uint ft=0;ft<fTypes.size();ft++){
+                for(uint dc=0;dc<(dClasses.size()-1);dc++){
+                    for(uint pp=0;pp<priPr.size();pp++){
+                        for(uint dv=0;dv<expReturnsDebugVariables.size();dv++){
+                          // vector <vector < vector <vector <vector <double> > > > > expReturnsDebug;
+                          double outputValue = expReturnsDebug.at(r2).at(ft).at(dc).at(pp).at(dv);
+                          out << scenarioName << d;
+                          out << currentYear << d;
+                          out << regIds2[r2] << d;
+                          out << fTypes[ft] << d;
+                          out << dClasses[dc] << d;
+                          out << priPr[pp] << d;
+                          out << expReturnsDebugVariables[dv] << d;
+                          out << outputValue << d;
+                          out << "\n";
+                        }
+                    }
+                }
+            }
+        }
+
+  } // end initial condition checks
+}
+
+
 
 /**
 This routine clean the output scenario from previous outputs of the defined scenario.

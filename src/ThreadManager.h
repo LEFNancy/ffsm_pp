@@ -75,8 +75,8 @@ public:
 	ModelCoreSpatial*   SCORE; ///< Core of the model (spatial version)
 	Sandbox*            TEST;  ///< Various debugging code for development
 	Ipopt::SmartPtr <Ipopt::TNLP>      OPT;  ///< Market optimisation
-	//std::random_device*                     randev; ///< used in the sampling from normal distribution
-	std::mt19937*                              gen; ///< used in the sampling from normal distribution
+    //std::random_device*  randev; ///< used in the sampling from normal distribution
+    std::mt19937*        gen;  ///< used in the sampling from normal distribution
 
 	void                setMessage(const QString &message);
 	void                stop();

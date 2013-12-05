@@ -460,7 +460,7 @@ ModelCoreSpatial::runBiologicalModule(){
 void
 ModelCoreSpatial::runManagementModule(){
 	msgOut(MSG_INFO, "Starting management module..");
-
+    bool weightedAverageExpectedReturns = MTHREAD->MD->getBoolSetting("weightedAverageExpectedReturns");
 
 	// Post optimisation management mobule..
 	for(uint i=0;i<regIds2.size();i++){
@@ -500,7 +500,7 @@ ModelCoreSpatial::runManagementModule(){
 					hV_byFT += finalHarvestFlag * px->hVol.at(j).at(u);
 				}
 
-				if(hV_byFT==0.){ // nothing has been harvested in this pixel for this specific forest type. Let's calculate the combination product/diameter class with the highest expected return
+                if(hV_byFT==0. || !weightedAverageExpectedReturns){ // nothing has been harvested in this pixel for this specific forest type. Let's calculate the combination product/diameter class with the highest expected return
 					for (uint u=0; u<dClasses.size(); u++){
 						string dc = dClasses[u];
 						double vHa         = px->vHa_exp.at(j).at(u);

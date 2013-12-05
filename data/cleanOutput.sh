@@ -18,6 +18,11 @@ rm -rf output/maps/integerListLayers
 rm -rf output/maps/scenarioName
 # results...
 rm -rf output/results/*.csv
+# copy back the not remove warning file..
+cp output/doNotRemove.txt output/maps/asciiGrids/
+cp output/doNotRemove.txt output/maps/bitmaps/
+cp output/doNotRemove.txt output/maps/cats/
+cp output/doNotRemove.txt output/maps/colr/
 
 echo Done cleaning Pythia output!
 echo ""

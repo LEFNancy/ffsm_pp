@@ -98,7 +98,7 @@ public:
 
 	vector <vector <double> >                  vol; // by ft,dc
     //vector <vector <double> >                 area; // by ft,dc
-	vector <vector <double> >                hArea; // by ft, dc
+    vector <vector <double> >                hArea; // by ft, dc  // possibly in ha, but to be check for 100% sure
 	vector <vector <double> >                 hVol; // by ft.dc
 	vector < vector <vector <double> > >hVol_byPrd; // by ft, dc, pp
 	map <int, vector <double> >            regArea; // by year, ft

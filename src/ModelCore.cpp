@@ -377,6 +377,7 @@ ModelCore::runBiologicalModule(){
 				//hr(u,i,essence,lambda,t) =    sum(p_pr, prov(u,essence,lambda,p_pr)*RPAR('st',i,p_pr,t)/In(i,p_pr,t));
 				//hV(u,i,essence,lambda,t) = hr(u,i,essence,lambda,t) * V(u,i,lambda,essence,t-1);
 				//hV_byPrd(u,i,essence,lambda,p_pr,t) =  prov(u,essence,lambda,p_pr)*(RPAR('st',i,p_pr,t)/In(i,p_pr,t))*V(u,i,lambda,essence,t-1);
+                //double debug =0;
 				for(uint pp=0;pp<priProducts.size();pp++){
 					double st = gpd("st",regId,priProducts[pp]);
 					double in = gpd("in",regId,priProducts[pp]);
@@ -384,8 +385,15 @@ ModelCore::runBiologicalModule(){
 					double hV_byPrd_dc_prd = hr_pr*pastYearVol;
 					hr += hr_pr;
 					hV_byPrd_dc.push_back( hV_byPrd_dc_prd);
+                    //debug += hV_byPrd_dc_prd;
 				}
 				double hV = hr*pastYearVol;
+                //double debug2 = debug-hV;
+
+                // test passed 20131203
+                //if(debug2  < -0.000000000001 || debug2  > 0.000000000001){
+                //    cout << "Problems!" << endl;
+                //}
 
 				// post harvesting remained volumes computation..
 				// loop(u$(ord(u)=1),
@@ -445,10 +453,17 @@ void
 ModelCore::runManagementModule(){
 
 	msgOut(MSG_INFO, "Starting management module..");
-	int thisYear = MTHREAD->SCD->getYear();
-	int previousYear = thisYear-1;
+    //int thisYear = MTHREAD->SCD->getYear();
+    //int previousYear = thisYear-1;
+    MTHREAD->DO->expReturnsDebug.clear();
+    int outputLevel = MTHREAD->MD->getIntSetting("outputLevel");
+    bool weightedAverageExpectedReturns = MTHREAD->MD->getBoolSetting("weightedAverageExpectedReturns");
+
+    //vector <vector < vector <vector <vector <double> > > > > expReturnsDebug; ///< l2_region, for type, d.c., pr prod, variable name
 
 	for(uint i=0;i<regIds2.size();i++){
+        vector < vector <vector <vector <double> > > >  expReturnsDebug_region;
+
 		int r2 = regIds2[i];
 		int regId = r2;
 		vector <double> cachedExpectedReturnsByFt;
@@ -457,6 +472,7 @@ ModelCore::runManagementModule(){
 
 		for(uint j=0;j<fTypes.size();j++){
 			string ft = fTypes[j];
+            vector <vector <vector <double> > >  expReturnsDebug_ft;
 			// Post optimisation management mobule..
 
 			//if(regType != "fixed" && regType != "fromHrLevel"){
@@ -476,33 +492,52 @@ ModelCore::runManagementModule(){
 			double hV_byFT = 0.; // gfd("hV",regId,ft,DIAM_PROD); // it must include only final harvested products in order to act as weightering agent
 			double expReturns = 0;
 
+
 			for (uint u=0; u<dClasses.size(); u++){
 				string dc = dClasses[u];
 				double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
-				hV_byFT += finalHarvestFlag * gfd("hV",regId,ft,dc);
+                double hV = gfd("hV",regId,ft,dc);
+                hV_byFT += finalHarvestFlag * hV;
 			}
 
-			if(hV_byFT==0.){ // nothing has been harvested in this pixel for this specific forest type. Let's calculate the combination product/diameter class with the highest expected return
+            if(hV_byFT==0. || !weightedAverageExpectedReturns){ // nothing has been harvested in this pixel for this specific forest type. Let's calculate the combination product/diameter class with the highest expected return
 				for (uint u=0; u<dClasses.size(); u++){
+                    vector <vector <double> >  expReturnsDebug_dc;
 					string dc = dClasses[u];
 					double vHa              = gfd("vHa_exp",regId,ft,dc);
 					double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
 					double cumTp_u          = gfd("cumTp_exp",regId,ft,dc);
 					for (uint pp=0;pp<priProducts.size();pp++){
+                        vector <double>  expReturnsDebug_pp;
 						double pw    = gpd("pw",regId,priProducts[pp]);
 						double raw_amount = finalHarvestFlag*pw*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
 						double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
 						if (anualised_amount>expReturns) {expReturns=anualised_amount;}
-					}
-				}
+                        if(outputLevel >= OUTVL_ALL){
+                          expReturnsDebug_pp.push_back(0.0);
+                          expReturnsDebug_pp.push_back(hV_byFT);
+                          expReturnsDebug_pp.push_back(finalHarvestFlag);
+                          expReturnsDebug_pp.push_back(0.0);
+                          expReturnsDebug_pp.push_back(pw);
+                          expReturnsDebug_pp.push_back(cumTp_u);
+                          expReturnsDebug_pp.push_back(vHa);
+                          expReturnsDebug_pp.push_back(anualised_amount);
+                          expReturnsDebug_pp.push_back(0);
+                        }
+                        expReturnsDebug_dc.push_back(expReturnsDebug_pp);
+                    } // end each pp
+                    expReturnsDebug_ft.push_back(expReturnsDebug_dc);
+                } // end dc
 			} else {
 				for (uint u=0; u<dClasses.size(); u++){
+                    vector <vector <double> >  expReturnsDebug_dc;
 					string dc  = dClasses[u];
 					double vHa = gfd("vHa_exp",regId,ft,dc);
 					double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
 					double cumTp_u = gfd("cumTp_exp",regId,ft,dc);
 
 					for (uint pp=0;pp<priProducts.size();pp++){
+                        vector <double>  expReturnsDebug_pp;
 						double pw    = gpd("pw",regId,priProducts[pp]);
 						double pl    = gpd("pl",regId,priProducts[pp]);
 						double pwor    = gpd("pl",99999,priProducts[pp]);
@@ -510,7 +545,7 @@ ModelCore::runManagementModule(){
 						double hVol_byUPp = hV_byPrd.at(i).at(j).at(u).at(pp); // harvested volumes for this product, diameter class on this region and forest type
 
 						//double raw_amount_old = pw*hv2fa*    hVol_byUPp/hV_byFT; // old and wrong. it was in €/m^4
-						double raw_amount = finalHarvestFlag*pw*vHa* hVol_byUPp/hV_byFT; // now in €/ha if there is also thining volumes in hV_byFT, I underestimate expected returns !! TODO change it !!
+                        double raw_amount = finalHarvestFlag*pw*vHa* hVol_byUPp/hV_byFT; // now in €/ha if there is also thining volumes in hV_byFT, I underestimate expected returns !! TO.DO change it !! DONE, DONE...
 						/**
 						see @ModelData::calculateAnnualisedEquivalent
 						*/
@@ -519,14 +554,31 @@ ModelCore::runManagementModule(){
 						//cout << regId <<";"<< ft <<";"<< dc <<";" << priProducts[pp] <<";" << raw_amount <<";"<< anualised_amount<<";";
 						//cout << cumTp_u <<";"<< hVol_byUPp << ";" << hV_byFT << ";" << pw << ";" << pl << ";" << pwor << ";" << vHa << ";" << finalHarvestFlag << endl;
 						expReturns += anualised_amount;
-					}
+
+                        if(outputLevel >= OUTVL_ALL){
+                          expReturnsDebug_pp.push_back(hVol_byUPp);
+                          expReturnsDebug_pp.push_back(hV_byFT);
+                          expReturnsDebug_pp.push_back(finalHarvestFlag);
+                          expReturnsDebug_pp.push_back(finalHarvestFlag*hVol_byUPp/hV_byFT);
+                          expReturnsDebug_pp.push_back(pw);
+                          expReturnsDebug_pp.push_back(cumTp_u);
+                          expReturnsDebug_pp.push_back(vHa);
+                          expReturnsDebug_pp.push_back(MD->calculateAnnualisedEquivalent(finalHarvestFlag*pw*vHa,cumTp_u));
+                          expReturnsDebug_pp.push_back(1);
+                        }
+                        expReturnsDebug_dc.push_back(expReturnsDebug_pp);
+                    } // end for each priProducts
+
+                    expReturnsDebug_ft.push_back(expReturnsDebug_dc);
 					//expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
-				}
-			}
+                } // end for each dc
+            } // ending "it has been harvested" condition
 			double debug = expReturns;
 			sfd(expReturns,"expReturns",regId, ft,"",DATA_NOW,true);
 			cachedExpectedReturnsByFt.push_back(expReturns);
-		} // end foreach forest type
+            expReturnsDebug_region.push_back(expReturnsDebug_ft);
+        } // end foreach forest
+        MTHREAD->DO->expReturnsDebug.push_back(expReturnsDebug_region);
 
 
 		// PART 2: ALLOCATING THE HARVESTED AREA TO REGENERATION AREA BASED ON EXPECTED RETURNS
@@ -568,7 +620,10 @@ ModelCore::runManagementModule(){
 			}
 		}// end of foreach forest type
 		double totalRegArea = gfd("regArea",regId,FT_ALL,DIAM_ALL);
-	} // end of each r2 region
+    } // end of each r2
+    //vector <vector < vector <vector <vector <double> > > > > expReturnsDebug = MTHREAD->DO->expReturnsDebug;
+    //cout << "bla" << endl;
+
 }
 
 void

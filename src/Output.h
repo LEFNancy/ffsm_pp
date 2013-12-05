@@ -53,14 +53,19 @@ public:
 		void                initOutputForestData();
 		void                initOutputProductData();
 		void                initOptimisationLog();
+        void                initDebugOutput();
 	void                print();
 	void                printMaps();
 	void                printFinalOutput();
 	void                printForestData(bool finalFlush=false);
 	void                printProductData(bool finalFlush=false);
+    void                printDebugOutput();
 	void                printOptLog(bool optimal, int &nIterations, double &obj);
 	char                getOutputFieldDelimiter();
 	void                cleanScenario(string fileName, string scenarioName, char d);
+
+    vector <vector < vector <vector <vector <double> > > > > expReturnsDebug; ///< l2_region, for type, d.c., pr prod, variable name
+    vector <string>       expReturnsDebugVariables;
 
 private:
 	int                                      oLevel;
@@ -87,12 +92,13 @@ private:
 	vector<int>                           l1regIds;
 	vector < vector <int> >                    l2r;
 	vector <string>                         fTypes;
-	vector <string>                       dClasses;
+    vector <string>                       dClasses; /// includes an empty string for variables without diameter attribute
+    vector <string>                      pDClasses; ///< production diameter classes: exclude the fist diameter class below 15 cm
 	int                                     nPriPr;
 	int                                     nSecPr;
 	int                                     nAllPr;
 	int                                       nL2r;
 	string                             logFilename;
+    bool                                    spMode; // spatial mode ?
 };
-
 #endif

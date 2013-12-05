@@ -1263,7 +1263,7 @@ ModelData::loadInput(){
 	//QString iFile("data/ffsmInput.ods");
 	QString iFile(MTHREAD->getInputFileName().c_str());
 	//cout << "PIPPO !!!!! " << MTHREAD->getInputFileName().c_str() << endl;
-	QString oDir((MTHREAD->getBaseDirectory()+"tempInput").c_str());
+    QString oDir((MTHREAD->getBaseDirectory()+"tempInput-"+MTHREAD->getScenarioName()).c_str());
 	string forDataCachedFilename = MTHREAD->getBaseDirectory()+"cachedInput/forData.csv";
 	string prodDataCachedFilename = MTHREAD->getBaseDirectory()+"cachedInput/prodData.csv";
 	
@@ -1300,7 +1300,7 @@ ModelData::loadInput(){
 	}
 	
 	// loading input file into memory...
-	string inputXMLFileName = MTHREAD->getBaseDirectory()+"tempInput/content.xml";
+    string inputXMLFileName = MTHREAD->getBaseDirectory()+"tempInput-"+MTHREAD->getScenarioName()+"/content.xml";
 	//string inputXMLFileName = MTHREAD->getBaseDirectory()+"test/content.xml";
 	//cout << "inputXMLFileName: " << inputXMLFileName << endl;
 	//mainDocument = new InputDocument();
@@ -1638,7 +1638,7 @@ Revenues at years n will be transforemed as average year rate as
 
 av.y.rev = rev(n)/ ( (1+ir)^(n-1)+(1+ir)^(n-2)+(1+ir)^(n-3)+...+(1+ir)^(n-n) )
 
-Objective is to have the present value of the final harvestin (A) equal to the sum pf the present values of yearly activities (B):
+Objective is to have the present value of the final harvest (A) equal to the sum pf the present values of yearly activities (B):
 
 \image html diagram_calculateAnnualisedEquivalent.png "Comparing present values" width=10cm
 
@@ -1647,6 +1647,9 @@ Objective is to have the present value of the final harvestin (A) equal to the s
 \f[ A/(1+r)^n = B * ( 1/(1+r)^1 + 1/(1+r)^2 + … + 1/(1+r)^n ) \f]
 \f[ A/(1+r)^n = B * ( (1+r)^(n-1) + (1+r)^(n-2) + … + (1+r)^(n-n) ) \f]
 \f[ B = A / ( (1+r)^(n-1) + (1+r)^(n-2) + … + (1+r)^(n-n) ) \f]
+
+20131204. Changed for the equivalent but simpler eai = rev(t)*i / ((1+i)^t-1)
+
 */
 double
 ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
@@ -1662,7 +1665,12 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
 	//);
 	if(years_h<0) return 0.;
 	if(years_h==0) return amount_h;
-	double ir = getDoubleSetting("ir");
+	double ir = getDoubleSetting("ir");    
+    double eai = amount_h * ir / (pow(1.0+ir,years_h)-1.0);
+
+    return eai;
+
+    /*
 	vector <double> df_by;
 	for(int y=0;y<years_h;y++){
 		double df;
@@ -1672,12 +1680,14 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
 			df = df_by.at(y-1)+pow((1+ir),y);
 		}
 		if (y==years_h-1) {
+         cout << eai << "   " << amount_h/df << endl;
 		 return amount_h/df; // big bug 20120904
 		}
 		df_by.push_back(df);
 	}
 	exit(1);
 	return 0; // never reached, just to avoid compilation warnings
+    */
 }
 
 double
