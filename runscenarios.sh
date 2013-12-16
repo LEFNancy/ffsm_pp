@@ -10,7 +10,7 @@
 ./ffsm -c -s vRegFromHr > logs/vRegFromHr.txt &
 ./ffsm -c -s vRegEnd075 > logs/vRegEnd075.txt &
 ./ffsm -c -s withVariance > logs/withVariance.txt &
-./ffsm -c -s withRisk06 > logs/withRisk06.txt &
+./ffsm -c -s withRisk06 > logs/withRisk06.txt
 ./ffsm -c -s withRisk08 > logs/withRisk08.txt
 ./ffsm -c -s withRisk10 > logs/withRisk10.txt
 
