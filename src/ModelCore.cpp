@@ -677,7 +677,7 @@ ModelCore::cacheSettings(){
 }
 
 /**
-Computing some fully exogenous parameters tat require complex operations, e.g. cumulative time of passage or volume per hectare.
+Computing some fully exogenous parameters that require complex operations, e.g. cumulative time of passage or volume per hectare.
 This happen at the very beginning of the init period and after each simulated year
 */
 void
@@ -710,10 +710,12 @@ ModelCore::computeCumulativeData(){
 				Will forest owners behave adaptively believing the time of passage between diameter classes will be like the observed one at time they make decision (0) or they will have full expectations believing forecasts (1) or something in the middle ?
 For compatibility with the GAMS code, a -1 value means using initial simulation tp values (fixed cumTp)."
 				*/
-				vector <double> cumTp_temp;     // cumulative time of passage to REACH a diameter class (tp is to LEAVE to the next one)
-				vector <double> vHa_temp;       // volume at hectar by each diameter class [m^3/ha]
-				vector <double> cumTp_exp_temp; // "expected" version of cumTp
-				vector <double> vHa_exp_temp;   // "expected" version of vHa
+                vector <double> cumTp_temp;        // cumulative time of passage to REACH a diameter class (tp is to LEAVE to the next one)
+                vector <double> vHa_temp;          // volume at hectar by each diameter class [m^3/ha]
+                vector <double> cumAlive_temp;     // cumulated alive rate to reach a given diameter class
+                vector <double> cumTp_exp_temp;    // "expected" version of cumTp
+                vector <double> vHa_exp_temp;      // "expected" version of vHa
+                vector <double> cumAlive_exp_temp; // "expected" version of cumMort
 
 				MD->setErrorLevel(MSG_NO_MSG); // as otherwise on 2007 otherwise sfd() will complain that is filling multiple years (2006 and 2007)
 				for (uint u=0; u<dClasses.size(); u++){
@@ -721,40 +723,54 @@ For compatibility with the GAMS code, a -1 value means using initial simulation 
 					double cumTp_u, cumTp_u_exp, cumTp_u_noExp, cumTp_u_fullExp;
 					double vHa_u, vHa_u_exp, vHa_u_noExp, vHa_u_fullExp, beta, beta_exp, beta_noExp, beta_fullExp, mort, mort_exp, mort_noExp, mort_fullExp;
 					double tp_u, tp_exp;
+                    double cumAlive_u, cumAlive_exp_u;
 
 					if(u==0) {
 						// first diameter class.. expected  and real values are the same (0)
 						cumTp_u = 0.;
 						vHa_u   = 0.;
+                        cumAlive_u = 1.;
 						cumTp_temp.push_back(cumTp_u);
 						cumTp_exp_temp.push_back(cumTp_u);
 						vHa_temp.push_back(vHa_u);
 						vHa_exp_temp.push_back(vHa_u);
+                        vHa_temp.push_back(vHa_u);
+                        vHa_exp_temp.push_back(vHa_u);
+                        cumAlive_temp.push_back(cumAlive_u);
+                        cumAlive_exp_temp.push_back(cumAlive_u);
 						sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
 						sfd(cumTp_u,"cumTp_exp",regId,ft,dc,DATA_NOW,true);
 						sfd(vHa_u,  "vHa",regId,ft,dc,DATA_NOW,true);
 						sfd(vHa_u,  "vHa_exp",regId,ft,dc,DATA_NOW,true);
+                        sfd(cumAlive_u,"cumAlive",regId,ft,dc,DATA_NOW,true);
+                        sfd(cumAlive_u,"cumAlive_exp",regId,ft,dc,DATA_NOW,true);
 					} else {
 						// other diameter classes.. first dealing with real values and then with expected ones..
 						// real values..
 						cumTp_u = cumTp_temp[u-1] + gfd("tp",regId,ft,dClasses[u-1],thisYear); // it adds to the time of passage to reach the previous diameter class the time of passage that there should be to reach this diameter class in the year where the previous diameter class will be reached
 						if (u==1){
 							vHa_u = gfd("entryVolHa",regId,ft,"",thisYear);
+                            mort = 0.; // not info about mortality first diameter class ("00")
 						} else {
 							mort = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear),gfd("tp",regId,ft,dClasses[u-1],thisYear)); // mortality of the previous diameter class
-							beta = gfd("betaCoef",regId,ft,dc, thisYear);
+                            beta = gfd("betaCoef",regId,ft,dc, thisYear);
 							vHa_u = vHa_temp[u-1]*beta*(1-mort);
 						}
+                        cumAlive_u = max(0.,cumAlive_temp[u-1]*(1-mort));
+                        cumAlive_temp.push_back(cumAlive_u);
 						cumTp_temp.push_back(cumTp_u);
 						vHa_temp.push_back(vHa_u);
 						sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
 						sfd(vHa_u,"vHa",regId,ft,dc,DATA_NOW,true);
+                        sfd(cumAlive_u,"cumAlive",regId,ft,dc,DATA_NOW,true);
+
 						// expected values..
 						if (expType == -1){
 							cumTp_u_exp = cumTp_exp_temp[u-1]+gfd("tp",regId,ft,dClasses[u-1],firstYear); // it adds to the time of passage to reach the previous diameter class the time of passage that there should be to reach this diameter class in the year where the previous diameter class will be reached
 							cumTp_exp_temp.push_back(cumTp_u_exp);
 							if(u==1) {
 								vHa_u_exp = gfd("entryVolHa",regId,ft,"",firstYear);
+                                mort_exp = 0.; // not info about mortality first diameter class ("00")
 							} else {
 								mort_exp  = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], firstYear),gfd("tp",regId,ft,dClasses[u-1],firstYear)) ; // mortality rate of previous diameter class
 								beta_exp  = gfd("betaCoef",regId,ft,dc, firstYear);
@@ -769,6 +785,7 @@ For compatibility with the GAMS code, a -1 value means using initial simulation 
 								vHa_u_noExp   = gfd("entryVolHa",regId,ft,"",DATA_NOW);
 								vHa_u_fullExp = gfd("entryVolHa",regId,ft,"",thisYear+ceil(cumTp_u));
 								vHa_u_exp     = vHa_u_fullExp*expType+vHa_u_noExp*(1-expType);
+                                mort_exp      = 0. ;
 							} else {
 								mort_noExp   = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW),cumTp_exp_temp[u]-cumTp_exp_temp[u-1]);
 								mort_fullExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_temp[u-1])),cumTp_exp_temp[u]-cumTp_exp_temp[u-1]); // mortality of the previous diameter class
@@ -780,8 +797,21 @@ For compatibility with the GAMS code, a -1 value means using initial simulation 
 							}
 						}
 						vHa_exp_temp.push_back(vHa_u_exp);
+                        cumAlive_exp_u = max(0.,cumAlive_exp_temp[u-1]*(1-mort_exp));
+                        cumAlive_exp_temp.push_back(cumAlive_exp_u);
 						sfd(cumTp_u_exp,"cumTp_exp",regId,ft,dc,DATA_NOW,true);
 						sfd(vHa_u_exp,  "vHa_exp",regId,ft,dc,DATA_NOW,true);
+                        sfd(cumAlive_exp_u,"cumAlive_exp",regId,ft,dc,DATA_NOW,true);
+                        //sfd(cumMort_u_exp,  "cumMort_exp",regId,ft,dc,DATA_NOW,true);
+
+                        //cout << "********" << endl;
+                        //cout << "dc: " << dClasses[u] << endl ;
+                        //cout << "mort: " << mort << endl;
+                        //cout << "mort_exp: " << mort_exp << endl;
+                        //cout << "cumAlive: " << cumAlive_u << endl;
+                        //cout << "cumAlive_exp: " << cumAlive_exp_u << endl;
+
+
 					}
 
 				} // end of each diam class

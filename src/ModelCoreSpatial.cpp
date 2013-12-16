@@ -493,6 +493,7 @@ ModelCoreSpatial::runManagementModule(){
 				//	          );
 				double hV_byFT = 0.; // gfd("hV",regId,ft,DIAM_PROD); // it must include only final harvested products in order to act as weightering agent
 				double expReturns = 0.;
+                int optDc; // "optimal diameter class", the one on which the expected returns are computed
 
 				for (uint u=0; u<dClasses.size(); u++){
 					string dc = dClasses[u];
@@ -512,37 +513,43 @@ ModelCoreSpatial::runManagementModule(){
 							//double pwor    = gpd("pl",99999,priProducts[pp]);
 							double raw_amount = finalHarvestFlag*pw*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
 							double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
-							if (anualised_amount>expReturns) {expReturns=anualised_amount;}
+                            if (anualised_amount>expReturns) {
+                                expReturns=anualised_amount;
+                                optDc = u;
+                            }
 						}
 					}
 				} else { // some harvested from this pixel we weight each products/diameter class combination expected returns with the actual harvested
-					for (uint u=0; u<dClasses.size(); u++){
-						//vector <double> expReturnsPondCoef_byPrd;
-						string dc = dClasses[u];
-						double vHa         = px->vHa_exp.at(j).at(u);
-						double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
-						double cumTp_u = px->cumTp_exp.at(j).at(u);
-						for (uint pp=0;pp<priProducts.size();pp++){
-							double pw    = gpd("pw",regId,priProducts[pp]);
-							//double pl    = gpd("pl",regId,priProducts[pp]);
-							//double pwor    = gpd("pl",99999,priProducts[pp]);
-							double hVol_byUPp = px->hVol_byPrd.at(j).at(u).at(pp); // harvested volumes for this product, diameter class on this region and forest type
-							//double raw_amount_old = pw*hv2fa*    hVol_byUPp/hV_byFT; // old and wrong. it was in €/m^4
-							double raw_amount = finalHarvestFlag*pw*vHa* hVol_byUPp/hV_byFT; // now in €/ha if there is also thining volumes in hV_byFT, I underestimate expected returns !! T.O.D.O change it !! DONE, hV_byFT now excludes thinning volumes
-							/// see @ModelData::calculateAnnualisedEquivalent
-							double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u); //comTp is on diamClasses, u here is on pDiamClasses
-							//cout << "reg|ft|dc|prd|raw amount|ann.amount|tp|hV|hVTot|pw|pl|pW|vHa|fHFlag;";
-							//cout << regId <<";"<< ft <<";"<< dc <<";" << priProducts[pp] <<";" << raw_amount <<";"<< anualised_amount<<";";
-							//cout << cumTp_u <<";"<< hVol_byUPp << ";" << hV_byFT << ";" << pw << ";" << pl << ";" << pwor << ";" << vHa << ";" << finalHarvestFlag << endl;
-							expReturns += anualised_amount;
-						}
-						//expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
-					}
+                    msgOut(MSG_CRITICAL_ERROR, "The option \"weightedAverageExpectedReturns\" is no longer supported!");
+//					for (uint u=0; u<dClasses.size(); u++){
+//						//vector <double> expReturnsPondCoef_byPrd;
+//						string dc = dClasses[u];
+//						double vHa         = px->vHa_exp.at(j).at(u);
+//						double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
+//						double cumTp_u = px->cumTp_exp.at(j).at(u);
+//						for (uint pp=0;pp<priProducts.size();pp++){
+//							double pw    = gpd("pw",regId,priProducts[pp]);
+//							//double pl    = gpd("pl",regId,priProducts[pp]);
+//							//double pwor    = gpd("pl",99999,priProducts[pp]);
+//							double hVol_byUPp = px->hVol_byPrd.at(j).at(u).at(pp); // harvested volumes for this product, diameter class on this region and forest type
+//							//double raw_amount_old = pw*hv2fa*    hVol_byUPp/hV_byFT; // old and wrong. it was in €/m^4
+//							double raw_amount = finalHarvestFlag*pw*vHa* hVol_byUPp/hV_byFT; // now in €/ha if there is also thining volumes in hV_byFT, I underestimate expected returns !! T.O.D.O change it !! DONE, hV_byFT now excludes thinning volumes
+//							/// see @ModelData::calculateAnnualisedEquivalent
+//							double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u); //comTp is on diamClasses, u here is on pDiamClasses
+//							//cout << "reg|ft|dc|prd|raw amount|ann.amount|tp|hV|hVTot|pw|pl|pW|vHa|fHFlag;";
+//							//cout << regId <<";"<< ft <<";"<< dc <<";" << priProducts[pp] <<";" << raw_amount <<";"<< anualised_amount<<";";
+//							//cout << cumTp_u <<";"<< hVol_byUPp << ";" << hV_byFT << ";" << pw << ";" << pl << ";" << pwor << ";" << vHa << ";" << finalHarvestFlag << endl;
+//							expReturns += anualised_amount;
+//						}
+//						//expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
+//					}
 				} // end of hV_byFT!=0
+
                 if(MD->getBoolSetting("heterogeneousRiskAversion")){
 					double ra = px->getDoubleValue("ra");
-                    double tStDev = gfd("tStDev",regId,ft,"",DATA_NOW);
-                    double tCV = gfd("tCV",regId,ft,"",DATA_NOW);
+                    //double tStDev = gfd("tStDev",regId,ft,"",DATA_NOW);
+                    //double tCV = gfd("tCV",regId,ft,"",DATA_NOW);
+                    double cumMort = 1-px->cumAlive_exp.at(j).at(optDc);
                     //cout << "******" << endl;
                     //cout << "- pixID: " << px->getID() << endl;
                     //cout << "- ft: " << ft << endl;
@@ -552,7 +559,7 @@ ModelCoreSpatial::runManagementModule(){
                     //cout << "- tCV: " << tCV << endl;
 					double origExpReturns = expReturns;
                     //expReturns = origExpReturns - ra*tStDev;
-                    expReturns = origExpReturns * (1.0 - ra*tCV);
+                    expReturns = origExpReturns * (1.0 - ra*cumMort);
                     //cout << "- new expReturn: " << expReturns << endl;
 				}
 				px->expectedReturns.push_back(expReturns);
@@ -676,9 +683,12 @@ ModelCoreSpatial::computeCumulativeData(){
 
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
+            px->cumTp.clear();
 			px->cumTp_exp.clear();
 			px->vHa_exp.clear();
 			px->vHa.clear();
+            px->cumAlive.clear();
+            px->cumAlive_exp.clear();
 
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
@@ -703,8 +713,10 @@ ModelCoreSpatial::computeCumulativeData(){
 				//);
 				vector <double> cumTp_temp;     // cumulative time of passage to REACH a diameter class (tp is to LEAVE to the next one)
 				vector <double> vHa_temp;       // volume at hectar by each diameter class [m^3/ha]
-				vector <double> cumTp_exp_temp; // expected version of cumTp_temp
+                vector <double> cumAlive_temp;     // cumulated alive rate to reach a given diameter class
+                vector <double> cumTp_exp_temp; // expected version of cumTp_temp
 				vector <double> vHa_exp_temp;   // expected version of vHa_temp
+                vector <double> cumAlive_exp_temp; // "expected" version of cumMort
 
 				MD->setErrorLevel(MSG_NO_MSG); // as otherwise on 2007 otherwise sfd() will complain that is filling multiple years (2006 and 2007)
 				for (uint u=0; u<dClasses.size(); u++){
@@ -712,6 +724,7 @@ ModelCoreSpatial::computeCumulativeData(){
 					double cumTp_u, cumTp_u_exp, cumTp_u_noExp, cumTp_u_fullExp;
 					double tp, tp_exp, tp_noExp, tp_fullExp;
 					double vHa_u, vHa_u_exp, vHa_u_noExp, vHa_u_fullExp, beta, beta_exp, beta_noExp, beta_fullExp, mort, mort_exp, mort_noExp, mort_fullExp;
+                    double cumAlive_u, cumAlive_exp_u;
 
 					// only cumTp is depending for the expectations, as it is what it is used by owner to calculate return of investments.
 					// the tp, beta and mort coefficients instead are the "real" ones as predicted by scientist for that specific time
@@ -720,10 +733,13 @@ ModelCoreSpatial::computeCumulativeData(){
 						// first diameter class.. expected  and real values are the same (0)
 						cumTp_u = 0.;
 						vHa_u   = 0.;
+                        cumAlive_u = 1.;
 						cumTp_temp.push_back(cumTp_u);
 						vHa_temp.push_back(vHa_u);
 						cumTp_exp_temp.push_back(cumTp_u);
 						vHa_exp_temp.push_back(vHa_u);
+                        cumAlive_temp.push_back(cumAlive_u);
+                        cumAlive_exp_temp.push_back(cumAlive_u);
 					} else {
 						// other diameter classes.. first dealing with real values and then with expected ones..
 						// real values..
@@ -732,11 +748,14 @@ ModelCoreSpatial::computeCumulativeData(){
 						cumTp_u = cumTp_temp[u-1] + tp;
 						if (u==1){
 							vHa_u = gfd("entryVolHa",regId,ft,"",thisYear);
+                            mort = 0.; // not info about mortality first diameter class ("00")
 						} else {
 							mort = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear)*mortCoef_multiplier_now,tp); // mortality of the previous diameter class
 							beta = gfd("betaCoef",regId,ft,dc, thisYear)*betaCoef_multiplier_now;
 							vHa_u = vHa_temp[u-1]*beta*(1-mort);
 						}
+                        cumAlive_u = max(0.,cumAlive_temp[u-1]*(1-mort));
+                        cumAlive_temp.push_back(cumAlive_u);
 						cumTp_temp.push_back(cumTp_u);
 						vHa_temp.push_back(vHa_u);
 						// expected values..
@@ -752,6 +771,7 @@ ModelCoreSpatial::computeCumulativeData(){
 							cumTp_exp_temp.push_back(cumTp_u_exp);
 							if(u==1) {
 								vHa_u_exp = gfd("entryVolHa",regId,ft,"",firstYear);
+                                mort_exp = 0.; // not info about mortality first diameter class ("00")
 							} else {
 								mort_exp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], firstYear)*mortCoef_multiplier_t0,tp_exp); // mortality rate of previous diameter class
 								beta_exp = gfd("betaCoef",regId,ft,dc, firstYear)*betaCoef_multiplier_t0;
@@ -769,6 +789,7 @@ ModelCoreSpatial::computeCumulativeData(){
 								vHa_u_noExp   = gfd("entryVolHa",regId,ft,"",DATA_NOW);
 								vHa_u_fullExp = gfd("entryVolHa",regId,ft,"",thisYear+ceil(cumTp_u));
 								vHa_u_exp = vHa_u_fullExp*expType+vHa_u_noExp*(1-expType);
+                                mort_exp = 0.; // not info about mortality first diameter class ("00")
 							} else {
 								mort_noExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW)*mortCoef_multiplier_now, tp_noExp); // mortCoef is a yearly value. Mort coeff between class is 1-(1-mortCoeff)^tp
 								double mortCoef_multiplier_dynamic = px->getMultiplier("mortCoef_multiplier",ft,thisYear+ceil(cumTp_exp_temp[u-1]));
@@ -782,6 +803,13 @@ ModelCoreSpatial::computeCumulativeData(){
 							}
 						}
 						vHa_exp_temp.push_back(vHa_u_exp);
+                        cumAlive_exp_u = max(0.,cumAlive_exp_temp[u-1]*(1-mort_exp));
+                        cumAlive_exp_temp.push_back(cumAlive_exp_u);
+
+                        //cout << "********" << endl;
+                        //cout << "dc;mort;cumAlive;cumAlive_exp "<< endl ;
+                        //cout << dClasses[u] << ";"<< mort << ";" << cumAlive_u << ";" << cumAlive_exp_u << endl;
+
 					}
 					// debug stuff on vHa
 					//double vHa_new = gfd("vHa",regId,ft,dc,DATA_NOW);
@@ -792,8 +820,11 @@ ModelCoreSpatial::computeCumulativeData(){
 				} // end of each diam class
 				px->cumTp.push_back(cumTp_temp);
 				px->vHa.push_back(vHa_temp);
+                px->cumAlive.push_back(cumAlive_temp);
 				px->cumTp_exp.push_back(cumTp_exp_temp);
 				px->vHa_exp.push_back(vHa_exp_temp);
+                px->cumAlive_exp.push_back(cumAlive_exp_temp);
+
 			} // end of each ft
 		} // end of each pixel
 	} // end of each region
@@ -829,6 +860,8 @@ ModelCoreSpatial::resetPixelValues(){
 			px->vHa.clear();
 			px->cumTp_exp.clear();
 			px->vHa_exp.clear();
+            px->cumAlive.clear();
+            px->cumAlive_exp.clear();
 
 		}
 	}

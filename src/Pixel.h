@@ -114,11 +114,10 @@ public:
 	vector <vector <double> >                   tp;
 	vector <vector <double> >                cumTp; ///< This is time of passage to REACH a diameter class (while the exogenous tp by diameter class is the time of passage to LEAVE to the next d class)
 	vector <vector <double> >                  vHa; ///< Volume at hectar by each diameter class [m^3/ha]
+    vector <vector <double> >             cumAlive; ///< Cumulative prob of remaining alive at beginnin of a given diam class
 	vector <vector <double> >            cumTp_exp; ///< This is the **expected** version of cumTp, used for calculating profits
 	vector <vector <double> >              vHa_exp; ///< This is the **expected** version of vHa, used for calculating profits
-
-
-
+    vector <vector <double> >         cumAlive_exp; ///< This is the **expected** version of cumAlive, used for calculating profits
 
 private:	
 	map<string, double>            values;  ///< Map of values for each layer
