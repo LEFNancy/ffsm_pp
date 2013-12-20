@@ -201,6 +201,7 @@ Pixel::correctInputMultiplier (const string& multiplierName, const string& forNa
 	string search_for = multiplierName+"#"+forName+"#";
 	for (std::map<string,double>::iterator it=values.lower_bound(search_for); it!=values.end(); ++it){
 		if (it->first.compare(0, search_for.size(), search_for) == 0){
+            //cout << ID << ";" << forName << ";" << coefficient << endl;
 			it->second = it->second * coefficient;
 		}
 	}

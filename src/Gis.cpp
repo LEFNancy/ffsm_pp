@@ -115,7 +115,8 @@ Gis::applySpatialStochasticValues(){
 	vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
 	//ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
 	//vector<Pixel*> regPixels = region->getMyPixels();
-
+    //double sumc = 0;
+    //double nc = 0;
 	for(uint i=0;i<regIds2.size();i++){
 		ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
 		vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
@@ -125,10 +126,16 @@ Gis::applySpatialStochasticValues(){
 			normal_distribution<double> d(1,sStDev); // default any how to double
 			for (uint z=0;z<rpx.size();z++){
 				double c = d(*MTHREAD->gen);
+                //cout << regIds2[i] << ";" <<sStDev <<";"<< c <<endl
 				rpx[z]->correctInputMultiplier("tp_multiplier",fTypes[j],c);
+                //sumc += c;
+                //nc ++;
 			}
 		}
 	}
+    //double avg_c = sumc/nc;
+    //cout << "Avg coeff: " << avg_c << "(on " << nc << " records)" << endl;
+    //if(avg_c>1) {exit(0);}
 }
 
 /**

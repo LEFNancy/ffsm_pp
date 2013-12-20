@@ -677,6 +677,12 @@ ModelCoreSpatial::computeCumulativeData(){
 	msgOut(MSG_INFO, "Starting computing some cumulative values..");
 	int thisYear     =  MTHREAD->SCD->getYear();
 
+//    double sumCumTP=0;
+//    double sumVHa = 0;
+//    double count = 0;
+//    double avg_sumCumTp;
+//    double avg_sumVHa;
+
 	for(uint r2= 0; r2<regIds2.size();r2++){
 		int regId = regIds2[r2];
 		regPx = MTHREAD->MD->getRegion(regId)->getMyPixels();
@@ -817,7 +823,9 @@ ModelCoreSpatial::computeCumulativeData(){
 					//cout << "Reg|Ft|dc|vHa (new)|1/hv2fa (old):   " << regId << " | " << ft;
 					//cout << " | " << dc << " | " << vHa_new << " | " << 1/hv2fa_old  << endl;
 
-				} // end of each diam class
+                } // end of each diam
+                //double pixID = px->getID();
+                //cout << thisYear << ";"<< regIds2[r2] << ";" << pixID << ";" << ft << ";" << cumTp_exp_temp[3] << ";" << vHa_exp_temp[3] << endl;
 				px->cumTp.push_back(cumTp_temp);
 				px->vHa.push_back(vHa_temp);
                 px->cumAlive.push_back(cumAlive_temp);
@@ -825,10 +833,19 @@ ModelCoreSpatial::computeCumulativeData(){
 				px->vHa_exp.push_back(vHa_exp_temp);
                 px->cumAlive_exp.push_back(cumAlive_exp_temp);
 
+                //sumCumTP += cumTp_exp_temp[3];
+                //sumVHa += vHa_exp_temp[3];
+                //count ++;
+
+
 			} // end of each ft
 		} // end of each pixel
 	} // end of each region
 	MD->setErrorLevel(MSG_ERROR);
+    //avg_sumCumTp = sumCumTP/ count;
+    //avg_sumVHa = sumVHa / count;
+    //cout << "Avg sumCumTp_35 and sumVha_35: " << avg_sumCumTp << " and " << avg_sumVHa << " (" << count << ")" << endl;
+    //exit(0);
 }
 
 void

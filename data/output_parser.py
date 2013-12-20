@@ -20,10 +20,12 @@ forIFiles = [
   'output_vRegFromHr/results/forestData.csv',
   'output_nonspatial/results/forestData.csv',
   'output_withRisk06/results/forestData.csv',
-  'output_withRisk08/results/forestData.csv',
-  'output_nonspatial/results/forestData.csv',  
+  'output_withRisk08/results/forestData.csv', 
   'output_withRisk10/results/forestData.csv',
   'output_withVariance/results/forestData.csv',
+  'output_withSpVarianceAndRisk/results/forestData.csv',
+  'output_randomSpace/results/forestData.csv',
+  'output_randomSpaceAndRisk/results/forestData.csv',
 ]
 
 scenarios = {
@@ -32,10 +34,53 @@ scenarios = {
    'vRegEnd070':   '#ff7200',
    'vRegFixed':    '#416c47',
    'vRegFromHr':   '#a1a612',
-   'withRisk06':   '#5ba5c4',
-   'withRisk08':   '#5059b7',
+   'withRisk06':   '#6dcaf1',
+   'withRisk08':   '#6c77e7',
    'withRisk10':   '#0015db',
    'withVariance': '#d4a4d7',
+   'withSpVarianceAndRisk': '#dbda6a',
+  #randomSpace scenarios
+   'random_117558':   '#d9d9d9',
+   'random_151813':   '#d9d9d9',
+   'random_152293':   '#d9d9d9',
+   'random_186692':   '#d9d9d9',
+   'random_190673':   '#d9d9d9',
+   'random_305289':   '#d9d9d9',
+   'random_317517':   '#d9d9d9',
+   'random_336080':   '#d9d9d9',
+   'random_349314':   '#d9d9d9',
+   'random_486049':   '#d9d9d9',
+   'random_505139':   '#d9d9d9',
+   'random_507065':   '#d9d9d9',
+   'random_514968':   '#d9d9d9',
+   'random_529216':   '#d9d9d9',
+   'random_663867':   '#d9d9d9',
+   'random_709506':   '#d9d9d9',
+   'random_767506':   '#d9d9d9',
+   'random_861718':   '#d9d9d9',
+   'random_888399':   '#d9d9d9',
+   'random_985589':   '#d9d9d9', 
+   #randomSpaceAndRisk scenarios
+   'random_10225':    '#d9d9d9',
+   'random_113183':   '#d9d9d9',
+   'random_124177':   '#d9d9d9',
+   'random_138725':   '#d9d9d9',
+   'random_144223':   '#d9d9d9',
+   'random_17935':    '#d9d9d9',
+   'random_221906':   '#d9d9d9',
+   'random_232901':   '#d9d9d9',
+   'random_269220':   '#d9d9d9',
+   'random_292783':   '#d9d9d9',
+   'random_465259':   '#d9d9d9',
+   'random_465275':   '#d9d9d9',
+   'random_481647':   '#d9d9d9',
+   'random_499587':   '#d9d9d9',
+   'random_517382':   '#d9d9d9',
+   'random_571690':   '#d9d9d9',
+   'random_596099':   '#d9d9d9',
+   'random_640941':   '#d9d9d9',
+   'random_758961':   '#d9d9d9',
+   'random_950809':   '#d9d9d9',
 }
 
 years = ['2007','2008','2009','2010','2011','2012','2013','2014','2015','2020','2030','2040','2050','2060','2070','2080','2090','2100']
@@ -56,9 +101,9 @@ regions = {'11042': 'Alsace', '11061': 'Aquitaine', '11072': 'Auvergne', '11025'
 
 # key: var short name
 # value: turple with long name, unit and optionally variable to act for ponderation and name of aggregated variable
-variables = {'hV': ['Harvested Volumes','Mm^3'],
-	     'vReg': ['Regeneration Volumes','Mm^3'],
-	     'vol': ['Forest Volumes', 'Mm^3'],
+variables = {'hV': ['Harvested Volumes', r"$Mm^3$"],
+	     'vReg': ['Regeneration Volumes', r"$Mm^3$"],
+	     'vol': ['Forest Volumes', r"$Mm^3$"],
 	     'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
 	     'forArea': ['Forest area','M ha ??']}
 
@@ -234,6 +279,11 @@ def main():
 # =============================================================================
 def plotMultivariable(scenarios_h, variables_h, region, title, filename):
  
+  #key_reference =  '11023', 'vReg', 'reference', 'broadL_highF', '2040'
+  #key_nonspatial =  '11023', 'vReg', 'nonspatial', 'broadL_highF', '2040'
+  #key_withVariance =  '11023', 'vReg', 'withVariance', 'broadL_highF', '2040'
+  #print "test: " + str(idata[key_reference]) + "   " + str(idata[key_nonspatial]) + "   " + str(idata[key_withVariance])
+  
   nvar = len(variables_h)
   nscen = len(scenarios_h)
   #plt.figure(1)
@@ -258,7 +308,7 @@ def plotMultivariable(scenarios_h, variables_h, region, title, filename):
 	y = odata[key]
 	plt.plot(x, y, serieLineType, label=serieName, linewidth=serieWidth, color=serieColor)
   #plt.subplots_adjust(hspace=0.6)
-  plt.savefig(chartoutdir+"/"+filename+"_"+region+".png", bbox_inches='tight', dpi=300)
+  plt.savefig(chartoutdir+"/"+filename+"_"+region+".pdf", bbox_inches='tight', dpi=300)
   #plt.show()
   plt.close()
         
@@ -298,7 +348,7 @@ def plotLegend(scenarios_h, title, filename):
       plt.plot(dummyx, dummyy, serieLineType, label=serieName, linewidth=serieWidth, color=serieColor)
   handles, labels = ax.get_legend_handles_labels()
   ax.legend(handles, labels, ncol=3, shadow=False, title="Legend")
-  plt.savefig(chartoutdir+"/"+filename+".png", bbox_inches='tight', pad_inches=0.1, dpi=300) 
+  plt.savefig(chartoutdir+"/"+filename+".pdf", bbox_inches='tight', pad_inches=0.1, dpi=300) 
   #plt.show()
   plt.close()
   
@@ -313,13 +363,16 @@ def plotLegend(scenarios_h, title, filename):
 def printCharts():
   print "Printing charts.."
   
-  plotLegend(['nonspatial','reference','vRegEnd070','vRegFixed','vRegFromHr','withRisk06','withRisk08','withRisk10','withVariance'],'Scenarios Legend','legend')
-  plotMultivariable(['reference','vRegEnd070','vRegFixed','vRegFromHr'],['expReturns','vReg','vol','hV'],'11000','Management effect','management')
-  plotMultivariable(['reference','withRisk06','withRisk08','withRisk10'],['expReturns','vReg','vol','hV'],'11000','Risk effect','risk')
-  plotMultivariable(['nonspatial','reference','withVariance'],['expReturns','vReg','vol','hV'],'11000','Spatial explicit simulations','space')
-
+  #plotLegend(['nonspatial','reference','vRegEnd070','vRegFixed','vRegFromHr','withRisk06','withRisk08','withRisk10','withVariance'],'Scenarios Legend','legend')
   
-  
+  #for region in regions.keys():
+    #plotMultivariable(['reference','vRegEnd070','vRegFixed','vRegFromHr'],['expReturns','vReg','vol','hV'],region,'Management effect','management')
+    #plotMultivariable(['reference','withRisk06','withRisk08','withRisk10'],['expReturns','vReg','vol','hV'],region,'Risk effect','risk')
+    #plotMultivariable(['nonspatial','reference','withVariance'],['expReturns','vReg','vol','hV'],region,'Spatial explicit simulations','space')
+    #plotMultivariable(['reference','withSpVarianceAndRisk'],['expReturns','vReg','vol','hV'],region,'Combined effect of risk and spatial heterogeneity','spaceandrisk')
+    
+  plotMultivariable(['random_117558', 'random_151813', 'random_152293', 'random_186692', 'random_190673', 'random_305289', 'random_317517', 'random_336080', 'random_349314', 'random_486049', 'random_505139', 'random_507065', 'random_514968', 'random_529216', 'random_663867', 'random_709506', 'random_767506', 'random_861718', 'random_888399', 'random_985589','reference','withVariance'],['expReturns','vReg','vol','hV'],'11041','Random space','randomSpace')
+  plotMultivariable(['random_10225', 'random_113183', 'random_124177', 'random_138725', 'random_144223', 'random_17935', 'random_221906', 'random_232901', 'random_269220', 'random_292783', 'random_465259', 'random_465275', 'random_481647', 'random_499587', 'random_517382', 'random_571690', 'random_596099', 'random_640941', 'random_758961', 'random_950809','reference','withSpVarianceAndRisk'],['expReturns','vReg','vol','hV'],'11041','Random space and risk','randomSpaceAndRisk')  
   
   
 # =============================================================================  
