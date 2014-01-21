@@ -25,12 +25,12 @@ data/output/maps/integerListLayers
 data/output/maps/scenarioName
 data/output/maps/bitmaps/*
 data/output/maps/cats/*
-#data/output/tables/*
+data/output/tables/*
 data/output/charts/*.pdf
 data/output/charts/png/*.png
 data/output/optimisationLog.txt
 data/output/debugOut.csv
-#logs/*
+logs/*
 callgrind.out.*
 /libadolc-1.dll
 
