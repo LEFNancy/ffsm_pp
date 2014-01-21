@@ -52,6 +52,16 @@ ModelCore::runSimulationYear(){
 	runMarketModule();
 	computeCumulativeData();     // compute cumTp_exp, vHa_exp
 	runBiologicalModule();
+
+    /*double sl = gpd("sl",11041,'softWRoundW');
+    double pl = gpd("pl",11041,'softWRoundW');
+    double sa = gpd("sa",11041,'softWRoundW');
+    double pworld = gpd("pl", WL2,'softWRoundW');
+    double st = gpd("st",11041,'softWRoundW');
+    double pw = (sl*pl+sa*pworld)/st;
+    cout << thisYear <<
+    */
+
 	runManagementModule();
 	updateMapAreas();
 	MTHREAD->DO->print();
@@ -283,7 +293,7 @@ ModelCore::runMarketModule(){
 	} else {
 		//Number final_obj = application->Statistics()->FinalObjective();
 		cout << "***ERROR: MODEL DIDN'T SOLVE FOR THIS YEAR" << endl;
-		msgOut(MSG_ERROR, "Model DIDN'T SOLVE for this year");
+        msgOut(MSG_CRITICAL_ERROR, "Model DIDN'T SOLVE for this year");
 		// IMPORTANT! Don't place the next two lines above the msgOut() function or it will crash in windows if the user press the stop button
 		Index iter_count = application->Statistics()->IterationCount();
 		Number final_obj = application->Statistics()->FinalObjective();
@@ -460,6 +470,9 @@ ModelCore::runManagementModule(){
     bool weightedAverageExpectedReturns = MTHREAD->MD->getBoolSetting("weightedAverageExpectedReturns");
 
     //vector <vector < vector <vector <vector <double> > > > > expReturnsDebug; ///< l2_region, for type, d.c., pr prod, variable name
+    //cout << "year/dc/pp/eai/cumTp/vHa/pw" << endl;
+
+    int thisYear = MTHREAD->SCD->getYear();
 
 	for(uint i=0;i<regIds2.size();i++){
         vector < vector <vector <vector <double> > > >  expReturnsDebug_region;
@@ -512,7 +525,12 @@ ModelCore::runManagementModule(){
 						double pw    = gpd("pw",regId,priProducts[pp]);
 						double raw_amount = finalHarvestFlag*pw*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
 						double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
-						if (anualised_amount>expReturns) {expReturns=anualised_amount;}
+                        if (anualised_amount>expReturns) {
+                            expReturns=anualised_amount;
+                           // if (ft == "con_highF" && regId == 11041){
+                           //     cout << thisYear << "/" << dc << "/" << priProducts[pp] << "/" << anualised_amount << "/" << cumTp_u << "/" << vHa << "/" << pw << endl;
+                           // }
+                        }
                         if(outputLevel >= OUTVL_ALL){
                           expReturnsDebug_pp.push_back(0.0);
                           expReturnsDebug_pp.push_back(hV_byFT);

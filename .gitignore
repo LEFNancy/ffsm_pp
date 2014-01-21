@@ -4,9 +4,14 @@
 *~
 ffsm
 ffsm.exe
+ffsm_debug
+ffsm_debug.exe
 *.pro.user
+*.pro.user.*
 Makefile
 src/Makefile
+src/Makefile.Release
+src/Makefile.Debug
 src/moc_*
 src/qrc_resources.cpp
 src/ui_MainWindow.h
@@ -20,6 +25,12 @@ data/output/maps/integerListLayers
 data/output/maps/scenarioName
 data/output/maps/bitmaps/*
 data/output/maps/cats/*
+#data/output/tables/*
+data/output/charts/*.pdf
+data/output/charts/png/*.png
+data/output/optimisationLog.txt
+data/output/debugOut.csv
+#logs/*
 callgrind.out.*
 /libadolc-1.dll
 

@@ -29,6 +29,7 @@
 #include "ThreadManager.h"
 #include "ModelData.h"
 #include "Gis.h"
+#include "ModelRegion.h"
 
 //Testing random distribution, using some new in C++ random generator seeds..
 #include <iostream>
@@ -264,6 +265,20 @@ Sandbox::basicTest(){
 
 void
 Sandbox::fullTest(){
+
+    /*
+    // Testing the number of plots in the model
+    vector <ModelRegion*> regions = MTHREAD->MD->getAllRegions();
+    int total = 0;
+    cout << "*** Pixels by region:" << endl;
+    for (int i=0;i< regions.size();i++){
+        vector <Pixel*>  regpixels =   MTHREAD->GIS->getAllPlotsByRegion(*regions[i]);
+        cout << regions[i]->getRegLName() << ":  " << regpixels.size() << endl;
+        total += regpixels.size() ;
+    }
+    cout << "** Total:  " << total << endl;
+    exit(0);
+    */
 
 	/*
 	// Testing the new random distributions. Requires the pointer MTHREAD->gen to be initialised,

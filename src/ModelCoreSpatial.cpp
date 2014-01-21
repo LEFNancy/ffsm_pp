@@ -507,8 +507,8 @@ ModelCoreSpatial::runManagementModule(){
 						double vHa         = px->vHa_exp.at(j).at(u);
 						double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
 						double cumTp_u = px->cumTp_exp.at(j).at(u);
-						for (uint pp=0;pp<priProducts.size();pp++){
-							double pw    = gpd("pw",regId,priProducts[pp]);
+                        for (uint pp=0;pp<priProducts.size();pp++){
+                            double pw    = gpd("pw",regId,priProducts[pp]); // note that this is the OBSERVED price. If we call it at current year+cumTp_u we would have the expected price
 							//double pl    = gpd("pl",regId,priProducts[pp]);
 							//double pwor    = gpd("pl",99999,priProducts[pp]);
 							double raw_amount = finalHarvestFlag*pw*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
