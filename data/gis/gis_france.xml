@@ -138,6 +138,31 @@
 			<legendItem label="FR - France" rColor="130" gColor="70" bColor="180">11000</legendItem>
 		</legendItems>	
 	</layer>
+	<layer>
+		<name>dtm</name>
+		<label>Digital Terrain Model</label>
+		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
+		<readAtStart>true</readAtStart><!-- bool -->
+		<dynamicContent>false</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->
+		<dirName>gis/france/</dirName>
+		<fileName>dtm_8000m.grd</fileName>
+		<legendItems>
+			<legendItem label="0 - 100 m" rColor="255" gColor="255" bColor="255" minValue="0" maxValue="100">0</legendItem>
+			<legendItem label="100 - 200 m" rColor="240" gColor="240" bColor="240" minValue="100" maxValue="200">100</legendItem>
+			<legendItem label="200 - 300 m" rColor="220" gColor="220" bColor="220" minValue="200" maxValue="300">200</legendItem>
+			<legendItem label="300 - 400 m" rColor="200" gColor="200" bColor="200" minValue="300" maxValue="400">300</legendItem>
+			<legendItem label="400 - 500 m" rColor="175" gColor="175" bColor="175" minValue="400" maxValue="500">400</legendItem>
+			<legendItem label="500 - 600 m" rColor="150" gColor="150" bColor="150" minValue="500" maxValue="600">500</legendItem>
+			<legendItem label="600 - 700 m" rColor="125" gColor="125" bColor="125" minValue="600" maxValue="700">600</legendItem>
+			<legendItem label="700 - 800 m" rColor="100" gColor="100" bColor="100" minValue="700" maxValue="800">700</legendItem>
+			<legendItem label="800 - 900 m" rColor="075" gColor="075" bColor="075" minValue="800" maxValue="900">800</legendItem>
+			<legendItem label="900 - 1000 m" rColor="050" gColor="050" bColor="050" minValue="900" maxValue="1000">900</legendItem>
+			<legendItem label="over 1000 m" rColor="025" gColor="025" bColor="025" minValue="1000" maxValue="10000">1000</legendItem>
+		</legendItems>
+	</layer>
+	
+	
+	
 </gis>
 
 

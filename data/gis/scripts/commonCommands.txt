@@ -2,3 +2,8 @@
 
 # create a report of each activity by each dtm_classes
 r.report farmActivities_2011_healthCheck,dtm_classes units=h > report_farmActivities_by_altimetry.txt
+
+
+# to comute mortality multipliers based on region and dtm use
+r.mapcalc 'mortality_multiplier200 = if( (regions == 61 || regions == 62 || regions == 81 || regions == 82 || regions == 83 || regions == 71  ) && (dtm_nonulls <= 500), 2.0, 1.0)'
+
