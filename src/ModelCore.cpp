@@ -295,10 +295,10 @@ ModelCore::runMarketModule(){
 		cout << "***ERROR: MODEL DIDN'T SOLVE FOR THIS YEAR" << endl;
         msgOut(MSG_CRITICAL_ERROR, "Model DIDN'T SOLVE for this year");
 		// IMPORTANT! Don't place the next two lines above the msgOut() function or it will crash in windows if the user press the stop button
-		Index iter_count = application->Statistics()->IterationCount();
-		Number final_obj = application->Statistics()->FinalObjective();
-		int icount = iter_count;
-		double obj = final_obj;
+        //Index iter_count = application->Statistics()->IterationCount(); // sys error if model didn't solve
+        //Number final_obj = application->Statistics()->FinalObjective();
+        int icount = 0;
+        double obj = 0;
 		MTHREAD->DO->printOptLog(false, icount, obj);
 	}
 
@@ -752,8 +752,6 @@ For compatibility with the GAMS code, a -1 value means using initial simulation 
 						cumTp_exp_temp.push_back(cumTp_u);
 						vHa_temp.push_back(vHa_u);
 						vHa_exp_temp.push_back(vHa_u);
-                        vHa_temp.push_back(vHa_u);
-                        vHa_exp_temp.push_back(vHa_u);
                         cumAlive_temp.push_back(cumAlive_u);
                         cumAlive_exp_temp.push_back(cumAlive_u);
 						sfd(cumTp_u,"cumTp",regId,ft,dc,DATA_NOW,true);
@@ -885,8 +883,8 @@ ModelCore::updateMapAreas(){
 		for(uint j=0;j<nFTypes;j++){
 			string ft = fTypes[j];
 			double oldRegioForArea = reg->getValue("forArea_"+ft);
-			double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL);
-			double regArea = gfd("regArea",regId,ft,DIAM_ALL);
+            double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL)*10000; //20140206
+            double regArea = gfd("regArea",regId,ft,DIAM_ALL)*10000; //20140206
 			double newRegioForArea = oldRegioForArea + regArea - harvestedArea;
 			sfd(newRegioForArea,"forArea",regId,ft,"",DATA_NOW, true);
 			for(uint z=0;z<rpx.size();z++){

@@ -273,12 +273,12 @@ ModelCoreSpatial::runMarketModule(){
 	} else {
 				//Number final_obj = application->Statistics()->FinalObjective();
 		cout << "***ERROR: MODEL DIDN'T SOLVE FOR THIS YEAR" << endl;
-				msgOut(MSG_ERROR, "Model DIDN'T SOLVE for this year");
+                msgOut(MSG_CRITICAL_ERROR, "Model DIDN'T SOLVE for this year");
 				// IMPORTANT! Don't place the next two lines above the msgOut() function or it will crash in windows if the user press the stop button
-				Index iter_count = application->Statistics()->IterationCount();
-				Number final_obj = application->Statistics()->FinalObjective();
-				int icount = iter_count;
-				double obj = final_obj;
+                //Index iter_count = application->Statistics()->IterationCount(); // syserror if model doesn't solve
+                //Number final_obj = application->Statistics()->FinalObjective();
+                int icount = 0;
+                double obj = 0;
 		MTHREAD->DO->printOptLog(false, icount, obj);
 	}
 
@@ -753,7 +753,14 @@ ModelCoreSpatial::computeCumulativeData(){
 						tp = gfd("tp",regId,ft,dClasses[u-1],thisYear)*tp_multiplier_now;
 						cumTp_u = cumTp_temp[u-1] + tp;
 						if (u==1){
-							vHa_u = gfd("entryVolHa",regId,ft,"",thisYear);
+                            /**
+                            Note on the effect of mortality modifiers on the entryVolHa.
+                            Unfortunatly for how it is defined the mortality multiplier (the ratio with the new mortality rate over the old one) we can't
+                            compute a entryVolHa based on it. It is NOT infact just like: vHa_adjusted = vHa_orig / mort_multiplier.
+                            The effect of mortality on the vHa of the first diameter class is unknow, and so we can't compute the effect of a relative
+                            increase.
+                            */
+                            vHa_u = gfd("entryVolHa",regId,ft,"",thisYear);
                             mort = 0.; // not info about mortality first diameter class ("00")
 						} else {
 							mort = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear)*mortCoef_multiplier_now,tp); // mortality of the previous diameter class
@@ -980,8 +987,8 @@ ModelCoreSpatial::updateMapAreas(){
 			for(uint z=0;z<rpx.size();z++){
 				Pixel* px = rpx[z];
 				double oldValue = px->getDoubleValue("forArea_"+ft,true);
-				double hArea = vSum(px->hArea.at(j));
-				double regArea = findMap(px->regArea,currentYear).at(j);
+                double hArea = vSum(px->hArea.at(j))*10000;              //bug 20140205 areas in the model are in ha, in the layer in m^2
+                double regArea = findMap(px->regArea,currentYear).at(j)*10000; //bug 20140205 areas in the model are in ha, in the layer in m^2
 				//double newValue = oldValue*(1. + newAreaRatio);
 				double newValue = oldValue-hArea+regArea;
 				rpx[z]->changeValue("forArea_"+ft, newValue);
