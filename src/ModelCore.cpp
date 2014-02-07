@@ -872,6 +872,7 @@ ModelCore::updateMapAreas(){
 	msgOut(MSG_INFO, "Updating map areas..");
 	map<int,double> forestArea; // foresta area by each region
 	pair<int,double > forestAreaPair;
+    int thisYear = MTHREAD->SCD->getYear();
 	vector<int> l2Regions =  MTHREAD->MD->getRegionIds(2, true);
 	vector <string> fTypes =  MTHREAD->MD->getForTypeIds();
 	int nFTypes = fTypes.size();
@@ -882,14 +883,24 @@ ModelCore::updateMapAreas(){
 		ModelRegion* reg = MTHREAD->MD->getRegion(regId);
 		for(uint j=0;j<nFTypes;j++){
 			string ft = fTypes[j];
-			double oldRegioForArea = reg->getValue("forArea_"+ft);
-            double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL)*10000; //20140206
-            double regArea = gfd("regArea",regId,ft,DIAM_ALL)*10000; //20140206
+            double oldRegioForArea;
+            if(thisYear <= firstYear+1) {
+                oldRegioForArea = reg->getValue("forArea_"+ft)/10000;
+            } else {
+                oldRegioForArea = gfd("forArea",regId,ft,DIAM_ALL,thisYear-1);
+            }
+            //oldRegioForArea = reg->getValue("forArea_"+ft)/10000;
+            //double debug = gfd("forArea",regId,ft,DIAM_ALL,thisYear-1);
+            //double debug_diff = oldRegioForArea - debug;
+            //cout << thisYear << ";" << regId << ";" << ft << ";" << oldRegioForArea << ";" << debug << ";" << debug_diff << endl;
+            double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL); //20140206
+            double regArea = gfd("regArea",regId,ft,DIAM_ALL); //20140206
 			double newRegioForArea = oldRegioForArea + regArea - harvestedArea;
 			sfd(newRegioForArea,"forArea",regId,ft,"",DATA_NOW, true);
 			for(uint z=0;z<rpx.size();z++){
 				double oldValue = rpx[z]->getDoubleValue("forArea_"+ft,true);
-				double newValue = oldValue*newRegioForArea/oldRegioForArea;
+                double ratio = newRegioForArea/oldRegioForArea;
+                double newValue = oldValue*ratio;
 				rpx[z]->changeValue("forArea_"+ft, newValue);
 			}
 

@@ -986,12 +986,12 @@ ModelCoreSpatial::updateMapAreas(){
 			//double newAreaRatio =  newAreaNet / regForArea;
 			for(uint z=0;z<rpx.size();z++){
 				Pixel* px = rpx[z];
-				double oldValue = px->getDoubleValue("forArea_"+ft,true);
-                double hArea = vSum(px->hArea.at(j))*10000;              //bug 20140205 areas in the model are in ha, in the layer in m^2
-                double regArea = findMap(px->regArea,currentYear).at(j)*10000; //bug 20140205 areas in the model are in ha, in the layer in m^2
+                double oldValue = px->getDoubleValue("forArea_"+ft,true)/10000;
+                double hArea = vSum(px->hArea.at(j));              //bug 20140205 areas in the model are in ha, in the layer in m^2
+                double regArea = findMap(px->regArea,currentYear).at(j); //bug 20140205 areas in the model are in ha, in the layer in m^2
 				//double newValue = oldValue*(1. + newAreaRatio);
 				double newValue = oldValue-hArea+regArea;
-				rpx[z]->changeValue("forArea_"+ft, newValue);
+                rpx[z]->changeValue("forArea_"+ft, newValue*10000);
 			}
 		}
 	}
@@ -1035,13 +1035,15 @@ ModelCoreSpatial::sumRegionalForData(){
 			double regArea = 0.;
 			double sumExpReturns = 0.;
 			double sumArea = 0.;
+            double pxForArea = 0.;
 			double vReg = 0.;
 			for (uint p=0;p<regPx.size();p++){
 				Pixel* px = regPx[p];
 				vReg += px->vReg.at(j);
 				regArea += findMap(px->regArea,currentYear).at(j);
-				sumExpReturns += (px->expectedReturns.at(j)* px->getDoubleValue("forArea_"+ft,true));
-				sumArea += px->getDoubleValue("forArea_"+ft,true);
+                pxForArea = (px->getDoubleValue("forArea_"+ft,true)/10000);
+                sumExpReturns += (px->expectedReturns.at(j)* pxForArea);
+                sumArea += pxForArea;
 			}
 			sfd(vReg,"vReg",regId,ft,"",DATA_NOW, true);
 			sfd(regArea,"regArea",regId,ft,"",DATA_NOW, true);
