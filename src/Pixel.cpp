@@ -25,7 +25,9 @@
 Pixel::Pixel(double ID_h, ThreadManager* MTHREAD_h): ID(ID_h)
 {
 	MTHREAD=MTHREAD_h;
-
+    int nft = MTHREAD->MD->getForTypeIds().size();
+    vector<double> temp(nft,1);
+    spMods = temp;
 }
 
 Pixel::~Pixel()
@@ -169,6 +171,7 @@ Pixel::getDoubleValue(const string &layerName_h, const bool &returnZeroForNoValu
 getMultiplier() returns the value of the multiplier as memorized in the spatialDataSubfolder layers.
 It will look for exact match or for lower years if available.
 If no layers are available or the usePixelData option is not used, it will return 1.
+If the tp_multiplier is asked for it will adjusts for spatial variance coefficient.
 */
 double
 Pixel::getMultiplier (const string& multiplierName, const string& forName, int year){
@@ -177,6 +180,9 @@ Pixel::getMultiplier (const string& multiplierName, const string& forName, int y
 	if(!MTHREAD->MD->getBoolSetting("usePixelData")) return 1.0;
 
 	if(year==DATA_NOW){year = MTHREAD->SCD->getYear();}
+
+
+    double multiplierSpVar = (multiplierName == "tp_multiplier")?getSpModifier(forName):1.0;
 
 	string search_for = multiplierName+"#"+forName+"##"+i2s(year);
 	map <string,double>::const_iterator i = values.upper_bound(search_for); //return the position always upper to the found one, even if it's an equal match.
@@ -189,10 +195,10 @@ Pixel::getMultiplier (const string& multiplierName, const string& forName, int y
 		//	cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
 		//	exit(0);
 		//}
-		return i->second;
+        return i->second*multiplierSpVar;
 	} else {
 		//cout << "NOTM:  " << search_for <<", "<< i->first << endl;
-		return 1.0;
+        return 1.0*multiplierSpVar;
 	}
 }
 
@@ -260,3 +266,15 @@ Pixel::swap(const int& swap_what){
 	}
 }
 
+
+double
+Pixel::getSpModifier(const string& ft){
+  vector<string>ftypes = MTHREAD->MD->getForTypeIds();
+  for (int i=0;i<ftypes.size();i++){
+      if (ftypes[i] == ft){
+          return spMods.at(i);
+      }
+  }
+  msgOut(MSG_CRITICAL_ERROR,"Asked spatial modifier for a forest type that doesn't exist");
+
+}

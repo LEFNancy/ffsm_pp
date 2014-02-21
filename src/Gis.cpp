@@ -122,12 +122,18 @@ Gis::applySpatialStochasticValues(){
 		vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
 		vector <string> fTypes = MTHREAD->MD->getForTypeIds();
 		for(uint j=0; j<fTypes.size(); j++){
-			double sStDev = MTHREAD->MD->getForData("sStDev",regIds2[i],fTypes[j],"");
-			normal_distribution<double> d(1,sStDev); // default any how to double
+            double sStDev = MTHREAD->MD->getForData("sStDev",regIds2[i],fTypes[j],""); // spatial standard deviation
+            double agr = MTHREAD->MD->getForData("agr",regIds2[i],fTypes[j],""); // average growth
+            // BUG solved 20141220 To obtain a population with the same avg and st.dev of the original using moltipliers, I need to use the cv not the st.dev. !
+            // tested with excel
+            normal_distribution<double> d(1,sStDev/agr); // default any how to double
 			for (uint z=0;z<rpx.size();z++){
 				double c = d(*MTHREAD->gen);
+                double c2 = max(0.3,min(1.7,c)); /// with simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
                 //cout << regIds2[i] << ";" <<sStDev <<";"<< c <<endl
-				rpx[z]->correctInputMultiplier("tp_multiplier",fTypes[j],c);
+                //rpx[z]->correctInputMultiplier("tp_multiplier",fTypes[j],c);
+                //cout << sStDev/agr << "    " << c2 << endl;
+                rpx[z]->setSpModifier(c2,j);
                 //sumc += c;
                 //nc ++;
 			}

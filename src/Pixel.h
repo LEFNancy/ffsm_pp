@@ -79,7 +79,8 @@ public:
 	void                setPxComments ( std::string pxComments_h ) {pxComments = pxComments_h;};
 	void                setCachedDouble(double cachedDouble_h){cachedDouble=cachedDouble_h;};
 	void                clearCache(){cachedDouble=0;};
-
+    void                setSpModifier(const double& value, const int& ftindex){spMods.at(ftindex)=value;};
+    double              getSpModifier(const string& ft);
 	void                swap(const int &swap_what);
 
 	// matrices of (ft,dc)
@@ -127,6 +128,7 @@ private:
 	int                               pxY;
 	string                     pxComments;
 	double                   cachedDouble;  ///< Cachable double used in some optimized algorithms
+    vector<double>                 spMods;  ///< The sampled spatial modifiers (by forest type)
 
 };
 
