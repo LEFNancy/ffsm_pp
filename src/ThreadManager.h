@@ -94,6 +94,7 @@ public:
 	string              getBaseDirectory(){return baseDirectory.toStdString();};
 	string              getInputFileName(){return inputFileName.toStdString();};
 	string              getScenarioName() {return scenarioName.toStdString();};
+    void                setScenarioName(const string &scenarioName_h){scenarioName=scenarioName_h.c_str();};
 	void                setOutputDirName(string outputDirname_h);
 
 	/// the regional data object..
@@ -138,7 +139,7 @@ public:
 	                        emit treeViewerItemChangeValueToGui("general_"+propertyName, newValue);};
 
 
-	void               fitInWindow() {emit fitInWindowToGui();}; ///< Re-draw the map making it to fit (with the right proportions) to the widget
+    void                fitInWindow() {emit fitInWindowToGui();}; ///< Re-draw the map making it to fit (with the right proportions) to the widget
 	void                runFromConsole(QString inputFileName_h, QString scenarioName_h);
 	bool                usingGUI(){return GUI;};
 

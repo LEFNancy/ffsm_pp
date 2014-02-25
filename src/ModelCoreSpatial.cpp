@@ -494,6 +494,7 @@ ModelCoreSpatial::runManagementModule(){
 				double hV_byFT = 0.; // gfd("hV",regId,ft,DIAM_PROD); // it must include only final harvested products in order to act as weightering agent
 				double expReturns = 0.;
                 int optDc; // "optimal diameter class", the one on which the expected returns are computed
+                double optCumTp; // "optimal cumulative time of passage", the one of optDc
 
 				for (uint u=0; u<dClasses.size(); u++){
 					string dc = dClasses[u];
@@ -516,9 +517,10 @@ ModelCoreSpatial::runManagementModule(){
                             if (anualised_amount>expReturns) {
                                 expReturns=anualised_amount;
                                 optDc = u;
+                                optCumTp = cumTp_u;
                             }
 						}
-					}
+					} 
 				} else { // some harvested from this pixel we weight each products/diameter class combination expected returns with the actual harvested
                     msgOut(MSG_CRITICAL_ERROR, "The option \"weightedAverageExpectedReturns\" is no longer supported!");
 //					for (uint u=0; u<dClasses.size(); u++){
@@ -564,6 +566,21 @@ ModelCoreSpatial::runManagementModule(){
 				}
 				px->expectedReturns.push_back(expReturns);
 				//cachedExpectedReturnsByFt.push_back(expReturns);
+
+
+                //debug
+                //double pxid = px->getID();
+                //double spmultiplier = px->getSpModifier(ft);
+                //cout  << MTHREAD->getScenarioName() << ";" << px->getID() << ";" << ft <<";"<< px->getSpModifier(ft) << ";" << optDc << ";" << optCumTp << ";" << expReturns << endl;
+                //counter ++;
+                //if (counter >50){
+                //   exit(0);
+                //}
+
+
+
+
+
 			//}
 			} // end foreach forest type
 
@@ -611,6 +628,7 @@ ModelCoreSpatial::runManagementModule(){
 			px->regArea.insert(pair <int, vector<double> > (MTHREAD->SCD->getYear(), thisYearRegAreas));
 		} // end of each pixel
 	} // end of each region
+
 }
 
 

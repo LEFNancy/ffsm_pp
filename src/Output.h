@@ -99,6 +99,7 @@ private:
 	int                                     nAllPr;
 	int                                       nL2r;
 	string                             logFilename;
+    string                           debugFilename;
     bool                                    spMode; // spatial mode ?
 };
 #endif

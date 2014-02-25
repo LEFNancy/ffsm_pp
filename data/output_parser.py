@@ -553,7 +553,7 @@ def printTables():
       #'random_958031', 'random_816881', 'random_589866', 'random_251807', 'random_177382', 'random_173935', 'random_266700', 'random_956967', 'random_376875', 'random_226236', 'random_974424', 'random_329197', 'random_969368', 'random_502630', 'random_904379', 'random_94508' , 'random_666933', 'random_325051', 'random_456691', 'random_376237', 'random_286113', 'random_83519' , 'random_437521', 'random_841772', 'random_262868', 'random_481944', 'random_715469', 'random_192731', 'random_703980', 'random_458520'
       #],['expReturns','vReg','vol','hV'], [region], ['2100'],'Random space','randomspace_2100_'+region)
     checkScenarioDifferences('bau', ['cc1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'cc1 scenario outcomes in 2100, '+regions[region],'cc1_2100_'+region)
-
+    checkScenarioDifferences('bau', ['cc1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2060'],'cc1 scenario outcomes in 2060, '+regions[region],'cc1_2060_'+region)
 # =============================================================================
 # EXECUTION ACTUALLY STARTS HERE.....
 main()

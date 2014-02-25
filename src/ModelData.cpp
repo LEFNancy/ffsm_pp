@@ -30,6 +30,7 @@
 #include <algorithm> //alghoritm used to reverse an array ( reverse(v.begin(), v.end()); )
 #include <iomanip> // for unzip
 #include <math.h>
+#include <random> // for random temp directory to unzip
 
 // Qt headers..
 #include <QFile>
@@ -1263,7 +1264,13 @@ ModelData::loadInput(){
 	//QString iFile("data/ffsmInput.ods");
 	QString iFile(MTHREAD->getInputFileName().c_str());
 	//cout << "PIPPO !!!!! " << MTHREAD->getInputFileName().c_str() << endl;
-    QString oDir((MTHREAD->getBaseDirectory()+"tempInput-"+MTHREAD->getScenarioName()).c_str());
+
+    std::random_device rd;
+    std::mt19937 localgen(rd());
+    std::uniform_int_distribution<> dis(10, 1000000);
+    int randomNumber = dis(localgen);
+
+    QString oDir((MTHREAD->getBaseDirectory()+"tempInput-"+MTHREAD->getScenarioName()+i2s(randomNumber)).c_str());
 	string forDataCachedFilename = MTHREAD->getBaseDirectory()+"cachedInput/forData.csv";
 	string prodDataCachedFilename = MTHREAD->getBaseDirectory()+"cachedInput/prodData.csv";
 	
@@ -1300,7 +1307,7 @@ ModelData::loadInput(){
 	}
 	
 	// loading input file into memory...
-    string inputXMLFileName = MTHREAD->getBaseDirectory()+"tempInput-"+MTHREAD->getScenarioName()+"/content.xml";
+    string inputXMLFileName = MTHREAD->getBaseDirectory()+"tempInput-"+MTHREAD->getScenarioName()+i2s(randomNumber)+"/content.xml";
 	//string inputXMLFileName = MTHREAD->getBaseDirectory()+"test/content.xml";
 	//cout << "inputXMLFileName: " << inputXMLFileName << endl;
 	//mainDocument = new InputDocument();

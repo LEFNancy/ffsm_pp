@@ -83,7 +83,7 @@ int main(int argc, char *argv[]){
 	opt->addUsage( " -s  --scenario [scenario_name]	Scenario name (default: the first defined in the input file) " );
 	opt->addUsage( "" );
 	opt->addUsage( "Notes:");
-	opt->addUsage( "	- input_file and scenario options have no effect in GUI mode;" );
+    opt->addUsage( "	- input_file and scenario options have no effect in GUI mode;" );
 	opt->addUsage( "	- the working directory is the base path relative to the input file." );
 	opt->addUsage( "" );
 	opt->addUsage( "Read installed documentation or browse it at http://www.ffsm-project.org/doc." );
@@ -118,8 +118,8 @@ int main(int argc, char *argv[]){
 	}
 
 	if( opt->getFlag( 'c' ) || opt->getFlag( "console" ) ){
-		ThreadManager  modelMainThread;
-		modelMainThread.runFromConsole(inputFileName,scenarioName);
+        ThreadManager  modelMainThread;
+        modelMainThread.runFromConsole(inputFileName,scenarioName);
 	}
 	else {
 		QApplication app(argc, argv);

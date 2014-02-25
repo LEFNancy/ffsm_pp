@@ -59,14 +59,15 @@ Output::commonInit(){
 	nYears       = MTHREAD->MD->getIntSetting("simulationYears");
 	baseDir      = MTHREAD->MD->getBaseDirectory();
 	oDir         = MTHREAD->MD->getOutputDirectory();
-    bool initSeed = MTHREAD->MD->getBoolSetting("newRandomSeed");
-    if (initSeed){
-        uniform_int_distribution<> d(1, 1000000);
-        int random = d(*MTHREAD->gen);
-        scenarioName = MTHREAD->getScenarioName()+"_"+i2s(random);
-    } else {
-        scenarioName = MTHREAD->getScenarioName();
-    }
+//    bool initSeed = MTHREAD->MD->getBoolSetting("newRandomSeed");
+//    if (initSeed){
+//        uniform_int_distribution<> d(1, 1000000);
+//        int random = d(*MTHREAD->gen);
+//        scenarioName = MTHREAD->getScenarioName()+"_"+i2s(random);
+//    } else {
+//        scenarioName = MTHREAD->getScenarioName();
+//    }
+    scenarioName = MTHREAD->getScenarioName();
 	oFileExt     = MTHREAD->MD->getStringSetting("outputFileExtension");
 	oHRedeable   = MTHREAD->MD->getBoolSetting("outputHumanReadable");
 	oSingleFile  = MTHREAD->MD->getBoolSetting("outputSingleFile");
@@ -115,7 +116,13 @@ void
 Output::initOptimisationLog(){
 	if(oLevel<OUTVL_AGGREGATED) return;
 
-	logFilename = baseDir+oDir+"optimisationLog.txt";
+    if (oSingleFile){
+         logFilename = baseDir+oDir+"optimisationLogs/optimisationLogs.txt";
+
+    } else {
+         logFilename = baseDir+oDir+"optimisationLogs/"+scenarioName+".txt";
+    }
+
 
 	ifstream in(logFilename.c_str(), ios::in);
 	if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
@@ -160,16 +167,21 @@ Output::initDebugOutput(){
     expReturnsDebugVariables.push_back("expectedReturns");
     expReturnsDebugVariables.push_back("weightedAvgCompModeFlag");
 
-    logFilename = baseDir+oDir+"debugOut.csv";
-    ifstream in(logFilename.c_str(), ios::in);
+    if (oSingleFile){
+         debugFilename = baseDir+oDir+"debugs/debugOut.csv";
+    } else {
+         debugFilename = baseDir+oDir+"debugs/debugOut_"+scenarioName+".csv";
+    }
+
+    ifstream in(debugFilename.c_str(), ios::in);
     if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
         in.close();
-        cleanScenario(logFilename, scenarioName, d);
+        cleanScenario(debugFilename, scenarioName, d);
         return;
     } else { // file doesn't exist
         in.close();
-        ofstream out(logFilename.c_str(), ios::out);
-        if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+logFilename+" for writing.");}
+        ofstream out(debugFilename.c_str(), ios::out);
+        if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+debugFilename+" for writing.");}
         out << "scenario" << d << "year" << d << "region or pixel" << d << "forType" << d << "diamClass" << d << "prod" << d << "parName" << d << "value" << d <<"\n";
         out.close();
     }
@@ -248,9 +260,9 @@ void
 Output::initOutputMaps(){
 	if(oLevel<OUTVL_MAPS) return;
 	string mapBaseDirectory = baseDir+oDir+"maps/";
-	string filenameToSaveScenarioName = mapBaseDirectory+"scenarioName";
-	string filenameListIntLayers = mapBaseDirectory+"integerListLayers";
-	string filenameListFloatLayers = mapBaseDirectory+"floatListLayers";
+    string filenameToSaveScenarioName = mapBaseDirectory+"scenarioNames/"+scenarioName;
+    string filenameListIntLayers = mapBaseDirectory+"integerListLayers/"+scenarioName;
+    string filenameListFloatLayers = mapBaseDirectory+"floatListLayers/"+scenarioName;
 
 	// printing the scenario name in the "scenarioName file"...
 	ofstream outSN(filenameToSaveScenarioName.c_str(), ios::out);
@@ -562,9 +574,8 @@ Output::printDebugOutput(){
   // print debugging the expected returns...
 
   if (!spMode && !expReturnsDebug.empty()){
-    outFileName = baseDir+oDir+"debugOut.csv";
-    ofstream out (outFileName.c_str(), ios::app);
-    if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
+    ofstream out (debugFilename.c_str(), ios::app);
+    if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+debugFilename+" for writing.");}
     int currentYear = MTHREAD->SCD->getYear();
     vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
 

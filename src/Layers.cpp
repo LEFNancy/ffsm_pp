@@ -269,8 +269,8 @@ Layers::print(){
 	string mapFilename      = mapGridOutputDirectory +name+ "_" +i2s(MTHREAD->SCD->getYear()) +"_" +MTHREAD->getScenarioName();
 	string catsFilename     = catsOutputDirectory    +name+ "_" +i2s(MTHREAD->SCD->getYear()) +"_" +MTHREAD->getScenarioName();
 	string coloursFilename  = coloursOutputDirectory +name+ "_" +i2s(MTHREAD->SCD->getYear()) +"_" +MTHREAD->getScenarioName();
-	string filenameListIntLayers = mapBaseDirectory+"integerListLayers";
-	string filenameListFloatLayers = mapBaseDirectory+"floatListLayers";
+    string filenameListIntLayers = mapBaseDirectory+"integerListLayers/"+MTHREAD->getScenarioName();
+    string filenameListFloatLayers = mapBaseDirectory+"floatListLayers/"+MTHREAD->getScenarioName();
 
 	// printing the map...
 	string header;

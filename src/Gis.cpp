@@ -129,7 +129,7 @@ Gis::applySpatialStochasticValues(){
             normal_distribution<double> d(1,sStDev/agr); // default any how to double
 			for (uint z=0;z<rpx.size();z++){
 				double c = d(*MTHREAD->gen);
-                double c2 = max(0.3,min(1.7,c)); /// with simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
+                double c2 = max(0.4,min(1.6,c)); /// with simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
                 //cout << regIds2[i] << ";" <<sStDev <<";"<< c <<endl
                 //rpx[z]->correctInputMultiplier("tp_multiplier",fTypes[j],c);
                 //cout << sStDev/agr << "    " << c2 << endl;

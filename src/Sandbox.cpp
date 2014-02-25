@@ -116,6 +116,25 @@ struct GccTest
 void
 Sandbox::basicTest(){
 
+    /*
+    // -------------------------------------------------------------------
+    // Sampling from uniform distribution with local random seed
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    //this code sample from a uniform distribution. In this case also the seed is reinitialisated, but it it valid only locally: the rest of the program run with the same seed
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(1, 6);
+
+    for (int n=0; n<10; ++n)
+        std::cout << dis(gen) << ' ';
+    std::cout << '\n';
+    exit(0);
+   */
+
+
+
 	/*
 	// -------------------------------------------------------------------
 	// Testing how to get all elements in a map by substrings
@@ -265,6 +284,30 @@ Sandbox::basicTest(){
 
 void
 Sandbox::fullTest(){
+
+    /*
+    // Testing for each region how far is the average of the multipliers from 1
+    vector<int>  regIds  =    MTHREAD->MD->getRegionIds(2);
+    vector <string> ftypes = MTHREAD->MD->getForTypeIds();
+
+    cout << "*** Checking how far is the tpMultiplier far from 1 in each region:" << endl;
+    for (int i=0;i< regIds.size();i++){
+        ModelRegion* region = MTHREAD->MD->getRegion(regIds[i]);
+        vector <Pixel*>  regpixels =   MTHREAD->GIS->getAllPlotsByRegion(regIds[i]);
+        if(regpixels.size()==0) continue;
+        cout << "*** " << region->getRegLName() << ":  "<< endl;
+        for(int ft = 0;ft<ftypes.size();ft++){
+            double tot = 0;
+            double avg = 0;
+            for(int j=0;j<regpixels.size();j++){
+              tot += regpixels[j]->getSpModifier(ftypes[ft]);
+            }
+            avg = tot/regpixels.size();
+            cout << ftypes[ft] << ":  " << avg << endl;
+        }
+    }
+    exit(0);
+    */
 
     /*
     // Testing the number of plots in the model
