@@ -555,7 +555,9 @@ def printCharts():
   #text('c',"Automatically generated charts.")  
   #plotLegend(['nonspatial','reference','vRegEnd070','vRegFixed','vRegFromHr','withRisk06','withRisk08','withRisk10','withVariance','withSpVarianceAndRisk'],'Scenarios Legend','legend')
   
-  for region in sortedregions:
+  selectedregions=['11000', '11041', '11061', '11062', '11081', '11071', '11082', '11083']
+  
+  for region in sortedregions: #selectedregions:#sortedregions:
     title('c','section',regions[region])
 
     title('c','subsection',"Active management")
@@ -565,7 +567,7 @@ def printCharts():
     plotMultivariable(['reference','withRisk06','withRisk08','withRisk10'],['expReturns','vReg','vol','hV'],region,'Risk effect','risk')
     
     title('c','subsection',"Heterogeneous environment")
-    plotMultivariable(['nonspatial','reference','withSpVariance'],['expReturns','vReg','vol','hV'],region,'Spatial explicit effects','space')
+    plotMultivariable(['nonspatial','reference','withSpVariance'],['expReturns','vReg','vol','hV','forArea'],region,'Spatial explicit effects','space')
     
     title('c','subsection',"Combined effects of risk aversion and spatial heterogeneity")
     plotMultivariable(['reference','bau'],['expReturns','vReg','vol','hV'],region,'Combined effect of risk and spatial heterogeneity','bau')
@@ -574,8 +576,8 @@ def printCharts():
     plotMultivariable(['bau','cc1'],['expReturns','vReg','vol','hV','forArea',],region,'cc1 scenario output','cc1')
     plotMultivariable(['bau_nospvar','cc1_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'cc1 scenario output when spatial variance is not considered','cc1_nospvar')
     title('c','subsubsection',"Stronger mortality effect") 
-    plotMultivariable(['bau','cc1','ccstrong'],['expReturns','vReg','vol','hV','forArea',],region,'ccstrong scenario output','ccsstrong')
-    plotMultivariable(['bau_nospvar','cc1_nospvar','ccstrong_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'ccstrong scenario output when spatial variance is not considered','ccsstrong_nospvar')
+    plotMultivariable(['bau','cc1','ccstrong'],['expReturns','vReg','vol','hV','forArea',],region,'ccstrong scenario output','ccstrong')
+    plotMultivariable(['bau_nospvar','cc1_nospvar','ccstrong_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'ccstrong scenario output when spatial variance is not considered','ccstrong_nospvar')
   
 # =============================================================================  
 def printTables():
@@ -585,7 +587,9 @@ def printTables():
   
   #text('t',"Automatically generated result tables.")
   
-  for region in sortedregions:
+  selectedregions=['11000', '11041', '11061', '11062', '11081', '11071', '11082', '11083']
+  
+  for region in sortedregions: #selectedregions:#sortedregions:
     title('t','section',regions[region])
 
     title('t','subsection',"Active management")
@@ -593,6 +597,8 @@ def printTables():
     printTable('vRegFromHr',['reference'],['expReturns','vReg','vol','hV'],[region],['2100'],'Management effect [2100]','reference_management_2100_'+region)
     printTable('vRegFromHr',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger management effect [avg. 2040-2100]','vRegEnd070_2040-2100_'+region)
     printTable('vRegFromHr',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger management effect [2100]','vRegEnd070_2100_'+region)
+    printTable('reference',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger management effect compared with reference [avg. 2040-2100]','vRegEnd070_to_reference_2040-2100_'+region)
+    printTable('reference',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger management effect compared with reference [2100]','vRegEnd070_to_reference_2100_'+region)
  
     title('t','subsection',"Risk aversion")
     printTable('reference',['withRisk08'],['expReturns','vReg','vol','hV'],[region],oyears,'Risk effect [avg. 2040-2100]','withRisk08_2040-2100_'+region)
