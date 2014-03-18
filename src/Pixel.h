@@ -56,6 +56,7 @@ public:
 	void                newYear();
 	double              getPastRegArea(const int& ft_idx, const int& year);
 	void                setPastRegArea(const double& value, const int& ft_idx, const int& year);
+    ModelRegion*        getMyRegion(const int& rLevel = 2);
 
 
 	// space..
@@ -82,6 +83,7 @@ public:
     void                setSpModifier(const double& value, const int& ftindex){spMods.at(ftindex)=value;};
     double              getSpModifier(const string& ft);
 	void                swap(const int &swap_what);
+    void                setMyRegion(ModelRegion* region_h){l2region = region_h;};
 
 	// matrices of (ft,dc)
 	/*MatrixXd                                   vol;
@@ -129,6 +131,7 @@ private:
 	string                     pxComments;
 	double                   cachedDouble;  ///< Cachable double used in some optimized algorithms
     vector<double>                 spMods;  ///< The sampled spatial modifiers (by forest type)
+    ModelRegion*                 l2region;  ///< Pointer to level 2 region where this pixel is
 
 };
 

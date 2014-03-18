@@ -57,7 +57,7 @@ public:
 	void                setChildren(vector<ModelRegion*> children_h) {chRegions = children_h;}; ///< Childrens are all the lvel-1 region that are parts of this region.
 	void                addForData(forData* data_h){forDataVector.push_back(data_h);};
 	void                addProdData(prodData* data_h){prodDataVector.push_back(data_h);};
-	void                setMyPixels();
+    void                setMyPixels(); ///< It sets a double link pixels <--> region
 	void                swap(const int& swap_what);
 
 	// "get" methods..

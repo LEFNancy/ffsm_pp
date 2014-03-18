@@ -615,11 +615,12 @@ ModelCoreSpatial::runManagementModule(){
 					// regeneration area is a mix between harvested area and the harvested area of te most profitting forest type..
 					double regArea = 0.;
 					if (!foundMaxExpReturns && px->expectedReturns[j] == maxExpReturns){
-						// I use the foundMaxExpReturns for the unlucky event that two forest types have the same expected return to avoid overcounting of the area
+                        // I use the foundMaxExpReturns for the unlikely event that two forest types have the same expected return to avoid overcounting of the area
 						regArea += totalHarvestedArea*mr;
 						foundMaxExpReturns = true;
 					}
-					regArea +=  harvestedAreaForThisFT*(1-mr);
+                    double freq = gfd("freq_norm",regId,ft,""); // "probability of presence" for unmanaged forest, added 20140318
+                    regArea +=  harvestedAreaForThisFT*(1-mr)*freq;
 					//sfd(regArea,"regArea",regId,ft,"");
 					thisYearRegAreas.push_back(regArea);
 				}

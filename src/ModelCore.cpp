@@ -629,11 +629,12 @@ ModelCore::runManagementModule(){
 				// regeneration area is a mix between harvested area and the harvested area of te most profitting forest type..
 				double regArea = 0;
 				if (!foundMaxExpReturns && cachedExpectedReturnsByFt[j] == maxExpReturns){
-					// I use the foundMaxExpReturns for the unlucky event that two forest types have the same expected return to avoid overcounting of the area
+                    // I use the foundMaxExpReturns for the unlikely event that two forest types have the same expected return to avoid overcounting of the area
 					regArea += totalHarvestedArea*mr;
 					foundMaxExpReturns = true;
 				}
-				regArea +=  harvestedAreaForThisFT*(1-mr);
+                double freq = gfd("freq_norm",regId,ft,""); // "probability of presence" for unmanaged forest, added 20140318
+                regArea +=  harvestedAreaForThisFT*(1-mr)*freq;
 				sfd(regArea,"regArea",regId,ft,"",DATA_NOW,true);
 			}
 		}// end of foreach forest type
@@ -695,8 +696,10 @@ ModelCore::cacheSettings(){
 }
 
 /**
-Computing some fully exogenous parameters that require complex operations, e.g. cumulative time of passage or volume per hectare.
-This happen at the very beginning of the init period and after each simulated year
+* Computing some fully exogenous parameters that require complex operations, e.g. cumulative time of passage or volume per hectare.
+* This happen at the very beginning of the init period and after each simulated year
+*
+* It doesn't include tp and mort multipliers, but this could be added as now there is a regional versiopn of them and not just a pixel version.
 */
 void
 ModelCore::computeCumulativeData(){

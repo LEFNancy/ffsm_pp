@@ -168,38 +168,53 @@ Pixel::getDoubleValue(const string &layerName_h, const bool &returnZeroForNoValu
 }
 
 /**
-getMultiplier() returns the value of the multiplier as memorized in the spatialDataSubfolder layers.
-It will look for exact match or for lower years if available.
+getMultiplier() returns the value of the multiplier as memorized in the spatialDataSubfolder layers or in the forData table.
+It will looks for exact match or for lower years if available.
 If no layers are available or the usePixelData option is not used, it will return 1.
-If the tp_multiplier is asked for it will adjusts for spatial variance coefficient.
+If the tp_multiplier is asked for, it will adjusts for spatial variance coefficient.
 */
 double
 Pixel::getMultiplier (const string& multiplierName, const string& forName, int year){
 
-	// return 1 if not using pixel mode
-	if(!MTHREAD->MD->getBoolSetting("usePixelData")) return 1.0;
 
 	if(year==DATA_NOW){year = MTHREAD->SCD->getYear();}
 
 
     double multiplierSpVar = (multiplierName == "tp_multiplier")?getSpModifier(forName):1.0;
 
-	string search_for = multiplierName+"#"+forName+"##"+i2s(year);
-	map <string,double>::const_iterator i = values.upper_bound(search_for); //return the position always upper to the found one, even if it's an equal match.
-	if(i!= values.begin())	i--; // this rewind the position to the one just before or equal
-	const string& key = i->first;
-	string search_base = search_for.substr(0,search_for.size()-4);
-	if (key.compare(0, search_base.size(), search_base) == 0){
-		//cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
-		//if(i->second != 1){
-		//	cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
-		//	exit(0);
-		//}
-        return i->second*multiplierSpVar;
-	} else {
-		//cout << "NOTM:  " << search_for <<", "<< i->first << endl;
-        return 1.0*multiplierSpVar;
-	}
+    vector <string> modifiersFromTable = MTHREAD->MD->getStringVectorSetting("modifiersFromTable");
+
+    if(std::find(modifiersFromTable.begin(), modifiersFromTable.end(), multiplierName) != modifiersFromTable.end()) {
+      // load multiplier from forData table..
+      int regId = getMyRegion()->getRegId();
+      double multiplier = MTHREAD->MD->getForData("tp_multiplier", regId, forName, "",year);
+      return multiplier*multiplierSpVar;
+
+    } else {
+      // load multiplier from layer file..
+
+      // return 1 if not using pixel mode
+      if(!MTHREAD->MD->getBoolSetting("usePixelData")) return 1.0;
+      string search_for = multiplierName+"#"+forName+"##"+i2s(year);
+      map <string,double>::const_iterator i = values.upper_bound(search_for); //return the position always upper to the found one, even if it's an equal match.
+      if(i!= values.begin())	i--; // this rewind the position to the one just before or equal
+      const string& key = i->first;
+      string search_base = search_for.substr(0,search_for.size()-4);
+      if (key.compare(0, search_base.size(), search_base) == 0){
+          //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
+          //if(i->second != 1){
+          //	cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
+          //	exit(0);
+          //}
+          return i->second*multiplierSpVar;
+      } else {
+          //cout << "NOTM:  " << search_for <<", "<< i->first << endl;
+          return 1.0*multiplierSpVar;
+      }
+
+    }
+
+
 }
 
 void
@@ -277,4 +292,15 @@ Pixel::getSpModifier(const string& ft){
   }
   msgOut(MSG_CRITICAL_ERROR,"Asked spatial modifier for a forest type that doesn't exist");
 
+}
+
+ModelRegion*
+Pixel::getMyRegion(const int& rLevel){
+    if(rLevel==2){
+        return l2region;
+    } else if (rLevel==1) {
+        return l2region->getParent();
+    } else {
+        msgOut(MSG_ERROR, "Requested a unknown level region code in getMyRegion().");
+    }
 }

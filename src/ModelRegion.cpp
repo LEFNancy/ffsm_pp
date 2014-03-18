@@ -109,16 +109,24 @@ ModelRegion::getValue(string layerName, int op){
 	}
 	return 0.;
 }
-
+/***
+ * It establishs a link between pixels and regions.
+ *
+ * Pixels are stored in myPixels vectors and, only if this is a level2 region, a pointer to this region is passed to the pixel
+ *
+ * */
 void
 ModelRegion::setMyPixels(){
-	int xyNPixels = MTHREAD->GIS->getXyNPixels();
-	for(uint i=0;i<xyNPixels;i++){
-			Pixel* px = MTHREAD->GIS->getPixel(i);
-			if(px->getDoubleValue("regLev_1")==regId || px->getDoubleValue("regLev_2")==regId){
-				myPixels.push_back(px);
-			}
-		}
+  int xyNPixels = MTHREAD->GIS->getXyNPixels();
+  for(uint i=0;i<xyNPixels;i++){
+    Pixel* px = MTHREAD->GIS->getPixel(i);
+    if(px->getDoubleValue("regLev_1")==regId || px->getDoubleValue("regLev_2")==regId){
+      myPixels.push_back(px);
+      if(regLevel == 2){
+        px->setMyRegion(this);
+      }
+    }
+  }
 }
 
 void
