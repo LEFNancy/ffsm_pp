@@ -353,7 +353,7 @@ ModelCoreSpatial::runBiologicalModule(){
 				//		);
 				//	);
 				//);
-				int tp_u0 = px->tp.at(j).at(0); // time of passage to reach the first production diameter class
+                int tp_u0 = ceil(px->tp.at(j).at(0)); // time of passage to reach the first production diameter class // bug 20140318, added ceil
 				if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // T.O.D.O to be checked -> 20121109 OK
 					double pastRegArea = px->getPastRegArea(j,thisYear-tp_u0);
 					//double entryVolHa = gfd("entryVolHa",regId,ft,"");
@@ -619,7 +619,7 @@ ModelCoreSpatial::runManagementModule(){
 						regArea += totalHarvestedArea*mr;
 						foundMaxExpReturns = true;
 					}
-                    double freq = gfd("freq_norm",regId,ft,""); // "probability of presence" for unmanaged forest, added 20140318
+                    double freq = rescaleFrequencies ? gfd("freq_norm",regId,ft,""):gfd("freq",regId,ft,""); // "probability of presence" for unmanaged forest, added 20140318
                     regArea +=  harvestedAreaForThisFT*(1-mr)*freq;
 					//sfd(regArea,"regArea",regId,ft,"");
 					thisYearRegAreas.push_back(regArea);
@@ -653,6 +653,7 @@ ModelCoreSpatial::cacheSettings(){
 	l2r = MD->getRegionIds();
 	regType = MTHREAD->MD->getStringSetting("regType"); // how the regeneration should be computed (exogenous, from hr, from allocation choises)
 	expType = MD->getDoubleSetting("expType");
+    rescaleFrequencies = MD->getBoolSetting("rescaleFrequencies");
 	if((expType<0 || expType>1) && expType != -1){
 		msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
 	}

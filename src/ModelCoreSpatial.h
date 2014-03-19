@@ -65,6 +65,7 @@ private:
 	double expType;
 	double mr;
 	vector <Pixel*> regPx; // pixels behaving to the current region
+    bool rescaleFrequencies;
 };
 
 #endif // MODELCORESPATIAL_H

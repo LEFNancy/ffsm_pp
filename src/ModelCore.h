@@ -88,6 +88,7 @@ private:
 	double mr;
 	vector < vector < vector < vector <double> > > > hV_byPrd; // by regId, ft, dc, pp
 	//Ipopt::SmartPtr<Ipopt::IpoptApplication> application;
+    bool rescaleFrequencies;
 
 
 };
