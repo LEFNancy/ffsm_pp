@@ -353,17 +353,24 @@ ModelCoreSpatial::runBiologicalModule(){
 				//		);
 				//	);
 				//);
-                int tp_u0 = ceil(px->tp.at(j).at(0)); // time of passage to reach the first production diameter class // bug 20140318, added ceil
+                int tp_u0 = px->tp.at(j).at(0); // time of passage to reach the first production diameter class // bug 20140318, added ceil. 20140318 removed it.. model did go crazy with it
 				if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // T.O.D.O to be checked -> 20121109 OK
 					double pastRegArea = px->getPastRegArea(j,thisYear-tp_u0);
 					//double entryVolHa = gfd("entryVolHa",regId,ft,"");
 					double vHa = px->vHa.at(j).at(1);
 					px->vReg.push_back(pastRegArea*vHa/1000000); // TODO: check the 1000000. Should be ok, as area in ha vol in Mm^3
-				} else {
+                    if (pastRegArea*vHa/1000000 < 0.0){
+                       msgOut(MSG_CRITICAL_ERROR,"Negative regeneration volumes in endogenous regeneration");
+                    }
+                } else {
 					double regionArea = REG->getValue("forArea_"+ft,OP_SUM);
 					double pxArea     = px->getDoubleValue("forArea_"+ft, true); // 20121109 bug solved (add get zero for not data)
-					double newVReg = regionArea ? gfd("vReg",r2,ft,"")*pxArea/regionArea : 0;
+                    double regRegVolumes = gfd("vReg",r2,ft,"");
+                    double newVReg = regionArea ? regRegVolumes*pxArea/regionArea : 0;
 					px->vReg.push_back(newVReg); // 20121108 BUG !!! solved
+                    if (newVReg<0.0){
+                       msgOut(MSG_CRITICAL_ERROR,"Negative regeneration volumes in exogenous regeneration");
+                    }
 					// vReg and entryVolHa are NOT the same thing. vReg is the yearly regeneration volumes
 					// for the whole region. We can use them when we don't know the harvested area
 					// entryVolHa can lead to vReg calculation only when we know the regeneration area. So in the
@@ -421,6 +428,9 @@ ModelCoreSpatial::runBiologicalModule(){
 					}else if(u==1){
 						vol = (1-1/tp-mort)*pastYearVol+vReg;
 						double debug = vol;
+                        if (vol<0.0){
+                          msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
+                        }
 					} else {
 						// time of passage and volume of smaller diameter class
 						double inc = (u==dClasses.size()-1)?0:1./tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
@@ -428,6 +438,9 @@ ModelCoreSpatial::runBiologicalModule(){
 						double pastYearVol_1 = px->vol_l.at(j).at(u-1); //gfd("vol",regId,ft,dClasses[u-1],thisYear-1);
 						vol = (1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
 						double debug = vol;
+                        if (vol<0.0){
+                          msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
+                        }
 					}
 					if(u != 0){ // this if is required to avoid a 0/0 and na error that then propage also in vSum()
 						hArea_byDc.push_back(finalHarvestFlag*1000000*hV/vHa); // volumes are in Mm^3, area in ha, vHa in m^3/ha
@@ -681,7 +694,10 @@ ModelCoreSpatial::initializePixelValues(){
 					double regVol;
 					regVol = z ? gfd("vol",regIds2[i],fTypes[y],dClasses[z],firstYear) : 0 ; // if z=0-> regVol= gfd(), otherwise regVol=0;
 					double pxArea = rpx[j]->getDoubleValue("forArea_"+fTypes[y], true); // bug solved 20121109. get zero for not data
-					double pxVol = regForArea ? regVol * pxArea/regForArea: 0; // if we introduce new forest types without initial area we must avoid a 0/0 division
+                    if (pxArea<0.0){
+                        cout << "got it in initialisation! aa" << endl;
+                    }
+                    double pxVol = regForArea ? regVol * pxArea/regForArea: 0; // if we introduce new forest types without initial area we must avoid a 0/0 division
 					//rpx[j]->changeValue(pxVol,"vol",fTypes[y],dClasses[z],firstYear);
 					vol_byu.push_back(pxVol);
 				}
@@ -1011,6 +1027,13 @@ ModelCoreSpatial::updateMapAreas(){
                 double regArea = findMap(px->regArea,currentYear).at(j); //bug 20140205 areas in the model are in ha, in the layer in m^2
 				//double newValue = oldValue*(1. + newAreaRatio);
 				double newValue = oldValue-hArea+regArea;
+                double areaNetOfRegeneration = oldValue-hArea;
+                if (areaNetOfRegeneration<0.0){
+                    msgOut(MSG_CRITICAL_ERROR,"areaNetOfRegeneration negative in updateMapAreas");
+                }
+                if (newValue<0.0){
+                    msgOut(MSG_CRITICAL_ERROR,"for area negative in updateMapAreas");
+                }
                 rpx[z]->changeValue("forArea_"+ft, newValue*10000);
 			}
 		}

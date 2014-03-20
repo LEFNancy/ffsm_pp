@@ -367,7 +367,7 @@ ModelCore::runBiologicalModule(){
 			//		);
 			//	);
 			//);
-            int tp_u0 = ceil(gfd("tp",regId,ft,dClasses[0])); // time of passage to reach the first diameter class // bug 20140318, added ceil
+            int tp_u0 = gfd("tp",regId,ft,dClasses[0]); // time of passage to reach the first diameter class // bug 20140318, added ceil
 			if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // T.O.D.O to be checked -> 20121109 OK
 				double pastRegArea = gfd("regArea",regId,ft,"",thisYear-tp_u0);
 				double vHa = gfd("vHa",regId,ft,dClasses[1]);
