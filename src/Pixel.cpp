@@ -276,6 +276,9 @@ Pixel::swap(const int& swap_what){
 		case VAR_VOL:
 			vol_l = vol;
 			break;
+        case VAR_AREA:
+            area_l = area;
+            break;
 		default:
 			msgOut(MSG_CRITICAL_ERROR,"Don't know how to swap "+swap_what);
 	}

@@ -82,7 +82,7 @@ public:
 	void                clearCache(){cachedDouble=0;};
     void                setSpModifier(const double& value, const int& ftindex){spMods.at(ftindex)=value;};
     double              getSpModifier(const string& ft);
-	void                swap(const int &swap_what);
+    void                swap(const int &swap_what); ///< Assign to the delayed value the current values, e.g. vol_l = vol
     void                setMyRegion(ModelRegion* region_h){l2region = region_h;};
 
 	// matrices of (ft,dc)
@@ -100,7 +100,7 @@ public:
 	MatrixXd                                 cumTp;*/
 
 	vector <vector <double> >                  vol; // by ft,dc
-    //vector <vector <double> >                 area; // by ft,dc
+    vector <vector <double> >                 area; // by ft,dc
     vector <vector <double> >                hArea; // by ft, dc  // possibly in ha, but to be check for 100% sure
 	vector <vector <double> >                 hVol; // by ft.dc
 	vector < vector <vector <double> > >hVol_byPrd; // by ft, dc, pp
@@ -110,7 +110,8 @@ public:
 	vector <double >                          vReg; // by ft
 	vector <double>                expectedReturns; // by ft
 
-	vector <vector <double> >                vol_l;
+    vector <vector <double> >                vol_l;  // store the volumes of the previous year
+    vector <vector <double> >               area_l; // store the areas of the previous year
 
 	vector <vector <double> >                 beta;
 	vector <vector <double> >                 mort;

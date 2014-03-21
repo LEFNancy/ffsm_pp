@@ -34,6 +34,7 @@ public:
 
 	void                  cacheSettings();          ///< just cache exogenous settings from ModelData
 	void                  initializePixelValues();  ///< distribuite regional exogenous volumes to pixel volumes using corine land cover area as weight
+    void                  initializePixelArea();    ///< compute px->area for each ft and dc
 	void                  resetPixelValues();       ///< swap volumes->lagged_volumes and reset the other pixel vectors
 	void                  cachePixelExogenousData();///< computes pixel level tp, meta and mort
 	void                  computeInventary();       ///< in=f(vol_t-1)

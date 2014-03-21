@@ -24,9 +24,11 @@ void
 ModelCoreSpatial::runInitPeriod(){
 	/**
 	Some importan notes:
-	V (volumes) -> at the end of the year
+    V (volumes)    -> at the end of the year
 	In (inventary) -> at the beginning of the year
-	Volumes are in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2
+    Area           -> at the end of the year
+    Harvesting     -> at the beginning of the year
+    Volumes are in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2, vHa in m^3/ha
 	*/
 	cacheSettings();             // cashe things like first year, second year, dClasses...
 	initializePixelValues();     // compute px volumes vol for 2005
@@ -37,6 +39,7 @@ ModelCoreSpatial::runInitPeriod(){
 	cachePixelExogenousData();   // compute pixel tp, meta and mort
 	computeInventary();          // in=f(vol_t-1)
 	computeCumulativeData();     // compute cumTp_exp, vHa_exp, vHa
+    initializePixelArea();       // compute px->area for each ft and dc
 	runBiologicalModule();       //
 	runManagementModule();
 	updateMapAreas();            // update the forArea_{ft} layer on each pixel as old value-hArea+regArea
@@ -319,9 +322,27 @@ ModelCoreSpatial::runMarketModule(){
 }
 
 
-
+/**
+ * @brief ModelCoreSpatial::runBiologicalModule
+ *
+ *   Changes in Area:
+ *   dc     area_l  area    diff
+ *   0      --------->      +regArea -areaFirstProdClass (areaMovingUp_00)
+ *   15     --------->      +areaFirstPrClass -hArea_15 -areaMovingUp_15
+ *   25     --------->      +areaMovingUp15 - hArea_25 - areaMovingUp_25
+ *   35     --------->      +areaMovingUp25 - hArea_35 - areaMovingUp_35
+ *   ...
+ *   95     --------->      +areaMovingUp85 - hArea_95 - areaMovingUp_95
+ *   105    --------->      +areaMovingUp95 - hArea_105
+ *
+ *   note: regArea is computed in the management module, not here
+ */
 void
 ModelCoreSpatial::runBiologicalModule(){
+
+
+
+
 
 	msgOut(MSG_INFO, "Starting resource module..");
 	int thisYear = MTHREAD->SCD->getYear();
@@ -337,10 +358,13 @@ ModelCoreSpatial::runBiologicalModule(){
 			//px->expectedReturns.clear();
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
+                double pxArea_debug     = px->getDoubleValue("forArea_"+ft, true);
 				vector <double>            hV_byDiam;
 				vector < vector <double> > hV_byDiamAndPrd;
 				vector <double> hArea_byDc;
 				vector <double> newVol_byDiam;
+                vector <double> areasMovingUp(dClasses.size(), 0.0);
+                double areaFirstProdClass;
 
 				// calculating the regeneration..
 				// if we are in a year where the time of passage has not yet been reached
@@ -358,19 +382,29 @@ ModelCoreSpatial::runBiologicalModule(){
 					double pastRegArea = px->getPastRegArea(j,thisYear-tp_u0);
 					//double entryVolHa = gfd("entryVolHa",regId,ft,"");
 					double vHa = px->vHa.at(j).at(1);
-					px->vReg.push_back(pastRegArea*vHa/1000000); // TODO: check the 1000000. Should be ok, as area in ha vol in Mm^3
-                    if (pastRegArea*vHa/1000000 < 0.0){
+                    px->vReg.push_back(pastRegArea*vHa/1000000.0); // TODO: check the 1000000. Should be ok, as area in ha vol in Mm^3
+                    areaFirstProdClass = pastRegArea; // this is just a start and will need to include the last year area
+                    #ifdef QT_DEBUG
+                    if (areaFirstProdClass < 0.0){
                        msgOut(MSG_CRITICAL_ERROR,"Negative regeneration volumes in endogenous regeneration");
                     }
+                    #endif
                 } else {
 					double regionArea = REG->getValue("forArea_"+ft,OP_SUM);
 					double pxArea     = px->getDoubleValue("forArea_"+ft, true); // 20121109 bug solved (add get zero for not data)
                     double regRegVolumes = gfd("vReg",r2,ft,"");
-                    double newVReg = regionArea ? regRegVolumes*pxArea/regionArea : 0;
+                    double newVReg = regionArea ? regRegVolumes*pxArea/regionArea : 0.0;
 					px->vReg.push_back(newVReg); // 20121108 BUG !!! solved
-                    if (newVReg<0.0){
+                    double pastArea = px->area_l.at(j).at(0);
+                    areaFirstProdClass = (1.0 / (px->tp.at(j).at(0)) ) * pastArea;
+                    //areaFirstProdClass = entryVolHa ? newVReg*1000000 /entryVolHa:0.0;
+
+
+                    #ifdef QT_DEBUG
+                    if (areaFirstProdClass<0.0){
                        msgOut(MSG_CRITICAL_ERROR,"Negative regeneration volumes in exogenous regeneration");
                     }
+                    #endif
 					// vReg and entryVolHa are NOT the same thing. vReg is the yearly regeneration volumes
 					// for the whole region. We can use them when we don't know the harvested area
 					// entryVolHa can lead to vReg calculation only when we know the regeneration area. So in the
@@ -428,9 +462,11 @@ ModelCoreSpatial::runBiologicalModule(){
 					}else if(u==1){
 						vol = (1-1/tp-mort)*pastYearVol+vReg;
 						double debug = vol;
+                        #ifdef QT_DEBUG
                         if (vol<0.0){
                           msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
                         }
+                        #endif
 					} else {
 						// time of passage and volume of smaller diameter class
 						double inc = (u==dClasses.size()-1)?0:1./tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
@@ -438,16 +474,34 @@ ModelCoreSpatial::runBiologicalModule(){
 						double pastYearVol_1 = px->vol_l.at(j).at(u-1); //gfd("vol",regId,ft,dClasses[u-1],thisYear-1);
 						vol = (1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
 						double debug = vol;
+                        #ifdef QT_DEBUG
                         if (vol<0.0){
                           msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
                         }
+                        #endif
 					}
 					if(u != 0){ // this if is required to avoid a 0/0 and na error that then propage also in vSum()
-						hArea_byDc.push_back(finalHarvestFlag*1000000*hV/vHa); // volumes are in Mm^3, area in ha, vHa in m^3/ha
+                        double inc = (u==dClasses.size()-1)?0:1.0/tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
+                        double volumesMovingUp = inc*pastYearVol;
+                        double pastArea = px->area_l.at(j).at(u);
+                        areasMovingUp.at(u) = inc*pastArea;
+                        double finalHarvestedVolumes = finalHarvestFlag* hV;
+                        double finalHarvestedRate = pastYearVol?finalHarvestedVolumes/pastYearVol:0.0;
+                        hArea_byDc.push_back(finalHarvestedRate*pastArea); // volumes are in Mm^3, area in ha, vHa in m^3/ha
+
+                        px->area.at(j).at(u) = px->area_l.at(j).at(u) - areasMovingUp.at(u) + areasMovingUp.at(u-1) - hArea_byDc.at(u);
+
 					} else {
+                        areasMovingUp.at(u) = areaFirstProdClass;
 						hArea_byDc.push_back(0.);
+                        px->area.at(j).at(u) = px->area_l.at(j).at(u) - areasMovingUp.at(u) - hArea_byDc.at(u);
 					}
 					newVol_byDiam.push_back(vol);
+                    #ifdef QT_DEBUG
+                    if(px->area.at(j).at(u)< 0.0 || areasMovingUp.at(u) < 0.0 || hArea_byDc.at(u) < 0.0 ){
+                        msgOut(MSG_CRITICAL_ERROR, "Negative values in runBiologicalModel");
+                    }
+                    #endif
 
 					//double debug = hv2fa*hr*pastYearVol*100;
 					//cout << "regId|ft|dc| debug | freeArea: " << r2 << "|"<<ft<<"|"<<dc<<"| "<< debug << " | " << freeArea_byU << endl;
@@ -633,11 +687,19 @@ ModelCoreSpatial::runManagementModule(){
 						foundMaxExpReturns = true;
 					}
                     double freq = rescaleFrequencies ? gfd("freq_norm",regId,ft,""):gfd("freq",regId,ft,""); // "probability of presence" for unmanaged forest, added 20140318
-                    regArea +=  harvestedAreaForThisFT*(1-mr)*freq;
+                    regArea +=  totalHarvestedArea*(1-mr)*freq;
 					//sfd(regArea,"regArea",regId,ft,"");
 					thisYearRegAreas.push_back(regArea);
 				}
+                px->area.at(j).at(0) += thisYearRegAreas.at(j); // adding regeneration area to the fist (00) diameter class
 			} // end for each forest type
+            #ifdef QT_DEBUG
+            double totalRegArea = vSum(thisYearRegAreas);
+            double ratio = totalRegArea / totalHarvestedArea ;
+            if(ratio < 0.99999999999 || ratio > 1.00000000001) {
+              msgOut(MSG_CRITICAL_ERROR, "Sum of regeneration areas not equal to sum of harvested area in runManagementModel()!");
+            }
+            #endif
 			//double totalRegArea = gfd("regArea",regId,FT_ALL,DIAM_ALL);
 			px->regArea.insert(pair <int, vector<double> > (MTHREAD->SCD->getYear(), thisYearRegAreas));
 		} // end of each pixel
@@ -705,6 +767,83 @@ ModelCoreSpatial::initializePixelValues(){
 			}
 		}
 	}
+}
+
+/**
+ * @brief ModelCoreSpatial::initializePixelArea
+ *
+ * This function compute the initial area by ft and dc. It requires vHa computed in computeCumulativeData, this is why it is
+ * separated form the other initialisedPixelValues().
+ * As the sum of area computed using vHa may differ from the one memorised in forArea_* layer, all values are scaled to match
+ * it before being memorised.
+ * Also assign area = area_l
+ */
+
+void
+ModelCoreSpatial::initializePixelArea(){
+  msgOut(MSG_INFO, "Starting initializing pixel-level area");
+  if(!MD->getBoolSetting("usePixelData")) return;
+  for(uint i=0;i<regIds2.size();i++){
+    ModelRegion* reg = MD->getRegion(regIds2[i]);
+    vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
+    for (uint p=0;p<rpx.size();p++){
+      Pixel* px = rpx[p];
+      double pxid= px->getID();
+      for(uint j=0;j<fTypes.size();j++){
+        string ft = fTypes[j];
+        vector <double> tempAreas;
+        vector <double> areasByFt;
+        double pxArea = px->getDoubleValue("forArea_"+ft,true)/10000.0; //ha
+        for (uint u=0;u<dClasses.size();u++){
+          if(u==0){
+            double regionArea = reg->getValue("forArea_"+ft,OP_SUM)/10000.0; //ha
+            double regRegVolumes = gfd("vReg",regIds2[i],ft,""); // regional regeneration volumes.. ugly name !!
+            double newVReg = regionArea ? regRegVolumes*pxArea/regionArea : 0.0;
+            double tp_u0 = px->tp.at(j).at(0); // time of passage to reach the first production diameter class
+            double entryVolHa = gfd("entryVolHa",regIds2[i],ft,"");
+            double tempArea = (newVReg*1000000.0/entryVolHa)*tp_u0;
+            tempAreas.push_back(tempArea);
+          } else {
+            string dc = dClasses[u];
+            double dcVol = px->vol_l.at(j).at(u)*1000000.0; // m^3
+            double dcVHa = px->vHa.at(j).at(u); // m^3/ha
+            #ifdef QT_DEBUG
+            if(dcVol < 0.0 || dcVHa < 0.0){
+                msgOut(MSG_CRITICAL_ERROR, "Negative volumes or density in initializePixelArea");
+            }
+            #endif
+            double tempArea = dcVHa?dcVol/dcVHa:0;
+            tempAreas.push_back(tempArea);
+          }
+
+        } // end dc
+        double sumTempArea = vSum(tempAreas);
+       // double sharedc0 = 5.0/90.0; // an arbitrary share of total area allocated to first diameter class
+        //tempAreas.at(0) = sumTempArea * sharedc0;
+        //sumTempArea = vSum(tempAreas);
+        double normCoef = sumTempArea?pxArea/ sumTempArea:0;
+        #ifdef QT_DEBUG
+        if(normCoef < 0.0){
+            msgOut(MSG_CRITICAL_ERROR, "Negative normCoef in initializePixelArea");
+        }
+        #endif
+        for (uint u=0;u<dClasses.size();u++){
+          areasByFt.push_back(tempAreas.at(u)*normCoef); //manca la costruzione originale del vettore
+        }
+        #ifdef QT_DEBUG
+        if (pxArea != 0.0){
+            double ratio = vSum(areasByFt)/ pxArea;  // vSum(areasByFt) should be equal to pxArea
+            if(ratio < 0.99999999999 || ratio > 1.00000000001) {
+              msgOut(MSG_CRITICAL_ERROR, "pxArea is not equal to vSum(areasByFt) in initializePixelArea");
+            }
+        }
+        #endif
+        px->area_l.push_back(areasByFt);
+      } // end ft
+      px->area = px->area_l;  //Assigning initial value of area to the area of the old year
+    } // end px
+  } // end region
+
 }
 
 void
@@ -899,10 +1038,11 @@ ModelCoreSpatial::resetPixelValues(){
 		regPx = MTHREAD->MD->getRegion(regId)->getMyPixels();
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
-			px->swap(VAR_VOL);
-
+            px->swap(VAR_VOL);  // vol_l = vol
+            px->swap(VAR_AREA); // area_l = area
 			// 20121108 BUG! Solved, used empty (just return true if the vector is empty) instead of clear (it actually clears the vector)
 			px->vol.clear(); // by ft,dc
+            px->area = px->area_l; // ATTENCTION, DIFFERENT FROM THE OTHERS. Here it is not cleared, it is assigned the previous year as default
 			/*px->area.clear(); // by ft,dc*/
 			px->hArea.clear(); // by ft, dc
 			//px->regArea.clear(); // by year, ft NO, this one is a map, it doesn't need to be changed
@@ -1002,6 +1142,33 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
 void
 ModelCoreSpatial::updateMapAreas(){
 	msgOut(MSG_INFO, "Updating map areas..");
+
+
+
+    if(!MD->getBoolSetting("usePixelData")) return;
+    for(uint i=0;i<regIds2.size();i++){
+      ModelRegion* reg = MD->getRegion(regIds2[i]);
+      vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
+      for (uint p=0;p<rpx.size();p++){
+        Pixel* px = rpx[p];
+        double pxid= px->getID();
+        for(uint j=0;j<fTypes.size();j++){
+          string ft = fTypes[j];
+          double forArea = vSum(px->area.at(j));
+          #ifdef QT_DEBUG
+          if(forArea < 0.0 ){
+            msgOut(MSG_CRITICAL_ERROR, "Negative forArea in updateMapAreas");
+          }
+          #endif
+          px->changeValue("forArea_"+ft, forArea*10000);
+        } // end ft
+      } // end px
+    } // end region
+
+
+
+
+    /*
 	int currentYear = MTHREAD->SCD->getYear();
 	map<int,double> forestArea; // foresta area by each region
 	pair<int,double > forestAreaPair;
@@ -1038,6 +1205,7 @@ ModelCoreSpatial::updateMapAreas(){
 			}
 		}
 	}
+    */
 }
 
 void

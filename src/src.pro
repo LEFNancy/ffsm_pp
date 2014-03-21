@@ -85,11 +85,9 @@ QMAKE_CXXFLAGS += -std=c++0x
 
 
 CONFIG(release, debug|release) {
-    #debug code here
     TARGET = ffsm
 }
 CONFIG(debug, debug|release) {
-    #debug code here
     TARGET = ffsm_debug
 }
 
