@@ -29,12 +29,13 @@ ModelCoreSpatial::runInitPeriod(){
     Area           -> at the end of the year
     Harvesting     -> at the beginning of the year
     Volumes are in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2, vHa in m^3/ha
-	*/
+    */
 	cacheSettings();             // cashe things like first year, second year, dClasses...
 	initializePixelValues();     // compute px volumes vol for 2005
 	initMarketModule();          // inside it uses first year, second year
 	MTHREAD->DO->print();
 	MTHREAD->SCD->advanceYear(); // 2005->2006
+    int thisYear = MTHREAD->SCD->getYear(); // for debugging
 	resetPixelValues();          // swap volumes->lagged_volumes and reset the other pixel vectors
 	cachePixelExogenousData();   // compute pixel tp, meta and mort
 	computeInventary();          // in=f(vol_t-1)
@@ -49,6 +50,7 @@ ModelCoreSpatial::runInitPeriod(){
 
 void
 ModelCoreSpatial::runSimulationYear(){
+    int thisYear = MTHREAD->SCD->getYear(); // for debugging
 	resetPixelValues();          // swap volumes->lagged_volumes and reset the other pixel vectors
 	cachePixelExogenousData();   // compute pixel tp, meta and mort
 	computeInventary();          // in=f(vol_t-1)
@@ -355,6 +357,10 @@ ModelCoreSpatial::runBiologicalModule(){
 		regPx = REG->getMyPixels();
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
+            double pxID=px->getID();
+            if (pxID == 17348.0){
+                cout << "got the pixel" << endl;
+            }
 			//px->expectedReturns.clear();
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
@@ -378,15 +384,19 @@ ModelCoreSpatial::runBiologicalModule(){
 				//	);
 				//);
                 int tp_u0 = px->tp.at(j).at(0); // time of passage to reach the first production diameter class // bug 20140318, added ceil. 20140318 removed it.. model did go crazy with it
-				if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // T.O.D.O to be checked -> 20121109 OK
-					double pastRegArea = px->getPastRegArea(j,thisYear-tp_u0);
+                if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // T.O.D.O to be checked -> 20121109 OK
+                    double pastRegArea = px->getPastRegArea(j,thisYear-tp_u0);
+                    double availableArea = px->area_l.at(j).at(0);
 					//double entryVolHa = gfd("entryVolHa",regId,ft,"");
 					double vHa = px->vHa.at(j).at(1);
                     px->vReg.push_back(pastRegArea*vHa/1000000.0); // TODO: check the 1000000. Should be ok, as area in ha vol in Mm^3
-                    areaFirstProdClass = pastRegArea; // this is just a start and will need to include the last year area
+                    areaFirstProdClass = min(availableArea, pastRegArea); // this is just a start and will need to include the last year area
                     #ifdef QT_DEBUG
                     if (areaFirstProdClass < 0.0){
                        msgOut(MSG_CRITICAL_ERROR,"Negative regeneration volumes in endogenous regeneration");
+                    }
+                    if ( (availableArea-pastRegArea) < -0.00000001     ){
+                       msgOut(MSG_CRITICAL_ERROR,"Upgrading from dc0 more area than the available one in endogenous regeneration");
                     }
                     #endif
                 } else {
@@ -397,12 +407,18 @@ ModelCoreSpatial::runBiologicalModule(){
 					px->vReg.push_back(newVReg); // 20121108 BUG !!! solved
                     double pastArea = px->area_l.at(j).at(0);
                     areaFirstProdClass = (1.0 / (px->tp.at(j).at(0)) ) * pastArea;
+                    // in the exogenous period we are exogenously upgrading u0->u1 some areas but, as we do not have the regeneration
+                    // are corresponding to that we have also to manually add it to u0
+                    px->area_l.at(j).at(0) += areaFirstProdClass;
                     //areaFirstProdClass = entryVolHa ? newVReg*1000000 /entryVolHa:0.0;
 
 
                     #ifdef QT_DEBUG
                     if (areaFirstProdClass<0.0){
                        msgOut(MSG_CRITICAL_ERROR,"Negative regeneration volumes in exogenous regeneration");
+                    }
+                    if (areaFirstProdClass > pastArea){
+                       msgOut(MSG_CRITICAL_ERROR,"Moving up area higher than available area in exogenous regeneration !");
                     }
                     #endif
 					// vReg and entryVolHa are NOT the same thing. vReg is the yearly regeneration volumes
@@ -539,6 +555,11 @@ ModelCoreSpatial::runManagementModule(){
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
 			px->expectedReturns.clear();
+
+            double pxID=px->getID();
+            if (pxID == 17348.0){
+                cout << "got the pixel" << endl;
+            }
 
 			// CALCULATING the expected returns for each forest type...
 			for(uint j=0;j<fTypes.size();j++){
