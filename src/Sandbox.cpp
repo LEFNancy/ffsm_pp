@@ -117,6 +117,38 @@ void
 Sandbox::basicTest(){
 
     /*
+    // Testing the new changeMapValue(), incrMapValue(), resetMapValues() and vectorToMap() funcions
+    map<int,double> testMap;
+    for (uint i=0;i<5;i++){
+        pair<int,double> mypair(i,i*2.5);
+        testMap.insert(mypair);
+    }
+    double result = findMap(testMap,3,MSG_NO_MSG);
+    double result2 = findMap(testMap,1,MSG_ERROR);
+    double result3 = findMap(testMap,7,MSG_DEBUG);
+    cout << findMap(testMap,3,MSG_NO_MSG)<< endl;
+    changeMapValue(testMap,3,200.0,MSG_ERROR);
+    cout << findMap(testMap,3,MSG_NO_MSG)<< endl;
+    incrMapValue(testMap,3,5.0,MSG_ERROR);
+    cout << findMap(testMap,3,MSG_NO_MSG)<< endl;
+    cout << "done" << endl;
+
+    vector<string> mykeys;
+    mykeys.push_back("andrea");
+    mykeys.push_back("antonello");
+    mykeys.push_back("paolo");
+    map<string,double> mymap = vectorToMap(mykeys,15.0);
+    string searchkey;
+    searchkey = "andrea";
+    cout << findMap(mymap,searchkey,MSG_DEBUG)<< endl;
+    resetMapValues(mymap,32.0);
+    cout << findMap(mymap,searchkey,MSG_DEBUG)<< endl;
+    exit(0);
+    */
+
+
+
+    /*
     // -------------------------------------------------------------------
     // Sampling from uniform distribution with local random seed
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -284,6 +316,17 @@ Sandbox::basicTest(){
 
 void
 Sandbox::fullTest(){
+
+    /*
+    // Testing api to call generic forest type data, parent/child
+    cout << "Hello world " << endl;
+    cout << MTHREAD->MD->getForData("freq_norm",11041,"broadL","",2040) << endl;
+    MTHREAD->MD->setForData(100,"freq_norm",11041,"broadL","",2040);
+    cout << MTHREAD->MD->getForData("freq_norm",11041,"broadL","",2040) << endl;
+    cout << MTHREAD->MD->getForTypeParentId("broadL_highF")<< endl;
+    cout << MTHREAD->MD->getForTypeParentId("con_highF")<< endl;
+    exit(0);
+    */
 
     /*
     // Testing for each region how far is the average of the multipliers from 1

@@ -214,7 +214,7 @@ public:
 	/// Tokenize a string using a delimiter (default is space)
 	void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ") const;
 
-	/// Search for a value starting from a key in any type of map
+    /// Lookup a map for a value. Return the value starting from the key
 	template <typename K, typename V> V findMap(const map <K, V> &mymap, const K& key, const int& error_level=MSG_CRITICAL_ERROR){
 		typename map<K, V>::const_iterator p;
 		p=mymap.find(key);
@@ -223,9 +223,51 @@ public:
 		}
 		else {
 			msgOut(error_level, "Error in finding a value in a map (no value found)");
-
 		}
 	}
+
+    /// Change the value stored in a map given the key and the new value
+    template <typename K, typename V> void changeMapValue(map <K, V> &mymap, const K& key, const V& value, const int& error_level=MSG_CRITICAL_ERROR){
+        typename map<K, V>::iterator p;
+        p=mymap.find(key);
+        if(p != mymap.end()) {
+            p->second = value;
+            return;
+        }
+        else {
+            msgOut(error_level, "Error in finding a value in a map (no value found)");
+        }
+    }
+    /// Increment a value stored in a map of the specified value, given the key
+    template <typename K, typename V> void incrMapValue(map <K, V> &mymap, const K& key, const V& value, const int& error_level=MSG_CRITICAL_ERROR){
+        typename map<K, V>::iterator p;
+        p=mymap.find(key);
+        if(p != mymap.end()) {
+            p->second = p->second + value;
+            return;
+        }
+        else {
+            msgOut(error_level, "Error in finding a value in a map (no value found)");
+        }
+    }
+
+    /// Reset all values stored in a map to the specified one
+    template <typename K, typename V> void resetMapValues(map <K, V> &mymap, const V& value){
+        typename map<K, V>::iterator p;
+        for(p=mymap.begin(); p!=mymap.end(); p++) {
+            p->second =value;
+        }
+    }
+
+    /// Return a map built using the given vector and the given (scalar) value as keys/values pairs
+    template <typename K, typename V> map <K, V> vectorToMap(const vector <K>& keys, const V& value=0.0){
+        map<K,V> returnMap;
+        for(uint i=0; i<keys.size();i++){
+            pair<K,V> apair(keys[i],value);
+            returnMap.insert(apair);
+        }
+        return returnMap;
+    }
 
 
 protected:

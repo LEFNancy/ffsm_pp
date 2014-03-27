@@ -65,11 +65,19 @@ ModelData::~ModelData(){
 }
 
 forType*
-ModelData::getForType(string forTypeId_h){
+ModelData::getForType(string &forTypeId_h){
 	for(int i=0;i<forTypes.size();i++){
 		if(forTypes[i].forTypeId==forTypeId_h) return &forTypes[i];
 	}
 	msgOut(MSG_CRITICAL_ERROR,"forTypeId "+forTypeId_h+" not found. Aborting.");
+}
+
+string
+ModelData::getForTypeParentId(const string &forTypeId_h){
+    for(int i=0;i<forTypes.size();i++){
+        if(forTypes[i].forTypeId==forTypeId_h) return forTypes[i].ereditatedFrom;
+    }
+    msgOut(MSG_CRITICAL_ERROR,"forTypeId "+forTypeId_h+" not found. Aborting.");
 }
 
 vector<string>

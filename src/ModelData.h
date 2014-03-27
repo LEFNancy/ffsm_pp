@@ -104,8 +104,9 @@ public:
 	int                 getNForTypes(){return forTypes.size();}
 	int                 getNReclRules(){return reclRules.size();}
 	forType*            getForType(int position){return &forTypes[position];}
-	forType*            getForType(string forTypeId_h);
+    forType*            getForType(string& forTypeId_h);
 	vector <string>     getForTypeIds(bool all=false); ///< By default it doesn't return forTypes used only as input
+    string              getForTypeParentId(const string& forTypeId_h);
 	reclRule*           getReclRule(int position){return &reclRules[position];}
 	vector <string>     getDiameterClasses(bool productionOnly=false);
 	/// A simple function to assess if a specified product can be made by a certain forest type and diameter class
