@@ -80,6 +80,17 @@ ModelData::getForTypeParentId(const string &forTypeId_h){
     msgOut(MSG_CRITICAL_ERROR,"forTypeId "+forTypeId_h+" not found. Aborting.");
 }
 
+int
+ModelData::getNForTypesChilds(const string& forTypeId_h){
+    int nChilds = 0;
+    for(int i=0;i<forTypes.size();i++){
+        if(forTypes[i].ereditatedFrom==forTypeId_h) {
+            nChilds ++;
+        }
+    }
+    return nChilds;
+}
+
 vector<string>
 ModelData::getScenarios(){
 	vector<string> toReturn;

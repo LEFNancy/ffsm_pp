@@ -518,24 +518,32 @@ Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Nu
 
 
 	// all variables have upper or equal than zero bound
-	for (Index i=0; i<n; i++) {
+    /*for (Index i=0; i<n; i++) {
 	// removed 20120812, as not really needed.. doesn't actually change either obj or efforts to reach it
 		if(
-//					 ( n>=gip("dc")&& n<(gip("dc")+nSecPr*nL2r))
-//				|| ( n>=gip("sc")&& n<(gip("sc")+nPriPr*nL2r))
+            //	 ( n>=gip("dc")&& n<(gip("dc")+nSecPr*nL2r))
+            //	|| ( n>=gip("sc")&& n<(gip("sc")+nPriPr*nL2r))
 				 ( n>=gip("dl")&& n<gip("dl")+getVarInstances("dl"))
 			|| ( n>=gip("sa")&& n<gip("sa")+getVarInstances("sa"))
 			|| ( n>=gip("sl")&& n<gip("sl")+getVarInstances("sl"))
 			|| ( n>=gip("da")&& n<gip("da")+getVarInstances("da"))
 			|| ( n>=gip("pl")&& n<gip("sa")+getVarInstances("sa"))
 		) {  // I could make a function to return the number of positions by a certain variable name, looking up the the map that define its domain
-			x_l[i] = 0.00000001;
+            //x_l[i] = 0.00000001;
+            x_l[i] =         0.; //20140328: if these vars have a lower bound > 0 the model doesn't solve when volumes in a region go to zero !!!
 			x_u[i] =       1e20;
 		} else {
 			x_l[i] =         0.;
 			x_u[i] =       1e20;
 		}
-	}
+    }*/
+
+    for (Index i=0; i<n; i++) {
+            x_l[i] =         0.; //20140328: if these vars have a lower bound > 0 the model doesn't solve when volumes in a region go to zero !!!
+            x_u[i] =       1e20;
+    }
+
+
 
 	// Set the bounds for the constraints
 	for (Index i=0; i<m; i++) {
@@ -813,6 +821,7 @@ Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, co
 
 void
 Opt::generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h_lag){
+    /// Copied from http://bocop.org/
     Number *xp    = new double[n];
     Number *lamp  = new double[m];
     Number *zl    = new double[m];

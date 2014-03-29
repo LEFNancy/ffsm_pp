@@ -193,7 +193,7 @@ ModelCoreSpatial::runMarketModule(){
 	// *** PRE-OPTIMISATION YEARLY OPERATIONS..
 	for(uint i=0;i<regIds2.size();i++){
 		int r2 = regIds2[i];
-										for(uint sp=0;sp<secProducts.size();sp++){
+        for(uint sp=0;sp<secProducts.size();sp++){
 			double g1    = gpd("g1",r2,secProducts[sp],previousYear);
 			double sigma = gpd("sigma",r2,secProducts[sp]);
 			double pc_1  = gpd("pc",r2,secProducts[sp],previousYear);
@@ -342,10 +342,6 @@ ModelCoreSpatial::runMarketModule(){
 void
 ModelCoreSpatial::runBiologicalModule(){
 
-
-
-
-
 	msgOut(MSG_INFO, "Starting resource module..");
 	int thisYear = MTHREAD->SCD->getYear();
 
@@ -357,10 +353,11 @@ ModelCoreSpatial::runBiologicalModule(){
 		regPx = REG->getMyPixels();
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
-            double pxID=px->getID();
-            if (pxID == 17348.0){
-                cout << "got the pixel" << endl;
-            }
+
+            double pxId = px->getID();
+            //if (pxId == 3550.0){
+            //    cout << "got the pixel" << endl;
+            //}
 			//px->expectedReturns.clear();
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
@@ -384,41 +381,53 @@ ModelCoreSpatial::runBiologicalModule(){
 				//	);
 				//);
                 int tp_u0 = px->tp.at(j).at(0); // time of passage to reach the first production diameter class // bug 20140318, added ceil. 20140318 removed it.. model did go crazy with it
+                if(thisYear == secondYear){
+                    px->initialDc0Area.push_back(px->area_l.at(j).at(0));
+                }
                 if(regType != "fixed" && (thisYear-secondYear) >= tp_u0 ) { // T.O.D.O to be checked -> 20121109 OK
                     double pastRegArea = px->getPastRegArea(j,thisYear-tp_u0);
                     double availableArea = px->area_l.at(j).at(0);
 					//double entryVolHa = gfd("entryVolHa",regId,ft,"");
 					double vHa = px->vHa.at(j).at(1);
-                    px->vReg.push_back(pastRegArea*vHa/1000000.0); // TODO: check the 1000000. Should be ok, as area in ha vol in Mm^3
+                    //attenction that at times could take the wrong pastRegArea if tp change too suddenly as in some "strange" scenarios
                     areaFirstProdClass = min(availableArea, pastRegArea); // this is just a start and will need to include the last year area
+                    px->vReg.push_back(areaFirstProdClass*vHa/1000000.0); // TODO: check the 1000000. Should be ok, as area in ha vol in Mm^3
+                    //if (pxId == 3550.0 && j==3){
+                    //    cout << "got the pixel" << endl;
+                    //}
                     #ifdef QT_DEBUG
                     if (areaFirstProdClass < 0.0){
-                       msgOut(MSG_CRITICAL_ERROR,"Negative regeneration volumes in endogenous regeneration");
+                       //msgOut(MSG_CRITICAL_ERROR,"Negative regeneration volumes in endogenous regeneration");
                     }
                     if ( (availableArea-pastRegArea) < -0.00000001     ){
-                       msgOut(MSG_CRITICAL_ERROR,"Upgrading from dc0 more area than the available one in endogenous regeneration");
+                       // in a very rare cases tp change first in a direction and then in the other, so that the wrong past regeneration area
+                       // is picken up.
+                       //msgOut(MSG_CRITICAL_ERROR,"Upgrading from dc0 more area than the available one in endogenous regeneration");
                     }
                     #endif
                 } else {
-					double regionArea = REG->getValue("forArea_"+ft,OP_SUM);
-					double pxArea     = px->getDoubleValue("forArea_"+ft, true); // 20121109 bug solved (add get zero for not data)
+                    double regionArea = REG->getValue("forArea_"+ft,OP_SUM);
+                    double pxArea     = px->getDoubleValue("forArea_"+ft, true); // 20121109 bug solved (add get zero for not data)
                     double regRegVolumes = gfd("vReg",r2,ft,"");
                     double newVReg = regionArea ? regRegVolumes*pxArea/regionArea : 0.0;
-					px->vReg.push_back(newVReg); // 20121108 BUG !!! solved
-                    double pastArea = px->area_l.at(j).at(0);
-                    areaFirstProdClass = (1.0 / (px->tp.at(j).at(0)) ) * pastArea;
+                    px->vReg.push_back(newVReg); // 20121108 BUG !!! solved // as now we have the area we could also use here entryVolHa
+                    // only a share of the exogenous area goes up, the regeneration one doesn't yet reach tp0:
+                    // areaFirstProdClass = (1.0 / px->tp.at(j).at(0) ) * px->area_l.at(j).at(0);
+                    areaFirstProdClass = (1.0 / ((double) tp_u0) ) * px->initialDc0Area.at(j);
                     // in the exogenous period we are exogenously upgrading u0->u1 some areas but, as we do not have the regeneration
                     // are corresponding to that we have also to manually add it to u0
-                    px->area_l.at(j).at(0) += areaFirstProdClass;
+                    //px->area_l.at(j).at(0) += areaFirstProdClass;
                     //areaFirstProdClass = entryVolHa ? newVReg*1000000 /entryVolHa:0.0;
-
+                    //if (pxId == 3550.0 && j==3){
+                    //    cout << "got the pixel" << endl;
+                    //}
 
                     #ifdef QT_DEBUG
                     if (areaFirstProdClass<0.0){
-                       msgOut(MSG_CRITICAL_ERROR,"Negative regeneration volumes in exogenous regeneration");
+                      // msgOut(MSG_CRITICAL_ERROR,"Negative regeneration volumes in exogenous regeneration");
                     }
                     if (areaFirstProdClass > pastArea){
-                       msgOut(MSG_CRITICAL_ERROR,"Moving up area higher than available area in exogenous regeneration !");
+                       //msgOut(MSG_CRITICAL_ERROR,"Moving up area higher than available area in exogenous regeneration !");
                     }
                     #endif
 					// vReg and entryVolHa are NOT the same thing. vReg is the yearly regeneration volumes
@@ -488,10 +497,9 @@ ModelCoreSpatial::runBiologicalModule(){
 						double inc = (u==dClasses.size()-1)?0:1./tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
 						double tp_1 = px->tp.at(j).at(u-1); //gfd("tp",regId,ft,dClasses[u-1]);
 						double pastYearVol_1 = px->vol_l.at(j).at(u-1); //gfd("vol",regId,ft,dClasses[u-1],thisYear-1);
-						vol = (1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1;
-						double debug = vol;
+                        vol = max(0.0,(1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1);
                         #ifdef QT_DEBUG
-                        if (vol<0.0){
+                        if ((1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1 < -0.00001){
                           msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
                         }
                         #endif
@@ -511,11 +519,14 @@ ModelCoreSpatial::runBiologicalModule(){
                         areasMovingUp.at(u) = areaFirstProdClass;
 						hArea_byDc.push_back(0.);
                         px->area.at(j).at(u) = px->area_l.at(j).at(u) - areasMovingUp.at(u) - hArea_byDc.at(u);
+                        //if (pxId == 3550.0 && j==3){
+                        //    cout << "got the pixel" << endl;
+                        //}
 					}
 					newVol_byDiam.push_back(vol);
                     #ifdef QT_DEBUG
                     if(px->area.at(j).at(u)< 0.0 || areasMovingUp.at(u) < 0.0 || hArea_byDc.at(u) < 0.0 ){
-                        msgOut(MSG_CRITICAL_ERROR, "Negative values in runBiologicalModel");
+                       // msgOut(MSG_CRITICAL_ERROR, "Negative values in runBiologicalModel");
                     }
                     #endif
 
@@ -544,6 +555,8 @@ void
 ModelCoreSpatial::runManagementModule(){
 	msgOut(MSG_INFO, "Starting management module..");
     bool weightedAverageExpectedReturns = MTHREAD->MD->getBoolSetting("weightedAverageExpectedReturns");
+    vector<string> allFTypes = MTHREAD->MD->getForTypeIds(true);
+    map<string,double> hAreaByFTypeGroup = vectorToMap(allFTypes,0.0);
 
 	// Post optimisation management mobule..
 	for(uint i=0;i<regIds2.size();i++){
@@ -555,15 +568,17 @@ ModelCoreSpatial::runManagementModule(){
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
 			px->expectedReturns.clear();
+            resetMapValues(hAreaByFTypeGroup,0.0);
 
-            double pxID=px->getID();
-            if (pxID == 17348.0){
-                cout << "got the pixel" << endl;
-            }
+            //double pxId = px->getID();
+            //if (pxId == 3550.0){
+            //    cout << "got the pixel" << endl;
+            //}
 
 			// CALCULATING the expected returns for each forest type...
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
+                string parentFt = MTHREAD->MD->getForTypeParentId(ft);
 
 				//if(regType != "fixed" && regType != "fromHrLevel"){
 				// 20120910, Antonello: changed.. calculating the expected returns also for fixed and fromHrLevel regeneration (then not used but gives indication)
@@ -665,6 +680,9 @@ ModelCoreSpatial::runManagementModule(){
                 //   exit(0);
                 //}
 
+                double hAreaThisFt=vSum(px->hArea.at(j));
+                incrMapValue(hAreaByFTypeGroup,parentFt,hAreaThisFt); // increment the parent ft of the harvested area, neeed for assigning the frequences (prob. of presence)
+
 
 
 
@@ -693,6 +711,7 @@ ModelCoreSpatial::runManagementModule(){
 			vector <double> thisYearRegAreas;
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
+                string parentFt = MTHREAD->MD->getForTypeParentId(ft);
 				double harvestedAreaForThisFT = vSum(px->hArea.at(j)); // gfd("harvestedArea",regId,ft,DIAM_ALL);
 				if(regType == "fixed" || regType == "fromHrLevel"){
 					// regeneration area is the harvested area..
@@ -707,18 +726,30 @@ ModelCoreSpatial::runManagementModule(){
 						regArea += totalHarvestedArea*mr;
 						foundMaxExpReturns = true;
 					}
-                    double freq = rescaleFrequencies ? gfd("freq_norm",regId,ft,""):gfd("freq",regId,ft,""); // "probability of presence" for unmanaged forest, added 20140318
-                    regArea +=  totalHarvestedArea*(1-mr)*freq;
+                    double freq = rescaleFrequencies ? gfd("freq_norm",regId,parentFt,""):gfd("freq",regId,parentFt,""); // "probability of presence" for unmanaged forest, added 20140318
+                    double hAreaThisFtGroup = findMap(hAreaByFTypeGroup,parentFt);
+                    double hRatio = 1.0;
+                    if(hAreaThisFtGroup>0){
+                        hRatio = harvestedAreaForThisFT/hAreaThisFtGroup;
+                    } else {
+                        int nFtChilds = MTHREAD->MD->getNForTypesChilds(parentFt);
+                        hRatio = 1.0/nFtChilds;
+                    }
+                    //regArea += harvestedAreaForThisFT*(1-mr);
+                    regArea +=  totalHarvestedArea*(1-mr)*freq*hRatio;
 					//sfd(regArea,"regArea",regId,ft,"");
 					thisYearRegAreas.push_back(regArea);
 				}
                 px->area.at(j).at(0) += thisYearRegAreas.at(j); // adding regeneration area to the fist (00) diameter class
-			} // end for each forest type
+                //if (pxId == 3550.0 && j==3){
+                //    cout << "got the pixel" << endl;
+                //}
+            } // end for each forest type
             #ifdef QT_DEBUG
             double totalRegArea = vSum(thisYearRegAreas);
             double ratio = totalRegArea / totalHarvestedArea ;
-            if(ratio < 0.99999999999 || ratio > 1.00000000001) {
-              msgOut(MSG_CRITICAL_ERROR, "Sum of regeneration areas not equal to sum of harvested area in runManagementModel()!");
+            if(rescaleFrequencies && (ratio < 0.99999999999 || ratio > 1.00000000001) ) {
+             // msgOut(MSG_CRITICAL_ERROR, "Sum of regeneration areas not equal to sum of harvested area in runManagementModel()!");
             }
             #endif
 			//double totalRegArea = gfd("regArea",regId,FT_ALL,DIAM_ALL);
@@ -1114,7 +1145,13 @@ ModelCoreSpatial::cachePixelExogenousData(){
 				for (uint u=0; u<dClasses.size(); u++){
 					string dc = dClasses[u];
 					double tp, beta_real, mort_real;
-					tp        = gfd("tp",regId,ft,dClasses[u],DATA_NOW)*tp_multiplier_now; // tp is defined also in the first diameter class, as it is the years to reach the NEXT diameter class
+                    if (u==0){
+                        // tp of first diameter class not making it change across the time dimension, otherwise problems in getting the rigth past
+                        // regenerations
+                        tp  = gfd("tp",regId,ft,dClasses[u],firstYear)*px->getMultiplier("tp_multiplier",ft,firstYear); // tp is defined also in the first diameter class, as it is the years to reach the NEXT diameter class
+                    } else {
+                        tp  = gfd("tp",regId,ft,dClasses[u],DATA_NOW)*tp_multiplier_now; // tp is defined also in the first diameter class, as it is the years to reach the NEXT diameter class
+                    }
 					beta_real = u?gfd("betaCoef",regId,ft,dClasses[u],DATA_NOW)*betaCoef_multiplier_now:0;
 					mort_real = u?gfd("mortCoef",regId,ft,dClasses[u],DATA_NOW)*mortCoef_multiplier_now:0;
 					tp_byu.push_back(tp);
@@ -1155,7 +1192,15 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
 			} // end of each priProduct
 		} // end each pixel
 		for(uint pp=0;pp<priProducts.size();pp++){
-			spd(in_reg.at(pp),"in",r2,priProducts[pp],DATA_NOW,true);
+            // Even if I fixed all the lower bounds to zero in Opt::get_bounds_info still the model
+            // doesn't solve with no-forest in a region.
+            // Even with 0.0001 doesn't solve !!
+            spd(max(0.001,in_reg.at(pp)),"in",r2,priProducts[pp],DATA_NOW,true);
+            #ifdef QT_DEBUG
+            if (in_reg.at(pp) < -0.0){
+              msgOut(MSG_CRITICAL_ERROR,"Negative inventary");
+            }
+            #endif
 		}
 	} // end each region
 }
