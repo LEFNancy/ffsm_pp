@@ -318,6 +318,17 @@ void
 Sandbox::fullTest(){
 
     /*
+    // Testing getProdData for the freeDimension
+    MTHREAD->MD->setProdData(0.4,"rt",11041,"hardWSawnW",DATA_NOW,true,"11061");
+    MTHREAD->MD->setProdData(0.3,"rt",11041,"hardWSawnW",DATA_NOW,true,"11030");
+    MTHREAD->MD->setProdData(0.2,"rt",11041,"hardWSawnX",DATA_NOW,true,"11030");
+    double debug = MTHREAD->MD->getProdData("rt",11041,"hardWSawnW",DATA_NOW,"11061");
+    double debug2 = MTHREAD->MD->getProdData("rt",11041,"hardWSawnW",DATA_NOW);
+    cout << debug << "    " << debug2 << endl;
+    exit(0);
+    */
+
+    /*
     // Testing api to call generic forest type data, parent/child
     cout << "Hello world " << endl;
     cout << MTHREAD->MD->getForData("freq_norm",11041,"broadL","",2040) << endl;

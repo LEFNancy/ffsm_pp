@@ -983,6 +983,7 @@ ModelData::getProdData(const string &type_h, const int& regId_h, const string &p
 	for(uint r=0;r<regIdsS;r++){
 		for(uint i=0;i<products.size();i++){
 			key = makeKeyProdData(type_h,i2s(regIds[r]),products[i],freeDim_h);
+            if (!exactMatch && key.size () > 0)  key.resize (key.size () - 1); // bug 20140402, removing the last #
 			value += dataMapGetValue(prodDataMap,key,year,exactMatch);
 			if(tempBool) found = true;
 		}
