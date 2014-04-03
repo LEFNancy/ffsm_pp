@@ -14,51 +14,63 @@ import matplotlib.pyplot as plt
 # input data expected format
 # - scen;parName;country;region;forType;diamClass;year;value;
 forIFiles = [  
-  'output_vRegFixed/results/forestData.csv',
-  'output_vRegFromHr/results/forestData.csv', 
-  'output_reference/results/forestData.csv',
-  'output_vRegEnd070/results/forestData.csv',
-  'output_withRisk06/results/forestData.csv',
-  'output_withRisk08/results/forestData.csv', 
-  'output_withRisk10/results/forestData.csv',
-  'output_nonspatial/results/forestData.csv',
-  'output_withSpVariance/results/forestData.csv',
-  'output_bau/results/forestData.csv',
-  'output_cc1/results/forestData.csv', 
-  'output_bau_nospvar/results/forestData.csv',
-  'output_cc1_nospvar/results/forestData.csv', 
-  'output_ccstrong/results/forestData.csv',
-  'output_ccstrong_nospvar/results/forestData.csv',
-  'output_randomSpace/results/forestData_randomSpace_1358.csv',
-  'output_randomSpace/results/forestData_randomSpace_42439.csv',
-  'output_randomSpace/results/forestData_randomSpace_49354.csv',
-  'output_randomSpace/results/forestData_randomSpace_81286.csv',
-  'output_randomSpace/results/forestData_randomSpace_143358.csv',
-  'output_randomSpace/results/forestData_randomSpace_192017.csv',
-  'output_randomSpace/results/forestData_randomSpace_221898.csv',
-  'output_randomSpace/results/forestData_randomSpace_236126.csv',
-  'output_randomSpace/results/forestData_randomSpace_245919.csv',
-  'output_randomSpace/results/forestData_randomSpace_251514.csv',
-  'output_randomSpace/results/forestData_randomSpace_277643.csv',
-  'output_randomSpace/results/forestData_randomSpace_284890.csv',
-  'output_randomSpace/results/forestData_randomSpace_324294.csv',
-  'output_randomSpace/results/forestData_randomSpace_331704.csv',
-  'output_randomSpace/results/forestData_randomSpace_373836.csv',
-  'output_randomSpace/results/forestData_randomSpace_436656.csv',
-  'output_randomSpace/results/forestData_randomSpace_439168.csv',
-  'output_randomSpace/results/forestData_randomSpace_491250.csv',
-  'output_randomSpace/results/forestData_randomSpace_528837.csv',
-  'output_randomSpace/results/forestData_randomSpace_558664.csv',
-  'output_randomSpace/results/forestData_randomSpace_587050.csv',
-  'output_randomSpace/results/forestData_randomSpace_599346.csv',
-  'output_randomSpace/results/forestData_randomSpace_637050.csv',
-  'output_randomSpace/results/forestData_randomSpace_750582.csv',
-  'output_randomSpace/results/forestData_randomSpace_758804.csv',
-  'output_randomSpace/results/forestData_randomSpace_767448.csv',
-  'output_randomSpace/results/forestData_randomSpace_854666.csv',
-  'output_randomSpace/results/forestData_randomSpace_854769.csv',
-  'output_randomSpace/results/forestData_randomSpace_867895.csv',
-  'output_randomSpace/results/forestData_randomSpace_883158.csv',
+  'output_vRegFixed/results/forestData_vRegFixed.csv',
+  'output_vRegFromHr/results/forestData_vRegFromHr.csv', 
+  'output_reference/results/forestData_reference.csv',
+  'output_vRegEnd070/results/forestData_vRegEnd070.csv',
+  'output_withRisk06/results/forestData_withRisk06.csv',
+  'output_withRisk08/results/forestData_withRisk08.csv', 
+  'output_withRisk10/results/forestData_withRisk10.csv',
+  'output_nonspatial/results/forestData_nonspatial.csv',
+  'output_withSpVariance/results/forestData_withSpVariance.csv',
+  'output_bau/results/forestData_bau.csv',
+  'output_cc1/results/forestData_cc1.csv', 
+  'output_bau_nospvar/results/forestData_bau_nospvar.csv',
+  'output_cc1_nospvar/results/forestData_cc1_nospvar.csv', 
+  'output_cc2/results/forestData_cc2.csv',
+  'output_cc2_nospvar/results/forestData_cc2_nospvar.csv',
+  'output_cc3/results/forestData_cc3.csv',
+  'output_cc3_nospvar/results/forestData_cc3_nospvar.csv',
+  'output_cc4/results/forestData_cc4.csv',
+  'output_cc4_nospvar/results/forestData_cc4_nospvar.csv',
+  'output_cc5/results/forestData_cc5.csv',
+  'output_cc5_nospvar/results/forestData_cc5_nospvar.csv',
+  
+  'output_randomSpace/results/forestData_randomSpace_49393.csv',
+  'output_randomSpace/results/forestData_randomSpace_111737.csv',
+  'output_randomSpace/results/forestData_randomSpace_177633.csv',
+  'output_randomSpace/results/forestData_randomSpace_208136.csv',
+  'output_randomSpace/results/forestData_randomSpace_233499.csv',
+  'output_randomSpace/results/forestData_randomSpace_248642.csv',
+  'output_randomSpace/results/forestData_randomSpace_296214.csv',
+  'output_randomSpace/results/forestData_randomSpace_301359.csv',
+  'output_randomSpace/results/forestData_randomSpace_302681.csv',
+  'output_randomSpace/results/forestData_randomSpace_310227.csv',
+  'output_randomSpace/results/forestData_randomSpace_338943.csv',
+  'output_randomSpace/results/forestData_randomSpace_344678.csv',
+  'output_randomSpace/results/forestData_randomSpace_347417.csv',
+  'output_randomSpace/results/forestData_randomSpace_371709.csv',
+  'output_randomSpace/results/forestData_randomSpace_420780.csv',
+  'output_randomSpace/results/forestData_randomSpace_504660.csv',
+  'output_randomSpace/results/forestData_randomSpace_529107.csv',
+  'output_randomSpace/results/forestData_randomSpace_566950.csv',
+  'output_randomSpace/results/forestData_randomSpace_569498.csv',
+  'output_randomSpace/results/forestData_randomSpace_580374.csv',
+  'output_randomSpace/results/forestData_randomSpace_663118.csv',
+  'output_randomSpace/results/forestData_randomSpace_703743.csv',
+  'output_randomSpace/results/forestData_randomSpace_703885.csv',
+  'output_randomSpace/results/forestData_randomSpace_708759.csv',
+  'output_randomSpace/results/forestData_randomSpace_767794.csv',
+  'output_randomSpace/results/forestData_randomSpace_768599.csv',
+  'output_randomSpace/results/forestData_randomSpace_816082.csv',
+  'output_randomSpace/results/forestData_randomSpace_873308.csv',
+  'output_randomSpace/results/forestData_randomSpace_976417.csv',
+  #'output_randomSpace/results/forestData_randomSpace_xxxxxx.csv',
+]
+
+prodIFile = [
+  'output_bau/results/forestData_bau.csv',
+  'output_cc1/results/forestData_cc1.csv', 
 ]
 
 scenarios = {
@@ -72,42 +84,49 @@ scenarios = {
   'nonspatial':           '#b7b7b7',
   'withSpVariance':       '#d4a4d7',
   'bau':                  '#610e0e',
-  'cc1':                  '#6dcaf1',  
+  'cc1':                  '#d6e5de',   
+  'cc2':                  '#9ce1db',  
+  'cc3':                  '#7786e0',  
+  'cc4':                  '#2d44cb',  
+  'cc5':                  '#00127c',   
   'bau_nospvar':          '#610e0e',
-  'cc1_nospvar':          '#6dcaf1',  
-  'ccstrong':             '#0015db',
-  'ccstrong_nospvar':     '#0015db',  
+  'cc1_nospvar':          '#d6e5de',  
+  'cc2_nospvar':          '#9ce1db',  
+  'cc3_nospvar':          '#7786e0',   
+  'cc4_nospvar':          '#2d44cb',     
+  'cc5_nospvar':          '#00127c',   
+  
   #randomSpace scenarios
-  'randomSpace_1358':     '#d9d9d9',
-  'randomSpace_42439':    '#d9d9d9',
-  'randomSpace_49354':    '#d9d9d9',
-  'randomSpace_81286':    '#d9d9d9',
-  'randomSpace_143358':   '#d9d9d9',
-  'randomSpace_192017':   '#d9d9d9',
-  'randomSpace_221898':   '#d9d9d9',
-  'randomSpace_236126':   '#d9d9d9',
-  'randomSpace_245919':   '#d9d9d9',
-  'randomSpace_251514':   '#d9d9d9',
-  'randomSpace_277643':   '#d9d9d9',
-  'randomSpace_284890':   '#d9d9d9',
-  'randomSpace_324294':   '#d9d9d9',
-  'randomSpace_331704':   '#d9d9d9',
-  'randomSpace_373836':   '#d9d9d9',
-  'randomSpace_436656':   '#d9d9d9',
-  'randomSpace_439168':   '#d9d9d9',
-  'randomSpace_491250':   '#d9d9d9',
-  'randomSpace_528837':   '#d9d9d9',
-  'randomSpace_558664':   '#d9d9d9',
-  'randomSpace_587050':   '#d9d9d9',
-  'randomSpace_599346':   '#d9d9d9',
-  'randomSpace_637050':   '#d9d9d9',
-  'randomSpace_750582':   '#d9d9d9',
-  'randomSpace_758804':   '#d9d9d9',
-  'randomSpace_767448':   '#d9d9d9',
-  'randomSpace_854666':   '#d9d9d9',
-  'randomSpace_854769':   '#d9d9d9',
-  'randomSpace_867895':   '#d9d9d9',
-  'randomSpace_883158':   '#d9d9d9',
+  'randomSpace_49393':    '#d9d9d9',
+  'randomSpace_111737':    '#d9d9d9',
+  'randomSpace_177633':    '#d9d9d9',
+  'randomSpace_208136':    '#d9d9d9',
+  'randomSpace_233499':   '#d9d9d9',
+  'randomSpace_248642':   '#d9d9d9',
+  'randomSpace_296214':   '#d9d9d9',
+  'randomSpace_301359':   '#d9d9d9',
+  'randomSpace_302681':   '#d9d9d9',
+  'randomSpace_310227':   '#d9d9d9',
+  'randomSpace_338943':   '#d9d9d9',
+  'randomSpace_344678':   '#d9d9d9',
+  'randomSpace_347417':   '#d9d9d9',
+  'randomSpace_371709':   '#d9d9d9',
+  'randomSpace_420780':   '#d9d9d9',
+  'randomSpace_504660':   '#d9d9d9',
+  'randomSpace_529107':   '#d9d9d9',
+  'randomSpace_566950':   '#d9d9d9',
+  'randomSpace_569498':   '#d9d9d9',
+  'randomSpace_580374':   '#d9d9d9',
+  'randomSpace_663118':   '#d9d9d9',
+  'randomSpace_703743':   '#d9d9d9',
+  'randomSpace_703885':   '#d9d9d9',
+  'randomSpace_708759':   '#d9d9d9',
+  'randomSpace_767794':   '#d9d9d9',
+  'randomSpace_768599':   '#d9d9d9',
+  'randomSpace_816082':   '#d9d9d9',
+  'randomSpace_873308':   '#d9d9d9',
+  'randomSpace_976417':   '#d9d9d9',
+#  'randomSpace_xxxxxx':   '#d9d9d9',
 }
 
 years = ['2007','2008','2009','2010','2011','2012','2013','2014','2015','2020','2030','2040','2050','2060','2070','2080','2090','2100']
@@ -116,7 +135,9 @@ ofilename = 'output_cc.csv'
 chartoutdir = 'output/charts'
 tableoutdir = 'output/tables'
 tablesmaster = '00_master_tables'
+tablesmaster_prod  = '00_master_tables_prod'
 chartsmaster = '00_master_charts'
+chartsmaster = '00_master_charts_prod'
 charttype = 'pdf'
 sep = ';'
 
@@ -419,11 +440,12 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
   nscen = len(comparing_scenarios)
   nyears = len(years_h)
   nregions = len(regions_h)
-  nmulticol = "5"
+  nmulticol = "4"
   label_ref_scenario = ref_scenario.replace("_", "\\_")
   if nscen == 1:
     label_comparing_scenario = comparing_scenarios[0].replace("_", "\\_")
-    nmulticol = "4"
+  if nscen > 5:
+    nmulticol = "5"
     
     
   oString = ""
@@ -433,15 +455,15 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
   oString += "\\centering\n"
   oString += "\\caption{"+title+"}\n"
   oString += "\\begin{footnotesize}\n"
-  if nscen == 1:
-    oString += "\\begin{tabularx}{\\textwidth}{l r r r}\n"
-  else:
+  if nscen > 5:
     oString += "\\begin{tabularx}{\\textwidth}{l r r r r}\n"
-  oString += "\\hline\n"
-  if nscen == 1:
-    oString += d+label_ref_scenario+d+label_comparing_scenario+d+"difference"+el+"\n"
   else:
-    oString += d+label_ref_scenario+d+label_comparing_scenario+d+"difference"+d+"cv"+el+"\n"
+    oString += "\\begin{tabularx}{\\textwidth}{l r r r}\n"
+  oString += "\\hline\n"
+  if nscen > 5:
+    oString += d+label_ref_scenario+d+label_comparing_scenario+d+"difference"+d+"cv"+el+"\n"  
+  else:
+    oString += d+label_ref_scenario+d+label_comparing_scenario+d+"difference"+el+"\n"
      
   for region in regions_h:
     oString += "\\hline\n"
@@ -475,14 +497,14 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
           valCScenarios[s] = sumCScenarios[s]/nyears
         avgCScenarios = sum(valCScenarios) / float(nscen)
         scenarioDiff = avgCScenarios-valRScenario
-        scenarioRelativeDiff = 100 * scenarioDiff/valRScenario
-        if nscen > 1:
+        scenarioRelativeDiff = 100 * scenarioDiff/valRScenario if valRScenario else 0.0
+        if nscen > 5:
           for s in range(nscen):
             qdiffCScenarios[s] = (valCScenarios[s] - avgCScenarios)**2.0
             sumqdiffCScenarios += qdiffCScenarios[s]
           sd = (sumqdiffCScenarios/(nscen-1))**0.5
-          t = abs(scenarioDiff)*nscen**0.5/sd
-          cv = 100 * sd/abs(avgCScenarios)
+          t = abs(scenarioDiff)*nscen**0.5/sd if sd>0.0 else 0.0 
+          cv = 100.0 * sd/abs(avgCScenarios) if abs(avgCScenarios)> 0.0 else 0.0
           if t >= tvalue001[nscen-1-1]:
             significance = '$^a$'
           if t >= tvalue0001[nscen-1-1]:
@@ -495,7 +517,7 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
   oString += "\\end{tabularx}\n"
   oString += "\\end{footnotesize}\n"
   oString += "\\label{tab:"+filename+"}\n"
-  if nscen > 1:
+  if nscen > 5:
     oString += "\\begin{tablenotes}\n"
     oString += "\\begin{footnotesize}\n"
     oString += "\\item [a] Significantly different from 0 at $\\alpha=0.01$\n"
@@ -515,8 +537,6 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
   omfile = open(omasterfilename,'a')
   omfile.write("\\input{"+tableoutdir+'/'+filename+"}\n")
   omfile.close()
-
-
 
 # =============================================================================
 def title (cat, level, title):
@@ -576,8 +596,8 @@ def printCharts():
     plotMultivariable(['bau','cc1'],['expReturns','vReg','vol','hV','forArea',],region,'cc1 scenario output','cc1')
     plotMultivariable(['bau_nospvar','cc1_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'cc1 scenario output when spatial variance is not considered','cc1_nospvar')
     title('c','subsubsection',"Stronger mortality effect") 
-    plotMultivariable(['bau','cc1','ccstrong'],['expReturns','vReg','vol','hV','forArea',],region,'ccstrong scenario output','ccstrong')
-    plotMultivariable(['bau_nospvar','cc1_nospvar','ccstrong_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'ccstrong scenario output when spatial variance is not considered','ccstrong_nospvar')
+    plotMultivariable(['bau','cc1','cc2','cc3','cc4','cc5'],['expReturns','vReg','vol','hV','forArea',],region,'stronger cc scenarios output','ccs')
+    plotMultivariable(['bau_nospvar','cc1_nospvar','cc2_nospvar','cc3_nospvar','cc4_nospvar','cc5_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'stronger cc scenarios output when spatial variance is not considered','ccs_nospvar')
   
 # =============================================================================  
 def printTables():
@@ -612,12 +632,12 @@ def printTables():
     printTable('reference',['withSpVariance'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Spatial variance effect [2100]','withSpVariance_2100_'+region)
     title('t','subsubsection',"Stability of stochastic simulations")
     printTable('reference',
-      ['randomSpace_1358', 'randomSpace_42439', 'randomSpace_49354', 'randomSpace_81286', 'randomSpace_143358',
-      'randomSpace_192017', 'randomSpace_221898', 'randomSpace_236126', 'randomSpace_245919', 'randomSpace_251514',
-      'randomSpace_277643', 'randomSpace_284890', 'randomSpace_324294', 'randomSpace_331704', 'randomSpace_373836',
-      'randomSpace_436656', 'randomSpace_439168', 'randomSpace_491250', 'randomSpace_528837', 'randomSpace_558664',
-      'randomSpace_587050', 'randomSpace_599346', 'randomSpace_637050', 'randomSpace_750582', 'randomSpace_758804',
-      'randomSpace_767448', 'randomSpace_854666', 'randomSpace_854769', 'randomSpace_867895', 'randomSpace_883158',],
+      ['randomSpace_49393','randomSpace_111737','randomSpace_177633','randomSpace_208136','randomSpace_233499',
+       'randomSpace_248642','randomSpace_296214','randomSpace_301359','randomSpace_302681','randomSpace_310227',
+       'randomSpace_338943','randomSpace_344678','randomSpace_347417','randomSpace_371709','randomSpace_420780',
+       'randomSpace_504660','randomSpace_529107','randomSpace_566950','randomSpace_569498','randomSpace_580374',
+       'randomSpace_663118','randomSpace_703743','randomSpace_703885','randomSpace_708759','randomSpace_767794',
+       'randomSpace_768599','randomSpace_816082','randomSpace_873308','randomSpace_976417',],
       ['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Significance test of the stochastic scenario, '+regions[region]+' [2100]','randomSpace_2100_'+region)
    
     title('t','subsection',"Combined effects of risk aversion and spatial heterogeneity")
@@ -629,11 +649,30 @@ def printTables():
     printTable('bau', ['cc1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Mortality scenario effect, '+regions[region]+" [2100]",'cc1_2100_'+region)
     printTable('bau_nospvar', ['cc1_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2040-2100]",'cc1_nospvar_2040-2100_'+region)
     printTable('bau_nospvar', ['cc1_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc1_nospvar_2100_'+region) 
-    title('t','subsubsection',"Stronger mortality effect")
-    printTable('bau', ['ccstrong'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2040-2100]",'ccstrong_2040-2100_'+region)
-    printTable('bau', ['ccstrong'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect, '+regions[region]+" [2100]",'ccstrong_2100_'+region)
-    printTable('bau_nospvar', ['ccstrong_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2040-2100]",'ccstrong_nospvar_2040-2100_'+region)
-    printTable('bau_nospvar', ['ccstrong_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'ccstrong_nospvar_2100_'+region)     
+    title('t','subsubsection',"CC2 -Stronger mortality effect")
+    printTable('bau', ['cc2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2040-2100]",'cc2_2040-2100_'+region)
+    printTable('bau', ['cc2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect, '+regions[region]+" [2100]",'cc2_2100_'+region)
+    printTable('bau_nospvar', ['cc2_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2040-2100]",'cc2_nospvar_2040-2100_'+region)
+    printTable('bau_nospvar', ['cc2_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc2_nospvar_2100_'+region)
+    title('t','subsubsection',"CC3 -Stronger mortality effect")
+    printTable('bau', ['cc3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2040-2100]",'cc3_2040-2100_'+region)
+    printTable('bau', ['cc3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect, '+regions[region]+" [2100]",'cc3_2100_'+region)
+    printTable('bau_nospvar', ['cc3_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2040-2100]",'cc3_nospvar_2040-2100_'+region)
+    printTable('bau_nospvar', ['cc3_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc3_nospvar_2100_'+region)
+    title('t','subsubsection',"CC4 -Stronger mortality effect")
+    printTable('bau', ['cc4'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2040-2100]",'cc4_2040-2100_'+region)
+    printTable('bau', ['cc4'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect, '+regions[region]+" [2100]",'cc4_2100_'+region)
+    printTable('bau_nospvar', ['cc4_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2040-2100]",'cc4_nospvar_2040-2100_'+region)
+    printTable('bau_nospvar', ['cc4_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc4_nospvar_2100_'+region)  
+    title('t','subsubsection',"CC5 -Stronger mortality effect")
+    printTable('bau', ['cc5'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2040-2100]",'cc5_2040-2100_'+region)
+    printTable('bau', ['cc5'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect, '+regions[region]+" [2100]",'cc5_2100_'+region)
+    printTable('bau_nospvar', ['cc5_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2040-2100]",'cc5_nospvar_2040-2100_'+region)
+    printTable('bau_nospvar', ['cc5_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc5_nospvar_2100_'+region)  
+    
+    
+    
+    
 # =============================================================================
 # EXECUTION ACTUALLY STARTS HERE.....
 main()

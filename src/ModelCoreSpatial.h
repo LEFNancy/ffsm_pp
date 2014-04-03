@@ -63,10 +63,13 @@ private:
 	vector <string> fTypes;
 	vector <vector <int> > l2r;
 	string regType;
+    string natRegAllocation;
 	double expType;
 	double mr;
 	vector <Pixel*> regPx; // pixels behaving to the current region
     bool rescaleFrequencies;
+    bool oldVol2AreaMethod;
+
 };
 
 #endif // MODELCORESPATIAL_H

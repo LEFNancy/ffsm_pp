@@ -62,6 +62,7 @@ ModelCoreSpatial::runSimulationYear(){
 	updateMapAreas();
 	sumRegionalForData();      // only for printing stats as forest data is never used at regional level
 	MTHREAD->DO->print();
+
 }
 
 void
@@ -390,7 +391,11 @@ ModelCoreSpatial::runBiologicalModule(){
 					//double entryVolHa = gfd("entryVolHa",regId,ft,"");
 					double vHa = px->vHa.at(j).at(1);
                     //attenction that at times could take the wrong pastRegArea if tp change too suddenly as in some "strange" scenarios
-                    areaFirstProdClass = min(availableArea, pastRegArea); // this is just a start and will need to include the last year area
+                    if (oldVol2AreaMethod){
+                      areaFirstProdClass = pastRegArea;
+                    } else {
+                      areaFirstProdClass = min(availableArea, pastRegArea); // this is just a start and will need to include the last year area
+                    }
                     px->vReg.push_back(areaFirstProdClass*vHa/1000000.0); // TODO: check the 1000000. Should be ok, as area in ha vol in Mm^3
                     //if (pxId == 3550.0 && j==3){
                     //    cout << "got the pixel" << endl;
@@ -426,7 +431,7 @@ ModelCoreSpatial::runBiologicalModule(){
                     if (areaFirstProdClass<0.0){
                       // msgOut(MSG_CRITICAL_ERROR,"Negative regeneration volumes in exogenous regeneration");
                     }
-                    if (areaFirstProdClass > pastArea){
+                    if (areaFirstProdClass > px->area_l.at(j).at(0)){
                        //msgOut(MSG_CRITICAL_ERROR,"Moving up area higher than available area in exogenous regeneration !");
                     }
                     #endif
@@ -509,10 +514,14 @@ ModelCoreSpatial::runBiologicalModule(){
                         double volumesMovingUp = inc*pastYearVol;
                         double pastArea = px->area_l.at(j).at(u);
                         areasMovingUp.at(u) = inc*pastArea;
-                        double finalHarvestedVolumes = finalHarvestFlag* hV;
-                        double finalHarvestedRate = pastYearVol?finalHarvestedVolumes/pastYearVol:0.0;
-                        hArea_byDc.push_back(finalHarvestedRate*pastArea); // volumes are in Mm^3, area in ha, vHa in m^3/ha
 
+                        if(oldVol2AreaMethod) {
+                            hArea_byDc.push_back(finalHarvestFlag*1000000*hV/vHa); // volumes are in Mm^3, area in ha, vHa in m^3/ha
+                        } else {
+                            double finalHarvestedVolumes = finalHarvestFlag* hV;
+                            double finalHarvestedRate = pastYearVol?finalHarvestedVolumes/pastYearVol:0.0;
+                            hArea_byDc.push_back(finalHarvestedRate*pastArea); // volumes are in Mm^3, area in ha, vHa in m^3/ha
+                        }
                         px->area.at(j).at(u) = px->area_l.at(j).at(u) - areasMovingUp.at(u) + areasMovingUp.at(u-1) - hArea_byDc.at(u);
 
 					} else {
@@ -726,19 +735,22 @@ ModelCoreSpatial::runManagementModule(){
 						regArea += totalHarvestedArea*mr;
 						foundMaxExpReturns = true;
 					}
-                    double freq = rescaleFrequencies ? gfd("freq_norm",regId,parentFt,""):gfd("freq",regId,parentFt,""); // "probability of presence" for unmanaged forest, added 20140318
-                    double hAreaThisFtGroup = findMap(hAreaByFTypeGroup,parentFt);
-                    double hRatio = 1.0;
-                    if(hAreaThisFtGroup>0){
-                        hRatio = harvestedAreaForThisFT/hAreaThisFtGroup;
+                    if(natRegAllocation=="pp"){ // according to prob presence
+                        double freq = rescaleFrequencies ? gfd("freq_norm",regId,parentFt,""):gfd("freq",regId,parentFt,""); // "probability of presence" for unmanaged forest, added 20140318
+                        double hAreaThisFtGroup = findMap(hAreaByFTypeGroup,parentFt);
+                        double hRatio = 1.0;
+                        if(hAreaThisFtGroup>0){
+                            hRatio = harvestedAreaForThisFT/hAreaThisFtGroup;
+                        } else {
+                            int nFtChilds = MTHREAD->MD->getNForTypesChilds(parentFt);
+                            hRatio = 1.0/nFtChilds;
+                        }
+                        regArea +=  totalHarvestedArea*(1-mr)*freq*hRatio;
                     } else {
-                        int nFtChilds = MTHREAD->MD->getNForTypesChilds(parentFt);
-                        hRatio = 1.0/nFtChilds;
+                        regArea += harvestedAreaForThisFT*(1-mr);
                     }
-                    //regArea += harvestedAreaForThisFT*(1-mr);
-                    regArea +=  totalHarvestedArea*(1-mr)*freq*hRatio;
-					//sfd(regArea,"regArea",regId,ft,"");
 					thisYearRegAreas.push_back(regArea);
+                    //sfd(regArea,"regArea",regId,ft,"");
 				}
                 px->area.at(j).at(0) += thisYearRegAreas.at(j); // adding regeneration area to the fist (00) diameter class
                 //if (pxId == 3550.0 && j==3){
@@ -779,8 +791,10 @@ ModelCoreSpatial::cacheSettings(){
 	fTypes= MD->getForTypeIds();
 	l2r = MD->getRegionIds();
 	regType = MTHREAD->MD->getStringSetting("regType"); // how the regeneration should be computed (exogenous, from hr, from allocation choises)
+    natRegAllocation = MTHREAD->MD->getStringSetting("natRegAllocation"); // how to allocate natural regeneration
 	expType = MD->getDoubleSetting("expType");
     rescaleFrequencies = MD->getBoolSetting("rescaleFrequencies");
+    oldVol2AreaMethod = MD->getBoolSetting("oldVol2AreaMethod");
 	if((expType<0 || expType>1) && expType != -1){
 		msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
 	}
@@ -1147,7 +1161,8 @@ ModelCoreSpatial::cachePixelExogenousData(){
 					double tp, beta_real, mort_real;
                     if (u==0){
                         // tp of first diameter class not making it change across the time dimension, otherwise problems in getting the rigth past
-                        // regenerations
+                        // regenerations. BUT good, px->tp.at(0) is used only to pick up the right regeneration, so the remaining of the model
+                        // uses the getMultiplier version and cumTp consider the dynamic effects also in the first dc.
                         tp  = gfd("tp",regId,ft,dClasses[u],firstYear)*px->getMultiplier("tp_multiplier",ft,firstYear); // tp is defined also in the first diameter class, as it is the years to reach the NEXT diameter class
                     } else {
                         tp  = gfd("tp",regId,ft,dClasses[u],DATA_NOW)*tp_multiplier_now; // tp is defined also in the first diameter class, as it is the years to reach the NEXT diameter class
@@ -1195,10 +1210,11 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
             // Even if I fixed all the lower bounds to zero in Opt::get_bounds_info still the model
             // doesn't solve with no-forest in a region.
             // Even with 0.0001 doesn't solve !!
-            spd(max(0.001,in_reg.at(pp)),"in",r2,priProducts[pp],DATA_NOW,true);
+            // With 0.001 some scenarios doesn't solve in 2093
+            spd(max(0.003,in_reg.at(pp)),"in",r2,priProducts[pp],DATA_NOW,true);
             #ifdef QT_DEBUG
             if (in_reg.at(pp) < -0.0){
-              msgOut(MSG_CRITICAL_ERROR,"Negative inventary");
+              msgOut(MSG_CRITICAL_ERROR,"Negative inventory");
             }
             #endif
 		}
@@ -1209,69 +1225,66 @@ void
 ModelCoreSpatial::updateMapAreas(){
 	msgOut(MSG_INFO, "Updating map areas..");
 
-
-
-    if(!MD->getBoolSetting("usePixelData")) return;
-    for(uint i=0;i<regIds2.size();i++){
-      ModelRegion* reg = MD->getRegion(regIds2[i]);
-      vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
-      for (uint p=0;p<rpx.size();p++){
-        Pixel* px = rpx[p];
-        double pxid= px->getID();
-        for(uint j=0;j<fTypes.size();j++){
-          string ft = fTypes[j];
-          double forArea = vSum(px->area.at(j));
-          #ifdef QT_DEBUG
-          if(forArea < 0.0 ){
-            msgOut(MSG_CRITICAL_ERROR, "Negative forArea in updateMapAreas");
-          }
-          #endif
-          px->changeValue("forArea_"+ft, forArea*10000);
-        } // end ft
-      } // end px
-    } // end region
-
-
-
-
-    /*
-	int currentYear = MTHREAD->SCD->getYear();
-	map<int,double> forestArea; // foresta area by each region
-	pair<int,double > forestAreaPair;
-	vector<int> l2Regions =  MTHREAD->MD->getRegionIds(2, true);
-	vector <string> fTypes =  MTHREAD->MD->getForTypeIds();
-	int nFTypes = fTypes.size();
-	int nL2Regions = l2Regions.size();
-	for(int i=0;i<nL2Regions;i++){
-		int regId = l2Regions[i];
-		vector<Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regId);
-		for(int j=0;j<nFTypes;j++){
-			string ft = fTypes[j];
-			//double regForArea = reg->getValue("forArea_"+ft);
-			//double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL);
-			//double regArea = gfd("regArea",regId,ft,DIAM_ALL);
-			//cout << "Regid/ft/area/harvested/regeneration: " <<regId<<";"<<ft<<";"<<regForArea<<";"<<harvestedArea<<";" <<regArea<<endl;
-			//double newAreaNet = regArea-harvestedArea;
-			//double newAreaRatio =  newAreaNet / regForArea;
-			for(uint z=0;z<rpx.size();z++){
-				Pixel* px = rpx[z];
-                double oldValue = px->getDoubleValue("forArea_"+ft,true)/10000;
-                double hArea = vSum(px->hArea.at(j));              //bug 20140205 areas in the model are in ha, in the layer in m^2
-                double regArea = findMap(px->regArea,currentYear).at(j); //bug 20140205 areas in the model are in ha, in the layer in m^2
-				//double newValue = oldValue*(1. + newAreaRatio);
-				double newValue = oldValue-hArea+regArea;
-                double areaNetOfRegeneration = oldValue-hArea;
-                if (areaNetOfRegeneration<0.0){
-                    msgOut(MSG_CRITICAL_ERROR,"areaNetOfRegeneration negative in updateMapAreas");
+    if (!oldVol2AreaMethod){
+        if(!MD->getBoolSetting("usePixelData")) return;
+        for(uint i=0;i<regIds2.size();i++){
+          ModelRegion* reg = MD->getRegion(regIds2[i]);
+          vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
+          for (uint p=0;p<rpx.size();p++){
+            Pixel* px = rpx[p];
+            double pxid= px->getID();
+            for(uint j=0;j<fTypes.size();j++){
+              string ft = fTypes[j];
+              double forArea = vSum(px->area.at(j));
+              #ifdef QT_DEBUG
+              if(forArea < 0.0 ){
+                msgOut(MSG_CRITICAL_ERROR, "Negative forArea in updateMapAreas");
+              }
+              #endif
+              px->changeValue("forArea_"+ft, forArea*10000);
+            } // end ft
+          } // end px
+        } // end region
+    } else {
+        int currentYear = MTHREAD->SCD->getYear();
+        map<int,double> forestArea; // foresta area by each region
+        pair<int,double > forestAreaPair;
+        vector<int> l2Regions =  MTHREAD->MD->getRegionIds(2, true);
+        vector <string> fTypes =  MTHREAD->MD->getForTypeIds();
+        int nFTypes = fTypes.size();
+        int nL2Regions = l2Regions.size();
+        for(int i=0;i<nL2Regions;i++){
+            int regId = l2Regions[i];
+            vector<Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regId);
+            for(int j=0;j<nFTypes;j++){
+                string ft = fTypes[j];
+                //double regForArea = reg->getValue("forArea_"+ft);
+                //double harvestedArea = gfd("harvestedArea",regId,ft,DIAM_ALL);
+                //double regArea = gfd("regArea",regId,ft,DIAM_ALL);
+                //cout << "Regid/ft/area/harvested/regeneration: " <<regId<<";"<<ft<<";"<<regForArea<<";"<<harvestedArea<<";" <<regArea<<endl;
+                //double newAreaNet = regArea-harvestedArea;
+                //double newAreaRatio =  newAreaNet / regForArea;
+                for(uint z=0;z<rpx.size();z++){
+                    Pixel* px = rpx[z];
+                    double oldValue = px->getDoubleValue("forArea_"+ft,true)/10000;
+                    double hArea = vSum(px->hArea.at(j));              //bug 20140205 areas in the model are in ha, in the layer in m^2
+                    double regArea = findMap(px->regArea,currentYear).at(j); //bug 20140205 areas in the model are in ha, in the layer in m^2
+                    //double newValue = oldValue*(1. + newAreaRatio);
+                    double newValue = oldValue-hArea+regArea;
+                    double areaNetOfRegeneration = oldValue-hArea;
+                    #ifdef QT_DEBUG
+                    if (areaNetOfRegeneration<0.0){
+                        msgOut(MSG_CRITICAL_ERROR,"areaNetOfRegeneration negative in updateMapAreas");
+                    }
+                    if (newValue<0.0){
+                        msgOut(MSG_CRITICAL_ERROR,"for area negative in updateMapAreas");
+                    }
+                    #endif
+                    rpx[z]->changeValue("forArea_"+ft, newValue*10000);
                 }
-                if (newValue<0.0){
-                    msgOut(MSG_CRITICAL_ERROR,"for area negative in updateMapAreas");
-                }
-                rpx[z]->changeValue("forArea_"+ft, newValue*10000);
-			}
-		}
-	}
-    */
+            }
+        }
+    }
 }
 
 void
