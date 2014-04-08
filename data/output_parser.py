@@ -16,13 +16,12 @@ import matplotlib.pyplot as plt
 forIFiles = [  
   'output_vRegFixed/results/forestData_vRegFixed.csv',
   'output_vRegFromHr/results/forestData_vRegFromHr.csv', 
-  'output_reference/results/forestData_reference.csv',
+  'output_homSpace/results/forestData_homSpace.csv',
   'output_vRegEnd070/results/forestData_vRegEnd070.csv',
   'output_withRisk06/results/forestData_withRisk06.csv',
   'output_withRisk08/results/forestData_withRisk08.csv', 
   'output_withRisk10/results/forestData_withRisk10.csv',
-  'output_nonspatial/results/forestData_nonspatial.csv',
-  'output_withSpVariance/results/forestData_withSpVariance.csv',
+  'output_hetSpace/results/forestData_hetSpace.csv',
   'output_bau/results/forestData_bau.csv',
   'output_cc1/results/forestData_cc1.csv', 
   'output_bau_nospvar/results/forestData_bau_nospvar.csv',
@@ -76,13 +75,12 @@ prodIFile = [
 scenarios = {
   'vRegFixed':            '#416c47',
   'vRegFromHr':           '#a1a612',  
-  'reference':            '#f80000',  
+  'homSpace':             '#f80000',  
   'vRegEnd070':           '#ff7200',
   'withRisk06':           '#6dcaf1',
   'withRisk08':           '#6c77e7',
   'withRisk10':           '#0015db',   
-  'nonspatial':           '#b7b7b7',
-  'withSpVariance':       '#d4a4d7',
+  'hetSpace':             '#d4a4d7',
   'bau':                  '#610e0e',
   'cc1':                  '#d6e5de',   
   'cc2':                  '#9ce1db',  
@@ -90,11 +88,11 @@ scenarios = {
   'cc4':                  '#2d44cb',  
   'cc5':                  '#00127c',   
   'bau_nospvar':          '#610e0e',
-  'cc1_nospvar':          '#d6e5de',  
-  'cc2_nospvar':          '#9ce1db',  
-  'cc3_nospvar':          '#7786e0',   
-  'cc4_nospvar':          '#2d44cb',     
-  'cc5_nospvar':          '#00127c',   
+  'cc1_nospvar':          '#f9f8b0',  
+  'cc2_nospvar':          '#d9d87e',  
+  'cc3_nospvar':          '#99bf6c',   
+  'cc4_nospvar':          '#417700',     
+  'cc5_nospvar':          '#203b00',   
   
   #randomSpace scenarios
   'randomSpace_49393':    '#d9d9d9',
@@ -129,15 +127,18 @@ scenarios = {
 #  'randomSpace_xxxxxx':   '#d9d9d9',
 }
 
-years = ['2007','2008','2009','2010','2011','2012','2013','2014','2015','2020','2030','2040','2050','2060','2070','2080','2090','2100']
+#years = ['2007','2008','2009','2010','2011','2012','2013','2014','2015','2020','2030','2040','2050','2060','2070','2080','2090','2100']
+years = ['2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085','2086','2087','2088','2089','2090','2091','2092','2093','2094','2095','2096','2097','2098','2099','2100']
 
+printCharts = True
+printTablae = True
 ofilename = 'output_cc.csv'
 chartoutdir = 'output/charts'
 tableoutdir = 'output/tables'
 tablesmaster = '00_master_tables'
 tablesmaster_prod  = '00_master_tables_prod'
 chartsmaster = '00_master_charts'
-chartsmaster = '00_master_charts_prod'
+chartsmaster_prod = '00_master_charts_prod'
 charttype = 'pdf'
 sep = ';'
 
@@ -174,7 +175,7 @@ spAggregates = {'00_Total': [['broadL_highF','broadL_mixedF','broadL_copp','con_
                 '02_Coniferous': [['con_highF'],':',3]}
              
 
-tvalue001  = [63.6567411629, 9.9248432009, 5.8409093097, 4.6040948714, 4.0321429836, 3.7074280213, 3.4994832974, 3.3553873313, 3.2498355416, 3.1692726726, 3.1058065155, 3.0545395894, 3.0122758387, 2.9768427344, 2.9467128835, 2.9207816224, 2.8982305197, 2.8784404727, 2.8609346065, 2.8453397098, 2.831359558, 2.8187560606, 2.8073356838, 2.7969395048, 2.7874358137, 2.7787145333, 2.7706829571, 2.7632624555, 2.7563859037, 2.7499956536, 2.7440419193, 2.738481482, 2.7332766424, 2.7283943671, 2.7238055892, 2.7194846305, 2.7154087215, 2.7115576019, 2.7079131835, 2.7044592674, 2.7011813036, 2.6980661862, 2.6951020792, 2.6922782657, 2.6895850194, 2.6870134922, 2.6845556179, 2.682204027, 2.6799519736, 2.6777932709]    # invt for alpha=0.01
+tvalue001  = [63.6567411629, 9.9248432009, 5.8409093097, 4.6040948714, 4.0321429836, 3.7074280213, 3.4994832974, 3.3553873313, 3.2498355416, 3.1692726726, 3.1058065155, 3.0545395894, 3.0122758387, 2.9768427344, 2.9467128835, 2.9207816224, 2.8982305197, 2.8784404727, 2.8609346065, 2.8453397098, 2.831359558, 2.8187560606, 2.8073356838, 2.7969395048, 2.7874358137, 2.7787145333, 2.7706829571, 2.7632624555, 2.7563859037, 2.7499956536, 2.7440419193, 2.738481482, 2.7332766424, 2.7283943671, 2.7238055892, 2.7194846305, 2.7154087215, 2.7115576019, 2.7079131835, 2.7044592674, 2.7011813036, 2.6980661862, 2.6951020792, 2.6922782657, 2.6895850194, 2.6870134922, 2.6845556179, 2.682203027, 2.6799519736, 2.6777932709]    # invt for alpha=0.01
 tvalue0001 = [636.6192487687, 31.5990545764, 12.9239786367, 8.6103015814, 6.8688266259, 5.9588161788, 5.4078825209, 5.0413054334, 4.7809125859, 4.5868938587, 4.4369793382, 4.3177912836, 4.2208317277, 4.1404541127, 4.0727651959, 4.0149963272, 3.9651262721, 3.9216458251, 3.8834058526, 3.8495162749, 3.8192771643, 3.7921306717, 3.7676268043, 3.7453986193, 3.7251439497, 3.7066117435, 3.6895917135, 3.6739064007, 3.6594050195, 3.645958635, 3.6334563498, 3.6218022599, 3.6109130077, 3.6007157974, 3.5911467758, 3.5821497015, 3.5736748444, 3.5656780716, 3.5581200813, 3.5509657609, 3.544183643, 3.5377454453, 3.5316256778, 3.5258013065, 3.520251465, 3.5149572055, 3.5099012834, 3.5050679705, 3.5004428914, 3.4960128818] # invt for alpha=0.001
 
 
@@ -339,10 +340,12 @@ def main():
   file_c.close()
   
   # H - Printing charts
-  printCharts()
+  if printCharts:
+    printCharts()
   
   # I - Print tables
-  printTables()
+  if printTables:
+    printTables()
   
   print "Done!"
 
@@ -572,38 +575,38 @@ def text(cat, text_h):
 def printCharts():
   print "Printing charts.."
   
-  #text('c',"Automatically generated charts.")  
-  #plotLegend(['nonspatial','reference','vRegEnd070','vRegFixed','vRegFromHr','withRisk06','withRisk08','withRisk10','withVariance','withSpVarianceAndRisk'],'Scenarios Legend','legend')
-  
   selectedregions=['11000', '11041', '11061', '11062', '11081', '11071', '11082', '11083']
-  
+  oyears = ['2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085','2086','2087','2088','2089','2090','2091','2092','2093','2094','2095','2096','2097','2098','2099','2100']
+    
   for region in sortedregions: #selectedregions:#sortedregions:
     title('c','section',regions[region])
 
     title('c','subsection',"Active management")
-    plotMultivariable(['vRegFixed', 'vRegFromHr', 'reference','vRegEnd070'],['expReturns','vReg','vol','hV'],region,'Management effect','management')
+    plotMultivariable(['vRegFixed', 'vRegFromHr', 'homSpace','vRegEnd070'],['expReturns','vReg','vol','hV'],region,'Management effect','management')
     
     title('c','subsection',"Risk aversion")
-    plotMultivariable(['reference','withRisk06','withRisk08','withRisk10'],['expReturns','vReg','vol','hV'],region,'Risk effect','risk')
+    plotMultivariable(['homSpace','withRisk06','withRisk08','withRisk10'],['expReturns','vReg','vol','hV'],region,'Risk effect','risk')
     
     title('c','subsection',"Heterogeneous environment")
-    plotMultivariable(['nonspatial','reference','withSpVariance'],['expReturns','vReg','vol','hV','forArea'],region,'Spatial explicit effects','space')
+    plotMultivariable(['homSpace','hetSpace'],['expReturns','vReg','vol','hV','forArea'],region,'Spatial explicit effects','space')
     
     title('c','subsection',"Combined effects of risk aversion and spatial heterogeneity")
-    plotMultivariable(['reference','bau'],['expReturns','vReg','vol','hV'],region,'Combined effect of risk and spatial heterogeneity','bau')
+    plotMultivariable(['homSpace','bau'],['expReturns','vReg','vol','hV'],region,'Combined effect of risk and spatial heterogeneity','bau')
     
     title('c','subsection',"A spatial application: effects of an increased mortality in coniferous at the lower/southesr edges of ranges")
     plotMultivariable(['bau','cc1'],['expReturns','vReg','vol','hV','forArea',],region,'cc1 scenario output','cc1')
     plotMultivariable(['bau_nospvar','cc1_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'cc1 scenario output when spatial variance is not considered','cc1_nospvar')
     title('c','subsubsection',"Stronger mortality effect") 
-    plotMultivariable(['bau','cc1','cc2','cc3','cc4','cc5'],['expReturns','vReg','vol','hV','forArea',],region,'stronger cc scenarios output','ccs')
-    plotMultivariable(['bau_nospvar','cc1_nospvar','cc2_nospvar','cc3_nospvar','cc4_nospvar','cc5_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'stronger cc scenarios output when spatial variance is not considered','ccs_nospvar')
+    plotMultivariable(['bau','cc1','cc2','cc3','cc4'],['expReturns','vReg','vol','hV','forArea',],region,'stronger cc scenarios output','ccs')
+    plotMultivariable(['bau_nospvar','cc1_nospvar','cc2_nospvar','cc3_nospvar','cc4_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'stronger cc scenarios output when spatial variance is not considered','ccs_nospvar')
+    plotMultivariable(['cc2','cc4','cc2_nospvar','cc4_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'Sp. heterogenity effect in cc scenarios','ccs_sp_effect')
   
 # =============================================================================  
 def printTables():
   print "Printing tables.."
 
-  oyears = ['2040','2050','2060','2070','2080','2090','2100']
+  oyears = ['2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085','2086','2087','2088','2089','2090','2091','2092','2093','2094','2095','2096','2097','2098','2099','2100']
+
   
   #text('t',"Automatically generated result tables.")
   
@@ -613,25 +616,24 @@ def printTables():
     title('t','section',regions[region])
 
     title('t','subsection',"Active management")
-    printTable('vRegFromHr',['reference'],['expReturns','vReg','vol','hV'],[region],oyears,'Management effect [avg. 2040-2100]','reference_management_2040-2100_'+region)
-    printTable('vRegFromHr',['reference'],['expReturns','vReg','vol','hV'],[region],['2100'],'Management effect [2100]','reference_management_2100_'+region)
-    printTable('vRegFromHr',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger management effect [avg. 2040-2100]','vRegEnd070_2040-2100_'+region)
+    printTable('vRegFromHr',['homSpace'],['expReturns','vReg','vol','hV'],[region],oyears,'Management effect [avg. 2030-2100]','homSpace_management_2030-2100_'+region)
+    printTable('vRegFromHr',['homSpace'],['expReturns','vReg','vol','hV'],[region],['2100'],'Management effect [2100]','homSpace_management_2100_'+region)
+    printTable('vRegFromHr',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger management effect [avg. 2030-2100]','vRegEnd070_2030-2100_'+region)
     printTable('vRegFromHr',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger management effect [2100]','vRegEnd070_2100_'+region)
-    printTable('reference',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger management effect compared with reference [avg. 2040-2100]','vRegEnd070_to_reference_2040-2100_'+region)
-    printTable('reference',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger management effect compared with reference [2100]','vRegEnd070_to_reference_2100_'+region)
+    printTable('homSpace',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger management effect compared with homSpace [avg. 2030-2100]','vRegEnd070_to_homSpace_2030-2100_'+region)
+    printTable('homSpace',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger management effect compared with homSpace [2100]','vRegEnd070_to_homSpace_2100_'+region)
  
     title('t','subsection',"Risk aversion")
-    printTable('reference',['withRisk08'],['expReturns','vReg','vol','hV'],[region],oyears,'Risk effect [avg. 2040-2100]','withRisk08_2040-2100_'+region)
-    printTable('reference',['withRisk10'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger risk effect [avg. 2040-2100]','withRisk10_2040-2100_'+region)
-    printTable('reference',['withRisk08'],['expReturns','vReg','vol','hV'],[region],['2100'],'Risk effect [2100]','withRisk08_2100_'+region)
-    printTable('reference',['withRisk10'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger risk effect [2100]','withRisk10_2100_'+region)
+    printTable('homSpace',['withRisk08'],['expReturns','vReg','vol','hV'],[region],oyears,'Risk effect [avg. 2030-2100]','withRisk08_2030-2100_'+region)
+    printTable('homSpace',['withRisk10'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger risk effect [avg. 2030-2100]','withRisk10_2030-2100_'+region)
+    printTable('homSpace',['withRisk08'],['expReturns','vReg','vol','hV'],[region],['2100'],'Risk effect [2100]','withRisk08_2100_'+region)
+    printTable('homSpace',['withRisk10'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger risk effect [2100]','withRisk10_2100_'+region)
    
     title('t','subsection',"Heterogeneous environment")
-    printTable('nonspatial',['reference'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Testing the spatial algorithm [avg. 2040-2100]','reference_space_2040-2100_'+region)
-    printTable('reference',['withSpVariance'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Spatial variance effect [avg. 2040-2100]','withSpVariance_2040-2100_'+region)
-    printTable('reference',['withSpVariance'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Spatial variance effect [2100]','withSpVariance_2100_'+region)
+    printTable('homSpace',['hetSpace'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Spatial variance effect [avg. 2030-2100]','hetSpace_2030-2100_'+region)
+    printTable('homSpace',['hetSpace'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Spatial variance effect [2100]','hetSpace_2100_'+region)
     title('t','subsubsection',"Stability of stochastic simulations")
-    printTable('reference',
+    printTable('homSpace',
       ['randomSpace_49393','randomSpace_111737','randomSpace_177633','randomSpace_208136','randomSpace_233499',
        'randomSpace_248642','randomSpace_296214','randomSpace_301359','randomSpace_302681','randomSpace_310227',
        'randomSpace_338943','randomSpace_344678','randomSpace_347417','randomSpace_371709','randomSpace_420780',
@@ -641,34 +643,38 @@ def printTables():
       ['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Significance test of the stochastic scenario, '+regions[region]+' [2100]','randomSpace_2100_'+region)
    
     title('t','subsection',"Combined effects of risk aversion and spatial heterogeneity")
-    printTable('reference',['bau'],['expReturns','vReg','vol','hV'],[region],oyears,'Risk and spatial variance effect [avg. 2040-2100]','bau_2040-2100_'+region)
-    printTable('reference',['bau'],['expReturns','vReg','vol','hV'],[region],['2100'],'Risk and spatial variance effect [2100]','bau_2100_'+region)
+    printTable('homSpace',['bau'],['expReturns','vReg','vol','hV'],[region],oyears,'Risk and spatial variance effect [avg. 2030-2100]','bau_2030-2100_'+region)
+    printTable('homSpace',['bau'],['expReturns','vReg','vol','hV'],[region],['2100'],'Risk and spatial variance effect [2100]','bau_2100_'+region)
     
-    title('t','subsection',"A spatial application: effects of an increased mortality in coniferous at the lower/southesr edges of ranges")          
-    printTable('bau', ['cc1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Mortality scenario effect, '+regions[region]+" [avg. 2040-2100]",'cc1_2040-2100_'+region)
-    printTable('bau', ['cc1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Mortality scenario effect, '+regions[region]+" [2100]",'cc1_2100_'+region)
-    printTable('bau_nospvar', ['cc1_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2040-2100]",'cc1_nospvar_2040-2100_'+region)
-    printTable('bau_nospvar', ['cc1_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc1_nospvar_2100_'+region) 
+    title('t','subsection',"A spatial application: effects of an increased mortality in coniferous at the lower/southesr edges of ranges")  
+    printTable('bau', ['cc1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Mortality scenario effect, '+regions[region]+" [2100]",'cc1_2100_'+region)    
+    printTable('bau', ['cc1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Mortality scenario effect, '+regions[region]+" [avg. 2030-2100]",'cc1_2030-2100_'+region)
+    printTable('bau_nospvar', ['cc1_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc1_nospvar_2100_'+region)  
+    printTable('bau_nospvar', ['cc1_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2030-2100]",'cc1_nospvar_2030-2100_'+region)
+ 
     title('t','subsubsection',"CC2 -Stronger mortality effect")
-    printTable('bau', ['cc2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2040-2100]",'cc2_2040-2100_'+region)
     printTable('bau', ['cc2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect, '+regions[region]+" [2100]",'cc2_2100_'+region)
-    printTable('bau_nospvar', ['cc2_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2040-2100]",'cc2_nospvar_2040-2100_'+region)
+    printTable('bau', ['cc2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2030-2100]",'cc2_2030-2100_'+region)
     printTable('bau_nospvar', ['cc2_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc2_nospvar_2100_'+region)
+    printTable('bau_nospvar', ['cc2_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2030-2100]",'cc2_nospvar_2030-2100_'+region)
+
     title('t','subsubsection',"CC3 -Stronger mortality effect")
-    printTable('bau', ['cc3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2040-2100]",'cc3_2040-2100_'+region)
     printTable('bau', ['cc3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect, '+regions[region]+" [2100]",'cc3_2100_'+region)
-    printTable('bau_nospvar', ['cc3_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2040-2100]",'cc3_nospvar_2040-2100_'+region)
+    printTable('bau', ['cc3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2030-2100]",'cc3_2030-2100_'+region)
     printTable('bau_nospvar', ['cc3_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc3_nospvar_2100_'+region)
+    printTable('bau_nospvar', ['cc3_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2030-2100]",'cc3_nospvar_2030-2100_'+region)
+
     title('t','subsubsection',"CC4 -Stronger mortality effect")
-    printTable('bau', ['cc4'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2040-2100]",'cc4_2040-2100_'+region)
     printTable('bau', ['cc4'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect, '+regions[region]+" [2100]",'cc4_2100_'+region)
-    printTable('bau_nospvar', ['cc4_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2040-2100]",'cc4_nospvar_2040-2100_'+region)
+    printTable('bau', ['cc4'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2030-2100]",'cc4_2030-2100_'+region)
     printTable('bau_nospvar', ['cc4_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc4_nospvar_2100_'+region)  
+    printTable('bau_nospvar', ['cc4_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2030-2100]",'cc4_nospvar_2030-2100_'+region)
+
     title('t','subsubsection',"CC5 -Stronger mortality effect")
-    printTable('bau', ['cc5'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2040-2100]",'cc5_2040-2100_'+region)
     printTable('bau', ['cc5'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect, '+regions[region]+" [2100]",'cc5_2100_'+region)
-    printTable('bau_nospvar', ['cc5_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2040-2100]",'cc5_nospvar_2040-2100_'+region)
+    printTable('bau', ['cc5'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2030-2100]",'cc5_2030-2100_'+region)
     printTable('bau_nospvar', ['cc5_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc5_nospvar_2100_'+region)  
+    printTable('bau_nospvar', ['cc5_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2030-2100]",'cc5_nospvar_2030-2100_'+region)
     
     
     
