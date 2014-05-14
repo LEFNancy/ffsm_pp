@@ -182,7 +182,7 @@ Output::initDebugOutput(){
         in.close();
         ofstream out(debugFilename.c_str(), ios::out);
         if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+debugFilename+" for writing.");}
-        out << "scenario" << d << "year" << d << "region or pixel" << d << "forType" << d << "diamClass" << d << "prod" << d << "parName" << d << "value" << d <<"\n";
+        out << "scenario" << d << "year" << d << "region or pixel" << d << "forType" << d << "freeDim" << d << "prod" << d << "parName" << d << "value" << d <<"\n";
         out.close();
     }
 }
@@ -208,7 +208,7 @@ Output::initOutputForestData(){
 
 	ofstream out(outFileName.c_str(), ios::out);
 	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
-	out << "scen" << d << "parName" << d << "country" << d << "region" << d << "forType" << d << "diamClass" << d;
+    out << "scen" << d << "parName" << d << "country" << d << "region" << d << "forType" << d << "freeDim" << d;
 	if(oHRedeable){
 		for(int i=0;i<nYears;i++){
 			out << i+inYear << d;

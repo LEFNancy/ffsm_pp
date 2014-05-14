@@ -318,6 +318,18 @@ void
 Sandbox::fullTest(){
 
     /*
+    // Testing if forestData can uses other arbitrary elements in the diameter field in order to generalise it
+    double test = MTHREAD->MD->getForData("covar",11082,"con_highF","con_highF");
+    MTHREAD->MD->setForData(0.1,"covar",11082,"con_highF","con_highF");
+    MTHREAD->MD->setForData(0.1,"covar",11061,"con_highF","con_highF",DATA_NOW,true);
+    test = MTHREAD->MD->getForData("covar",11082,"con_highF","con_highF");
+    test = MTHREAD->MD->getForData("covar",11061,"con_highF","con_highF");
+    test = MTHREAD->MD->getForData("covar",11082,"con_highF","");
+    cout << test << endl;
+    exit(0);
+    */
+
+    /*
     // Testing getProdData for the freeDimension
     MTHREAD->MD->setProdData(0.4,"rt",11041,"hardWSawnW",DATA_NOW,true,"11061");
     MTHREAD->MD->setProdData(0.3,"rt",11041,"hardWSawnW",DATA_NOW,true,"11030");

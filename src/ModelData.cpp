@@ -394,7 +394,7 @@ ModelData::setDefaultForData(){
 				values.push_back(s2d(value));
 			}
 		}
-		string keys = makeKeyForData(table.getData(i,"parName"), table.getData(i,"region"),table.getData(i,"forType"),table.getData(i,"diamClass"));
+        string keys = makeKeyForData(table.getData(i,"parName"), table.getData(i,"region"),table.getData(i,"forType"),table.getData(i,"freeDim"));
 		forDataMap.insert(std::pair<string, vector<double> >(keys, values));
 	}
 }
@@ -409,7 +409,7 @@ ModelData::setScenarioForData(){
 
 	for(int i=0; i< table.nrecords(); i++){
 		bool found = false;
-		string key = makeKeyForData(table.getData(i,"parName"),table.getData(i,"region"),table.getData(i,"forType"),table.getData(i,"diamClass"));
+        string key = makeKeyForData(table.getData(i,"parName"),table.getData(i,"region"),table.getData(i,"forType"),table.getData(i,"freeDim"));
 		vector <double> values;
 		for (int z=0;z<nheaders-4;z++){ // don't consider parName, region, forType and diamClass headers
 			string toSearch = "value_"+i2s(z);
@@ -1003,12 +1003,12 @@ It addmits the following "filters":
 @type_h Name of the specific parameter requested
 @regId_h Look for a level1 or level2 region
 @forType_h If specified, look exactly for the specified forest type, otherwise accept the keyword FT_ALL for summing all of them
-@diamClass_h Diameter class. It accept three keywords, for summing up all diameters, production-ready diameters or sub-production ones, namelly DIAM_ALL, DIAM_PROD, DIAM_FIRST.\\
+@freeDim_h Normally used for diameter class, but occasionally used for other uses (changed 20140514). It accepts three keywords, for summing up all diameters, production-ready diameters or sub-production ones, namelly DIAM_ALL, DIAM_PROD, DIAM_FIRST.\\
 If a diameter-independed variable is required, put it in the data with an empty diameter class and retrieve it here using DIAM_ALL.
 @year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
 */
 const double
-ModelData::getForData(const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year){
+ModelData::getForData(const string &type_h, const int& regId_h, const string &forType_h, const string &freeDim_h, const int& year){
 	vector<int> regIds;
 	vector <string> dClasses;
 	vector <string> fTypes;
@@ -1024,15 +1024,15 @@ ModelData::getForData(const string &type_h, const int& regId_h, const string &fo
 	} else {
 		fTypes.push_back(forType_h);
 	}
-	if(diamClass_h == DIAM_ALL){
+    if(freeDim_h == DIAM_ALL){
 		dClasses = diamClasses;
 		dClasses.push_back("");
-	} else if (diamClass_h == DIAM_PROD){
+    } else if (freeDim_h == DIAM_PROD){
 		dClasses = getDiameterClasses(true);
-	} else if (diamClass_h == DIAM_FIRST){
+    } else if (freeDim_h == DIAM_FIRST){
 		dClasses.push_back(diamClasses.at(0));
 	} else	{
-		dClasses.push_back(diamClass_h);
+        dClasses.push_back(freeDim_h);
 	}
 	// Make sure to set the new value to all l2 regions if requested for a reg1 level
 	if(getRegion(regId_h)->getRegLevel()==2){
@@ -1058,7 +1058,7 @@ ModelData::getForData(const string &type_h, const int& regId_h, const string &fo
 	}
 
 	if(!found){
-		msgOut(errorLevel, "Error in getForData(): no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+diamClass_h+". Returning 0, but double check that this is ok for your model.");
+        msgOut(errorLevel, "Error in getForData(): no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
 	}
 	return value;
 }
@@ -1138,7 +1138,7 @@ ModelData::setProdData(const double& value_h, const string &type_h, const int& r
 
 
 void
-ModelData::setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year, const bool& allowCreate){
+ModelData::setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &freeDim_h, const int& year, const bool& allowCreate){
 
 	vector<int> regIds;
 	vector <string> dClasses;
@@ -1154,14 +1154,14 @@ ModelData::setForData(const double& value_h, const string &type_h, const int& re
 		fTypes.push_back(forType_h);
 	}
 
-	if(diamClass_h == DIAM_ALL){
+    if(freeDim_h == DIAM_ALL){
 		dClasses = diamClasses;
-	} else if (diamClass_h == DIAM_PROD){
+    } else if (freeDim_h == DIAM_PROD){
 		dClasses = getDiameterClasses(true);
-	} else if (diamClass_h == DIAM_FIRST){
+    } else if (freeDim_h == DIAM_FIRST){
 		dClasses.push_back(diamClasses.at(0));
 	} else	{
-		dClasses.push_back(diamClass_h);
+        dClasses.push_back(freeDim_h);
 	}
 
 	// Make sure to set the new value to all l2 regions if requested for a reg1 level
@@ -1188,7 +1188,7 @@ ModelData::setForData(const double& value_h, const string &type_h, const int& re
 
 	if(!found){
 		if(!allowCreate){
-			msgOut(MSG_CRITICAL_ERROR, "Error in setForData: no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+diamClass_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
+            msgOut(MSG_CRITICAL_ERROR, "Error in setForData: no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+freeDim_h+". You can allow new variables to be created using the \"allowCreate\" flag.");
 		} else {
 			for(uint r=0;r< regIds.size();r++){
 				for(uint i=0;i<dClasses.size();i++){
