@@ -124,6 +124,12 @@ public:
 	vector <vector <double> >              vHa_exp; ///< This is the **expected** version of vHa, used for calculating profits
     vector <vector <double> >         cumAlive_exp; ///< This is the **expected** version of cumAlive, used for calculating profits
 
+    // management variables (pixel==agent)
+    double                          portfolioVarRa; ///< Sampling derived risk aversion on portfolio variance for of this agent
+    double                                 expType; ///< Sampling derived expectation types of this agent
+    bool                              usePortfolio; ///< Sampling derived usage of portfolio management (false/true)
+
+
 private:	
 	map<string, double>            values;  ///< Map of values for each layer
 	mutable map<string, double>::const_iterator vIter; //< Iterator for the map of values

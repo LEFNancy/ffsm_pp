@@ -110,7 +110,7 @@ Gis::applySpatialStochasticValues(){
 	// - cashing value to the pixels
 	// - apply to the tp layers with change values
 
-	if(!MTHREAD->MD->getBoolSetting("usePixelData") || !MTHREAD->MD->getBoolSetting("useSpatialRegionalVariance")) return;
+  if(!MTHREAD->MD->getBoolSetting("usePixelData")) return;
 
 	vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
 	//ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
@@ -121,23 +121,48 @@ Gis::applySpatialStochasticValues(){
 		ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
 		vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
 		vector <string> fTypes = MTHREAD->MD->getForTypeIds();
-		for(uint j=0; j<fTypes.size(); j++){
-            double sStDev = MTHREAD->MD->getForData("sStDev",regIds2[i],fTypes[j],""); // spatial standard deviation
-            double agr = MTHREAD->MD->getForData("agr",regIds2[i],fTypes[j],""); // average growth
-            // BUG solved 20141220 To obtain a population with the same avg and st.dev of the original using moltipliers, I need to use the cv not the st.dev. !
-            // tested with excel
-            normal_distribution<double> d(1,sStDev/agr); // default any how to double
-			for (uint z=0;z<rpx.size();z++){
-				double c = d(*MTHREAD->gen);
-                double c2 = max(0.4,min(1.6,c)); /// with simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
-                //cout << regIds2[i] << ";" <<sStDev <<";"<< c <<endl
-                //rpx[z]->correctInputMultiplier("tp_multiplier",fTypes[j],c);
-                //cout << sStDev/agr << "    " << c2 << endl;
-                rpx[z]->setSpModifier(c2,j);
-                //sumc += c;
-                //nc ++;
-			}
+
+    // regional variance
+    if(MTHREAD->MD->getBoolSetting("useSpatialRegionalVariance")){
+      for(uint j=0; j<fTypes.size(); j++){
+        double sStDev = MTHREAD->MD->getForData("sStDev",regIds2[i],fTypes[j],""); // spatial standard deviation
+        double agr = MTHREAD->MD->getForData("agr",regIds2[i],fTypes[j],""); // average growth
+        // BUG solved 20141220 To obtain a population with the same avg and st.dev of the original using moltipliers, I need to use the cv not the st.dev. !
+        // tested with excel
+        normal_distribution<double> d(1,sStDev/agr); // default any how to double
+        for (uint z=0;z<rpx.size();z++){
+          double c = d(*MTHREAD->gen);
+          double c2 = max(0.4,min(1.6,c)); /// with simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
+          //cout << regIds2[i] << ";" <<sStDev <<";"<< c <<endl
+          //rpx[z]->correctInputMultiplier("tp_multiplier",fTypes[j],c);
+          //cout << sStDev/agr << "    " << c2 << endl;
+          rpx[z]->setSpModifier(c2,j);
+          //sumc += c;
+          //nc ++;
+        }
+      }
 		}
+
+    // expectation types
+    double avgExpTypes = MTHREAD->MD->getDoubleSetting("expType");
+    double expTypes_cv = MTHREAD->MD->getDoubleSetting("expType_cv");
+    if((avgExpTypes<0 || avgExpTypes>1) && avgExpTypes != -1){
+      msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
+    }
+    //cout << avgExpTypes << "     " << expTypes_cv << endl;
+
+    normal_distribution<double> ext_distr(avgExpTypes,expTypes_cv *avgExpTypes); // default any how to double
+    for (uint z=0;z<rpx.size();z++){
+      if(avgExpTypes == -1){
+          rpx[z]->expType = -1;
+      } else {
+        double c = ext_distr(*MTHREAD->gen);
+        double c2 = max(0.0,min(1.0,c)); /// Bounded [0,1]. With simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
+        cout << c2 << endl;
+        rpx[z]->expType = c2;
+      }
+    }
+
 	}
     //double avg_c = sumc/nc;
     //cout << "Avg coeff: " << avg_c << "(on " << nc << " records)" << endl;

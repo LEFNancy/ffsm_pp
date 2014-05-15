@@ -34,7 +34,7 @@ public:
 
 	void                  cacheSettings();          ///< just cache exogenous settings from ModelData
 	void                  initializePixelValues();  ///< distribuite regional exogenous volumes to pixel volumes using corine land cover area as weight
-    void                  initializePixelArea();    ///< compute px->area for each ft and dc
+  void                  initializePixelArea();    ///< compute px->area for each ft and dc
 	void                  resetPixelValues();       ///< swap volumes->lagged_volumes and reset the other pixel vectors
 	void                  cachePixelExogenousData();///< computes pixel level tp, meta and mort
 	void                  computeInventary();       ///< in=f(vol_t-1)
@@ -43,9 +43,9 @@ public:
 
 	// convenient handles to equivalent ModelData functions..
 	double              gpd(const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const string &freeDim_h="") const {return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};
-    double              gfd(const string &type_h, const int& regId_h, const string &forType_h, const string &freeDim_h, const int& year=DATA_NOW) const {return MTHREAD->MD->getForData(type_h, regId_h, forType_h, freeDim_h, year);};
-    void                spd(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h="") const {MTHREAD->MD->setProdData(value_h, type_h, regId_h, prodId_h, year, allowCreate, freeDim_h);};
-    void                sfd(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &freeDim_h, const int& year=DATA_NOW, const bool& allowCreate=false) const {MTHREAD->MD->setForData(value_h, type_h, regId_h, forType_h, freeDim_h, year, allowCreate);};
+  double              gfd(const string &type_h, const int& regId_h, const string &forType_h, const string &freeDim_h, const int& year=DATA_NOW) const {return MTHREAD->MD->getForData(type_h, regId_h, forType_h, freeDim_h, year);};
+  void                spd(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h="") const {MTHREAD->MD->setProdData(value_h, type_h, regId_h, prodId_h, year, allowCreate, freeDim_h);};
+  void                sfd(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &freeDim_h, const int& year=DATA_NOW, const bool& allowCreate=false) const {MTHREAD->MD->setForData(value_h, type_h, regId_h, forType_h, freeDim_h, year, allowCreate);};
 	bool                app(const string &prod_h, const string &forType_h, const string &dClass_h) const {return MTHREAD->MD->assessProdPossibility(prod_h, forType_h, dClass_h);};
 
 private:
@@ -63,12 +63,11 @@ private:
 	vector <string> fTypes;
 	vector <vector <int> > l2r;
 	string regType;
-    string natRegAllocation;
-	double expType;
+  string natRegAllocation;
 	double mr;
 	vector <Pixel*> regPx; // pixels behaving to the current region
-    bool rescaleFrequencies;
-    bool oldVol2AreaMethod;
+  bool rescaleFrequencies;
+  bool oldVol2AreaMethod;
 
 };
 

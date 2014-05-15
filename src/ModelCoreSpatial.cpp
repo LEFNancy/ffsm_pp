@@ -791,13 +791,9 @@ ModelCoreSpatial::cacheSettings(){
 	fTypes= MD->getForTypeIds();
 	l2r = MD->getRegionIds();
 	regType = MTHREAD->MD->getStringSetting("regType"); // how the regeneration should be computed (exogenous, from hr, from allocation choises)
-    natRegAllocation = MTHREAD->MD->getStringSetting("natRegAllocation"); // how to allocate natural regeneration
-	expType = MD->getDoubleSetting("expType");
-    rescaleFrequencies = MD->getBoolSetting("rescaleFrequencies");
-    oldVol2AreaMethod = MD->getBoolSetting("oldVol2AreaMethod");
-	if((expType<0 || expType>1) && expType != -1){
-		msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
-	}
+  natRegAllocation = MTHREAD->MD->getStringSetting("natRegAllocation"); // how to allocate natural regeneration
+  rescaleFrequencies = MD->getBoolSetting("rescaleFrequencies");
+  oldVol2AreaMethod = MD->getBoolSetting("oldVol2AreaMethod");
 	mr = MD->getDoubleSetting("mr");
 }
 
@@ -822,10 +818,10 @@ ModelCoreSpatial::initializePixelValues(){
 					double regVol;
 					regVol = z ? gfd("vol",regIds2[i],fTypes[y],dClasses[z],firstYear) : 0 ; // if z=0-> regVol= gfd(), otherwise regVol=0;
 					double pxArea = rpx[j]->getDoubleValue("forArea_"+fTypes[y], true); // bug solved 20121109. get zero for not data
-                    if (pxArea<0.0){
-                        cout << "got it in initialisation! aa" << endl;
-                    }
-                    double pxVol = regForArea ? regVol * pxArea/regForArea: 0; // if we introduce new forest types without initial area we must avoid a 0/0 division
+          if (pxArea<0.0){
+            cout << "got it in initialisation! aa" << endl;
+          }
+          double pxVol = regForArea ? regVol * pxArea/regForArea: 0; // if we introduce new forest types without initial area we must avoid a 0/0 division
 					//rpx[j]->changeValue(pxVol,"vol",fTypes[y],dClasses[z],firstYear);
 					vol_byu.push_back(pxVol);
 				}
@@ -930,12 +926,13 @@ ModelCoreSpatial::computeCumulativeData(){
 
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
-            px->cumTp.clear();
+      px->cumTp.clear();
 			px->cumTp_exp.clear();
 			px->vHa_exp.clear();
 			px->vHa.clear();
-            px->cumAlive.clear();
-            px->cumAlive_exp.clear();
+      px->cumAlive.clear();
+      px->cumAlive_exp.clear();
+      double expType = px->expType;
 
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
@@ -1076,14 +1073,14 @@ ModelCoreSpatial::computeCumulativeData(){
                 //cout << thisYear << ";"<< regIds2[r2] << ";" << pixID << ";" << ft << ";" << cumTp_exp_temp[3] << ";" << vHa_exp_temp[3] << endl;
 				px->cumTp.push_back(cumTp_temp);
 				px->vHa.push_back(vHa_temp);
-                px->cumAlive.push_back(cumAlive_temp);
+        px->cumAlive.push_back(cumAlive_temp);
 				px->cumTp_exp.push_back(cumTp_exp_temp);
 				px->vHa_exp.push_back(vHa_exp_temp);
-                px->cumAlive_exp.push_back(cumAlive_exp_temp);
+        px->cumAlive_exp.push_back(cumAlive_exp_temp);
 
-                //sumCumTP += cumTp_exp_temp[3];
-                //sumVHa += vHa_exp_temp[3];
-                //count ++;
+        //sumCumTP += cumTp_exp_temp[3];
+        //sumVHa += vHa_exp_temp[3];
+        //count ++;
 
 
 			} // end of each ft
