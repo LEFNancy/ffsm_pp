@@ -31,7 +31,9 @@ public:
 	void                  runBiologicalModule();    ///< computes hV, hArea and new vol at end of year
 	void                  runManagementModule();    ///< computes regArea and expectedReturns
 	void                  sumRegionalForData();     ///< computes vol, hV, harvestedArea, regArea and expReturns at reg level from the pixel level
+  void                  initialiseCarbonModule(); ///< call initialiseDeathBiomassStocks(), initialiseDeathBiomassStocks() and initialiseEmissionCounters()
 
+  void                  registerCarbonEvents();   ///< call registerHarvesting(), registerDeathBiomass() and registerProducts()
 	void                  cacheSettings();          ///< just cache exogenous settings from ModelData
 	void                  initializePixelValues();  ///< distribuite regional exogenous volumes to pixel volumes using corine land cover area as weight
   void                  initializePixelArea();    ///< compute px->area for each ft and dc

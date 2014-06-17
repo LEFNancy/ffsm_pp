@@ -81,6 +81,9 @@ MainProgram::run(){
 	// manage the printing of data needed for scenario-analisys. The "message output" (needed to see "what is it happening?" are instead simply printed with msgOut()..
 	Output *DO = new Output(MTHREAD);
 	MTHREAD->setDOPointer(DO);
+  // the carbon balance
+  Carbon *CBAL = new Carbon(MTHREAD);
+  MTHREAD->setCBALPointer(CBAL);
 
 	// Creating an istance of INIT and delegating to it the Initialization phase..
 	MTHREAD->INIT->setInitLevel(1); // Initial environment setting and agent rising

@@ -25,7 +25,7 @@ ModelCoreSpatial::runInitPeriod(){
 	/**
 	Some importan notes:
     V (volumes)    -> at the end of the year
-	In (inventary) -> at the beginning of the year
+    In (inventary) -> at the beginning of the year
     Area           -> at the end of the year
     Harvesting     -> at the beginning of the year
     Volumes are in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2, vHa in m^3/ha
@@ -35,22 +35,23 @@ ModelCoreSpatial::runInitPeriod(){
 	initMarketModule();          // inside it uses first year, second year
 	MTHREAD->DO->print();
 	MTHREAD->SCD->advanceYear(); // 2005->2006
-    int thisYear = MTHREAD->SCD->getYear(); // for debugging
+  int thisYear = MTHREAD->SCD->getYear(); // for debugging
 	resetPixelValues();          // swap volumes->lagged_volumes and reset the other pixel vectors
 	cachePixelExogenousData();   // compute pixel tp, meta and mort
 	computeInventary();          // in=f(vol_t-1)
 	computeCumulativeData();     // compute cumTp_exp, vHa_exp, vHa
-    initializePixelArea();       // compute px->area for each ft and dc
+  initializePixelArea();       // compute px->area for each ft and dc
 	runBiologicalModule();       //
 	runManagementModule();
 	updateMapAreas();            // update the forArea_{ft} layer on each pixel as old value-hArea+regArea
-	sumRegionalForData();      // only for printing stats ad forest data is never used at regional level
+  sumRegionalForData();        // only for printing stats as forest data is never used at regional level
+  initialiseCarbonModule();
 	MTHREAD->DO->print();
 }
 
 void
 ModelCoreSpatial::runSimulationYear(){
-    int thisYear = MTHREAD->SCD->getYear(); // for debugging
+  int thisYear = MTHREAD->SCD->getYear(); // for debugging
 	resetPixelValues();          // swap volumes->lagged_volumes and reset the other pixel vectors
 	cachePixelExogenousData();   // compute pixel tp, meta and mort
 	computeInventary();          // in=f(vol_t-1)
@@ -61,6 +62,7 @@ ModelCoreSpatial::runSimulationYear(){
 	runManagementModule();
 	updateMapAreas();
 	sumRegionalForData();      // only for printing stats as forest data is never used at regional level
+  registerCarbonEvents();
 	MTHREAD->DO->print();
 
 }
@@ -355,20 +357,20 @@ ModelCoreSpatial::runBiologicalModule(){
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
 
-            double pxId = px->getID();
-            //if (pxId == 3550.0){
-            //    cout << "got the pixel" << endl;
-            //}
+      double pxId = px->getID();
+      //if (pxId == 3550.0){
+      //    cout << "got the pixel" << endl;
+      //}
 			//px->expectedReturns.clear();
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
-                double pxArea_debug     = px->getDoubleValue("forArea_"+ft, true);
+        double pxArea_debug     = px->getDoubleValue("forArea_"+ft, true);
 				vector <double>            hV_byDiam;
 				vector < vector <double> > hV_byDiamAndPrd;
 				vector <double> hArea_byDc;
 				vector <double> newVol_byDiam;
-                vector <double> areasMovingUp(dClasses.size(), 0.0);
-                double areaFirstProdClass;
+        vector <double> areasMovingUp(dClasses.size(), 0.0);
+        double areaFirstProdClass;
 
 				// calculating the regeneration..
 				// if we are in a year where the time of passage has not yet been reached
@@ -492,37 +494,37 @@ ModelCoreSpatial::runBiologicalModule(){
 					}else if(u==1){
 						vol = (1-1/tp-mort)*pastYearVol+vReg;
 						double debug = vol;
-                        #ifdef QT_DEBUG
-                        if (vol<0.0){
-                          msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
-                        }
-                        #endif
+            #ifdef QT_DEBUG
+            if (vol<0.0){
+              msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
+            }
+            #endif
 					} else {
 						// time of passage and volume of smaller diameter class
 						double inc = (u==dClasses.size()-1)?0:1./tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
 						double tp_1 = px->tp.at(j).at(u-1); //gfd("tp",regId,ft,dClasses[u-1]);
 						double pastYearVol_1 = px->vol_l.at(j).at(u-1); //gfd("vol",regId,ft,dClasses[u-1],thisYear-1);
-                        vol = max(0.0,(1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1);
-                        #ifdef QT_DEBUG
-                        if ((1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1 < -0.00001){
-                          msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
-                        }
-                        #endif
+            vol = max(0.0,(1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1);
+            #ifdef QT_DEBUG
+            if ((1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1 < -0.00001){
+              msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
+            }
+            #endif
 					}
 					if(u != 0){ // this if is required to avoid a 0/0 and na error that then propage also in vSum()
-                        double inc = (u==dClasses.size()-1)?0:1.0/tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
-                        double volumesMovingUp = inc*pastYearVol;
-                        double pastArea = px->area_l.at(j).at(u);
-                        areasMovingUp.at(u) = inc*pastArea;
+            double inc = (u==dClasses.size()-1)?0:1.0/tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
+            double volumesMovingUp = inc*pastYearVol;
+            double pastArea = px->area_l.at(j).at(u);
+            areasMovingUp.at(u) = inc*pastArea;
 
-                        if(oldVol2AreaMethod) {
-                            hArea_byDc.push_back(finalHarvestFlag*1000000*hV/vHa); // volumes are in Mm^3, area in ha, vHa in m^3/ha
-                        } else {
-                            double finalHarvestedVolumes = finalHarvestFlag* hV;
-                            double finalHarvestedRate = pastYearVol?finalHarvestedVolumes/pastYearVol:0.0;
-                            hArea_byDc.push_back(finalHarvestedRate*pastArea); // volumes are in Mm^3, area in ha, vHa in m^3/ha
-                        }
-                        px->area.at(j).at(u) = px->area_l.at(j).at(u) - areasMovingUp.at(u) + areasMovingUp.at(u-1) - hArea_byDc.at(u);
+            if(oldVol2AreaMethod) {
+                hArea_byDc.push_back(finalHarvestFlag*1000000*hV/vHa); // volumes are in Mm^3, area in ha, vHa in m^3/ha
+            } else {
+                double finalHarvestedVolumes = finalHarvestFlag* hV;
+                double finalHarvestedRate = pastYearVol?finalHarvestedVolumes/pastYearVol:0.0;
+                hArea_byDc.push_back(finalHarvestedRate*pastArea); // volumes are in Mm^3, area in ha, vHa in m^3/ha
+            }
+            px->area.at(j).at(u) = px->area_l.at(j).at(u) - areasMovingUp.at(u) + areasMovingUp.at(u-1) - hArea_byDc.at(u);
 
 					} else {
                         areasMovingUp.at(u) = areaFirstProdClass;
@@ -811,6 +813,7 @@ ModelCoreSpatial::initializePixelValues(){
 			int debugPx = rpx[j]->getID();
 			int debug2 = debugPx;
 			rpx[j]->vol.clear(); // not actually necessary
+      std::fill(rpx[j]->vMort.begin(), rpx[j]->vMort.end(), 0.0);
 			for(uint y=0;y<fTypes.size();y++){
 				vector <double> vol_byu;
 				double regForArea = reg->getValue("forArea_"+fTypes[y]);
@@ -829,6 +832,14 @@ ModelCoreSpatial::initializePixelValues(){
 			}
 		}
 	}
+}
+
+void
+ModelCoreSpatial::initialiseCarbonModule(){
+
+  ///< call initialiseDeathBiomassStocks(), initialiseDeathBiomassStocks() and initialiseEmissionCounters()
+
+
 }
 
 /**
@@ -1341,3 +1352,9 @@ ModelCoreSpatial::sumRegionalForData(){
 
 }
 
+
+void
+ModelCoreSpatial::registerCarbonEvents(){
+  ///< call registerHarvesting(), registerDeathBiomass() and registerProducts()
+
+}

@@ -100,34 +100,35 @@ public:
 	MatrixXd                                 cumTp;*/
 
 	vector <vector <double> >                  vol; // by ft,dc
-    vector <vector <double> >                 area; // by ft,dc
-    vector <double>                 initialDc0Area; // by ft
-    vector <vector <double> >                hArea; // by ft, dc  // possibly in ha, but to be check for 100% sure
+  vector <vector <double> >                 area; // by ft,dc
+  vector <double>                 initialDc0Area; // by ft
+  vector <vector <double> >                hArea; // by ft, dc  // possibly in ha, but to be check for 100% sure
 	vector <vector <double> >                 hVol; // by ft.dc
 	vector < vector <vector <double> > >hVol_byPrd; // by ft, dc, pp
 	map <int, vector <double> >            regArea; // by year, ft
-    //vector <double>                             in; // by pp
-    //vector <double>                             hr; // by pp
-	vector <double >                          vReg; // by ft
+  //vector <double>                             in; // by pp
+  //vector <double>                             hr; // by pp
+  vector <double>                          vReg; // by ft
+  vector <double>                         vMort; // by ft
 	vector <double>                expectedReturns; // by ft
 
-    vector <vector <double> >                vol_l;  // store the volumes of the previous year
-    vector <vector <double> >               area_l; // store the areas of the previous year
+  vector <vector <double> >                vol_l;  // store the volumes of the previous year
+  vector <vector <double> >               area_l; // store the areas of the previous year
 
 	vector <vector <double> >                 beta;
 	vector <vector <double> >                 mort;
 	vector <vector <double> >                   tp;
 	vector <vector <double> >                cumTp; ///< This is time of passage to REACH a diameter class (while the exogenous tp by diameter class is the time of passage to LEAVE to the next d class)
 	vector <vector <double> >                  vHa; ///< Volume at hectar by each diameter class [m^3/ha]
-    vector <vector <double> >             cumAlive; ///< Cumulative prob of remaining alive at beginnin of a given diam class
+  vector <vector <double> >             cumAlive; ///< Cumulative prob of remaining alive at beginnin of a given diam class
 	vector <vector <double> >            cumTp_exp; ///< This is the **expected** version of cumTp, used for calculating profits
 	vector <vector <double> >              vHa_exp; ///< This is the **expected** version of vHa, used for calculating profits
-    vector <vector <double> >         cumAlive_exp; ///< This is the **expected** version of cumAlive, used for calculating profits
+  vector <vector <double> >         cumAlive_exp; ///< This is the **expected** version of cumAlive, used for calculating profits
 
-    // management variables (pixel==agent)
-    double                          portfolioVarRa; ///< Sampling derived risk aversion on portfolio variance for of this agent
-    double                                 expType; ///< Sampling derived expectation types of this agent
-    bool                              usePortfolio; ///< Sampling derived usage of portfolio management (false/true)
+  // management variables (pixel==agent)
+  double                          portfolioVarRa; ///< Sampling derived risk aversion on portfolio variance for of this agent
+  double                                 expType; ///< Sampling derived expectation types of this agent
+  bool                              usePortfolio; ///< Sampling derived usage of portfolio management (false/true)
 
 
 private:	
@@ -138,8 +139,8 @@ private:
 	int                               pxY;
 	string                     pxComments;
 	double                   cachedDouble;  ///< Cachable double used in some optimized algorithms
-    vector<double>                 spMods;  ///< The sampled spatial modifiers (by forest type)
-    ModelRegion*                 l2region;  ///< Pointer to level 2 region where this pixel is
+  vector<double>                 spMods;  ///< The sampled spatial modifiers (by forest type)
+  ModelRegion*                 l2region;  ///< Pointer to level 2 region where this pixel is
 
 };
 

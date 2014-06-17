@@ -27,7 +27,10 @@ Pixel::Pixel(double ID_h, ThreadManager* MTHREAD_h): ID(ID_h)
 	MTHREAD=MTHREAD_h;
     int nft = MTHREAD->MD->getForTypeIds().size();
     vector<double> temp(nft,1);
+    vector<double> temp2(nft,0);
     spMods = temp;
+    vMort  = temp2;
+    //std::fill(v.begin(), v.end(), 0);
 }
 
 Pixel::~Pixel()

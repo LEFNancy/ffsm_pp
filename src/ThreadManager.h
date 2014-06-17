@@ -50,6 +50,7 @@ class ModelCore;
 class ModelCoreSpatial;
 class Opt;
 class Sandbox;
+class Carbon;
 
 using namespace std;
 
@@ -73,6 +74,7 @@ public:
 	Output*             DO;    ///< data output
 	ModelCore*          CORE;  ///< Core of the model
 	ModelCoreSpatial*   SCORE; ///< Core of the model (spatial version)
+  Carbon*             CBAL;  ///< Module for the Carbon Balance
 	Sandbox*            TEST;  ///< Various debugging code for development
 	Ipopt::SmartPtr <Ipopt::TNLP>      OPT;  ///< Market optimisation
     //std::random_device*  randev; ///< used in the sampling from normal distribution
@@ -94,7 +96,7 @@ public:
 	string              getBaseDirectory(){return baseDirectory.toStdString();};
 	string              getInputFileName(){return inputFileName.toStdString();};
 	string              getScenarioName() {return scenarioName.toStdString();};
-    void                setScenarioName(const string &scenarioName_h){scenarioName=scenarioName_h.c_str();};
+  void                setScenarioName(const string &scenarioName_h){scenarioName=scenarioName_h.c_str();};
 	void                setOutputDirName(string outputDirname_h);
 
 	/// the regional data object..
@@ -111,10 +113,12 @@ public:
 	void                setDOPointer(Output *DO_h){DO=DO_h;};
 	/// Perform the algorithms of the model
 	void                setCOREPointer(ModelCore* CORE_h){CORE=CORE_h;};
-		/// Perform the algorithms of the model
+  /// Perform the algorithms of the model
 	void                setSCOREPointer(ModelCoreSpatial* SCORE_h){SCORE=SCORE_h;};
 	/// Perform the market optimisation
 	void                setOPTPointer(Ipopt::SmartPtr<Ipopt::TNLP> OPT_h){OPT=OPT_h;};
+  /// Module that account for the Carbon Balance
+  void                setCBALPointer(Carbon *CBAL_h){CBAL=CBAL_h;};
 
 	//public slots:
 	void                setInputFileName(QString inputFileName_h);
@@ -139,7 +143,7 @@ public:
 	                        emit treeViewerItemChangeValueToGui("general_"+propertyName, newValue);};
 
 
-    void                fitInWindow() {emit fitInWindowToGui();}; ///< Re-draw the map making it to fit (with the right proportions) to the widget
+  void                fitInWindow() {emit fitInWindowToGui();}; ///< Re-draw the map making it to fit (with the right proportions) to the widget
 	void                runFromConsole(QString inputFileName_h, QString scenarioName_h);
 	bool                usingGUI(){return GUI;};
 

@@ -364,3 +364,151 @@ BaseClass::tokenize(const string& str, vector<string>& tokens, const string& del
         pos = str.find_first_of(delimiter, lastPos);
     }
 }
+
+///////////////////////////////////// OTHER CLASSES THAN BASECLASS //////////////////
+/// iskey class ///
+iskey::iskey(){
+ i = 0;
+ s = "";
+}
+iskey::iskey(int i_h, string s_h){
+ i = i_h;
+ s = s_h;
+}
+
+iskey::~iskey(){
+
+}
+
+bool
+iskey::operator == (const iskey & op2) const{
+  if(op2.i == i && op2.s == s){
+    return true;
+  }
+  return false;
+}
+
+bool
+iskey::operator != (const iskey & op2) const{
+  if(op2.i == i && op2.s == s){
+    return false;
+  }
+  return true;
+}
+
+bool
+iskey::operator < (const iskey & op2) const{
+  if (i < op2.i ) return true;
+  if (i == op2.i) {
+    if (s < op2.s) return true;
+  }
+  return false;
+}
+
+bool
+iskey::operator > (const iskey & op2) const{
+  if (i > op2.i ) return true;
+  if (i == op2.i) {
+    if (s > op2.s) return true;
+  }
+  return false;
+}
+
+bool
+iskey::operator <= (const iskey & op2) const{
+  if (i < op2.i ) return true;
+  if (i == op2.i) {
+    if (s <= op2.s) return true;
+  }
+  return false;
+}
+
+bool
+iskey::operator >= (const iskey & op2) const{
+  if (i > op2.i ) return true;
+  if (i == op2.i) {
+    if (s >= op2.s) return true;
+  }
+  return false;
+}
+
+/// iiskey class (note the double ii) ///
+iiskey::iiskey(){
+ i = 0;
+ i2 = 0;
+ s = "";
+}
+iiskey::iiskey(int i_h, int i2_h, string s_h){
+ i  = i_h;
+ i2 = i2_h;
+ s  = s_h;
+}
+
+iiskey::~iiskey(){
+
+}
+
+bool
+iiskey::operator == (const iiskey & op2) const{
+  if(op2.i == i && op2.i2 == i2 && op2.s == s){
+    return true;
+  }
+  return false;
+}
+
+bool
+iiskey::operator != (const iiskey & op2) const{
+  if(op2.i == i && op2.i2 == i2 && op2.s == s){
+    return false;
+  }
+  return true;
+}
+
+bool
+iiskey::operator < (const iiskey & op2) const{
+  if (i < op2.i ) {return true;}
+  if (i == op2.i) {
+    if (i2 < op2.i2 ) {return true;}
+    if (i2 == op2.i2){
+      if (s < op2.s) {return true;}
+    }
+  }
+  return false;
+}
+
+bool
+iiskey::operator > (const iiskey & op2) const{
+  if (i > op2.i ) {return true;}
+  if (i == op2.i) {
+    if (i2 > op2.i2 ) {return true;}
+    if (i2 == op2.i2){
+      if (s > op2.s) {return true;}
+    }
+  }
+  return false;
+}
+
+bool
+iiskey::operator <= (const iiskey & op2) const{
+  if (i < op2.i ) {return true;}
+  if (i == op2.i) {
+    if (i2 < op2.i2 ) {return true;}
+    if (i2 == op2.i2){
+      if (s <= op2.s) {return true;}
+    }
+  }
+  return false;
+}
+
+bool
+iiskey::operator >= (const iiskey & op2) const{
+  if (i > op2.i ) {return true;}
+  if (i == op2.i) {
+    if (i2 > op2.i2 ) {return true;}
+    if (i2 == op2.i2){
+      if (s >= op2.s) {return true;}
+    }
+  }
+  return false;
+}
+

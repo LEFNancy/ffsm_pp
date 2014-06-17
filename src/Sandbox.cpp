@@ -30,6 +30,7 @@
 #include "ModelData.h"
 #include "Gis.h"
 #include "ModelRegion.h"
+#include "Carbon.h"
 
 //Testing random distribution, using some new in C++ random generator seeds..
 #include <iostream>
@@ -115,6 +116,28 @@ struct GccTest
 // --------------------------------------
 void
 Sandbox::basicTest(){
+
+    /*
+    // Testing the new iskey class
+    iskey op1(2100,"test");
+    iskey op2(2100,"test");
+    iskey op3(2101,"test");
+    iskey op4(2101,"tgst");
+    iskey op5(2101,"tb");
+    iskey op6(2101,"testa");
+    if(op1 == op2){
+      cout << "op1 and op2 are equal" << endl;
+    }
+    if(op1 == op3){
+      cout << "op1 and op3 are equal" << endl;
+    }
+    if(op6 > op3) cout << "test3 passed" << endl;
+    if(op5 < op3) cout << "test4 passed" << endl;
+    if(op6 >= op3) cout << "test5 passed" << endl;
+    if(op6 != op3) cout << "test6 passed" << endl;
+    if(op4 <= op3) cout << "test7 passed that it shoudn't" << endl;
+    exit(0);
+    */
 
     /*
     // Testing the new changeMapValue(), incrMapValue(), resetMapValues() and vectorToMap() funcions
@@ -316,6 +339,13 @@ Sandbox::basicTest(){
 
 void
 Sandbox::fullTest(){
+
+   double test = MTHREAD->CBAL->getStock(11061, STOCK_INV);
+       //STOCK_INV  -> from inventary source and death trees
+       //STOCK_EXTRA  -> from inventary source and death trees
+       //STOCK_PRODUCTS -> from products
+   cout << "DONE" << endl;
+   exit(0);
 
     /*
     // Testing if forestData can uses other arbitrary elements in the diameter field in order to generalise it

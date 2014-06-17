@@ -91,6 +91,17 @@ enum {
 	DOM_R2_ALL_PR          =6,
 	DOM_SCALAR             =7, // NOTUSED
 
+  //stock_type
+  STOCK_INV              =1,
+  STOCK_EXTRA            =2,
+  STOCK_PRODUCTS         =3,
+
+  // em_type
+  EM_ENSUB               =1,
+  EM_MATSUB              =2,
+  EM_FOROP               =3,
+
+
 	// domain of constrains variables (squares means a vector, r2n means neighbour -same r1- regions)
 	// attention for the not used, as algorithm to handle them may not have been implemented or -as minimum- tested!!
 	CDOM_SCALAR            =1,             // r1,r2,p
@@ -215,7 +226,7 @@ public:
 	void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ") const;
 
     /// Lookup a map for a value. Return the value starting from the key
-	template <typename K, typename V> V findMap(const map <K, V> &mymap, const K& key, const int& error_level=MSG_CRITICAL_ERROR){
+  template <typename K, typename V> V findMap(const map <K, V> &mymap, const K& key, const int& error_level=MSG_CRITICAL_ERROR) const{
 		typename map<K, V>::const_iterator p;
 		p=mymap.find(key);
 		if(p != mymap.end()) {
@@ -284,5 +295,43 @@ private:
 	void msgOut2(const int& msgCode_h, const string& msg_h, const bool& refreshGUI_h) const; ///< Do the job of the overloaded functions
 
 };
+
+/* class to provide a simple integer-string key */
+class iskey {
+public:
+                      iskey();
+                      iskey(int i_h, string s_h);
+                     ~iskey();
+  bool                operator == (const iskey &op2) const;
+  bool                operator != (const iskey &op2) const;
+  bool                operator <  (const iskey &op2) const;
+  bool                operator >  (const iskey &op2) const;
+  bool                operator <= (const iskey &op2) const;
+  bool                operator >= (const iskey &op2) const;
+
+  int                                          i;
+  string                                       s;
+
+};
+
+/* class to provide a simple integer-integer-string key */
+class iiskey {
+public:
+                      iiskey();
+                      iiskey(int i_h, int i2_h, string s_h);
+                     ~iiskey();
+  bool                operator == (const iiskey &op2) const;
+  bool                operator != (const iiskey &op2) const;
+  bool                operator <  (const iiskey &op2) const;
+  bool                operator >  (const iiskey &op2) const;
+  bool                operator <= (const iiskey &op2) const;
+  bool                operator >= (const iiskey &op2) const;
+
+  int                                          i;
+  int                                          i2;
+  string                                       s;
+
+};
+
 
 #endif

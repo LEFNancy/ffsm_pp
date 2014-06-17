@@ -44,6 +44,7 @@ ThreadManager::ThreadManager(){
 	CORE   = NULL;
 	SCORE  = NULL;
 	TEST   = NULL;
+  CBAL   = NULL;
 	//randev = NULL;
 	gen    = NULL;
 	
@@ -159,6 +160,7 @@ ThreadManager::deleteDeadOldPointers(){
 	if (MD) {delete MD; MD=0;}
 	if (CORE){delete CORE; CORE=0;}
 	if (SCORE){delete SCORE; SCORE=0;}
+  if (CBAL) {delete CBAL; CBAL=0;}
 	//if (OPT) {delete OPT; OPT=0;} // not needed, it's a "smart point"
 	if(TEST){delete TEST; TEST=0;}
 	//if(randev){delete randev; randev=0;}
