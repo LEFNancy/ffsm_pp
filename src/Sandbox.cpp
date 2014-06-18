@@ -117,6 +117,32 @@ struct GccTest
 void
 Sandbox::basicTest(){
 
+  /*
+  //This was in ModelData::debug():
+  // ********** START DEBUG CODE....... ************
+  double ddebuga=0; //20080209
+  uint idebuga=0;
+  double ddebugb=0; //20080209
+  uint idebugb=0;
+  double ddebugc=0; //20080209
+  uint idebugc=0;
+  double debugmin = 0;
+  double debugmax = 1000;
+  for (uint q=0;q<10000;q++){
+    ddebuga += debugmin + ( (double)rand() / ((double)(RAND_MAX)+(double)(1)) )*(debugmax-debugmin+1);
+    ddebugb += debugmin + ( (double)rand() / ((double)(RAND_MAX)+(double)(1)) )*(debugmax-debugmin+1);
+    ddebugc += debugmin + ( (double)rand() / ((double)(RAND_MAX)+(double)(1)) )*(debugmax-debugmin+1);
+  }
+  idebuga = ddebuga;
+  idebugb = ddebugb;
+  idebugc = ddebugc;
+  cout << "idebuga: "<<idebuga<<endl;
+  cout << "idebugb: "<<idebugb<<endl;
+  cout << "idebugc: "<<idebugc<<endl;
+  throw 2;
+  // ******** .....END DEBUG CODE *******************
+  */
+
     /*
     // Testing the new iskey class
     iskey op1(2100,"test");
@@ -340,12 +366,19 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
-   double test = MTHREAD->CBAL->getStock(11061, STOCK_INV);
-       //STOCK_INV  -> from inventary source and death trees
-       //STOCK_EXTRA  -> from inventary source and death trees
-       //STOCK_PRODUCTS -> from products
+
+   //double disttest = MTHREAD->MD->getProdData("dist",11042,"",DATA_NOW,i2s(11061));
+   //cout << disttest << endl;
+   //exit(0);
+
+
+   /*double test = MTHREAD->CBAL->getStock(11061, STOCK_INV);
+   //STOCK_INV  -> from inventary source and death trees
+   //STOCK_EXTRA  -> from inventary source and death trees
+   //STOCK_PRODUCTS -> from products
    cout << "DONE" << endl;
    exit(0);
+   */
 
     /*
     // Testing if forestData can uses other arbitrary elements in the diameter field in order to generalise it

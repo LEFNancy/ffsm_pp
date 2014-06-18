@@ -67,7 +67,7 @@ Output::commonInit(){
 //    } else {
 //        scenarioName = MTHREAD->getScenarioName();
 //    }
-    scenarioName = MTHREAD->getScenarioName();
+  scenarioName = MTHREAD->getScenarioName();
 	oFileExt     = MTHREAD->MD->getStringSetting("outputFileExtension");
 	oHRedeable   = MTHREAD->MD->getBoolSetting("outputHumanReadable");
 	oSingleFile  = MTHREAD->MD->getBoolSetting("outputSingleFile");
@@ -77,8 +77,8 @@ Output::commonInit(){
 	outForVariables          = MTHREAD->MD->getStringVectorSetting("outForVariables");
 	outProdVariables         = MTHREAD->MD->getStringVectorSetting("outProdVariables");
 	dClasses                 = MTHREAD->MD->getStringVectorSetting("dClasses");
-    pDClasses.insert(pDClasses.end(), dClasses.begin()+1, dClasses.end() ); // production diameter classes
-    dClasses.push_back(""); // needed for reporting of variables without diameter attribute
+  pDClasses.insert(pDClasses.end(), dClasses.begin()+1, dClasses.end() ); // production diameter classes
+  dClasses.push_back(""); // needed for reporting of variables without diameter attribute
 	outStepRange             = MTHREAD->MD->getIntSetting("outStepRange");
 	forestDiamDetailedOutput = MTHREAD->MD->getBoolSetting("forestDiamDetailedOutput");
 	fTypes                   = MTHREAD->MD->getForTypeIds();
@@ -90,9 +90,9 @@ Output::commonInit(){
 	nPriPr   = priPr.size();
 	nSecPr   = secPr.size();
 	nAllPr   = allPr.size();
-    l1regIds = MTHREAD->MD->getRegionIds(1, true);
-    nL2r     = MTHREAD->MD->getRegionIds(2, true).size();
-    spMode   = MTHREAD->MD->getBoolSetting("usePixelData");
+  l1regIds = MTHREAD->MD->getRegionIds(1, true);
+  nL2r     = MTHREAD->MD->getRegionIds(2, true).size();
+  spMode   = MTHREAD->MD->getBoolSetting("usePixelData");
     //if(spMode) {
     //   pxIds =   getXyNPixels();
     //}
@@ -448,31 +448,69 @@ Output::printProductData(bool finalFlush){
 	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
 
 
+  //11042	hardWSawnW	11083	0.00230651
+  //11042	hardWSawnW	11082	0.0390874
+
+  //if(MTHREAD->SCD->getYear() == 2007){
+//  double test  = MTHREAD->MD->getProdData("rt",11042,"hardWSawnW",DATA_NOW);
+//  double test2 = MTHREAD->MD->getProdData("rt",11042,"hardWSawnW",DATA_NOW,"11083");
+//  double test3 = MTHREAD->MD->getProdData("rt",11042,"hardWSawnW",DATA_NOW,"11082");
+//  cout << test << '\t' << test2 << '\t' << test3 << endl;
+//  exit(0);
+//  }
+
 	double outvalue;
 	for(uint v=0;v<outProdVariables.size();v++){
 		for (uint r1=0;r1<l2r.size();r1++){
 			for (uint r2=0;r2<l2r[r1].size();r2++){
 				for(uint p=0;p<allPr.size();p++){
 
-						out << scenarioName << d;
-						out << outProdVariables[v] << d;
-						out << l1regIds.at(r1) << d;
-						out << l2r[r1][r2] << d;
-						out << allPr[p] << d;
-						out << d;
-						if (oHRedeable){
-							for(int y=0;y<nYears;y++){
-								outvalue = MTHREAD->MD->getProdData(outProdVariables[v],l2r[r1][r2],allPr[p],y+inYear);
-								out << outvalue << d;
-							}
-							out << "\n";
-						} else {
-							outvalue = MTHREAD->MD->getProdData(outProdVariables[v],l2r[r1][r2],allPr[p]);
-							out << currentYear << d;
-							out << outvalue << d;
-							out << "\n";
-						}
+          if(outProdVariables[v]=="rt"){
+            for(uint r2b=0;r2b<l2r[r1].size();r2b++){
+              out << scenarioName << d;
+              out << outProdVariables[v] << d;
+              out << l1regIds.at(r1) << d;
+              out << l2r[r1][r2] << d;
+              out << allPr[p] << d;
+              out << l2r[r1][r2b] << d;
+              if (oHRedeable){
+                for(int y=0;y<nYears;y++){
+                  outvalue = MTHREAD->MD->getProdData(outProdVariables[v],l2r[r1][r2],allPr[p],y+inYear,i2s(l2r[r1][r2b]));
+                  out << outvalue << d;
+                }
+                out << "\n";
+              } else {
+//                if(MTHREAD->SCD->getYear() == 2007 && l2r[r1][r2] == 11042 && allPr[p] == "hardWSawnW" && (l2r[r1][r2b]== 11083 || l2r[r1][r2b]== 11082 )){
+//                outvalue = MTHREAD->MD->getProdData(outProdVariables[v],l2r[r1][r2],allPr[p],currentYear,i2s(l2r[r1][r2b]));
+//                cout << outvalue << endl;
+//                }
+                outvalue = MTHREAD->MD->getProdData(outProdVariables[v],l2r[r1][r2],allPr[p],currentYear,i2s(l2r[r1][r2b]));
+                out << currentYear << d;
+                out << outvalue << d;
+                out << "\n";
+              }
+            }
+          } else {
+            out << scenarioName << d;
+            out << outProdVariables[v] << d;
+            out << l1regIds.at(r1) << d;
+            out << l2r[r1][r2] << d;
+            out << allPr[p] << d;
+            out << d;
+            if (oHRedeable){
+              for(int y=0;y<nYears;y++){
+                outvalue = MTHREAD->MD->getProdData(outProdVariables[v],l2r[r1][r2],allPr[p],y+inYear);
+                out << outvalue << d;
+              }
+              out << "\n";
+            } else {
+              outvalue = MTHREAD->MD->getProdData(outProdVariables[v],l2r[r1][r2],allPr[p]);
+              out << currentYear << d;
+              out << outvalue << d;
+              out << "\n";
+            }
 
+          }
 				}
 			}
 		}

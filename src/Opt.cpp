@@ -283,7 +283,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
 	// mkteq2(i,p_tr)..  RVAR('dl',i,p_tr)+sum(j,EXP(i,j,p_tr))  =e=  RVAR('sl',i,p_tr)+ sum(b,EXP(b,i,p_tr)); // h1
 	CONSTRAIN_START_LOOP(secPr, 0) // attenction! you have to give the same order number as you inserted in the cons vector
-		g[cix] = x[gix("dl",r1,r2,psec)]-x[gix("sl",r1,r2,psec)];
+    g[cix] = x[gix("dl",r1,r2,psec)]-x[gix("sl",r1,r2,psec)]+x[gix("da",r1,r2,p)];
 		for (uint r2To=0;r2To<l2r[r1].size();r2To++){
 			g[cix] += x[gix("rt",r1,r2,psec,r2To)]-x[gix("rt",r1,r2To,psec,r2)];
 		}
@@ -326,7 +326,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
 	// mkteq3(i,p_pr)..  RVAR('dl',i,p_pr)+sum(j,EXP(i,j,p_pr))   =e=  RVAR('sl',i,p_pr)+ sum(b,EXP(b,i,p_pr))+sum(p_pr2, pres(p_pr2,p_pr)* RVAR('sl',i,p_pr2)); // h2
 	CONSTRAIN_START_LOOP(priPr,5)
-		g[cix] = x[gix("dl",r1,r2,p)]-x[gix("sl",r1,r2,p)];
+    g[cix] = x[gix("dl",r1,r2,p)]-x[gix("sl",r1,r2,p)]-x[gix("sa",r1,r2,p)];
 		for (uint r2To=0;r2To<l2r[r1].size();r2To++){
 			g[cix] += x[gix("rt",r1,r2,p,r2To)]-x[gix("rt",r1,r2To,p,r2)];
 		}
@@ -682,6 +682,9 @@ Opt::finalize_solution(SolverReturn status,
 				for(uint r2=0;r2<l2r[r1].size();r2++){
 					for(uint p=0;p<allPr.size();p++){
 						for(uint r2To=0;r2To<l2r[r1].size();r2To++){
+              //if(x[gix(viter->first,r1,r2,p,r2To)] > 0){
+              //  cout << l2r[r1][r2] << "\t" << allPr[p] << "\t" << l2r[r1][r2To] << "\t" << x[gix(viter->first,r1,r2,p,r2To)] << endl;
+              //}
 							spd(x[gix(viter->first,r1,r2,p,r2To)],viter->first,l2r[r1][r2],allPr[p],DATA_NOW,false,i2s(l2r[r1][r2To]));
 						}
 					}
@@ -691,8 +694,6 @@ Opt::finalize_solution(SolverReturn status,
 			msgOut(MSG_CRITICAL_ERROR,"Try to setting the solved value of a variable of unknow type ("+viter->first+")");
 		}
 	}
-
-
 
     // memory deallocation of ADOL-C variables
     delete[] x_lam;

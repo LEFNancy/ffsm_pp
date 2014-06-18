@@ -109,7 +109,7 @@ public:
   //vector <double>                             in; // by pp
   //vector <double>                             hr; // by pp
   vector <double>                          vReg; // by ft
-  vector <double>                         vMort; // by ft
+  vector <vector <double> >               vMort; // by ft,dc
 	vector <double>                expectedReturns; // by ft
 
   vector <vector <double> >                vol_l;  // store the volumes of the previous year

@@ -51,9 +51,10 @@ public:
   double                getStock(const int & regId, const int & stock_type) const;
   double                getCumSavedEmissions(const int & regId, const int & em_type) const;                ///< return the current cumulative saved emissions by type
 
-  void                  registerHarvesting(const int & regId, const string & fType, const double & value); ///< register the harvesting of trees -> cumEmittedForOper
+  void                  registerHarvesting(const double & value, const int & regId, const string &fType);  ///< register the harvesting of trees -> cumEmittedForOper
   void                  registerDeathBiomass(const double &value, const int & regId, const string &fType);
   void                  registerProducts(const double &value, const int & regId, const string &productName);
+  void                  registerTransports(const double &distQ, const int & regId);                         ///< register the quantities emitted by transport of wood FROM a given region
   void                  initialiseDeathBiomassStocks(const vector<double> & deathByFt, const int & regId); ///< Initialise the stocks of death biomass for the avgLive_* years before the simulation starts
   void                  initialiseProductsStocks(const vector<double> & qByProduct, const int &regId);                       ///< Initialise the stocks of products for the avgLive_* years before the simulation starts
   void                  initialiseEmissionCounters(); ///< Initialise the emission counters to zero.
@@ -70,9 +71,9 @@ private:
 
   map<iiskey, double >              deathBiomass; ///< map that register the death of biomass by year, l2_region and forest type [Mm^3 wood]
   map<iiskey, double >                  products; ///< map that register the production of a given product by year, l2_region and product [Mm^3 wood]
-  map<int,double>           cumSubstitutedEnergy; ///< map that store the cumulative CO2 substituted for energy consumption [Mt CO2]
-  map<int,double>         cumSubstitutedMaterial; ///< map that store the cumulative CO2 substituted using less energivory material [Mt CO2]
-  map<int,double>              cumEmittedForOper; ///< map that store emissions for forest operations [Mt CO2]
+  map<int,double>           cumSubstitutedEnergy; ///< map that store the cumulative CO2 substituted for energy consumption, by l2_region [Mt CO2]
+  map<int,double>         cumSubstitutedMaterial; ///< map that store the cumulative CO2 substituted using less energivory material, by l2_region [Mt CO2]
+  map<int,double>              cumEmittedForOper; ///< map that store emissions for forest operations, including transport, by l2_region [Mt CO2]
 
 
 

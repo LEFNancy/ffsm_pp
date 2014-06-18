@@ -33,7 +33,7 @@ Carbon::~Carbon(){
 }
 
 
-
+// ################# GET FUNCTIONS ################
 /**
  * @brief Carbon::getStock
  * @param reg
@@ -108,50 +108,17 @@ Carbon::getCumSavedEmissions(const int & regId, const int & em_type) const{
   return 0.0;
 }
 
-void
-Carbon::registerHarvesting(const int & regId, const string & fType, const double & value){
-  double convCoeff = MTHREAD->MD->getForData("forOperEmissions",regId,fType,"");
-  addSavedEmissions(-convCoeff*value,regId,EM_FOROP);
-}
+// ################# INITIALISE FUNCTIONS ################
 
 void
-Carbon::addSavedEmissions(const double & value, const int & regId, const int & em_type){
-  switch (em_type){
-    case EM_ENSUB:
-      incrMapValue(cumSubstitutedEnergy, regId, value);
-      break;
-    case EM_MATSUB:
-      incrMapValue(cumSubstitutedMaterial, regId, value);
-      break;
-    case EM_FOROP:
-      incrMapValue(cumEmittedForOper, regId, -value);
-      break;
-    default:
-      msgOut(MSG_CRITICAL_ERROR,"Unexpected em_type in function getCumSavedEmissions");
+Carbon::initialiseEmissionCounters(){
+  vector<int> regIds = MTHREAD->MD->getRegionIds(2);
+  for (int i=0;i<regIds.size();i++){
+    pair<int,double> mypair(regIds[i],0.0);
+    cumSubstitutedEnergy.insert(mypair);
+    cumSubstitutedMaterial.insert(mypair);
+    cumEmittedForOper.insert(mypair);
   }
-
-}
-
-void
-Carbon::registerDeathBiomass(const double &value, const int & regId, const string & fType){
-  int year = MTHREAD->SCD->getYear();
-  iiskey key(year,regId,fType);
-  pair<iiskey,double> mypair(key,value);
-  deathBiomass.insert(mypair);
-}
-
-void
-Carbon::registerProducts(const double &value, const int & regId, const string & productName){
-  // Registering the CO2 stock embedded in the product...
-  int year = MTHREAD->SCD->getYear();
-  iiskey key(year,regId,productName);
-  pair<iiskey,double> mypair(key,value);
-  products.insert(mypair);
-  // registering the substituted CO2 for energy and material..
-  double subEnergyCoeff   = MTHREAD->MD->getProdData("co2sub_energy",regId,productName,DATA_NOW,"");
-  double subMaterialCoeff = MTHREAD->MD->getProdData("forOperEmissions",regId,productName,DATA_NOW,"");
-  addSavedEmissions(subEnergyCoeff*value,regId,EM_ENSUB);
-  addSavedEmissions(subMaterialCoeff*value,regId,EM_MATSUB);
 }
 
 void
@@ -189,17 +156,61 @@ Carbon::initialiseProductsStocks(const vector<double> & qByProduct, const int & 
   }
 }
 
+// ################# REGISTER FUNCTIONS ################
+void
+Carbon::registerHarvesting(const double & value, const int & regId, const string & fType){
+  double convCoeff = MTHREAD->MD->getForData("forOperEmissions",regId,fType,"");
+  addSavedEmissions(-convCoeff*value,regId,EM_FOROP);
+}
 
 
 void
-Carbon::initialiseEmissionCounters(){
-  vector<int> regIds = MTHREAD->MD->getRegionIds(2);
-  for (int i=0;i<regIds.size();i++){
-    pair<int,double> mypair(regIds[i],0.0);
-    cumSubstitutedEnergy.insert(mypair);
-    cumSubstitutedMaterial.insert(mypair);
-    cumEmittedForOper.insert(mypair);
-  }
+Carbon::registerDeathBiomass(const double &value, const int & regId, const string & fType){
+  int year = MTHREAD->SCD->getYear();
+  iiskey key(year,regId,fType);
+  pair<iiskey,double> mypair(key,value);
+  deathBiomass.insert(mypair);
 }
 
+void
+Carbon::registerProducts(const double &value, const int & regId, const string & productName){
+  // Registering the CO2 stock embedded in the product...
+  int year = MTHREAD->SCD->getYear();
+  iiskey key(year,regId,productName);
+  pair<iiskey,double> mypair(key,value);
+  products.insert(mypair);
+  // registering the substituted CO2 for energy and material..
+  double subEnergyCoeff   = MTHREAD->MD->getProdData("co2sub_energy",regId,productName,DATA_NOW,"");
+  double subMaterialCoeff = MTHREAD->MD->getProdData("forOperEmissions",regId,productName,DATA_NOW,"");
+  addSavedEmissions(subEnergyCoeff*value,regId,EM_ENSUB);
+  addSavedEmissions(subMaterialCoeff*value,regId,EM_MATSUB);
+}
+
+
+
+void
+Carbon::registerTransports(const double &distQ, const int & regId){
+  double transportEmissionsCoeff = MTHREAD->MD->getDoubleSetting("transportEmissionsCoeff");
+  addSavedEmissions(-transportEmissionsCoeff*distQ,regId,EM_FOROP);
+}
+
+
+// ################# UTILITY (PRIVATE) FUNCTIONS ################
+
+void
+Carbon::addSavedEmissions(const double & value, const int & regId, const int & em_type){
+  switch (em_type){
+    case EM_ENSUB:
+      incrMapValue(cumSubstitutedEnergy, regId, value);
+      break;
+    case EM_MATSUB:
+      incrMapValue(cumSubstitutedMaterial, regId, value);
+      break;
+    case EM_FOROP:
+      incrMapValue(cumEmittedForOper, regId, -value);
+      break;
+    default:
+      msgOut(MSG_CRITICAL_ERROR,"Unexpected em_type in function getCumSavedEmissions");
+  }
+}
 

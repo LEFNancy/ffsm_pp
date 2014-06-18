@@ -158,7 +158,7 @@ Gis::applySpatialStochasticValues(){
       } else {
         double c = ext_distr(*MTHREAD->gen);
         double c2 = max(0.0,min(1.0,c)); /// Bounded [0,1]. With simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
-        cout << c2 << endl;
+        //cout << c2 << endl;
         rpx[z]->expType = c2;
       }
     }

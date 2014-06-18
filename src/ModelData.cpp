@@ -983,7 +983,7 @@ ModelData::getProdData(const string &type_h, const int& regId_h, const string &p
 	for(uint r=0;r<regIdsS;r++){
 		for(uint i=0;i<products.size();i++){
 			key = makeKeyProdData(type_h,i2s(regIds[r]),products[i],freeDim_h);
-            if (!exactMatch && key.size () > 0)  key.resize (key.size () - 1); // bug 20140402, removing the last #
+      if (!exactMatch && key.size () > 0)  key.resize (key.size () - 1); // bug 20140402, removing the last #
 			value += dataMapGetValue(prodDataMap,key,year,exactMatch);
 			if(tempBool) found = true;
 		}
@@ -1251,32 +1251,6 @@ ModelData::setTimedData(const double& value_h, vector<double> &dated_vector, con
 	}
 }
 
-
-void
-ModelData::debug(){
-	// ********** START DEBUG CODE....... ************
-	double ddebuga=0; //20080209
-	uint idebuga=0;
-	double ddebugb=0; //20080209
-	uint idebugb=0;
-	double ddebugc=0; //20080209
-	uint idebugc=0;
-	double debugmin = 0;
-	double debugmax = 1000;
-	for (uint q=0;q<10000;q++){
-		ddebuga += debugmin + ( (double)rand() / ((double)(RAND_MAX)+(double)(1)) )*(debugmax-debugmin+1);
-		ddebugb += debugmin + ( (double)rand() / ((double)(RAND_MAX)+(double)(1)) )*(debugmax-debugmin+1);
-		ddebugc += debugmin + ( (double)rand() / ((double)(RAND_MAX)+(double)(1)) )*(debugmax-debugmin+1);
-	}
-	idebuga = ddebuga;
-	idebugb = ddebugb;
-	idebugc = ddebugc;
-	cout << "idebuga: "<<idebuga<<endl;
-	cout << "idebugb: "<<idebugb<<endl;
-	cout << "idebugc: "<<idebugc<<endl;
-	throw 2;
-	// ******** .....END DEBUG CODE *******************
-}
 
 void
 ModelData::loadInput(){

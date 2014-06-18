@@ -87,8 +87,6 @@ public:
 	void                applyOverrides(); ///< Cancel all reg1 level data and trasform them in reg2 level if not already existing
 	void                applyDebugMode(); ///< Works only a specified subset of regions and products
 	void                setSpace();
-	/// Create the vector availableObjectsBySoilType so it is faster to assign spacial objects to farmers basing on their land types
-	void                debug();
 
 	/// Return a vector of objects that together provide the specified resource in the specified quantity
 	string              getOutputDirectory() const {return outputDirname;}
@@ -192,7 +190,7 @@ private:
 	vector <string>                            secProducts;
 	vector <string>                            allProducts;
 
-		bool                                         tempBool; ///< a temporary bool variable used for various functions
+  bool                                         tempBool; ///< a temporary bool variable used for various functions
 
 	 /// For each agricultural soil type (as defined in the setting "agrLandTypes") this list define the objects that can be placed on that soil type
 	InputNode                                 mainDocument;  ///< the main input document, loaded in memory at unzipping stage
