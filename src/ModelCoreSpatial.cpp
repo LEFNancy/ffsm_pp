@@ -860,8 +860,8 @@ ModelCoreSpatial::initialiseCarbonModule(){
     }
     for(int p=0;p<secProducts.size();p++){
       // for the tranformed product we skip those that are imported, hence derived from other forest systems
-      double consumption = gpd("sl",regIds2[i],priProducts[p],DATA_NOW);
-      double int_imports = gpd("sl",regIds2[i],priProducts[p],DATA_NOW);
+      double consumption = gpd("sl",regIds2[i],secProducts[p],DATA_NOW);
+      double int_imports = gpd("da",regIds2[i],secProducts[p],DATA_NOW);
       qProducts.push_back(consumption-int_imports);
     }
     MTHREAD->CBAL->initialiseProductsStocks(qProducts, regIds2[i]);
@@ -1409,8 +1409,8 @@ ModelCoreSpatial::registerCarbonEvents(){
     }
     for(int p=0;p<secProducts.size();p++){
       // for the tranformed product we skip those that are imported, hence derived from other forest systems
-      double consumption = gpd("sl",regIds2[i],priProducts[p],DATA_NOW);
-      double int_imports = gpd("sl",regIds2[i],priProducts[p],DATA_NOW);
+      double consumption = gpd("sl",regIds2[i],secProducts[p],DATA_NOW);
+      double int_imports = gpd("da",regIds2[i],secProducts[p],DATA_NOW);
       MTHREAD->CBAL->registerProducts(consumption-int_imports, regIds2[i], secProducts[p]); // register new stock
     }
 
