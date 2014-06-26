@@ -48,8 +48,8 @@ public:
                        ~Carbon();
 
 
-  double                getStock(const int & regId, const int & stock_type) const;
-  double                getCumSavedEmissions(const int & regId, const int & em_type) const;                ///< return the current cumulative saved emissions by type
+  double                getStock(const int & regId, const int & stock_type) const;                         ///< return the current stock of carbon [Mt CO2]
+  double                getCumSavedEmissions(const int & regId, const int & em_type) const;                ///< return the current cumulative saved emissions by type [Mt CO2]
 
   void                  registerHarvesting(const double & value, const int & regId, const string &fType);  ///< register the harvesting of trees -> cumEmittedForOper
   void                  registerDeathBiomass(const double &value, const int & regId, const string &fType);

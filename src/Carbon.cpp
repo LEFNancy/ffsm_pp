@@ -58,28 +58,34 @@ Carbon::getStock(const int & regId, const int & stock_type) const{
       vector <string> allProducts = priProducts;
       allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
       for(int i=0;i<allProducts.size();i++){
-        double coeff = MTHREAD->MD->getProdData("co2content_products",regId,allProducts[i],DATA_NOW,"");
+        double coeff = MTHREAD->MD->getProdData("co2content_products",regId,allProducts[i],DATA_NOW,""); //  [kg CO2/m^3 wood]
         double life  = MTHREAD->MD->getProdData("avgLife_products",regId,allProducts[i],DATA_NOW,"");
         for(int y=currentYear;y>currentYear-life;y--){ // ok
           iiskey key(y,regId,allProducts[i]);
-          toReturn += findMap(products,key,MSG_NO_MSG)*coeff;
+          toReturn += findMap(products,key,MSG_NO_MSG)*coeff/1000;
         }
       }
       break;
     }
-    case STOCK_INV:{}
+    case STOCK_INV:{
+    // TO.DO !!! No, It is already done (hint: missing the break!)
+
+    }
     case STOCK_EXTRA:{
       vector <string> fTypes = MTHREAD->MD->getForTypeIds();
       for(int i=0;i<fTypes.size();i++){
-        double coeff = (stock_type==STOCK_INV)? MTHREAD->MD->getForData("co2content_inventary",regId,fTypes[i],"",DATA_NOW):MTHREAD->MD->getForData("co2content_extra",regId,fTypes[i],"",DATA_NOW);
+        // units:
+        // co2content_inventary: [Kg CO2 / m^3 wood]
+        // co2content_extra:     [Kg CO2 / m^3 inventaried wood]
+        double coeff = (stock_type==STOCK_INV)? MTHREAD->MD->getForData("co2content_inventary",regId,fTypes[i],"",DATA_NOW):MTHREAD->MD->getForData("co2content_extra",regId,fTypes[i],"",DATA_NOW); //  [kg CO2/m^3 wood]
         double life  = MTHREAD->MD->getForData("avgLive_deathBiomass",regId,fTypes[i],"",DATA_NOW);
         // PART A: from death biomass..
         for(int y=currentYear;y>currentYear-life;y--){ // ok
           iiskey key(y,regId,fTypes[i]);
-          toReturn += findMap(deathBiomass,key,MSG_NO_MSG)*coeff;
+          toReturn += findMap(deathBiomass,key,MSG_NO_MSG)*coeff/1000;
         }
         // PART B: from inventary volumes
-        toReturn += MTHREAD->MD->getForData("vol",regId,fTypes[i],DIAM_ALL,DATA_NOW)*coeff;
+        toReturn += MTHREAD->MD->getForData("vol",regId,fTypes[i],DIAM_ALL,DATA_NOW)*coeff/1000;
       }
       break;
     }
@@ -160,8 +166,13 @@ Carbon::initialiseProductsStocks(const vector<double> & qByProduct, const int & 
 // ################# REGISTER FUNCTIONS ################
 void
 Carbon::registerHarvesting(const double & value, const int & regId, const string & fType){
-  double convCoeff = MTHREAD->MD->getForData("forOperEmissions",regId,fType,"");
-  addSavedEmissions(-convCoeff*value,regId,EM_FOROP);
+  double convCoeff = MTHREAD->MD->getForData("forOperEmissions",regId,fType,""); //  Kg of CO2 emitted per cubic meter of forest operations
+  // units:
+  // value: Mm^3
+  // convCoeff: Kg CO2/m^3 wood
+  // desidered output: Mt CO2
+  // ==> I must divide by 1000
+  addSavedEmissions(-convCoeff*value/1000,regId,EM_FOROP);
 }
 
 
@@ -183,16 +194,26 @@ Carbon::registerProducts(const double &value, const int & regId, const string & 
   // registering the substituted CO2 for energy and material..
   double subEnergyCoeff   = MTHREAD->MD->getProdData("co2sub_energy",regId,productName,DATA_NOW,"");
   double subMaterialCoeff = MTHREAD->MD->getProdData("co2sub_material",regId,productName,DATA_NOW,"");
-  addSavedEmissions(subEnergyCoeff*value,regId,EM_ENSUB);
-  addSavedEmissions(subMaterialCoeff*value,regId,EM_MATSUB);
+  // units:
+  // value: Mm^3
+  // subEnergyCoeff and subMaterialCoeff:  [kgCO2/m^3 wood]
+  // desidered output: Mt CO2
+  // ==> I must divide by 1000
+  addSavedEmissions(subEnergyCoeff*value/1000,regId,EM_ENSUB);
+  addSavedEmissions(subMaterialCoeff*value/1000,regId,EM_MATSUB);
 }
 
 
 
 void
 Carbon::registerTransports(const double &distQ, const int & regId){
+  // units:
+  // distQ: km*Mm^3
+  // transportEmissionsCoeff:  [Kg CO2 / (km*m^3) ]
+  // desidered output: Mt CO2
+  // ==> I must divide by 1000
   double transportEmissionsCoeff = MTHREAD->MD->getDoubleSetting("transportEmissionsCoeff");
-  addSavedEmissions(-transportEmissionsCoeff*distQ,regId,EM_FOROP);
+  addSavedEmissions(-transportEmissionsCoeff*distQ/1000,regId,EM_FOROP);
 }
 
 

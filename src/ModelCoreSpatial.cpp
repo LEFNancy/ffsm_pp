@@ -1422,12 +1422,12 @@ ModelCoreSpatial::registerCarbonEvents(){
       MTHREAD->CBAL->registerHarvesting(harvesting, regIds2[i], fTypes[j]);      // account for emissions
     }
 
-    for(int p=0;p<priProducts.size();p++){
+    for(uint p=0;p<priProducts.size();p++){
       // for the primary products we consider only the exports as the domestic consumption is entirelly transformed in secondary products
       double int_exports = gpd("sa",regIds2[i],priProducts[p],DATA_NOW);
       MTHREAD->CBAL->registerProducts(int_exports, regIds2[i], priProducts[p]);  // register new stock
     }
-    for(int p=0;p<secProducts.size();p++){
+    for(uint p=0;p<secProducts.size();p++){
       // for the tranformed product we skip those that are imported, hence derived from other forest systems
       // but we consider those coming from other regions
       double consumption = gpd("dl",regIds2[i],secProducts[p],DATA_NOW); // dl = sl + net regional imports
@@ -1441,9 +1441,9 @@ ModelCoreSpatial::registerCarbonEvents(){
       double distQProd = 0.0;
       for (uint r3=0;r3<l2r[r1].size();r3++){
         int rto = l2r[r1][r3];
-        double dist = gpd("dist",rfrom,"",DATA_NOW,i2s(rto));
-        for(int p=0;p<allProducts.size();p++){
-          distQProd += dist*gpd("rt",rfrom,allProducts[p],DATA_NOW,i2s(rto));
+        double dist = gpd("dist",rfrom,"",DATA_NOW,i2s(rto)); //km
+        for(uint p=0;p<allProducts.size();p++){
+          distQProd += dist*gpd("rt",rfrom,allProducts[p],DATA_NOW,i2s(rto)); //km*Mm^3
         }
       }
       MTHREAD->CBAL->registerTransports(distQProd, rfrom);
