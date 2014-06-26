@@ -30,6 +30,10 @@ ModelCoreSpatial::runInitPeriod(){
     Area           -> at the end of the year
     Harvesting     -> at the beginning of the year
     Volumes are in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2, vHa in m^3/ha
+
+    BALANCE:
+    PROD_forLocal (sl) + PROD_forExp (sa) + IMP (da) = CONS_fromLocal (dl) + CONS_fromImp (da) + EXP (sa)
+
     */
 	cacheSettings();             // cashe things like first year, second year, dClasses...
 	initializePixelValues();     // compute px volumes vol for 2005
@@ -493,7 +497,9 @@ ModelCoreSpatial::runBiologicalModule(){
 					double vHa         = px->vHa.at(j).at(u); //gfd("vHa",regId,ft,dc);
 					double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
 
-          vMort_byDc.push_back(mort*pastYearVol);
+          double vMort       = mort*pastYearVol;
+
+          vMort_byDc.push_back(vMort);
 
 					if(u==0){
 						vol = 0.0;
@@ -560,6 +566,19 @@ ModelCoreSpatial::runBiologicalModule(){
 				px->hArea.push_back(hArea_byDc);
 				px->vol.push_back(newVol_byDiam);
         px->vMort.push_back(vMort_byDc);
+
+        #ifdef QT_DEBUG
+        for (uint u=1; u<dClasses.size(); u++){
+          double volMort = vMort_byDc[u];
+          double harvVol = hV_byDiam[u];
+          double vol_new = newVol_byDiam[u];
+          double vol_lagged = px->vol_l.at(j).at(u);
+          double gain = vol_new - (vol_lagged-harvVol-volMort);
+          if (volMort > vol_lagged){
+            msgOut(MSG_CRITICAL_ERROR,"mort vol > lagged volumes ?");
+          }
+        }
+        #endif
 			} // end of each forest type
 		} // end of each pixel
 	} // end of each region
@@ -860,9 +879,8 @@ ModelCoreSpatial::initialiseCarbonModule(){
     }
     for(int p=0;p<secProducts.size();p++){
       // for the tranformed product we skip those that are imported, hence derived from other forest systems
-      double consumption = gpd("sl",regIds2[i],secProducts[p],DATA_NOW);
-      double int_imports = gpd("da",regIds2[i],secProducts[p],DATA_NOW);
-      qProducts.push_back(consumption-int_imports);
+      double consumption = gpd("dl",regIds2[i],secProducts[p],DATA_NOW); // dl = sl + net regional imports
+      qProducts.push_back(consumption);
     }
     MTHREAD->CBAL->initialiseProductsStocks(qProducts, regIds2[i]);
 
@@ -1336,6 +1354,12 @@ ModelCoreSpatial::sumRegionalForData(){
 		for(uint j=0;j<fTypes.size();j++){
 			string ft = fTypes[j];
 
+      double regArea = 0.;
+      double sumExpReturns = 0.;
+      double sumArea = 0.;
+      double pxForArea = 0.;
+      double vReg = 0.;
+
 			for (uint u=0; u<dClasses.size(); u++){
 				string dc = dClasses[u];
 				double vol =0.;
@@ -1363,11 +1387,7 @@ ModelCoreSpatial::sumRegionalForData(){
 
 				}
 			}
-			double regArea = 0.;
-			double sumExpReturns = 0.;
-			double sumArea = 0.;
-      double pxForArea = 0.;
-			double vReg = 0.;
+
 			for (uint p=0;p<regPx.size();p++){
 				Pixel* px = regPx[p];
 				vReg += px->vReg.at(j);
@@ -1409,9 +1429,9 @@ ModelCoreSpatial::registerCarbonEvents(){
     }
     for(int p=0;p<secProducts.size();p++){
       // for the tranformed product we skip those that are imported, hence derived from other forest systems
-      double consumption = gpd("sl",regIds2[i],secProducts[p],DATA_NOW);
-      double int_imports = gpd("da",regIds2[i],secProducts[p],DATA_NOW);
-      MTHREAD->CBAL->registerProducts(consumption-int_imports, regIds2[i], secProducts[p]); // register new stock
+      // but we consider those coming from other regions
+      double consumption = gpd("dl",regIds2[i],secProducts[p],DATA_NOW); // dl = sl + net regional imports
+      MTHREAD->CBAL->registerProducts(consumption, regIds2[i], secProducts[p]); // register new stock
     }
 
   }
@@ -1421,7 +1441,7 @@ ModelCoreSpatial::registerCarbonEvents(){
       double distQProd = 0.0;
       for (uint r3=0;r3<l2r[r1].size();r3++){
         int rto = l2r[r1][r3];
-        double dist = gpd("dist",rfrom,"a",DATA_NOW,i2s(rto));
+        double dist = gpd("dist",rfrom,"",DATA_NOW,i2s(rto));
         for(int p=0;p<allProducts.size();p++){
           distQProd += dist*gpd("rt",rfrom,allProducts[p],DATA_NOW,i2s(rto));
         }

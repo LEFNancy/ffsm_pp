@@ -24,6 +24,7 @@
 #include "Scheduler.h"
 #include "ModelData.h"
 #include "Gis.h"
+#include "Carbon.h"
 
 typedef map<string, vector <double> > DataMap;
 typedef pair<string, vector <double> > DataPair;
@@ -43,11 +44,11 @@ void
 Output::initOutput(){
 	commonInit();
 	initOutputMaps();
-    initDebugOutput();
+  initDebugOutput();
 	initOutputForestData();
 	initOutputProductData();
 	initOptimisationLog();
-
+  initCarbonBalance();
 }
 
 
@@ -252,6 +253,38 @@ Output::initOutputProductData(){
 	out.close();
 }
 
+void
+Output::initCarbonBalance(){
+
+  if(oSingleFile){
+    outFileName = baseDir+oDir+"results/carbonBalance"+oFileExt;
+    ifstream in(outFileName.c_str(), ios::in);
+    if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
+      in.close();
+      cleanScenario(outFileName, scenarioName, d);
+      return;
+    } else {
+      in.close();
+    }
+  } else {
+    outFileName = baseDir+oDir+"results/carbonBalance_"+scenarioName+oFileExt;
+  }
+
+  ofstream out(outFileName.c_str(), ios::out);
+  if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
+    out << "scen" << d << "country" << d << "region" << d << "balItem" << d;
+  //if(oHRedeable){
+  //	for(int i=0;i<nYears;i++){
+  //		out << i+inYear << d;
+  //	}
+  //} else {
+    out << "year" << d << "value" << d;
+  //}
+  out << "\n";
+  out.close();
+}
+
+
 /**
 Resetting the list of printed layers and the scenario name..
 <br>Printing scenario name for post-processing scripts
@@ -297,7 +330,8 @@ Output::print(){
 	MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
 	printForestData(false);
 	printProductData(false);
-    printDebugOutput();
+  printCarbonBalance();
+  printDebugOutput();
 	MTHREAD->MD->setErrorLevel(MSG_ERROR);
 }
 
@@ -316,7 +350,7 @@ Output::printFinalOutput(){
 	if(oHRedeable){
 		MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
 		printForestData(true);
-		printProductData(true);
+    printProductData(true);
 		MTHREAD->MD->setErrorLevel(MSG_ERROR);
 	}
 }
@@ -563,6 +597,84 @@ Output::printProductData(bool finalFlush){
 */
 	out.close();
 }
+
+
+
+
+
+void
+Output::printCarbonBalance(){
+
+  int currentYear = MTHREAD->SCD->getYear();
+  if (currentYear == inYear) {return;} // don't print carbon balance on first year, carbon balance containers has not yet been initialised
+
+  msgOut(MSG_INFO, "Printing forest data..");
+
+  if(oSingleFile){
+    outFileName = baseDir+oDir+"results/carbonBalance"+oFileExt;
+  } else {
+    outFileName = baseDir+oDir+"results/carbonBalance_"+scenarioName+oFileExt;
+  }
+  ofstream out (outFileName.c_str(), ios::app);
+  if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
+  double outvalue=0;
+
+  vector<int> balItems {STOCK_INV,STOCK_EXTRA,STOCK_PRODUCTS,EM_ENSUB,EM_MATSUB,EM_FOROP};
+
+  for (uint r1=0;r1<l2r.size();r1++){
+    for (uint r2=0;r2<l2r[r1].size();r2++){
+      int regId = l2r[r1][r2];
+      for (uint b=0;b<balItems.size();b++){
+        out << scenarioName << d;
+        out << l1regIds.at(r1) << d;
+        out << l2r[r1][r2] << d;
+        string balItemString;
+        switch(balItems[b]){
+          case STOCK_INV: {
+            balItemString = "STOCK_INV";
+            outvalue = MTHREAD->CBAL->getStock(regId, balItems[b]);
+            break;
+          }
+          case STOCK_EXTRA: {
+            balItemString = "STOCK_EXTRA";
+            outvalue = MTHREAD->CBAL->getStock(regId, balItems[b]);
+            break;
+          }
+          case STOCK_PRODUCTS: {
+            balItemString = "STOCK_PRODUCTS";
+            outvalue = MTHREAD->CBAL->getStock(regId, balItems[b]);
+            break;
+          }
+          case EM_ENSUB: {
+            balItemString = "EM_ENSUB";
+            outvalue = MTHREAD->CBAL->getCumSavedEmissions(regId, balItems[b]);
+            break;
+          }
+          case EM_MATSUB: {
+            balItemString = "EM_MATSUB";
+            outvalue = MTHREAD->CBAL->getCumSavedEmissions(regId, balItems[b]);
+            break;
+          }
+          case EM_FOROP: {
+            balItemString = "EM_FOROP";
+            outvalue = MTHREAD->CBAL->getCumSavedEmissions(regId, balItems[b]);
+            break;
+          }
+        default:
+            msgOut(MSG_CRITICAL_ERROR,"Unexpected balance item type in function printCarbonBalance");
+        }
+        out << balItemString << d;
+        out << currentYear << d;
+        out << outvalue << d;
+        out << "\n";
+
+
+      } // end bal items
+    } // end r2
+  } // end r1
+  out.close();
+}
+
 
 char
 Output::getOutputFieldDelimiter(){

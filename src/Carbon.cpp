@@ -147,13 +147,14 @@ Carbon::initialiseProductsStocks(const vector<double> & qByProduct, const int & 
   if(allProducts.size() != qByProduct.size()) {msgOut(MSG_CRITICAL_ERROR,"allProducts and qByProduct have different lenght!");}
   int currentYear = MTHREAD->SCD->getYear();
   for(int i=0;i<allProducts.size();i++){
-    double life  = MTHREAD->MD->getForData("avgLive_products",regId,allProducts[i],"",DATA_NOW);
+    double life  = MTHREAD->MD->getProdData("avgLife_products",regId,allProducts[i],DATA_NOW);
     for(int y=currentYear;y>currentYear-life;y--){
       iiskey key(y,regId,allProducts[i]);
       pair<iiskey,double> mypair(key,qByProduct.at(i));
       products.insert(mypair);
      }
   }
+  cout << "" << endl;
 }
 
 // ################# REGISTER FUNCTIONS ################
@@ -181,7 +182,7 @@ Carbon::registerProducts(const double &value, const int & regId, const string & 
   products.insert(mypair);
   // registering the substituted CO2 for energy and material..
   double subEnergyCoeff   = MTHREAD->MD->getProdData("co2sub_energy",regId,productName,DATA_NOW,"");
-  double subMaterialCoeff = MTHREAD->MD->getProdData("forOperEmissions",regId,productName,DATA_NOW,"");
+  double subMaterialCoeff = MTHREAD->MD->getProdData("co2sub_material",regId,productName,DATA_NOW,"");
   addSavedEmissions(subEnergyCoeff*value,regId,EM_ENSUB);
   addSavedEmissions(subMaterialCoeff*value,regId,EM_MATSUB);
 }

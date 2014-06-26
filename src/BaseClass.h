@@ -95,11 +95,10 @@ enum {
   STOCK_INV              =1,
   STOCK_EXTRA            =2,
   STOCK_PRODUCTS         =3,
-
   // em_type
-  EM_ENSUB               =1,
-  EM_MATSUB              =2,
-  EM_FOROP               =3,
+  EM_ENSUB               =4,
+  EM_MATSUB              =5,
+  EM_FOROP               =6,
 
 
 	// domain of constrains variables (squares means a vector, r2n means neighbour -same r1- regions)
