@@ -603,23 +603,35 @@ ModelCoreSpatial::runManagementModule(){
 			Pixel* px = regPx[p];
 			px->expectedReturns.clear();
       resetMapValues(hAreaByFTypeGroup,0.0);
+      double totalHarvestedArea = vSum(px->hArea); //gfd("harvestedArea",regId,FT_ALL,DIAM_ALL);
 
-			// CALCULATING the expected returns for each forest type...
-			for(uint j=0;j<fTypes.size();j++){
+      vector<double> thisYearRegAreas(fTypes.size(),0.0); // initialize a vector of fTypes.size() zeros.
+      vector<double> expectedReturns(fTypes.size(),0.0); //  uncorrected expected returns (without considering transaction costs)
+
+      //vector <double> thisYearRegAreas;
+
+      // A - Computing the harvestingArea by parent ft group (for the allocation according to the prob of presence):
+      for(uint j=0;j<fTypes.size();j++){
         string ft = fTypes[j];
         string parentFt = MTHREAD->MD->getForTypeParentId(ft);
+        double hAreaThisFt=vSum(px->hArea.at(j));
+        incrMapValue(hAreaByFTypeGroup,parentFt,hAreaThisFt); // increment the parent ft of the harvested area, neeed for assigning the frequences (prob. of presence)
+      }
 
+
+
+      // B - Computing the uncorrected expected returns (without considering transaction costs)
+			for(uint j=0;j<fTypes.size();j++){
+        string ft = fTypes[j];
         double hV_byFT = 0.; // gfd("hV",regId,ft,DIAM_PROD); // it must include only final harvested products in order to act as weightering agent
         double expReturns = 0.;
         int optDc; // "optimal diameter class", the one on which the expected returns are computed
         double optCumTp; // "optimal cumulative time of passage", the one of optDc
-
         for (uint u=0; u<dClasses.size(); u++){
           string dc = dClasses[u];
           double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
           hV_byFT += finalHarvestFlag * px->hVol.at(j).at(u);
         }
-
         for (uint u=0; u<dClasses.size(); u++){
           string dc = dClasses[u];
           double vHa         = px->vHa_exp.at(j).at(u);
@@ -643,16 +655,15 @@ ModelCoreSpatial::runManagementModule(){
           expReturns = origExpReturns * (1.0 - ra*cumMort);
         }
         px->expectedReturns.push_back(expReturns);
-        double hAreaThisFt=vSum(px->hArea.at(j));
-        incrMapValue(hAreaByFTypeGroup,parentFt,hAreaThisFt); // increment the parent ft of the harvested area, neeed for assigning the frequences (prob. of presence)
+        expectedReturns.at(j) = expReturns;
 			} // end foreach forest type
 
-			// calculating freeArea at the end of the year and choosing the new regeneration area..
-			double totalHarvestedArea = vSum(px->hArea); //gfd("harvestedArea",regId,FT_ALL,DIAM_ALL);
-			double maxExpReturns = *( max_element( px->expectedReturns.begin(), px->expectedReturns.end() ) );
-			bool foundMaxExpReturns = false;
 
-			vector <double> thisYearRegAreas;
+      double maxExpReturns = *( max_element( px->expectedReturns.begin(), px->expectedReturns.end() ) );
+      bool foundMaxExpReturns = false;
+
+
+      // calculating freeArea at the end of the year and choosing the new regeneration area..
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
         string parentFt = MTHREAD->MD->getForTypeParentId(ft);
@@ -678,7 +689,7 @@ ModelCoreSpatial::runManagementModule(){
         } else {
             regArea += harvestedAreaForThisFT*(1-mr);
         }
-        thisYearRegAreas.push_back(regArea);
+        thisYearRegAreas.at(j) = regArea;
         px->area.at(j).at(0) += thisYearRegAreas.at(j); // adding regeneration area to the fist (00) diameter class
       } // end for each forest type
       #ifdef QT_DEBUG
