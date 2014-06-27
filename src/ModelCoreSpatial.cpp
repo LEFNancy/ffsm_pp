@@ -590,156 +590,64 @@ ModelCoreSpatial::runBiologicalModule(){
 void
 ModelCoreSpatial::runManagementModule(){
 	msgOut(MSG_INFO, "Starting management module..");
-    bool weightedAverageExpectedReturns = MTHREAD->MD->getBoolSetting("weightedAverageExpectedReturns");
-    vector<string> allFTypes = MTHREAD->MD->getForTypeIds(true);
-    map<string,double> hAreaByFTypeGroup = vectorToMap(allFTypes,0.0);
+  vector<string> allFTypes = MTHREAD->MD->getForTypeIds(true);
+  map<string,double> hAreaByFTypeGroup = vectorToMap(allFTypes,0.0);
 
 	// Post optimisation management mobule..
 	for(uint i=0;i<regIds2.size();i++){
 		int r2 = regIds2[i];
 		int regId = r2;
 		ModelRegion* REG = MTHREAD->MD->getRegion(r2);
-		//Gis* GIS = MTHREAD->GIS;
 		regPx = REG->getMyPixels();
 		for (uint p=0;p<regPx.size();p++){
 			Pixel* px = regPx[p];
 			px->expectedReturns.clear();
-            resetMapValues(hAreaByFTypeGroup,0.0);
-
-            //double pxId = px->getID();
-            //if (pxId == 3550.0){
-            //    cout << "got the pixel" << endl;
-            //}
+      resetMapValues(hAreaByFTypeGroup,0.0);
 
 			// CALCULATING the expected returns for each forest type...
 			for(uint j=0;j<fTypes.size();j++){
-				string ft = fTypes[j];
-                string parentFt = MTHREAD->MD->getForTypeParentId(ft);
+        string ft = fTypes[j];
+        string parentFt = MTHREAD->MD->getForTypeParentId(ft);
 
-				//if(regType != "fixed" && regType != "fromHrLevel"){
-				// 20120910, Antonello: changed.. calculating the expected returns also for fixed and fromHrLevel regeneration (then not used but gives indication)
-				// calculating the expected returns..
-				//	loop ( (u,i,essence,lambda,p_pr),
-				//		if (sum(u2, hV(u2,i,essence,lambda,t))= 0,
-				//			expRetPondCoef(u,i,essence,lambda,p_pr) = 0;
-				//		else
-				//			expRetPondCoef(u,i,essence,lambda,p_pr) = hV_byPrd(u,i,essence,lambda,p_pr,t)/ sum(u2, hV(u2,i,essence,lambda,t));
-				//		);
-				//	);
-				//	expReturns(i,essence,lambda) = sum( (u,p_pr),
-				//	          RPAR("pl",i,p_pr,t)*hv2fa(i,essence,lambda,u)*(1/df_byFT(u,i,lambda,essence))*        // df_byFT(u,i,lambda,essence)
-				//	          expRetPondCoef(u,i,essence,lambda,p_pr)
-				//	          );
-				double hV_byFT = 0.; // gfd("hV",regId,ft,DIAM_PROD); // it must include only final harvested products in order to act as weightering agent
-				double expReturns = 0.;
-                int optDc; // "optimal diameter class", the one on which the expected returns are computed
-                double optCumTp; // "optimal cumulative time of passage", the one of optDc
+        double hV_byFT = 0.; // gfd("hV",regId,ft,DIAM_PROD); // it must include only final harvested products in order to act as weightering agent
+        double expReturns = 0.;
+        int optDc; // "optimal diameter class", the one on which the expected returns are computed
+        double optCumTp; // "optimal cumulative time of passage", the one of optDc
 
-				for (uint u=0; u<dClasses.size(); u++){
-					string dc = dClasses[u];
-					double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
-					hV_byFT += finalHarvestFlag * px->hVol.at(j).at(u);
-				}
+        for (uint u=0; u<dClasses.size(); u++){
+          string dc = dClasses[u];
+          double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
+          hV_byFT += finalHarvestFlag * px->hVol.at(j).at(u);
+        }
 
-                if(hV_byFT==0. || !weightedAverageExpectedReturns){ // nothing has been harvested in this pixel for this specific forest type. Let's calculate the combination product/diameter class with the highest expected return
-					for (uint u=0; u<dClasses.size(); u++){
-						string dc = dClasses[u];
-						double vHa         = px->vHa_exp.at(j).at(u);
-						double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
-						double cumTp_u = px->cumTp_exp.at(j).at(u);
-                        for (uint pp=0;pp<priProducts.size();pp++){
-                            double pw    = gpd("pw",regId,priProducts[pp]); // note that this is the OBSERVED price. If we call it at current year+cumTp_u we would have the expected price. But we would first have to compute it, as pw is weigthed price world-local and we don't have local price for the future.
-							//double pl    = gpd("pl",regId,priProducts[pp]);
-							//double pwor    = gpd("pl",99999,priProducts[pp]);
-							double raw_amount = finalHarvestFlag*pw*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
-							double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
-                            if (anualised_amount>expReturns) {
-                                expReturns=anualised_amount;
-                                optDc = u;
-                                optCumTp = cumTp_u;
-                            }
-						}
-					} 
-				} else { // some harvested from this pixel we weight each products/diameter class combination expected returns with the actual harvested
-                    msgOut(MSG_CRITICAL_ERROR, "The option \"weightedAverageExpectedReturns\" is no longer supported!");
-//					for (uint u=0; u<dClasses.size(); u++){
-//						//vector <double> expReturnsPondCoef_byPrd;
-//						string dc = dClasses[u];
-//						double vHa         = px->vHa_exp.at(j).at(u);
-//						double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
-//						double cumTp_u = px->cumTp_exp.at(j).at(u);
-//						for (uint pp=0;pp<priProducts.size();pp++){
-//							double pw    = gpd("pw",regId,priProducts[pp]);
-//							//double pl    = gpd("pl",regId,priProducts[pp]);
-//							//double pwor    = gpd("pl",99999,priProducts[pp]);
-//							double hVol_byUPp = px->hVol_byPrd.at(j).at(u).at(pp); // harvested volumes for this product, diameter class on this region and forest type
-//							//double raw_amount_old = pw*hv2fa*    hVol_byUPp/hV_byFT; // old and wrong. it was in €/m^4
-//							double raw_amount = finalHarvestFlag*pw*vHa* hVol_byUPp/hV_byFT; // now in €/ha if there is also thining volumes in hV_byFT, I underestimate expected returns !! T.O.D.O change it !! DONE, hV_byFT now excludes thinning volumes
-//							/// see @ModelData::calculateAnnualisedEquivalent
-//							double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u); //comTp is on diamClasses, u here is on pDiamClasses
-//							//cout << "reg|ft|dc|prd|raw amount|ann.amount|tp|hV|hVTot|pw|pl|pW|vHa|fHFlag;";
-//							//cout << regId <<";"<< ft <<";"<< dc <<";" << priProducts[pp] <<";" << raw_amount <<";"<< anualised_amount<<";";
-//							//cout << cumTp_u <<";"<< hVol_byUPp << ";" << hV_byFT << ";" << pw << ";" << pl << ";" << pwor << ";" << vHa << ";" << finalHarvestFlag << endl;
-//							expReturns += anualised_amount;
-//						}
-//						//expReturnsPondCoef.push_back(expReturnsPondCoef_byPrd);
-//					}
-				} // end of hV_byFT!=0
-
-                if(MD->getBoolSetting("heterogeneousRiskAversion")){
-					double ra = px->getDoubleValue("ra");
-                    //double tStDev = gfd("tStDev",regId,ft,"",DATA_NOW);
-                    //double tCV = gfd("tCV",regId,ft,"",DATA_NOW);
-                    double cumMort = 1-px->cumAlive_exp.at(j).at(optDc);
-                    //cout << "******" << endl;
-                    //cout << "- pixID: " << px->getID() << endl;
-                    //cout << "- ft: " << ft << endl;
-                    //cout << "- orig expReturn: " << expReturns << endl;
-                    //cout << "- ra: " << ra << endl;
-                    //cout << "- tStDev: " << tStDev << endl;
-                    //cout << "- tCV: " << tCV << endl;
-					double origExpReturns = expReturns;
-                    //expReturns = origExpReturns - ra*tStDev;
-                    expReturns = origExpReturns * (1.0 - ra*cumMort);
-                    //cout << "- new expReturn: " << expReturns << endl;
-				}
-				px->expectedReturns.push_back(expReturns);
-				//cachedExpectedReturnsByFt.push_back(expReturns);
-
-
-                //debug
-                //double pxid = px->getID();
-                //double spmultiplier = px->getSpModifier(ft);
-                //cout  << MTHREAD->getScenarioName() << ";" << px->getID() << ";" << ft <<";"<< px->getSpModifier(ft) << ";" << optDc << ";" << optCumTp << ";" << expReturns << endl;
-                //counter ++;
-                //if (counter >50){
-                //   exit(0);
-                //}
-
-                double hAreaThisFt=vSum(px->hArea.at(j));
-                incrMapValue(hAreaByFTypeGroup,parentFt,hAreaThisFt); // increment the parent ft of the harvested area, neeed for assigning the frequences (prob. of presence)
-
-
-
-
-
-			//}
+        for (uint u=0; u<dClasses.size(); u++){
+          string dc = dClasses[u];
+          double vHa         = px->vHa_exp.at(j).at(u);
+          double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
+          double cumTp_u = px->cumTp_exp.at(j).at(u);
+          for (uint pp=0;pp<priProducts.size();pp++){
+            double pw    = gpd("pw",regId,priProducts[pp]); // note that this is the OBSERVED price. If we call it at current year+cumTp_u we would have the expected price. But we would first have to compute it, as pw is weigthed price world-local and we don't have local price for the future.
+            double raw_amount = finalHarvestFlag*pw*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
+            double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
+            if (anualised_amount>expReturns) {
+              expReturns=anualised_amount;
+              optDc = u;
+              optCumTp = cumTp_u;
+            }
+          }
+        }
+        if(MD->getBoolSetting("heterogeneousRiskAversion")){
+          double ra = px->getDoubleValue("ra");
+          double cumMort = 1-px->cumAlive_exp.at(j).at(optDc);
+          double origExpReturns = expReturns;
+          expReturns = origExpReturns * (1.0 - ra*cumMort);
+        }
+        px->expectedReturns.push_back(expReturns);
+        double hAreaThisFt=vSum(px->hArea.at(j));
+        incrMapValue(hAreaByFTypeGroup,parentFt,hAreaThisFt); // increment the parent ft of the harvested area, neeed for assigning the frequences (prob. of presence)
 			} // end foreach forest type
 
-
 			// calculating freeArea at the end of the year and choosing the new regeneration area..
-			//freeArea(i,essence,lambda) = sum(u, hv2fa(i,essence,lambda,u)*hr(u,i,essence,lambda,t)*V(u,i,lambda,essence,t-1)*100);
-			//if(scen("endVreg") ,
-			//	regArea(i,essence,lambda,t) = freeArea(i,essence, lambda);   // here we could introduce in/out area from other land usages
-			//else
-			//	loop (i,
-			//		loop( (essence,lambda),
-			//			if ( expReturns(i,essence,lambda) = smax( (essence2,lambda2),expReturns(i,essence2,lambda2) ),
-			//				regArea (i,essence,lambda,t) =  sum( (essence2, lambda2), freeArea(i,essence2, lambda2) ) * mr;
-			//			);
-			//		);
-			//		regArea(i,essence,lambda,t) = freeArea(i,essence, lambda)*(1-mr);   // here we could introduce in/out area from other land usages
-			//	);
 			double totalHarvestedArea = vSum(px->hArea); //gfd("harvestedArea",regId,FT_ALL,DIAM_ALL);
 			double maxExpReturns = *( max_element( px->expectedReturns.begin(), px->expectedReturns.end() ) );
 			bool foundMaxExpReturns = false;
@@ -747,57 +655,43 @@ ModelCoreSpatial::runManagementModule(){
 			vector <double> thisYearRegAreas;
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
-                string parentFt = MTHREAD->MD->getForTypeParentId(ft);
+        string parentFt = MTHREAD->MD->getForTypeParentId(ft);
 				double harvestedAreaForThisFT = vSum(px->hArea.at(j)); // gfd("harvestedArea",regId,ft,DIAM_ALL);
-				if(regType == "fixed" || regType == "fromHrLevel"){
-					// regeneration area is the harvested area..
-					double harvestedArea = harvestedAreaForThisFT;
-					thisYearRegAreas.push_back(harvestedArea);
-					//sfd(harvestedArea,"regArea",regId,ft,"");
-				} else {
-					// regeneration area is a mix between harvested area and the harvested area of te most profitting forest type..
-					double regArea = 0.;
-					if (!foundMaxExpReturns && px->expectedReturns[j] == maxExpReturns){
-                        // I use the foundMaxExpReturns for the unlikely event that two forest types have the same expected return to avoid overcounting of the area
-						regArea += totalHarvestedArea*mr;
-						foundMaxExpReturns = true;
-					}
-                    if(natRegAllocation=="pp"){ // according to prob presence
-                        double freq = rescaleFrequencies ? gfd("freq_norm",regId,parentFt,""):gfd("freq",regId,parentFt,""); // "probability of presence" for unmanaged forest, added 20140318
-                        double hAreaThisFtGroup = findMap(hAreaByFTypeGroup,parentFt);
-                        double hRatio = 1.0;
-                        if(hAreaThisFtGroup>0){
-                            hRatio = harvestedAreaForThisFT/hAreaThisFtGroup;
-                        } else {
-                            int nFtChilds = MTHREAD->MD->getNForTypesChilds(parentFt);
-                            hRatio = 1.0/nFtChilds;
-                        }
-                        regArea +=  totalHarvestedArea*(1-mr)*freq*hRatio;
-                    } else {
-                        regArea += harvestedAreaForThisFT*(1-mr);
-                    }
-					thisYearRegAreas.push_back(regArea);
-                    //sfd(regArea,"regArea",regId,ft,"");
-				}
-                px->area.at(j).at(0) += thisYearRegAreas.at(j); // adding regeneration area to the fist (00) diameter class
-                //if (pxId == 3550.0 && j==3){
-                //    cout << "got the pixel" << endl;
-                //}
-            } // end for each forest type
-            #ifdef QT_DEBUG
-            double totalRegArea = vSum(thisYearRegAreas);
-            double ratio = totalRegArea / totalHarvestedArea ;
-            if(rescaleFrequencies && (ratio < 0.99999999999 || ratio > 1.00000000001) ) {
-             // msgOut(MSG_CRITICAL_ERROR, "Sum of regeneration areas not equal to sum of harvested area in runManagementModel()!");
+        // regeneration area is a mix between harvested area and the harvested area of te most profitting forest type..
+        double regArea = 0.;
+        if (!foundMaxExpReturns && px->expectedReturns[j] == maxExpReturns){
+          // I use the foundMaxExpReturns for the unlikely event that two forest types have the same expected return to avoid overcounting of the area
+          regArea += totalHarvestedArea*mr;
+          foundMaxExpReturns = true;
+        }
+        if(natRegAllocation=="pp"){ // according to prob presence
+            double freq = rescaleFrequencies ? gfd("freq_norm",regId,parentFt,""):gfd("freq",regId,parentFt,""); // "probability of presence" for unmanaged forest, added 20140318
+            double hAreaThisFtGroup = findMap(hAreaByFTypeGroup,parentFt);
+            double hRatio = 1.0;
+            if(hAreaThisFtGroup>0){
+                hRatio = harvestedAreaForThisFT/hAreaThisFtGroup;
+            } else {
+                int nFtChilds = MTHREAD->MD->getNForTypesChilds(parentFt);
+                hRatio = 1.0/nFtChilds;
             }
-            #endif
-			//double totalRegArea = gfd("regArea",regId,FT_ALL,DIAM_ALL);
+            regArea +=  totalHarvestedArea*(1-mr)*freq*hRatio;
+        } else {
+            regArea += harvestedAreaForThisFT*(1-mr);
+        }
+        thisYearRegAreas.push_back(regArea);
+        px->area.at(j).at(0) += thisYearRegAreas.at(j); // adding regeneration area to the fist (00) diameter class
+      } // end for each forest type
+      #ifdef QT_DEBUG
+      double totalRegArea = vSum(thisYearRegAreas);
+      double ratio = totalRegArea / totalHarvestedArea ;
+      if(rescaleFrequencies && (ratio < 0.99999999999 || ratio > 1.00000000001) ) {
+       // msgOut(MSG_CRITICAL_ERROR, "Sum of regeneration areas not equal to sum of harvested area in runManagementModel()!");
+      }
+      #endif
 			px->regArea.insert(pair <int, vector<double> > (MTHREAD->SCD->getYear(), thisYearRegAreas));
 		} // end of each pixel
 	} // end of each region
-
 }
-
 
 void
 ModelCoreSpatial::cacheSettings(){

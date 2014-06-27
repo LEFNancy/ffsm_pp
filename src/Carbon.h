@@ -36,10 +36,10 @@
 /// %Output methods
 
 /**
-Class responsable to output  the data, both as all kind of log as well as georeferenciated one.
+Class responsable to keep the logbook of the Carbon Balance
 @author Antonello Lobianco
 
-An istance of this class is owned by each region .. or better a single global one ??
+A single istance of this class exists and is available trought the global MTHREAD->CBAL pointer.
 */
 
 class Carbon: public BaseClass{
@@ -58,17 +58,11 @@ public:
   void                  initialiseDeathBiomassStocks(const vector<double> & deathByFt, const int & regId); ///< Initialise the stocks of death biomass for the avgLive_* years before the simulation starts
   void                  initialiseProductsStocks(const vector<double> & qByProduct, const int &regId);                       ///< Initialise the stocks of products for the avgLive_* years before the simulation starts
   void                  initialiseEmissionCounters(); ///< Initialise the emission counters to zero.
-//double                       transportCostsToCo2; // coefficient that transform the transport cost per m^3 in Kg Co2 emitted
-/*vector<double>                  forOperEmissions; // emissions due to forest operations, by forest type [Kg C02 / m^3 harvested]
-vector<double>              co2content_inventary; // carbon content in inventariated forest wood resources, by forest type [Kg CO2 / m^3 inventariated wood]
-vector<double>                  co2content_extra; // carbon content in non-inventariated forest wood resources (branches, soil..), by forest type [Kg CO2 / m^3 of inventariated wood]
-vector<double>              avgLife_deathBiomass; // average life before death biomass get oxidated, by forest type [years]
-vector<double>                  avgLife_products;
-vector<double>                     co2sub_energy;
-vector<double>                   co2sum_material;*/
+
 private:
   void                  addSavedEmissions(const double & value, const int & regId, const int & em_type); ///< add value to the saved emissions for a given type and region
 
+  // Carbon pools (in Mm^3 wood) and emission cumulated counters (in Mt CO2):
   map<iiskey, double >              deathBiomass; ///< map that register the death of biomass by year, l2_region and forest type [Mm^3 wood]
   map<iiskey, double >                  products; ///< map that register the production of a given product by year, l2_region and product [Mm^3 wood]
   map<int,double>           cumSubstitutedEnergy; ///< map that store the cumulative CO2 substituted for energy consumption, by l2_region [Mt CO2]
@@ -78,10 +72,5 @@ private:
 
 
 };                 
-
-
-//typedef map<iskey, double > DataMap;
-//typedef pair<iskey, double > DataPair;
-
 
 #endif // CARBON_H

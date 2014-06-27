@@ -1667,9 +1667,9 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
 	if(years_h<0) return 0.;
 	if(years_h==0) return amount_h;
 	double ir = getDoubleSetting("ir");    
-    double eai = amount_h * ir / (pow(1.0+ir,years_h)-1.0);
+  double eai = amount_h * ir / (pow(1.0+ir,years_h)-1.0);
 
-    return eai;
+  return eai;
 
     /*
 	vector <double> df_by;

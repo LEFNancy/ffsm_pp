@@ -108,6 +108,7 @@ Debug:RCC_DIR = ../build/debug
 
 # Input
 HEADERS += Adolc_debugtest.h \
+           CommonLib.h \
            BaseClass.h \
            Gis.h \
            Init.h \
@@ -134,9 +135,11 @@ HEADERS += Adolc_debugtest.h \
            ScenarioSelectionWidget.h \
            ModelCore.h \
            ModelCoreSpatial.h \
-           Carbon.h
+           Carbon.h \
+
 FORMS   += MainWindow.ui
 SOURCES += Adolc_debugtest.cpp \
+           CommonLib.cpp \
            BaseClass.cpp \
            Gis.cpp \
            Init.cpp \

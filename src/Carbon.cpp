@@ -57,7 +57,7 @@ Carbon::getStock(const int & regId, const int & stock_type) const{
       vector <string> secProducts = MTHREAD->MD->getStringVectorSetting("secProducts");
       vector <string> allProducts = priProducts;
       allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
-      for(int i=0;i<allProducts.size();i++){
+      for(uint i=0;i<allProducts.size();i++){
         double coeff = MTHREAD->MD->getProdData("co2content_products",regId,allProducts[i],DATA_NOW,""); //  [kg CO2/m^3 wood]
         double life  = MTHREAD->MD->getProdData("avgLife_products",regId,allProducts[i],DATA_NOW,"");
         for(int y=currentYear;y>currentYear-life;y--){ // ok
@@ -73,7 +73,7 @@ Carbon::getStock(const int & regId, const int & stock_type) const{
     }
     case STOCK_EXTRA:{
       vector <string> fTypes = MTHREAD->MD->getForTypeIds();
-      for(int i=0;i<fTypes.size();i++){
+      for(uint i=0;i<fTypes.size();i++){
         // units:
         // co2content_inventary: [Kg CO2 / m^3 wood]
         // co2content_extra:     [Kg CO2 / m^3 inventaried wood]
@@ -119,7 +119,7 @@ Carbon::getCumSavedEmissions(const int & regId, const int & em_type) const{
 void
 Carbon::initialiseEmissionCounters(){
   vector<int> regIds = MTHREAD->MD->getRegionIds(2);
-  for (int i=0;i<regIds.size();i++){
+  for (uint i=0;i<regIds.size();i++){
     pair<int,double> mypair(regIds[i],0.0);
     cumSubstitutedEnergy.insert(mypair);
     cumSubstitutedMaterial.insert(mypair);
@@ -133,7 +133,7 @@ Carbon::initialiseDeathBiomassStocks(const vector<double> & deathByFt, const int
   vector <string> fTypes = MTHREAD->MD->getForTypeIds();
   if(fTypes.size() != deathByFt.size()) {msgOut(MSG_CRITICAL_ERROR,"deathByFt and fTypes have different lenght!");}
   int currentYear = MTHREAD->SCD->getYear();
-  for(int i=0;i<fTypes.size();i++){
+  for(uint i=0;i<fTypes.size();i++){
     double life  = MTHREAD->MD->getForData("avgLive_deathBiomass",regId,fTypes[i],"",DATA_NOW);
     for(int y=currentYear;y>currentYear-life;y--){
       iiskey key(y,regId,fTypes[i]);
@@ -152,7 +152,7 @@ Carbon::initialiseProductsStocks(const vector<double> & qByProduct, const int & 
   allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
   if(allProducts.size() != qByProduct.size()) {msgOut(MSG_CRITICAL_ERROR,"allProducts and qByProduct have different lenght!");}
   int currentYear = MTHREAD->SCD->getYear();
-  for(int i=0;i<allProducts.size();i++){
+  for(uint i=0;i<allProducts.size();i++){
     double life  = MTHREAD->MD->getProdData("avgLife_products",regId,allProducts[i],DATA_NOW);
     for(int y=currentYear;y>currentYear-life;y--){
       iiskey key(y,regId,allProducts[i]);

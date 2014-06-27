@@ -32,6 +32,7 @@
 #include "ModelRegion.h"
 #include "Carbon.h"
 
+
 //Testing random distribution, using some new in C++ random generator seeds..
 #include <iostream>
 #include <iomanip>
@@ -116,6 +117,22 @@ struct GccTest
 // --------------------------------------
 void
 Sandbox::basicTest(){
+
+  /*
+  // Testing getMaxPos()
+  vector<double> test {7,2,6,4,7,2,5,7,2};
+  double maxpos   = getMaxPos(test);
+  double maxvalue = getMax(test);
+  double minpos   = getMinPos(test);
+  double minvalue = getMin(test);
+  //double maxpos = testB();
+  cout << "maxpos: " << maxpos << endl;
+  cout << "maxvalue: " << maxvalue << endl;
+  cout << "minpos: " << minpos << endl;
+  cout << "minvalue: " << minvalue << endl;
+  exit(0);
+  */
+
 
   /*
   //This was in ModelData::debug():

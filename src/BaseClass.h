@@ -279,6 +279,22 @@ public:
         return returnMap;
     }
 
+    /// Return the position of the maximum element in the vector (the last one in case of multiple equivalent maxima)
+    template <typename K>  int getMaxPos (const vector <K> & v){
+      return (minmax_element(v.begin(), v.end()).second - v.begin());
+    }
+    /// Return the position of the minimum element in the vector (the first one in case of multiple equivalent minima)
+    template <typename K>  int getMinPos (const vector <K> & v){
+      return (minmax_element(v.begin(), v.end()).first - v.begin());
+    }
+    /// Return the value of the maximum element in the vector (the last one in case of multiple equivalent maxima)
+    template <typename K>  int getMax(const vector <K> & v){
+      return *minmax_element(v.begin(), v.end()).second;
+    }
+    /// Return the value of the minimum element in the vector (the first one in case of multiple equivalent minima)
+    template <typename K>  int getMin (const vector <K> & v){
+      return *minmax_element(v.begin(), v.end()).first;
+    }
 
 protected:
 
