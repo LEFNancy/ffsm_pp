@@ -661,7 +661,7 @@ ModelCoreSpatial::runManagementModule(){
 
 			for(uint j=0;j<fTypes.size();j++){
 				string ft = fTypes[j];
-        string parentFt = MTHREAD->MD->getForTypeParentId(ft);
+
 				double harvestedAreaForThisFT = vSum(px->hArea.at(j)); // gfd("harvestedArea",regId,ft,DIAM_ALL);
         vector<double> corrExpectedReturns(fTypes.size(),0.0); //  uncorrected expected returns (without considering transaction costs)
 
@@ -669,10 +669,10 @@ ModelCoreSpatial::runManagementModule(){
         for(uint j2=0;j2<fTypes.size();j2++){
           string ft2 = fTypes[j2];
           double invTransConstCoeff = gfd("invTransConstCoeff",regId,ft,ft2,DATA_NOW);
-          corrExpectedReturns[j2] = expectedReturns[j2]*1; // TODO invTransConstCoeff;
+          corrExpectedReturns[j2] = expectedReturns[j2]*invTransConstCoeff; // TODO invTransConstCoeff;
         }
 
-        int highestReturnFtIndex = getMaxPos(corrExpectedReturns);
+        //int highestReturnFtIndex = getMaxPos(corrExpectedReturns);
 
         // D - Assigning the Managed area
         // calculating freeArea at the end of the year and choosing the new regeneration area..
@@ -688,30 +688,47 @@ ModelCoreSpatial::runManagementModule(){
         //		);
         //		regArea(i,essence,lambda,t) = freeArea(i,essence, lambda)*(1-mr);   // here we could introduce in/out area from other land usages
         //	);
-        if (j==highestReturnFtIndex){
-          thisYearRegAreas[j] += totalHarvestedArea*mr;
-        }
+        //if (j==highestReturnFtIndex){
+        //  thisYearRegAreas[j] += totalHarvestedArea*mr;
+        //}
         // If I Implement this I'll have a minimal diff in total area.. why ?????
-        //thisYearRegAreas[getMaxPos(corrExpectedReturns)] += harvestedAreaForThisFT*mr;
+
+
+        thisYearRegAreas[getMaxPos(corrExpectedReturns)] += harvestedAreaForThisFT*mr;
 
 
         // E - Assigning unmanaged area
-        if(natRegAllocation=="pp"){ // according to prob presence
-          double freq = rescaleFrequencies ? gfd("freq_norm",regId,parentFt,""):gfd("freq",regId,parentFt,""); // "probability of presence" for unmanaged forest, added 20140318
-          double hAreaThisFtGroup = findMap(hAreaByFTypeGroup,parentFt);
-          double hRatio = 1.0;
-          if(hAreaThisFtGroup>0){
-              hRatio = harvestedAreaForThisFT/hAreaThisFtGroup;
+        //for(uint j2=0;j2<fTypes.size();j2++){
+          if(natRegAllocation=="pp"){ // according to prob presence
+            //string ft2 = fTypes[j2];
+            string parentFt = MTHREAD->MD->getForTypeParentId(ft);
+            double freq = rescaleFrequencies ? gfd("freq_norm",regId,parentFt,""):gfd("freq",regId,parentFt,""); // "probability of presence" for unmanaged forest, added 20140318
+            double hAreaThisFtGroup = findMap(hAreaByFTypeGroup,parentFt);
+            double hRatio = 1.0;
+            if(hAreaThisFtGroup>0){
+                //double harvestedAreaForThisFT2 = vSum(px->hArea.at(j2));
+                hRatio = harvestedAreaForThisFT/hAreaThisFtGroup;
+            } else {
+                int nFtChilds = MTHREAD->MD->getNForTypesChilds(parentFt);
+                hRatio = 1.0/nFtChilds;
+            }
+            thisYearRegAreas[j] +=  totalHarvestedArea*(1-mr)*freq*hRatio;
+            //thisYearRegAreas[j2] +=  harvestedAreaForThisFT*(1-mr)*freq*hRatio;
           } else {
-              int nFtChilds = MTHREAD->MD->getNForTypesChilds(parentFt);
-              hRatio = 1.0/nFtChilds;
+            thisYearRegAreas[j] += harvestedAreaForThisFT*(1-mr);
+            //thisYearRegAreas[j2] += harvestedAreaForThisFT*(1-mr);
           }
-          thisYearRegAreas[j] +=  totalHarvestedArea*(1-mr)*freq*hRatio;
-        } else {
-          thisYearRegAreas[j] += harvestedAreaForThisFT*(1-mr);
-        }
-        px->area.at(j).at(0) += thisYearRegAreas.at(j); // adding regeneration area to the fist (00) diameter class
+        //}
       } // end for each forest type
+
+      // adding regeneration area to the fist (00) diameter class
+      for(uint j=0;j<fTypes.size();j++){
+        px->area.at(j).at(0) += thisYearRegAreas.at(j);
+      }
+
+
+
+
       #ifdef QT_DEBUG
       double totalRegArea = vSum(thisYearRegAreas);
       double ratio = totalRegArea / totalHarvestedArea ;

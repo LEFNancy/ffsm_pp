@@ -69,6 +69,7 @@ Output::commonInit(){
 //        scenarioName = MTHREAD->getScenarioName();
 //    }
   scenarioName = MTHREAD->getScenarioName();
+  //scenarioName = "debug2";
 	oFileExt     = MTHREAD->MD->getStringSetting("outputFileExtension");
 	oHRedeable   = MTHREAD->MD->getBoolSetting("outputHumanReadable");
 	oSingleFile  = MTHREAD->MD->getBoolSetting("outputSingleFile");
