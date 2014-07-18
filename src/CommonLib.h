@@ -30,6 +30,8 @@
 #include <sstream>
 #include <time.h>
 
+// regmas headers...
+
 
 /**
 A file containing utility functions
@@ -41,6 +43,9 @@ using namespace std;
 //template <typename K> int getMaxPosition (const vector <K> & aVector);
 //int testAA (const vector <double> & atest){return 1;}
 double testB ();
+
+
+
 
 
 

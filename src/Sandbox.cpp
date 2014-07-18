@@ -384,6 +384,34 @@ void
 Sandbox::fullTest(){
 
 
+  /*
+  // Testing normSample
+  // template <typename K> K normSample (const K& avg, const K& stdev, const K& minval=NULL, const K& maxval=NULL)
+  // template <typename K> K normSample (const normal_distribution<K>& d, const std::mt19937& gen, const K& minval=NULL, const K& maxval=NULL)
+  double avg = 0.8;
+  double stdev = 0.2;
+  double minval = 0.0;
+  double maxval = 1.0;
+  double result;
+
+  cout << "Starting first method.." << endl;
+  normal_distribution<double> d(avg,stdev);
+  std::mt19937 gen = *MTHREAD->gen;
+  for (uint i=0;i<1000;i++){
+    result = normSample(d, gen, minval, maxval);
+    cout << "Result1: " << result << endl;
+  }
+  cout << "Finished first method and starting second one.." << endl;
+  for (uint i=0;i<1000;i++){
+    result = normSample(avg, stdev, minval, maxval);
+    cout << "Result2: " << result << endl;
+  }
+  cout << "Finished second method."<< endl;
+
+  exit(0);
+  */
+
+
    //double disttest = MTHREAD->MD->getProdData("dist",11042,"",DATA_NOW,i2s(11061));
    //cout << disttest << endl;
    //exit(0);

@@ -321,6 +321,25 @@ BaseClass::toString(const T& x) const {
   return oss.str();
 }
 
+
+double
+BaseClass::normSample (const double& avg, const double& stdev, const double& minval, const double& maxval) const{
+  if(minval != NULL  && maxval != NULL){
+    if (maxval <= minval){
+      msgOut(MSG_CRITICAL_ERROR,"Error in normSample: the maxvalue is lower than the minvalue");
+    }
+  }
+  for(;;){
+    normal_distribution<double> d(avg,stdev);
+    double c = d(*MTHREAD->gen);
+    if( (minval == NULL || c >= minval) && (maxval == NULL || c <= maxval) ){
+      return c;
+    }
+  }
+  return minval;
+}
+
+
 template<typename T> T 
 BaseClass::stringTo(const std::string& s) const {
   std::istringstream iss(s);

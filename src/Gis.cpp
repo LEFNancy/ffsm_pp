@@ -133,6 +133,7 @@ Gis::applySpatialStochasticValues(){
         for (uint z=0;z<rpx.size();z++){
           double c = d(*MTHREAD->gen);
           double c2 = max(0.4,min(1.6,c)); /// with simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
+          // TODO: Convert it to using normSample where instead of a min/max a loop is used to fund smaples that are within the bounds
           //cout << regIds2[i] << ";" <<sStDev <<";"<< c <<endl
           //rpx[z]->correctInputMultiplier("tp_multiplier",fTypes[j],c);
           //cout << sStDev/agr << "    " << c2 << endl;
@@ -157,13 +158,15 @@ Gis::applySpatialStochasticValues(){
           rpx[z]->expType = -1;
       } else {
         double c = ext_distr(*MTHREAD->gen);
-        double c2 = max(0.0,min(1.0,c)); /// Bounded [0,1]. With simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
-        //cout << c2 << endl;
-        rpx[z]->expType = c2;
+        //double c2 = max(0.0,min(1.0,c)); /// Bounded [0,1]. With simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
+        double c3 = normSample(ext_distr,*MTHREAD->gen,0.0,1.0);
+        //cout << "Sampled:\t" << c2 << '\t' << c3 <<  endl;
+        rpx[z]->expType = c3;
       }
     }
 
 	}
+  exit(0);
     //double avg_c = sumc/nc;
     //cout << "Avg coeff: " << avg_c << "(on " << nc << " records)" << endl;
     //if(avg_c>1) {exit(0);}

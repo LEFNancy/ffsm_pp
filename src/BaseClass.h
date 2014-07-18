@@ -236,65 +236,88 @@ public:
 		}
 	}
 
-    /// Change the value stored in a map given the key and the new value
-    template <typename K, typename V> void changeMapValue(map <K, V> &mymap, const K& key, const V& value, const int& error_level=MSG_CRITICAL_ERROR){
-        typename map<K, V>::iterator p;
-        p=mymap.find(key);
-        if(p != mymap.end()) {
-            p->second = value;
-            return;
-        }
-        else {
-            msgOut(error_level, "Error in finding a value in a map (no value found)");
-        }
-    }
-    /// Increment a value stored in a map of the specified value, given the key
-    template <typename K, typename V> void incrMapValue(map <K, V> &mymap, const K& key, const V& value, const int& error_level=MSG_CRITICAL_ERROR){
-        typename map<K, V>::iterator p;
-        p=mymap.find(key);
-        if(p != mymap.end()) {
-            p->second = p->second + value;
-            return;
-        }
-        else {
-            msgOut(error_level, "Error in finding a value in a map (no value found)");
-        }
-    }
+  /// Change the value stored in a map given the key and the new value
+  template <typename K, typename V> void changeMapValue(map <K, V> &mymap, const K& key, const V& value, const int& error_level=MSG_CRITICAL_ERROR){
+      typename map<K, V>::iterator p;
+      p=mymap.find(key);
+      if(p != mymap.end()) {
+          p->second = value;
+          return;
+      }
+      else {
+          msgOut(error_level, "Error in finding a value in a map (no value found)");
+      }
+  }
+  /// Increment a value stored in a map of the specified value, given the key
+  template <typename K, typename V> void incrMapValue(map <K, V> &mymap, const K& key, const V& value, const int& error_level=MSG_CRITICAL_ERROR){
+      typename map<K, V>::iterator p;
+      p=mymap.find(key);
+      if(p != mymap.end()) {
+          p->second = p->second + value;
+          return;
+      }
+      else {
+          msgOut(error_level, "Error in finding a value in a map (no value found)");
+      }
+  }
 
-    /// Reset all values stored in a map to the specified one
-    template <typename K, typename V> void resetMapValues(map <K, V> &mymap, const V& value){
-        typename map<K, V>::iterator p;
-        for(p=mymap.begin(); p!=mymap.end(); p++) {
-            p->second =value;
-        }
-    }
+  /// Reset all values stored in a map to the specified one
+  template <typename K, typename V> void resetMapValues(map <K, V> &mymap, const V& value){
+      typename map<K, V>::iterator p;
+      for(p=mymap.begin(); p!=mymap.end(); p++) {
+          p->second =value;
+      }
+  }
 
-    /// Return a map built using the given vector and the given (scalar) value as keys/values pairs
-    template <typename K, typename V> map <K, V> vectorToMap(const vector <K>& keys, const V& value=0.0){
-        map<K,V> returnMap;
-        for(uint i=0; i<keys.size();i++){
-            pair<K,V> apair(keys[i],value);
-            returnMap.insert(apair);
-        }
-        return returnMap;
-    }
+  /// Return a map built using the given vector and the given (scalar) value as keys/values pairs
+  template <typename K, typename V> map <K, V> vectorToMap(const vector <K>& keys, const V& value=0.0){
+      map<K,V> returnMap;
+      for(uint i=0; i<keys.size();i++){
+          pair<K,V> apair(keys[i],value);
+          returnMap.insert(apair);
+      }
+      return returnMap;
+  }
 
-    /// Return the position of the maximum element in the vector (the last one in case of multiple equivalent maxima)
-    template <typename K>  int getMaxPos (const vector <K> & v){
-      return (minmax_element(v.begin(), v.end()).second - v.begin());
+  /// Return the position of the maximum element in the vector (the last one in case of multiple equivalent maxima)
+  template <typename K>  int getMaxPos (const vector <K> & v){
+    return (minmax_element(v.begin(), v.end()).second - v.begin());
+  }
+  /// Return the position of the minimum element in the vector (the first one in case of multiple equivalent minima)
+  template <typename K>  int getMinPos (const vector <K> & v){
+    return (minmax_element(v.begin(), v.end()).first - v.begin());
+  }
+  /// Return the value of the maximum element in the vector (the last one in case of multiple equivalent maxima)
+  template <typename K>  int getMax(const vector <K> & v){
+    return *minmax_element(v.begin(), v.end()).second;
+  }
+  /// Return the value of the minimum element in the vector (the first one in case of multiple equivalent minima)
+  template <typename K>  int getMin (const vector <K> & v){
+    return *minmax_element(v.begin(), v.end()).first;
+  }
+
+  /// Sampling from normal distribution with bounds. Slower (double time, but still you see the diff only after milion of loops).
+  /// It doesn't require the normal_distribution to be passed to it, but it can not teplated, so works only with doubles.
+  double normSample (const double& avg, const double& stdev, const double& minval=NULL, const double& maxval=NULL) const;
+
+  /// Sampling from normal distribution with bounds. Faster (half time) as the normal_distribution is made only once.
+  template <typename K> K normSample (normal_distribution<K>& d, std::mt19937& gen, const K& minval=NULL, const K& maxval=NULL) const {
+    if(minval != NULL  && maxval != NULL){
+      if (maxval <= minval){
+        msgOut(MSG_CRITICAL_ERROR,"Error in normSample: the maxvalue is lower than the minvalue");
+      }
     }
-    /// Return the position of the minimum element in the vector (the first one in case of multiple equivalent minima)
-    template <typename K>  int getMinPos (const vector <K> & v){
-      return (minmax_element(v.begin(), v.end()).first - v.begin());
+    for(;;){
+      K c = d(gen);
+      if( (minval == NULL || c >= minval) && (maxval == NULL || c <= maxval) ){
+        return c;
+      }
     }
-    /// Return the value of the maximum element in the vector (the last one in case of multiple equivalent maxima)
-    template <typename K>  int getMax(const vector <K> & v){
-      return *minmax_element(v.begin(), v.end()).second;
-    }
-    /// Return the value of the minimum element in the vector (the first one in case of multiple equivalent minima)
-    template <typename K>  int getMin (const vector <K> & v){
-      return *minmax_element(v.begin(), v.end()).first;
-    }
+    return minval;
+  }
+
+
+
 
 protected:
 

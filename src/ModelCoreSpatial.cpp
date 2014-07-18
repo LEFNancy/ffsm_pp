@@ -764,6 +764,7 @@ ModelCoreSpatial::cacheSettings(){
   rescaleFrequencies = MD->getBoolSetting("rescaleFrequencies");
   oldVol2AreaMethod = MD->getBoolSetting("oldVol2AreaMethod");
 	mr = MD->getDoubleSetting("mr");
+
 }
 
 void
