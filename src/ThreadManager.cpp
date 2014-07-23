@@ -100,7 +100,7 @@ void ThreadManager::run(){
 		delete myProgram;
 		refreshGUI();
 		
-	}catch (...) { // TODO.. perform a better exception handing..
+  }catch (...) { /// \todo .. perform a better exception handing..
 		emit upgradeLogArea("**INFO: Model has stopped or rised an error (read previous line).");
 	}	
 	emit upgradeLogArea("**INFO: Model has ended.");

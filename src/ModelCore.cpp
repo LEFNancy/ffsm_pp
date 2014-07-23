@@ -257,7 +257,7 @@ ModelCore::runMarketModule(){
 	//application->Options()->SetIntegerValue("mumps_mem_percent", 100);
 	application->Options()->SetNumericValue("obj_scaling_factor", -1); // maximisation
 	application->Options()->SetNumericValue("max_cpu_time", 1800); // max 1/2 hour to find the optimus for one single year
-	application->Options()->SetStringValue("check_derivatives_for_naninf", "yes"); // detect error but may crash the application.. TODO catch this error!
+  application->Options()->SetStringValue("check_derivatives_for_naninf", "yes"); // detect error but may crash the application.. TO.DO catch this error!
 	//application->Options()->SetStringValue("nlp_scaling_method", "equilibration-based"); // much worster
 	// Initialize the IpoptApplication and process the options
 	ApplicationReturnStatus status;
@@ -380,7 +380,7 @@ ModelCore::runBiologicalModule(){
 				string dc = dClasses[u];
 				double hr = 0;
 				double pastYearVol = u?gfd("vol",regId,ft,dc,previousYear):0.;
-				double hV_mort = 0.; //harvested volumes from death trees TODO
+        double hV_mort = 0.; /// \todo Harvest volumes from death trees
 				vector <double> hV_byPrd_dc;
 
 				// harvesting rate & volumes...

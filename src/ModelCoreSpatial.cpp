@@ -405,7 +405,7 @@ ModelCoreSpatial::runBiologicalModule(){
           } else {
             areaFirstProdClass = min(availableArea, pastRegArea); // this is just a start and will need to include the last year area
           }
-          px->vReg.push_back(areaFirstProdClass*vHa/1000000.0); // TODO: check the 1000000. Should be ok, as area in ha vol in Mm^3
+          px->vReg.push_back(areaFirstProdClass*vHa/1000000.0); // TO.DO: check the 1000000. Should be ok, as area in ha vol in Mm^3
           //if (pxId == 3550.0 && j==3){
           //    cout << "got the pixel" << endl;
           //}
@@ -669,7 +669,7 @@ ModelCoreSpatial::runManagementModule(){
         for(uint j2=0;j2<fTypes.size();j2++){
           string ft2 = fTypes[j2];
           double invTransConstCoeff = gfd("invTransConstCoeff",regId,ft,ft2,DATA_NOW);
-          corrExpectedReturns[j2] = expectedReturns[j2]*invTransConstCoeff; // TODO invTransConstCoeff;
+          corrExpectedReturns[j2] = expectedReturns[j2]*invTransConstCoeff;
         }
 
         //int highestReturnFtIndex = getMaxPos(corrExpectedReturns);

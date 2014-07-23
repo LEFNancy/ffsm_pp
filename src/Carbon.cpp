@@ -35,12 +35,10 @@ Carbon::~Carbon(){
 
 // ################# GET FUNCTIONS ################
 /**
- * @brief Carbon::getStock
  * @param reg
  * @param stock_type
- * @return
+ * @return the Carbon stocked in a given sink
  *
- * Returns the Carbon stocked in a given sink
  * For product sink:
  * - for primary products it includes the primary products exported out of the country, but not those exported to other regions or used in the region as
  *   these are assumed to be totally transformed to secondary products;

@@ -17,6 +17,17 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+/**
+ * \file BaseClass.h
+ * \brief This file is the header of BaseClass and it is included by ALL compiled code.
+ *
+ * It contains also global enum and macro definitions that can be used anywhere in the code.
+ * If the code require some "case" parameter, put the cases in the enum here.
+ * DON'T USE NEGATIVE NUMBERS in the enums, as often negative numbers have a different meaning !
+ *
+ */
+
 #ifndef BASECLASSBASECLASS_H
 #define BASECLASSBASECLASS_H
 
@@ -34,96 +45,71 @@ class ThreadManager;
 
 using namespace std;
 
-enum {
+/// Type of message to be printed
+enum messageType{
 
-	// DON'T USE NEGATIVE NUMBERS, as often different meaning !
-	PLOTS_ALL             = 0,
-	PLOTS_OWNED           = 1,
-	PLOTS_RENTED          = 2,
+  MSG_NO_MSG            = 0,             ///< Do not actually output any message
+  MSG_DEBUG             = 1,             ///< Print a debug message, normally filtered out
+  MSG_INFO              = 2,             ///< Print an INFO message
+  MSG_WARNING           = 3,             ///< Print a WARNING message
+  MSG_ERROR             = 4,             ///< Print an ERROR message, but don't stop the model
+  MSG_CRITICAL_ERROR    = 5,             ///< Print an error message and stop the model
+};
+/// Type of data requested
+enum dataType{
+  TYPE_INT               =0,             ///< The required data is an integer
+  TYPE_DOUBLE            =1,             ///< The required data is a double
+  TYPE_STRING            =2,             ///< The required data is a string
+  TYPE_BOOL              =3,             ///< The required data is a bool
+};
+/// A generic enum to deal with data requests
+enum dataRequest {
+  DATA_NOW               =-1,            ///< The required data is for the current year
+  DATA_INIT              = -2,           ///< Setting a data request for the init period
+  DATA_ERROR             = -99999999999, ///< There is an error in retrieving the data
+  // operations possible in certain contexts
+  OP_SUM                 =1,             ///< Perform a SUM operation
+  OP_AVG                 =5,             ///< Perform an AVERAGE operation
+};
+/// Verbosity level of the output
+enum outputVerbosity {
+  OUTVL_NONE             =0,             ///< Output verbosity level none
+  OUTVL_MAPS             =5,             ///< Output verbosity level print the maps
+  OUTVL_AGGREGATED       =10,            ///< Output verbosity level print (also) aggregated output
+  OUTVL_DETAILED         =15,            ///< Output verbosity level print (also) detailed output
+  OUTVL_BINMAPS          =20,            ///< Output verbosity level print (also) binary (png) maps
+  OUTVL_ALL              =25,            ///< Output verbosity level print everything
+};
+/// Domain associated to a variable or a constrain in the optimisation of the market module
+enum domains {
+  DOM_PRI_PR             =1,             ///< Primary products // domain of variables and constrains: primary, secondary, all products or all products over r2 couple regions (in-country commercial flows)
+  DOM_SEC_PR             =2,             ///< Secondary products
+  DOM_ALL_PR             =3,             ///< All products (primary+secondary)
+  DOM_R2_PRI_PR          =4,             ///< Primary products over r2 couple regions (in-country commercial flows)
+  DOM_R2_SEC_PR          =5,             ///< Secondary products over r2 couple regions (in-country commercial flows)
+  DOM_R2_ALL_PR          =6,             ///< All products over r2 couple regions (in-country commercial flows)
+  DOM_SCALAR             =7,             ///< Scalar variable (not used)
+};
+/// Carbon stocks
+enum carbonStocks {
+  STOCK_INV              =1,             ///< Invetariated biomass (live and death tree logs)
+  STOCK_EXTRA            =2,             ///< Extra biomass (soils, branches..)
+  STOCK_PRODUCTS         =3,             ///< Biomass in forest products (sawns, pannels..)
+};
+/// Emission types
+enum emissionType {
+  EM_ENSUB               =4,             ///< Energy substitution
+  EM_MATSUB              =5,             ///< Material substitution
+  EM_FOROP               =6,             ///< Flow from forest operations
+};
 
-	STAGE_INIT            = 0,
-	STAGE_NORMAL          = 1,
-
-	MSG_NO_MSG            = 0,
-	MSG_DEBUG             = 1,
-	MSG_INFO              = 2,
-	MSG_WARNING           = 3,
-	MSG_ERROR             = 4,
-	MSG_CRITICAL_ERROR    = 5,
-
-	RESSOURCE_ZERO         =0,
-	RESSOURCE_FIXED        =1,
-	RESSOURCE_CALCULATED   =2,
-	RESSOURCE_OBJECTS      =3,
-	RESSOURCE_PIXEL        =4,
-
-	RESTYPE_GENERIC        =0,
-	RESTYPE_FINANCIAL      =1,
-	RESTYPE_POLICYPREMIUM  =2,
-	RESTYPE_LABOUR         =3,
-	RESTYPE_STABLES        =4,
-	RESTYPE_MACHINARY      =5,
-	RESTYPE_FEED           =6,
-
-	TYPE_INT               =0,
-	TYPE_DOUBLE            =1,
-	TYPE_STRING            =2,
-	TYPE_BOOL              =3,
-
-	DATA_INDIVIDUAL        =0,
-	DATA_VECTOR            =1,
-	DATA_NOW               =-1, // asking for data (settings) at current time
-	DATA_ERROR             = -99999999999, // error in retrieving data
-	DATA_INIT              = -2, // data referring to the init years
-
-	OUTVL_NONE             =0, //output verbosity level
-	OUTVL_MAPS             =5,
-	OUTVL_AGGREGATED       =10,
-	OUTVL_DETAILED         =15,
-	OUTVL_BINMAPS          =20,
-	OUTVL_ALL              =25,
-
-	DOM_PRI_PR             =1, // domain of variables and constrains: primary, secondary, all products or all products over r2 couple regions (in-country commercial flows)
-	DOM_SEC_PR             =2,
-	DOM_ALL_PR             =3,
-	DOM_R2_PRI_PR          =4,
-	DOM_R2_SEC_PR          =5,
-	DOM_R2_ALL_PR          =6,
-	DOM_SCALAR             =7, // NOTUSED
-
-  //stock_type
-  STOCK_INV              =1,
-  STOCK_EXTRA            =2,
-  STOCK_PRODUCTS         =3,
-  // em_type
-  EM_ENSUB               =4,
-  EM_MATSUB              =5,
-  EM_FOROP               =6,
-
-
-	// domain of constrains variables (squares means a vector, r2n means neighbour -same r1- regions)
-	// attention for the not used, as algorithm to handle them may not have been implemented or -as minimum- tested!!
-	CDOM_SCALAR            =1,             // r1,r2,p
-	CDOM_SCALAR_DOUBLE     =2,             // r1,r2,p,r2n and r1,r2n,p,r2
-	CDOM_R2TO              =3,  // NOTUSED // r1,r2,p,[r2n]
-	CDOM_R2FROM            =4,  // NOTUSED // r1,[r2n],p,r2
-	CDOM_R2FROMTO          =5,             // r1,[r2n],p,[r2n]
-	CDOM_PRI_PR            =6,             // r1,r2,[p_pr]
-	CDOM_PRI_PR_AND_SCALAR =7,             // r1,r2,[p_pr]&&p
-	CDOM_SEC_PR            =8,  // NOTUSED // r1,r2,[p_sec]
-	CDOM_ALL_PR            =9,  // NOTUSED // r1,r2,[prd]
-	CDOM_ALL               =10, // NOTUSED // [r1],[r2],[p]
-	CDOM_ALLR2             =11, // NOTUSED // [r1],[r2],[p],[r2n]
-
-
+enum contrainDirection {
 	CONSTR_EQ              =1, // constrain of type equality
 	CONSTR_LE0             =2, // constrain of type lower or equal than 0
-	CONSTR_GE0             =3,  // constrain of type greater or equal 0
+  CONSTR_GE0             =3, // constrain of type greater or equal 0
+};
 
-	// operations possible in certain contexts
-	OP_SUM                 =1,
-	OP_AVG                 =5,
-
+enum varType {
 	VAR_VOL                =1,
 	VAR_AREA               =2,
 	VAR_IN                 =3
@@ -146,25 +132,25 @@ enum {
 
 // some macro for specific keywords in the model
 #ifndef PROD_ALL
-#define PROD_ALL "PROD_ALL" //< all primary and transformed products
+#define PROD_ALL "PROD_ALL"           ///< All primary and transformed products
 #endif
 #ifndef PROD_PRI
-#define PROD_PRI "PROD_PRI" //< primary products
+#define PROD_PRI "PROD_PRI"           ///< Primary products
 #endif
 #ifndef PROD_SEC
-#define PROD_SEC "PROD_SEC" //< secondary products
+#define PROD_SEC "PROD_SEC"           ///< Secondary products
 #endif
 #ifndef DIAM_ALL
-#define DIAM_ALL "DIAM_ALL" //< all diameter classes
+#define DIAM_ALL "DIAM_ALL"           ///< All diameter classes
 #endif
 #ifndef DIAM_PROD
-#define DIAM_PROD "DIAM_PROD" //< diameter classes used for production (e.g. excluded the first one)
+#define DIAM_PROD "DIAM_PROD"         ///< Diameter classes used for production (e.g. excluded the first one)
 #endif
 #ifndef DIAM_FIRST
-#define DIAM_FIRST "DIAM_FIRST_CLASS" //< first diameter class (NOT used for production)
+#define DIAM_FIRST "DIAM_FIRST_CLASS" ///< First diameter class (NOT used for production)
 #endif
 #ifndef FT_ALL
-#define FT_ALL "FT_ALL" //< all forest types
+#define FT_ALL "FT_ALL"               ///< All forest types
 #endif
 
 /// Base class for the regmas application.
@@ -203,13 +189,8 @@ public:
 	vector<string>      d2s (const vector<double>& double_h) const; ///<  double  to string  conversion (vector)
 	vector<string>      b2s (const vector<bool>& bool_h)     const; ///<  bool    to string  conversion (vector)
 
-	/**
-	Return a type according to enum TYPE_* from a string (eg: "string" -> TYPE_STRING (2)).
-	<br>If we pass it an unknow type it generates an error.
-	*/
-	int                 getType(const string &type_h) const;
-
-	void                refreshGUI() const;  ///< Ping to periodically return the control to the GUI
+  int                 getType(const string &type_h) const; ///< Return a type according to enum TYPE_* from a string (eg: "string" -> TYPE_STRING (2))
+  void                refreshGUI() const;                  ///< Ping to periodically return the control to the GUI
 
 	//string intToString(int x);
 	template<typename T> string toString(const T& x) const;      // string s = toString(x);
@@ -224,7 +205,7 @@ public:
 	/// Tokenize a string using a delimiter (default is space)
 	void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ") const;
 
-    /// Lookup a map for a value. Return the value starting from the key
+  /// Lookup a map for a value. Return the value starting from the key
   template <typename K, typename V> V findMap(const map <K, V> &mymap, const K& key, const int& error_level=MSG_CRITICAL_ERROR) const{
 		typename map<K, V>::const_iterator p;
 		p=mymap.find(key);
@@ -248,7 +229,8 @@ public:
           msgOut(error_level, "Error in finding a value in a map (no value found)");
       }
   }
-  /// Increment a value stored in a map of the specified value, given the key
+
+  /// Increments a value stored in a map of the specified value, given the key
   template <typename K, typename V> void incrMapValue(map <K, V> &mymap, const K& key, const V& value, const int& error_level=MSG_CRITICAL_ERROR){
       typename map<K, V>::iterator p;
       p=mymap.find(key);
@@ -269,7 +251,7 @@ public:
       }
   }
 
-  /// Return a map built using the given vector and the given (scalar) value as keys/values pairs
+  /// Returns a map built using the given vector and the given (scalar) value as keys/values pairs
   template <typename K, typename V> map <K, V> vectorToMap(const vector <K>& keys, const V& value=0.0){
       map<K,V> returnMap;
       for(uint i=0; i<keys.size();i++){
@@ -279,28 +261,30 @@ public:
       return returnMap;
   }
 
-  /// Return the position of the maximum element in the vector (the last one in case of multiple equivalent maxima)
+  /// Returns the position of the maximum element in the vector (the last one in case of multiple equivalent maxima)
   template <typename K>  int getMaxPos (const vector <K> & v){
     return (minmax_element(v.begin(), v.end()).second - v.begin());
   }
-  /// Return the position of the minimum element in the vector (the first one in case of multiple equivalent minima)
+  /// Returns the position of the minimum element in the vector (the first one in case of multiple equivalent minima)
   template <typename K>  int getMinPos (const vector <K> & v){
     return (minmax_element(v.begin(), v.end()).first - v.begin());
   }
-  /// Return the value of the maximum element in the vector (the last one in case of multiple equivalent maxima)
+  /// Returns the value of the maximum element in the vector (the last one in case of multiple equivalent maxima)
   template <typename K>  int getMax(const vector <K> & v){
     return *minmax_element(v.begin(), v.end()).second;
   }
-  /// Return the value of the minimum element in the vector (the first one in case of multiple equivalent minima)
+  /// Returns the value of the minimum element in the vector (the first one in case of multiple equivalent minima)
   template <typename K>  int getMin (const vector <K> & v){
     return *minmax_element(v.begin(), v.end()).first;
   }
 
-  /// Sampling from normal distribution with bounds. Slower (double time, but still you see the diff only after milion of loops).
-  /// It doesn't require the normal_distribution to be passed to it, but it can not teplated, so works only with doubles.
+  /// Sample from a normal distribution with bounds. Slower (double time, but still you see the diff only after milion of loops).
+
+  /// It doesn't require the normal_distribution to be passed to it, but due to including MTHREAD its definition can't be placed
+  /// in the header and hence it can not be templated, so it works only with doubles.
   double normSample (const double& avg, const double& stdev, const double& minval=NULL, const double& maxval=NULL) const;
 
-  /// Sampling from normal distribution with bounds. Faster (half time) as the normal_distribution is made only once.
+  /// Sample from a normal distribution with bounds. Faster (half time) as the normal_distribution is made only once.
   template <typename K> K normSample (normal_distribution<K>& d, std::mt19937& gen, const K& minval=NULL, const K& maxval=NULL) const {
     if(minval != NULL  && maxval != NULL){
       if (maxval <= minval){
@@ -322,8 +306,8 @@ public:
 protected:
 
 	/**
-	Pointer to the Thread Manager. \\	
-	Through this pointer each deribed subclass (the vast maiority of those used on FFSM) can "ask" for sending signals to the GUI, like append the log or modify the map.
+  * Through this pointer each derived subclass (the vast maiority of those used on FFSM) can "ask"
+  * for sending signals to the GUI, like append the log or modify the map.
 	*/
 	ThreadManager*                         MTHREAD; ///< Pointer to the Thread manager.
 	// ATTENTION
@@ -334,7 +318,7 @@ private:
 
 };
 
-/* class to provide a simple integer-string key */
+/// Class to provide a simple integer-string key to be used in std maps
 class iskey {
 public:
                       iskey();
@@ -346,13 +330,11 @@ public:
   bool                operator >  (const iskey &op2) const;
   bool                operator <= (const iskey &op2) const;
   bool                operator >= (const iskey &op2) const;
-
   int                                          i;
   string                                       s;
-
 };
 
-/* class to provide a simple integer-integer-string key */
+/// Class to provide a simple integer-integer-string key in std maps
 class iiskey {
 public:
                       iiskey();
@@ -364,12 +346,10 @@ public:
   bool                operator >  (const iiskey &op2) const;
   bool                operator <= (const iiskey &op2) const;
   bool                operator >= (const iiskey &op2) const;
-
   int                                          i;
   int                                          i2;
   string                                       s;
 
 };
-
 
 #endif

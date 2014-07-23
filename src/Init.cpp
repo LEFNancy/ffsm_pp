@@ -107,7 +107,7 @@ Init::setInitLevel1(){
 		srand(time(NULL));
 		std::random_device randev;
 		MTHREAD->gen = new std::mt19937(randev());
-        //TODO change scenarioname to scenarioname_random number
+        //TO.DO change scenarioname to scenarioname_random number
         uniform_int_distribution<> ud(1, 1000000);
         int randomscenario = ud(*MTHREAD->gen);
         string oldScenarioName = MTHREAD->getScenarioName();

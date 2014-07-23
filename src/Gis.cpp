@@ -133,7 +133,7 @@ Gis::applySpatialStochasticValues(){
         for (uint z=0;z<rpx.size();z++){
           double c = d(*MTHREAD->gen);
           double c2 = max(0.4,min(1.6,c)); /// with simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
-          // TODO: Convert it to using normSample where instead of a min/max a loop is used to fund smaples that are within the bounds
+          // TO.DO: Convert it to using normSample where instead of a min/max a loop is used to fund smaples that are within the bounds
           //cout << regIds2[i] << ";" <<sStDev <<";"<< c <<endl
           //rpx[z]->correctInputMultiplier("tp_multiplier",fTypes[j],c);
           //cout << sStDev/agr << "    " << c2 << endl;
@@ -166,10 +166,6 @@ Gis::applySpatialStochasticValues(){
     }
 
 	}
-  exit(0);
-    //double avg_c = sumc/nc;
-    //cout << "Avg coeff: " << avg_c << "(on " << nc << " records)" << endl;
-    //if(avg_c>1) {exit(0);}
 }
 
 /**

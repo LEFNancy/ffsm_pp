@@ -20,8 +20,8 @@
 #ifndef MAPBOX_H
 #define MAPBOX_H
 
-#include <QColor> //TODO del
-#include <QImage> //TODO del
+#include <QColor> //TO.DO del
+#include <QImage> //TO.DO del
 
 #include <QWidget>
 #include <QPixmap>

@@ -74,20 +74,20 @@ ModelRegion::getNChildren(bool excludeResidual){
 
 double
 ModelRegion::getVolumes(){
-	//TODO;
+  /// \todo Implement me (but really needed?)
 	return 0;
 }
 
 vector<double>
 ModelRegion::getVolumes(int fType_h){
-	//TODO;
+  /// \todo Implement me (but really needed?)
 	vector<double> toReturn;
 	return toReturn;
 }
 
 vector < vector <double> >
 ModelRegion::getVolumes(int fType_h, string dClass_h){
-	//TODO;
+  /// \todo Implement me (but really needed?)
 	vector < vector <double> > toReturn;
 	return toReturn;
 }

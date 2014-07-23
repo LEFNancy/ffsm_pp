@@ -1,16 +1,18 @@
-RegMAS documentation is comprised of:
-   • The Official Documentation: includes the User Manual and the Reference Manual
-   • The Contributed Documentation: includes the wiki
-   • The Community Project (hosted at SourceForge): includes the forum and the wiki
-
-All up-to-date documentation is available at http://www.regmas.org/doc
+FFSM++ documentation is comprised of:
+   • The Reference Manual
+   • The Papers
 
 
+NO: All up-to-date documentation is available at http://www.ffsm.org/doc
 
-*** SVN USERS ***
-To create the Reference Manual and the User Manual locally type the following commands from a SHELL/DOS prompt:
+
+
+*** GIT USERS ***
+To create the Reference Manual locally type the following commands from a SHELL/DOS prompt:
 (Reference Manual)
-doxygen regmas.doxygen
+doxygen ffsm_pp.doxygen
+
+TODO:
 (User Manual)
 cd userManual
 pdflatex -shell-escape -interaction=nonstopmode regmasUserManual.tex

@@ -104,7 +104,7 @@ ModelData::getScenarios(){
 
 int
 ModelData::getScenarioIndex(){
-	vector<string> scenarios = getScenarios(); // TODO Check that I can call this function all around the model and not only at the beginning
+  vector<string> scenarios = getScenarios(); /// \todo Check that I can call this function all around the model and not only at the beginning
 	string currentScenario = MTHREAD->getScenarioName();
 	for(int i=0;i<scenarios.size();i++){
 		if (currentScenario == scenarios[i]){

@@ -25,8 +25,6 @@
 #include "BaseClass.h"
 #include "ThreadManager.h"
 
-
-
 using namespace std;
 
 BaseClass::BaseClass()
