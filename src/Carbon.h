@@ -67,7 +67,8 @@ private:
   void                  addSavedEmissions(const double & value, const int & regId, const int & em_type);    ///< Increases the value to the saved emissions for a given type and region
 
 
-  map<iiskey, double >              deathBiomass; ///< Map that register the death of biomass by year, l2_region and forest type [Mm^3 wood]
+  map<iiskey, double >     deathBiomassInventory; ///< Map that register the death of biomass by year, l2_region and forest type (inventoried)[Mm^3 wood]
+  map<iiskey, double >         deathBiomassExtra; ///< Map that register the death of biomass by year, l2_region and forest type (non-inventoried biomass: branches, roots..) [Mm^3 wood]
   map<iiskey, double >                  products; ///< Map that register the production of a given product by year, l2_region and product [Mm^3 wood]
   map<int,double>           cumSubstitutedEnergy; ///< Map that store the cumulative CO2 substituted for energy consumption, by l2_region [Mt CO2]
   map<int,double>         cumSubstitutedMaterial; ///< Map that store the cumulative CO2 substituted using less energivory material, by l2_region [Mt CO2]

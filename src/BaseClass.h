@@ -92,7 +92,7 @@ enum domains {
 };
 /// Carbon stocks
 enum carbonStocks {
-  STOCK_INV              =1,             ///< Invetariated biomass (live and death tree logs)
+  STOCK_INV              =1,             ///< Invetoried biomass (live and death tree logs)
   STOCK_EXTRA            =2,             ///< Extra biomass (soils, branches..)
   STOCK_PRODUCTS         =3,             ///< Biomass in forest products (sawns, pannels..)
 };

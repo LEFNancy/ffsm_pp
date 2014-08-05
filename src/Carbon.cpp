@@ -66,24 +66,40 @@ Carbon::getStock(const int & regId, const int & stock_type) const{
       break;
     }
     case STOCK_INV:{
-    // TO.DO !!! No, It is already done (hint: missing the break!)
+      vector <string> fTypes = MTHREAD->MD->getForTypeIds();
+      for(uint i=0;i<fTypes.size();i++){
+        // units:
+        // co2content_inventory: [Kg CO2 / m^3 wood]
+        // co2content_extra:     [Kg CO2 / m^3 inventaried wood]
+        double coeff = MTHREAD->MD->getForData("co2content_inventory",regId,fTypes[i],"",DATA_NOW); //  [kg CO2/m^3 wood]
+        double life  = MTHREAD->MD->getForData("avgLive_deathBiomass_inventory",regId,fTypes[i],"",DATA_NOW);
+        // PART A: from death biomass..
+        for(int y=currentYear;y>currentYear-life;y--){ // ok
+          iiskey key(y,regId,fTypes[i]);
+          toReturn += findMap(deathBiomassInventory,key,MSG_NO_MSG)*coeff/1000;
+        }
+        // PART B: from inventory volumes
+        toReturn += MTHREAD->MD->getForData("vol",regId,fTypes[i],DIAM_ALL,DATA_NOW)*coeff/1000;
+      }
+      break;
 
     }
     case STOCK_EXTRA:{
       vector <string> fTypes = MTHREAD->MD->getForTypeIds();
       for(uint i=0;i<fTypes.size();i++){
         // units:
-        // co2content_inventary: [Kg CO2 / m^3 wood]
+        // co2content_inventory: [Kg CO2 / m^3 wood]
         // co2content_extra:     [Kg CO2 / m^3 inventaried wood]
-        double coeff = (stock_type==STOCK_INV)? MTHREAD->MD->getForData("co2content_inventary",regId,fTypes[i],"",DATA_NOW):MTHREAD->MD->getForData("co2content_extra",regId,fTypes[i],"",DATA_NOW); //  [kg CO2/m^3 wood]
-        double life  = MTHREAD->MD->getForData("avgLive_deathBiomass",regId,fTypes[i],"",DATA_NOW);
+        double coeff = MTHREAD->MD->getForData("co2content_extra",regId,fTypes[i],"",DATA_NOW); //  [kg CO2/m^3 wood]
+        double life  = MTHREAD->MD->getForData("avgLive_deathBiomass_extra",regId,fTypes[i],"",DATA_NOW);
         // PART A: from death biomass..
         for(int y=currentYear;y>currentYear-life;y--){ // ok
           iiskey key(y,regId,fTypes[i]);
-          toReturn += findMap(deathBiomass,key,MSG_NO_MSG)*coeff/1000;
+          toReturn += findMap(deathBiomassExtra,key,MSG_NO_MSG)*coeff/1000;
         }
-        // PART B: from inventary volumes
-        toReturn += MTHREAD->MD->getForData("vol",regId,fTypes[i],DIAM_ALL,DATA_NOW)*coeff/1000;
+        // PART B: from inventory volumes
+        double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fTypes[i],"",DATA_NOW);
+        toReturn += MTHREAD->MD->getForData("vol",regId,fTypes[i],DIAM_ALL,DATA_NOW)*extraBiomass_ratio*coeff/1000;
       }
       break;
     }
@@ -131,12 +147,21 @@ Carbon::initialiseDeathBiomassStocks(const vector<double> & deathByFt, const int
   vector <string> fTypes = MTHREAD->MD->getForTypeIds();
   if(fTypes.size() != deathByFt.size()) {msgOut(MSG_CRITICAL_ERROR,"deathByFt and fTypes have different lenght!");}
   int currentYear = MTHREAD->SCD->getYear();
+
   for(uint i=0;i<fTypes.size();i++){
-    double life  = MTHREAD->MD->getForData("avgLive_deathBiomass",regId,fTypes[i],"",DATA_NOW);
-    for(int y=currentYear;y>currentYear-life;y--){
-      iiskey key(y,regId,fTypes[i]);
-      pair<iiskey,double> mypair(key,deathByFt.at(i));
-      deathBiomass.insert(mypair);
+    double life_inventory     = MTHREAD->MD->getForData("avgLive_deathBiomass_inventory",regId,fTypes[i],"",DATA_NOW);
+    double life_extra         = MTHREAD->MD->getForData("avgLive_deathBiomass_extra",regId,fTypes[i],"",DATA_NOW);
+    double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fTypes[i],"",DATA_NOW);
+
+    for(int y=currentYear;y>currentYear-life_inventory;y--){
+        iiskey key(y,regId,fTypes[i]);
+        pair<iiskey,double> mypair(key,deathByFt.at(i));
+        deathBiomassInventory.insert(mypair);
+    }
+    for(int y=currentYear;y>currentYear-life_extra;y--){
+        iiskey key(y,regId,fTypes[i]);
+        pair<iiskey,double> mypair(key,deathByFt.at(i)*extraBiomass_ratio);
+        deathBiomassExtra.insert(mypair);
     }
   }
 }
@@ -178,8 +203,12 @@ void
 Carbon::registerDeathBiomass(const double &value, const int & regId, const string & fType){
   int year = MTHREAD->SCD->getYear();
   iiskey key(year,regId,fType);
-  pair<iiskey,double> mypair(key,value);
-  deathBiomass.insert(mypair);
+  double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fType,"",DATA_NOW);
+  pair<iiskey,double> mypairInventory(key,value);
+  pair<iiskey,double> mypairExtra(key,value*extraBiomass_ratio);
+  deathBiomassInventory.insert(mypairInventory);
+  deathBiomassExtra.insert(mypairExtra);
+
 }
 
 void
