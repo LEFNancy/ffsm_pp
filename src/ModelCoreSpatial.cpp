@@ -1347,11 +1347,19 @@ ModelCoreSpatial::sumRegionalForData(){
 	}
 
 }
-
-
+/**
+ * This function call registerHarvesting() (accounts for emissions from for. operations), registerDeathBiomass() (registers new stocks of death biomass),
+ * registerProducts() (registers new stock of products) and registerTransports() (accounts for emissions from transportation).
+ *
+ * It pass to registerProducts():
+ * - for primary products, the primary products exported out of the country, but not those exported to other regions or used in the region as
+ *   these are assumed to be totally transformed to secondary products;
+ * - for secondary products, those produced in the region from locally or regionally imported primary product plus those secondary products
+ *   imported from other regions, less those exported to other regions. It doesn't include the secondary products imported from abroad the country.
+ */
 void
 ModelCoreSpatial::registerCarbonEvents(){
-  ///< call registerHarvesting(), registerDeathBiomass(), registerProducts() and registerTransports()
+
   //void                  registerHarvesting(const int & regId, const string & fType, const double & value); ///< register the harvesting of trees -> cumEmittedForOper
   //void                  registerDeathBiomass(const double &value, const int & regId, const string &fType);
   //void                  registerProducts(const double &value, const int & regId, const string &productName);
