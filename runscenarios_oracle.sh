@@ -13,6 +13,8 @@
 ./run_single_scenario.sh 'arpege_a1b'
 ./run_single_scenario.sh 'arpege_a2'
 ./run_single_scenario.sh 'arpege_b1'
+./run_single_scenario.sh 'arpege_a1b_noExpectations'
+./run_single_scenario.sh 'arpege_a1b_fullExpectations'
 ./run_single_scenario.sh 'CNCM33_1'
 ./run_single_scenario.sh 'DMIEH5C_1'
 ./run_single_scenario.sh 'DMIEH5C_2'
