@@ -63,9 +63,10 @@ public:
   void                  initialiseProductsStocks(const vector<double> & qByProduct, const int &regId);      ///< Initialise the stocks of products for the avgLive_* years before the simulation starts
   void                  initialiseEmissionCounters();                                                       ///< Initialise the emission counters to zero.
 
+
 private:
   void                  addSavedEmissions(const double & value, const int & regId, const int & em_type);    ///< Increases the value to the saved emissions for a given type and region
-
+  double                getRemainingStock(const double & initialValue, const double & halfLife, const double & years) const; ///< Apply a single exponential decay model to retrieve the remining stock given the initial stock, the half life and the time passed from stock formation.
 
   map<iiskey, double >     deathBiomassInventory; ///< Map that register the death of biomass by year, l2_region and forest type (inventoried)[Mm^3 wood]
   map<iiskey, double >         deathBiomassExtra; ///< Map that register the death of biomass by year, l2_region and forest type (non-inventoried biomass: branches, roots..) [Mm^3 wood]

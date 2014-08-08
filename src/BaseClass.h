@@ -38,6 +38,8 @@
 #include <map>
 #include <algorithm>
 #include <numeric>
+#include <limits>
+#include <cstddef>
 
 // regmas headers...
 
@@ -206,7 +208,7 @@ public:
 	void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ") const;
 
   /// Lookup a map for a value. Return the value starting from the key
-  template <typename K, typename V> V findMap(const map <K, V> &mymap, const K& key, const int& error_level=MSG_CRITICAL_ERROR) const{
+  template <typename K, typename V> V findMap(const map <K, V> &mymap, const K& key, const int& error_level=MSG_CRITICAL_ERROR, const V &notFoundValue=numeric_limits<V>::min()) const{
 		typename map<K, V>::const_iterator p;
 		p=mymap.find(key);
 		if(p != mymap.end()) {
@@ -214,6 +216,7 @@ public:
 		}
 		else {
 			msgOut(error_level, "Error in finding a value in a map (no value found)");
+      return notFoundValue;
 		}
 	}
 

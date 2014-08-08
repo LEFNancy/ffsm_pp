@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <math.h>       /* log */
+
 #include "Carbon.h"
 #include "ThreadManager.h"
 #include "ModelData.h"
@@ -49,6 +51,7 @@ double
 Carbon::getStock(const int & regId, const int & stock_type) const{
   double toReturn = 0.0;
   int currentYear = MTHREAD->SCD->getYear();
+  int initialYear = MTHREAD->MD->getIntSetting("initialYear");
   switch (stock_type){
     case STOCK_PRODUCTS: {
       vector <string> priProducts = MTHREAD->MD->getStringVectorSetting("priProducts");
@@ -58,9 +61,15 @@ Carbon::getStock(const int & regId, const int & stock_type) const{
       for(uint i=0;i<allProducts.size();i++){
         double coeff = MTHREAD->MD->getProdData("co2content_products",regId,allProducts[i],DATA_NOW,""); //  [kg CO2/m^3 wood]
         double life  = MTHREAD->MD->getProdData("avgLife_products",regId,allProducts[i],DATA_NOW,"");
-        for(int y=currentYear;y>currentYear-life;y--){ // ok
+        //for(int y=currentYear;y>currentYear-life;y--){ // ok
+        //  iiskey key(y,regId,allProducts[i]);
+        //  toReturn += findMap(products,key,MSG_NO_MSG,0.0)*coeff/1000;
+        //}
+        for(int y=(initialYear-100);y<=currentYear;y++){
           iiskey key(y,regId,allProducts[i]);
-          toReturn += findMap(products,key,MSG_NO_MSG)*coeff/1000;
+          double originalStock = findMap(products,key,MSG_NO_MSG,0.0);
+          double remainingStock = getRemainingStock(originalStock,life,currentYear-y);
+          toReturn += remainingStock*coeff/1000;
         }
       }
       break;
@@ -74,10 +83,17 @@ Carbon::getStock(const int & regId, const int & stock_type) const{
         double coeff = MTHREAD->MD->getForData("co2content_inventory",regId,fTypes[i],"",DATA_NOW); //  [kg CO2/m^3 wood]
         double life  = MTHREAD->MD->getForData("avgLive_deathBiomass_inventory",regId,fTypes[i],"",DATA_NOW);
         // PART A: from death biomass..
-        for(int y=currentYear;y>currentYear-life;y--){ // ok
+        //for(int y=currentYear;y>currentYear-life;y--){ // ok
+        //  iiskey key(y,regId,fTypes[i]);
+        //  toReturn += findMap(deathBiomassInventory,key,MSG_NO_MSG)*coeff/1000;
+        //}
+        for(int y=(initialYear-100);y<=currentYear;y++){
           iiskey key(y,regId,fTypes[i]);
-          toReturn += findMap(deathBiomassInventory,key,MSG_NO_MSG)*coeff/1000;
+          double originalStock = findMap(deathBiomassInventory,key,MSG_NO_MSG,0.0);
+          double remainingStock = getRemainingStock(originalStock,life,currentYear-y);
+          toReturn += remainingStock*coeff/1000;
         }
+
         // PART B: from inventory volumes
         toReturn += MTHREAD->MD->getForData("vol",regId,fTypes[i],DIAM_ALL,DATA_NOW)*coeff/1000;
       }
@@ -93,9 +109,15 @@ Carbon::getStock(const int & regId, const int & stock_type) const{
         double coeff = MTHREAD->MD->getForData("co2content_extra",regId,fTypes[i],"",DATA_NOW); //  [kg CO2/m^3 wood]
         double life  = MTHREAD->MD->getForData("avgLive_deathBiomass_extra",regId,fTypes[i],"",DATA_NOW);
         // PART A: from death biomass..
-        for(int y=currentYear;y>currentYear-life;y--){ // ok
+        //for(int y=currentYear;y>currentYear-life;y--){ // ok
+        //  iiskey key(y,regId,fTypes[i]);
+        //  toReturn += findMap(deathBiomassExtra,key,MSG_NO_MSG),0.0*coeff/1000;
+        //}
+        for(int y=(initialYear-100);y<=currentYear;y++){
           iiskey key(y,regId,fTypes[i]);
-          toReturn += findMap(deathBiomassExtra,key,MSG_NO_MSG)*coeff/1000;
+          double originalStock = findMap(deathBiomassExtra,key,MSG_NO_MSG,0.0);
+          double remainingStock = getRemainingStock(originalStock,life,currentYear-y);
+          toReturn += remainingStock*coeff/1000;
         }
         // PART B: from inventory volumes
         double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fTypes[i],"",DATA_NOW);
@@ -147,21 +169,30 @@ Carbon::initialiseDeathBiomassStocks(const vector<double> & deathByFt, const int
   vector <string> fTypes = MTHREAD->MD->getForTypeIds();
   if(fTypes.size() != deathByFt.size()) {msgOut(MSG_CRITICAL_ERROR,"deathByFt and fTypes have different lenght!");}
   int currentYear = MTHREAD->SCD->getYear();
+  //int initialYear = MD->getIntSetting("initialYear");
 
   for(uint i=0;i<fTypes.size();i++){
-    double life_inventory     = MTHREAD->MD->getForData("avgLive_deathBiomass_inventory",regId,fTypes[i],"",DATA_NOW);
-    double life_extra         = MTHREAD->MD->getForData("avgLive_deathBiomass_extra",regId,fTypes[i],"",DATA_NOW);
-    double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fTypes[i],"",DATA_NOW);
+//    double life_inventory     = MTHREAD->MD->getForData("avgLive_deathBiomass_inventory",regId,fTypes[i],"",DATA_NOW);
+//    double life_extra         = MTHREAD->MD->getForData("avgLive_deathBiomass_extra",regId,fTypes[i],"",DATA_NOW);
+      double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fTypes[i],"",DATA_NOW);
 
-    for(int y=currentYear;y>currentYear-life_inventory;y--){
+//    for(int y=currentYear;y>currentYear-life_inventory;y--){
+//        iiskey key(y,regId,fTypes[i]);
+//        pair<iiskey,double> mypair(key,deathByFt.at(i));
+//        deathBiomassInventory.insert(mypair);
+//    }
+//    for(int y=currentYear;y>currentYear-life_extra;y--){
+//        iiskey key(y,regId,fTypes[i]);
+//        pair<iiskey,double> mypair(key,deathByFt.at(i)*extraBiomass_ratio);
+//        deathBiomassExtra.insert(mypair);
+//    }
+
+    for(int y=currentYear;y>currentYear-100;y--){
         iiskey key(y,regId,fTypes[i]);
-        pair<iiskey,double> mypair(key,deathByFt.at(i));
-        deathBiomassInventory.insert(mypair);
-    }
-    for(int y=currentYear;y>currentYear-life_extra;y--){
-        iiskey key(y,regId,fTypes[i]);
-        pair<iiskey,double> mypair(key,deathByFt.at(i)*extraBiomass_ratio);
-        deathBiomassExtra.insert(mypair);
+        pair<iiskey,double> mypairInventory(key,deathByFt.at(i));
+        pair<iiskey,double> mypairExtra(key,deathByFt.at(i)*extraBiomass_ratio);
+        deathBiomassInventory.insert(mypairInventory);
+        deathBiomassExtra.insert(mypairExtra);
     }
   }
 }
@@ -177,13 +208,14 @@ Carbon::initialiseProductsStocks(const vector<double> & qByProduct, const int & 
   int currentYear = MTHREAD->SCD->getYear();
   for(uint i=0;i<allProducts.size();i++){
     double life  = MTHREAD->MD->getProdData("avgLife_products",regId,allProducts[i],DATA_NOW);
-    for(int y=currentYear;y>currentYear-life;y--){
-      iiskey key(y,regId,allProducts[i]);
-      pair<iiskey,double> mypair(key,qByProduct.at(i));
-      products.insert(mypair);
-     }
+    //for(int y=currentYear;y>currentYear-life;y--){
+    for(int y=currentYear;y>currentYear-100;y--){
+        iiskey key(y,regId,allProducts[i]);
+        pair<iiskey,double> mypair(key,qByProduct.at(i));
+        products.insert(mypair);
+    }
   }
-  cout << "" << endl;
+  //cout << "" << endl;
 }
 
 // ################# REGISTER FUNCTIONS ################
@@ -261,5 +293,11 @@ Carbon::addSavedEmissions(const double & value, const int & regId, const int & e
     default:
       msgOut(MSG_CRITICAL_ERROR,"Unexpected em_type in function getCumSavedEmissions");
   }
+}
+
+double
+Carbon::getRemainingStock(const double & initialValue, const double & halfLife, const double & years) const{
+  double k  = log(2)/halfLife;
+  return initialValue*exp(-k*years);
 }
 

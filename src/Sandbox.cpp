@@ -40,6 +40,9 @@
 #include <map>
 #include <random>
 #include <cmath>
+#include <float.h>
+#include <limits>
+#include <cstddef>
 
 
 // Testing zip library...
@@ -117,6 +120,16 @@ struct GccTest
 // --------------------------------------
 void
 Sandbox::basicTest(){
+
+  /*
+  // Testing limits for 0
+  double test = DBL_MIN;
+  cout << test << endl;
+  test = numeric_limits<double>::min();
+  cout << test << endl;
+  exit(0);
+  */
+
 
   /*
   // Testing getMaxPos()
@@ -383,6 +396,26 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+  /*
+  // Testing the decay model  - ok, passed
+  double initialValue = 100;
+  double halfLife = 2;
+  double years = 0;
+  double remStock = MTHREAD->CBAL->getRemainingStock(initialValue, halfLife, years); ///< Apply a single exponential decay model to retrieve the remining stock given the initial stock, the half life and the time passed from stock formation.
+  cout << "Remaining stock: " << remStock << endl;
+  years = 1;
+  remStock = MTHREAD->CBAL->getRemainingStock(initialValue, halfLife, years);
+  cout << "Remaining stock: " << remStock << endl;
+  years = 5;
+  remStock = MTHREAD->CBAL->getRemainingStock(initialValue, halfLife, years);
+  cout << "Remaining stock: " << remStock << endl;
+  years =10;
+  remStock = MTHREAD->CBAL->getRemainingStock(initialValue, halfLife, years);
+  cout << "Remaining stock: " << remStock << endl;
+  years = 200;
+  remStock = MTHREAD->CBAL->getRemainingStock(initialValue, halfLife, years);
+  cout << "Remaining stock: " << remStock << endl;
+  */
 
   /*
   // Testing normSample
