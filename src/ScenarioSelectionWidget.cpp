@@ -26,17 +26,17 @@
 
 ScenarioSelectionWidget::ScenarioSelectionWidget(QWidget *parent): QDialog(parent) {
 
-	label = new QLabel(tr("Select the scenario you want to run..."));
-	scenarioSelector = new QComboBox();
-	QVBoxLayout *mainLayout = new QVBoxLayout;
-	mainLayout->addWidget(label);
-	mainLayout->addWidget(scenarioSelector);
-	setLayout(mainLayout);
-	setWindowTitle(tr("Scenario selection"));
-	setFixedHeight(sizeHint().height());
+  label = new QLabel(tr("Select the scenario you want to run..."));
+  scenarioSelector = new QComboBox();
+  QVBoxLayout *mainLayout = new QVBoxLayout;
+  mainLayout->addWidget(label);
+  mainLayout->addWidget(scenarioSelector);
+  setLayout(mainLayout);
+  setWindowTitle(tr("Scenario selection"));
+  setFixedHeight(sizeHint().height());
 
-	//connect(scenarioSelector, SIGNAL( activated(const QString&)), this, SLOT( processSelectedScenario(const QString &)   ));
-	//connect(scenarioSelector, SIGNAL( activated(const QString&)), this, SLOT( close()));
+  //connect(scenarioSelector, SIGNAL( activated(const QString&)), this, SLOT( processSelectedScenario(const QString &)   ));
+  //connect(scenarioSelector, SIGNAL( activated(const QString&)), this, SLOT( close()));
 
 }
 
@@ -46,19 +46,19 @@ ScenarioSelectionWidget::~ScenarioSelectionWidget(){
 
 void
 ScenarioSelectionWidget::receiveScenarioOptions(const QVector<QString> &scenarios_h){
-	scenarioSelector->clear();
-	for (uint i=0; i< scenarios_h.size();i++){
-		scenarioSelector->addItem(scenarios_h.at(i));
-	}
-	//scenarioSelector->setFocus(); // may be not visible, no effect!
-	//scenarioSelector->grabMouse();
-	//scenarioSelector->grabKeyboard();
+  scenarioSelector->clear();
+  for (uint i=0; i< scenarios_h.size();i++){
+    scenarioSelector->addItem(scenarios_h.at(i));
+  }
+  //scenarioSelector->setFocus(); // may be not visible, no effect!
+  //scenarioSelector->grabMouse();
+  //scenarioSelector->grabKeyboard();
 }
 
 /*
 void
 ScenarioSelectionWidget::processSelectedScenario(const QString &scenario_h){
-	emit selectedScenarioName(scenario_h);	
+  emit selectedScenarioName(scenario_h);  
 }
 
 */

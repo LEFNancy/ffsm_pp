@@ -30,28 +30,28 @@ class QComboBox;
 /**
 Simple widget to show the available scenarios so that the user can choose one.
 
-	@author Antonello Lobianco <antonello@regmas.org>
+  @author Antonello Lobianco <antonello@regmas.org>
 */
 class ScenarioSelectionWidget: public QDialog{
-	Q_OBJECT
+  Q_OBJECT
 
 public:
-	ScenarioSelectionWidget(QWidget *parent = 0);
-	void receiveScenarioOptions(const QVector<QString> &scenarios_h);
-	QComboBox                  *scenarioSelector;
+  ScenarioSelectionWidget(QWidget *parent = 0);
+  void receiveScenarioOptions(const QVector<QString> &scenarios_h);
+  QComboBox                  *scenarioSelector;
 
 private:
-	QLabel                                *label;
+  QLabel                                *label;
 
 
-	~ScenarioSelectionWidget();
+  ~ScenarioSelectionWidget();
 
 /*
 signals:
-	void selectedScenarioName(const QString &scenario_h);
+  void selectedScenarioName(const QString &scenario_h);
 
 public slots:
-	void processSelectedScenario(const QString &scenario_h);
+  void processSelectedScenario(const QString &scenario_h);
 */
 
 };

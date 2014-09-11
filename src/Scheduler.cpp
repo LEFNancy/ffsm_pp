@@ -28,8 +28,8 @@
 #include "ModelCoreSpatial.h"
 
 Scheduler::Scheduler(ThreadManager* MTHREAD_h){
-	MTHREAD=MTHREAD_h;
-	iteration=0;
+  MTHREAD=MTHREAD_h;
+  iteration=0;
 }
 
 Scheduler::~Scheduler(){
@@ -38,33 +38,33 @@ Scheduler::~Scheduler(){
 void
 Scheduler::run(){
 
-	int initialYear           = MTHREAD->MD->getIntSetting("initialYear");
-	int initialSimulationYear = MTHREAD->MD->getIntSetting("initialOptYear");
-	int preSimulationYears = initialSimulationYear-initialYear;
-	for (int it=preSimulationYears;it<MTHREAD->MD->getIntSetting("simulationYears")+preSimulationYears;it++){
-		iteration = it;
-		year = iteration+MTHREAD->MD->getCachedInitialYear();
-		MTHREAD->upgradeMainSBLabel("New year started..");
-		msgOut(MSG_INFO, "### "+i2s(getYear())+ " year started.. ####");
-		time_t now;
-		time(&now);
-		struct tm *current = localtime(&now);
-		string timemessage = "("+i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec)+")";
-		MTHREAD->upgradeYearSBLabel(iteration+ MTHREAD->MD->getIntSetting("initialYear"));
-		MTHREAD->treeViewerChangeGeneralPropertyValue("year",i2s(iteration+ MTHREAD->MD->getIntSetting("initialYear")));
-		if(MTHREAD->MD->getBoolSetting("usePixelData")){
-			//MTHREAD->GIS->initLayersModelData(); // removed 20120930, not needed, as data in specific pixel values
-			MTHREAD->SCORE->runSimulationYear();
-		} else {
-			MTHREAD->CORE->runSimulationYear();
-		}
+  int initialYear           = MTHREAD->MD->getIntSetting("initialYear");
+  int initialSimulationYear = MTHREAD->MD->getIntSetting("initialOptYear");
+  int preSimulationYears = initialSimulationYear-initialYear;
+  for (int it=preSimulationYears;it<MTHREAD->MD->getIntSetting("simulationYears")+preSimulationYears;it++){
+    iteration = it;
+    year = iteration+MTHREAD->MD->getCachedInitialYear();
+    MTHREAD->upgradeMainSBLabel("New year started..");
+    msgOut(MSG_INFO, "### "+i2s(getYear())+ " year started.. ####");
+    time_t now;
+    time(&now);
+    struct tm *current = localtime(&now);
+    string timemessage = "("+i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec)+")";
+    MTHREAD->upgradeYearSBLabel(iteration+ MTHREAD->MD->getIntSetting("initialYear"));
+    MTHREAD->treeViewerChangeGeneralPropertyValue("year",i2s(iteration+ MTHREAD->MD->getIntSetting("initialYear")));
+    if(MTHREAD->MD->getBoolSetting("usePixelData")){
+      //MTHREAD->GIS->initLayersModelData(); // removed 20120930, not needed, as data in specific pixel values
+      MTHREAD->SCORE->runSimulationYear();
+    } else {
+      MTHREAD->CORE->runSimulationYear();
+    }
 
 
-		//MTHREAD->DO->print(); // done within modelcore now
+    //MTHREAD->DO->print(); // done within modelcore now
 
-		for(int i=0;i<MTHREAD->GIS->getXNPixels();i++){
-			MTHREAD->GIS->getPixel(i)->newYear(); //delete objects for the pixels, in the update the agents will do the same for their objects
-		}
-	}
+    for(int i=0;i<MTHREAD->GIS->getXNPixels();i++){
+      MTHREAD->GIS->getPixel(i)->newYear(); //delete objects for the pixels, in the update the agents will do the same for their objects
+    }
+  }
 }
 

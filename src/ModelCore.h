@@ -41,53 +41,53 @@
 class ModelCore : public BaseClass{
 
 public:
-												ModelCore(ThreadManager* MTHREAD_h);
-											 ~ModelCore();
+                        ModelCore(ThreadManager* MTHREAD_h);
+                       ~ModelCore();
 
-	void                  runInitPeriod();
-	void                  runSimulationYear();
+  void                  runInitPeriod();
+  void                  runSimulationYear();
 
-	void                  initMarketModule();       ///< computes st and pw for second year and several needed-only-at-t0-vars for the market module
-	void                  runMarketModule();        ///< computes st (supply total) and pw (weighted price). Optimisation inside.
-	void                  runBiologicalModule();    ///< computes hV, hArea and new vol at end of year
-	void                  runManagementModule();    ///< computes regArea and expectedReturns
+  void                  initMarketModule();       ///< computes st and pw for second year and several needed-only-at-t0-vars for the market module
+  void                  runMarketModule();        ///< computes st (supply total) and pw (weighted price). Optimisation inside.
+  void                  runBiologicalModule();    ///< computes hV, hArea and new vol at end of year
+  void                  runManagementModule();    ///< computes regArea and expectedReturns
 
-	void                  cacheSettings();          ///< just cache exogenous settings from ModelData
-	void                  cachePixelExogenousData();///< computes pixel level tp, meta and mort
-	void                  computeInventary();       ///< in=f(vol_t-1)
-	void                  computeCumulativeData();  ///< computes cumTp, vHa, cumTp_exp, vHa_exp,
-	void                  updateMapAreas();         ///< computes forArea_{ft}
+  void                  cacheSettings();          ///< just cache exogenous settings from ModelData
+  void                  cachePixelExogenousData();///< computes pixel level tp, meta and mort
+  void                  computeInventary();       ///< in=f(vol_t-1)
+  void                  computeCumulativeData();  ///< computes cumTp, vHa, cumTp_exp, vHa_exp,
+  void                  updateMapAreas();         ///< computes forArea_{ft}
 
 
 private:
-	// convenient handles to equivalent ModelData functions..
-	double              gpd(const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const string &freeDim_h="") const {return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};
+  // convenient handles to equivalent ModelData functions..
+  double              gpd(const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const string &freeDim_h="") const {return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};
   double              gfd(const string &type_h, const int& regId_h, const string &forType_h, const string &freeDim_h, const int& year=DATA_NOW) const {return MTHREAD->MD->getForData(type_h, regId_h, forType_h, freeDim_h, year);};
-	void                spd(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h="") const {MTHREAD->MD->setProdData(value_h, type_h, regId_h, prodId_h, year, allowCreate, freeDim_h);};
+  void                spd(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h="") const {MTHREAD->MD->setProdData(value_h, type_h, regId_h, prodId_h, year, allowCreate, freeDim_h);};
   void                sfd(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &freeDim_h, const int& year=DATA_NOW, const bool& allowCreate=false) const {MTHREAD->MD->setForData(value_h, type_h, regId_h, forType_h, freeDim_h, year, allowCreate);};
-	bool                app(const string &prod_h, const string &forType_h, const string &dClass_h) const {return MTHREAD->MD->assessProdPossibility(prod_h, forType_h, dClass_h);};
+  bool                app(const string &prod_h, const string &forType_h, const string &dClass_h) const {return MTHREAD->MD->assessProdPossibility(prod_h, forType_h, dClass_h);};
 
-	//vector <vector <vector <double> cumTp; /// cumulative time to reach a certain diameter class;
-	//vector <vector <vector <double> vHa;   /// volumes at hectar [m^3/ha];
+  //vector <vector <vector <double> cumTp; /// cumulative time to reach a certain diameter class;
+  //vector <vector <vector <double> vHa;   /// volumes at hectar [m^3/ha];
 
-	ModelData* MD;
-	int firstYear;
-	int secondYear;
-	int thirdYear;
-	int WL2;
-	vector <int> regIds2;
-	vector <string> priProducts;
-	vector <string> secProducts;
-	vector <string> allProducts;
-	vector <string> dClasses;
-	vector <string> pDClasses;
-	vector <string> fTypes;
-	vector <vector <int> > l2r;
-	string regType;
-	double expType;
-	double mr;
-	vector < vector < vector < vector <double> > > > hV_byPrd; // by regId, ft, dc, pp
-	//Ipopt::SmartPtr<Ipopt::IpoptApplication> application;
+  ModelData* MD;
+  int firstYear;
+  int secondYear;
+  int thirdYear;
+  int WL2;
+  vector <int> regIds2;
+  vector <string> priProducts;
+  vector <string> secProducts;
+  vector <string> allProducts;
+  vector <string> dClasses;
+  vector <string> pDClasses;
+  vector <string> fTypes;
+  vector <vector <int> > l2r;
+  string regType;
+  double expType;
+  double mr;
+  vector < vector < vector < vector <double> > > > hV_byPrd; // by regId, ft, dc, pp
+  //Ipopt::SmartPtr<Ipopt::IpoptApplication> application;
     bool rescaleFrequencies;
 
 

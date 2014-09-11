@@ -30,13 +30,13 @@ The constructor of REGION instances want:
 @param MTHREAD_h Pointer to the main thread manager
 */
 ModelRegion::ModelRegion(ThreadManager* MTHREAD_h, int regId_h, string regSName_h, string regLName_h, int regLevel_h, int parRegId_h, bool isResidual_h){
-	MTHREAD=MTHREAD_h;
-	regId = regId_h;
-	regSName = regSName_h;
-	regLName = regLName_h;
-	regLevel = regLevel_h;
-	parRegId = parRegId_h;
-	isResidual =  isResidual_h;
+  MTHREAD=MTHREAD_h;
+  regId = regId_h;
+  regSName = regSName_h;
+  regLName = regLName_h;
+  regLevel = regLevel_h;
+  parRegId = parRegId_h;
+  isResidual =  isResidual_h;
 }
 
 ModelRegion::~ModelRegion(){
@@ -44,30 +44,30 @@ ModelRegion::~ModelRegion(){
 
 vector<ModelRegion*>
 ModelRegion::getChildren(bool excludeResidual){
-	if(excludeResidual){
-		vector<ModelRegion*> toReturn;
-		for(uint i=0;i<chRegions.size();i++){
-			if(!chRegions[i]->getIsResidual()){
-				toReturn.push_back(chRegions[i]);
-			}
-		}
-		return toReturn;
-	}
-	return chRegions;
+  if(excludeResidual){
+    vector<ModelRegion*> toReturn;
+    for(uint i=0;i<chRegions.size();i++){
+      if(!chRegions[i]->getIsResidual()){
+        toReturn.push_back(chRegions[i]);
+      }
+    }
+    return toReturn;
+  }
+  return chRegions;
 }
 
 int
 ModelRegion::getNChildren(bool excludeResidual){
-	if(excludeResidual){
-		int toReturn;
-		for(uint i=0;i<chRegions.size();i++){
-			if(!chRegions[i]->getIsResidual()){
-				toReturn++;
-			}
-		}
-		return toReturn;
-	}
-	return chRegions.size();
+  if(excludeResidual){
+    int toReturn;
+    for(uint i=0;i<chRegions.size();i++){
+      if(!chRegions[i]->getIsResidual()){
+        toReturn++;
+      }
+    }
+    return toReturn;
+  }
+  return chRegions.size();
 }
 
 
@@ -75,39 +75,39 @@ ModelRegion::getNChildren(bool excludeResidual){
 double
 ModelRegion::getVolumes(){
   /// \todo Implement me (but really needed?)
-	return 0;
+  return 0;
 }
 
 vector<double>
 ModelRegion::getVolumes(int fType_h){
   /// \todo Implement me (but really needed?)
-	vector<double> toReturn;
-	return toReturn;
+  vector<double> toReturn;
+  return toReturn;
 }
 
 vector < vector <double> >
 ModelRegion::getVolumes(int fType_h, string dClass_h){
   /// \todo Implement me (but really needed?)
-	vector < vector <double> > toReturn;
-	return toReturn;
+  vector < vector <double> > toReturn;
+  return toReturn;
 }
 
 double
 ModelRegion::getValue(string layerName, int op){
-	int nPx = myPixels.size();
-	double sumvalue=0;
-	for(uint i=0;i<nPx; i++){
-		sumvalue += myPixels[i]->getDoubleValue(layerName,true);
-	}
-	if(op==OP_SUM){
-		return sumvalue;
-	} else if (op == OP_AVG) {
-		return sumvalue/nPx;
-	} else {
-		string thisf = __PRETTY_FUNCTION__;
-		msgOut(MSG_CRITICAL_ERROR, "in "+thisf+", operation not supported");
-	}
-	return 0.;
+  int nPx = myPixels.size();
+  double sumvalue=0;
+  for(uint i=0;i<nPx; i++){
+    sumvalue += myPixels[i]->getDoubleValue(layerName,true);
+  }
+  if(op==OP_SUM){
+    return sumvalue;
+  } else if (op == OP_AVG) {
+    return sumvalue/nPx;
+  } else {
+    string thisf = __PRETTY_FUNCTION__;
+    msgOut(MSG_CRITICAL_ERROR, "in "+thisf+", operation not supported");
+  }
+  return 0.;
 }
 /***
  * It establishs a link between pixels and regions.
@@ -132,9 +132,9 @@ ModelRegion::setMyPixels(){
 void
 ModelRegion::swap(const int& swap_what){
 
-	for(uint i=0;i<myPixels.size();i++) {
-		myPixels[i]->swap(swap_what);
-	}
+  for(uint i=0;i<myPixels.size();i++) {
+    myPixels[i]->swap(swap_what);
+  }
 
 }
 

@@ -43,51 +43,51 @@ class Pixel;
 class ModelRegion : public BaseClass{
 
 public:
-						ModelRegion(ThreadManager* MTHREAD_h, int regId_h, string regSName_h, string regLName_h, int regLevel_h, int parRegId_h, bool isResidual_h); ///< Constructor
-					   ~ModelRegion();
+            ModelRegion(ThreadManager* MTHREAD_h, int regId_h, string regSName_h, string regLName_h, int regLevel_h, int parRegId_h, bool isResidual_h); ///< Constructor
+             ~ModelRegion();
 
-	// "set" methods..
-	void                setRegId(int regId_h){regId = regId_h;};
-	void                setRegSName(string regSName_h){regSName = regSName_h;};
-	void                setRegLName(string regLName_h){regLName = regLName_h;};
-	void                setRegLevel(int regLevel_h){regLevel = regLevel_h;};
-	void                setParRegId(int parRegId_h){parRegId = parRegId_h;};
-	void                setIsResidual(bool isResidual_h){isResidual = isResidual_h;};
-	void                setParent(ModelRegion* parRegion_h){parRegion = parRegion_h;};
-	void                setChildren(vector<ModelRegion*> children_h) {chRegions = children_h;}; ///< Childrens are all the lvel-1 region that are parts of this region.
-	void                addForData(forData* data_h){forDataVector.push_back(data_h);};
-	void                addProdData(prodData* data_h){prodDataVector.push_back(data_h);};
+  // "set" methods..
+  void                setRegId(int regId_h){regId = regId_h;};
+  void                setRegSName(string regSName_h){regSName = regSName_h;};
+  void                setRegLName(string regLName_h){regLName = regLName_h;};
+  void                setRegLevel(int regLevel_h){regLevel = regLevel_h;};
+  void                setParRegId(int parRegId_h){parRegId = parRegId_h;};
+  void                setIsResidual(bool isResidual_h){isResidual = isResidual_h;};
+  void                setParent(ModelRegion* parRegion_h){parRegion = parRegion_h;};
+  void                setChildren(vector<ModelRegion*> children_h) {chRegions = children_h;}; ///< Childrens are all the lvel-1 region that are parts of this region.
+  void                addForData(forData* data_h){forDataVector.push_back(data_h);};
+  void                addProdData(prodData* data_h){prodDataVector.push_back(data_h);};
     void                setMyPixels(); ///< It sets a double link pixels <--> region
-	void                swap(const int& swap_what);
+  void                swap(const int& swap_what);
 
-	// "get" methods..
-	int                 getRegId() {return regId;};
-	string              getRegSName() {return regSName;};
-	string              getRegLName() {return regLName;};
-	int                 getRegLevel() {return regLevel;};
-	int                 getParRegId() {return parRegId;};
-	bool                getIsResidual() {return isResidual;};
-	ModelRegion*        getParent(){return parRegion;}; ///< Returns a pointer to the parent regions
-	vector<ModelRegion*>getChildren(bool excludeResidual = true); ///< Return a vector of pointers to the direct child regions
-	double              getVolumes();
-	vector<double>      getVolumes(int fType_h);
-	double              getValue(string layerName, int op=OP_SUM); ///< return the values of its own pixels for the specified layer. Possible operations: OP_SUM or OP_AVG
-	vector < vector <double> > getVolumes(int fType_h, string dClass_h);
-	int                 getNChildren(bool excludeResidual = true);
-	vector<Pixel*>      getMyPixels(){return myPixels;};
+  // "get" methods..
+  int                 getRegId() {return regId;};
+  string              getRegSName() {return regSName;};
+  string              getRegLName() {return regLName;};
+  int                 getRegLevel() {return regLevel;};
+  int                 getParRegId() {return parRegId;};
+  bool                getIsResidual() {return isResidual;};
+  ModelRegion*        getParent(){return parRegion;}; ///< Returns a pointer to the parent regions
+  vector<ModelRegion*>getChildren(bool excludeResidual = true); ///< Return a vector of pointers to the direct child regions
+  double              getVolumes();
+  vector<double>      getVolumes(int fType_h);
+  double              getValue(string layerName, int op=OP_SUM); ///< return the values of its own pixels for the specified layer. Possible operations: OP_SUM or OP_AVG
+  vector < vector <double> > getVolumes(int fType_h, string dClass_h);
+  int                 getNChildren(bool excludeResidual = true);
+  vector<Pixel*>      getMyPixels(){return myPixels;};
 
 private:
-	int                                regId; ///< Regional unique ID
-	string                          regSName; ///< A short name of the region
-	string                          regLName; ///< Region long name;
-	int                             regLevel; ///< The level of the region. 1: country, 2: regions
-	int                             parRegId; ///< Id of the parent region;
-	bool                          isResidual; ///< A flag if this region should be explicitelly modelled or it is just a residual
-	ModelRegion*                   parRegion; ///< Pointer to the parent region
-	vector<ModelRegion*>           chRegions; ///< Vector of level-1 children regions
-	vector<forData*>           forDataVector; ///< Vector of pointers of forestry data (owned by ModelData)
-	vector<prodData*>         prodDataVector; ///< Vector of pointers of product data (owned by ModelData)
-	vector<Pixel*>                  myPixels; ///< Vector of pixels for this region
+  int                                regId; ///< Regional unique ID
+  string                          regSName; ///< A short name of the region
+  string                          regLName; ///< Region long name;
+  int                             regLevel; ///< The level of the region. 1: country, 2: regions
+  int                             parRegId; ///< Id of the parent region;
+  bool                          isResidual; ///< A flag if this region should be explicitelly modelled or it is just a residual
+  ModelRegion*                   parRegion; ///< Pointer to the parent region
+  vector<ModelRegion*>           chRegions; ///< Vector of level-1 children regions
+  vector<forData*>           forDataVector; ///< Vector of pointers of forestry data (owned by ModelData)
+  vector<prodData*>         prodDataVector; ///< Vector of pointers of product data (owned by ModelData)
+  vector<Pixel*>                  myPixels; ///< Vector of pixels for this region
 
 
 };

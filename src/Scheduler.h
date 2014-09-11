@@ -40,17 +40,17 @@ This class is responsable to manage the time-dimension of the program.
 class Scheduler: public BaseClass{
 
 public:
-	                    Scheduler(ThreadManager* MTHREAD_h);
-	                   ~Scheduler();
-	void                run();
-	int                 getIteration(){return iteration;};
-	int                 getYear(){return year;}
-	int                 setYear(const int& year_h){year = year_h;}
-	int                 advanceYear(){year += 1;}
+                      Scheduler(ThreadManager* MTHREAD_h);
+                     ~Scheduler();
+  void                run();
+  int                 getIteration(){return iteration;};
+  int                 getYear(){return year;}
+  int                 setYear(const int& year_h){year = year_h;}
+  int                 advanceYear(){year += 1;}
 
 private:
-	int                                iteration;
-	int                                     year;
+  int                                iteration;
+  int                                     year;
 
 };
 

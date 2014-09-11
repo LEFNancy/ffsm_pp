@@ -44,63 +44,63 @@ Class responsable to output  the data, both as all kind of log as well as georef
 */
 class Output: public BaseClass{
 public:
-	                    Output(ThreadManager* MTHREAD_h); ///< Constructor
-	                   ~Output();
+                      Output(ThreadManager* MTHREAD_h); ///< Constructor
+                     ~Output();
 
-	void                initOutput();
-		void                commonInit();
-		void                initOutputMaps();
-		void                initOutputForestData();
-		void                initOutputProductData();
-		void                initOptimisationLog();
+  void                initOutput();
+    void                commonInit();
+    void                initOutputMaps();
+    void                initOutputForestData();
+    void                initOutputProductData();
+    void                initOptimisationLog();
     void                initDebugOutput();
     void                initCarbonBalance();
-	void                print();
+  void                print();
     void                printMaps();
     void                printForestData(bool finalFlush=false);
     void                printProductData(bool finalFlush=false);
     void                printCarbonBalance();
   void                printFinalOutput();
   void                printDebugOutput();
-	void                printOptLog(bool optimal, int &nIterations, double &obj);
-	char                getOutputFieldDelimiter();
-	void                cleanScenario(string fileName, string scenarioName, char d);
+  void                printOptLog(bool optimal, int &nIterations, double &obj);
+  char                getOutputFieldDelimiter();
+  void                cleanScenario(string fileName, string scenarioName, char d);
 
     vector <vector < vector <vector <vector <double> > > > > expReturnsDebug; ///< l2_region, for type, d.c., pr prod, variable name
     vector <string>       expReturnsDebugVariables;
 
 private:
-	int                                      oLevel;
-	char                                          d;
-	int                                      inYear;
-	int                                      nYears;
-	string                                  baseDir;
-	string                                     oDir;
-	string                             scenarioName;
-	string                                 oFileExt;
-	bool                                 oHRedeable;
-	bool                                oSingleFile;
-	vector<int>                              oYears;
-	int                                   wRegId_l1;
-	int                                   wRegId_l2;
-	string                              outFileName;
-	vector <string>                 outForVariables;
-	vector <string>                outProdVariables;
-	int                                outStepRange;
-	bool                   forestDiamDetailedOutput;
-	vector<string>                           priPr;
-	vector<string>                           secPr;
-	vector<string>                           allPr;
-	vector<int>                           l1regIds;
-	vector < vector <int> >                    l2r;
-	vector <string>                         fTypes;
+  int                                      oLevel;
+  char                                          d;
+  int                                      inYear;
+  int                                      nYears;
+  string                                  baseDir;
+  string                                     oDir;
+  string                             scenarioName;
+  string                                 oFileExt;
+  bool                                 oHRedeable;
+  bool                                oSingleFile;
+  vector<int>                              oYears;
+  int                                   wRegId_l1;
+  int                                   wRegId_l2;
+  string                              outFileName;
+  vector <string>                 outForVariables;
+  vector <string>                outProdVariables;
+  int                                outStepRange;
+  bool                   forestDiamDetailedOutput;
+  vector<string>                           priPr;
+  vector<string>                           secPr;
+  vector<string>                           allPr;
+  vector<int>                           l1regIds;
+  vector < vector <int> >                    l2r;
+  vector <string>                         fTypes;
     vector <string>                       dClasses; /// includes an empty string for variables without diameter attribute
     vector <string>                      pDClasses; ///< production diameter classes: exclude the fist diameter class below 15 cm
-	int                                     nPriPr;
-	int                                     nSecPr;
-	int                                     nAllPr;
-	int                                       nL2r;
-	string                             logFilename;
+  int                                     nPriPr;
+  int                                     nSecPr;
+  int                                     nAllPr;
+  int                                       nL2r;
+  string                             logFilename;
     string                           debugFilename;
     bool                                    spMode; // spatial mode ?
 };

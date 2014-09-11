@@ -41,35 +41,35 @@ class MapBox : public QWidget {
 
 public:
                         MapBox(QWidget *parent = 0);
-	int                 getLayerIndex(QString layerName_h=""); ///< Return the index of the specified layer (null to ask for the current one)
+  int                 getLayerIndex(QString layerName_h=""); ///< Return the index of the specified layer (null to ask for the current one)
 
 public slots:
-	void                updatePixel(QString layerName_h, int x_h, int y_h, QColor color_h);
-	void                updateImage(QString layerName_h, const QImage& image_h);
-	void                switchToLayer(QString layerName_h); ///< Change the layer that currentLayer and currentLayerName points
-	void                addLayer(QString layerName_h);
-	void                fitInWindow();
-	void                zoom(double zoomFactor);
-	void                scroll(int deltaX, int deltaY);
+  void                updatePixel(QString layerName_h, int x_h, int y_h, QColor color_h);
+  void                updateImage(QString layerName_h, const QImage& image_h);
+  void                switchToLayer(QString layerName_h); ///< Change the layer that currentLayer and currentLayerName points
+  void                addLayer(QString layerName_h);
+  void                fitInWindow();
+  void                zoom(double zoomFactor);
+  void                scroll(int deltaX, int deltaY);
 
 signals:
-	void                queryRequestOnPx(int px_ID, int currentLayerIndex, bool newRequest);
+  void                queryRequestOnPx(int px_ID, int currentLayerIndex, bool newRequest);
 
 private:
-	void                updatePixmap(const QImage &image, bool reFit=false);
-	void                paintEvent(QPaintEvent *event); ///< Reimplementation of the standard paintEvent method.
-	void                prepareQueryEvent(QPoint click);
-	void                keyPressEvent(QKeyEvent *event);
-	void                wheelEvent(QWheelEvent *event);
-	void                mousePressEvent(QMouseEvent *event);
-	void                mouseMoveEvent(QMouseEvent *event);
-	vector <QImage>                 layersVector; ///< Vector of QImages
-	vector <QString>            layersNameVector; ///< Vector of layer names
-	QImage                          currentLayer;
-	QString                     currentLayerName;
-	QPoint lastDragPos;
-	double sx1, sy1, sx2, sy2; ///< coordinates of corner pixels of source - pixmap - rectangle
-	double dx1, dy1, dx2, dy2; ///< coordinates of corner pixels of destination - widget - rectangle	
+  void                updatePixmap(const QImage &image, bool reFit=false);
+  void                paintEvent(QPaintEvent *event); ///< Reimplementation of the standard paintEvent method.
+  void                prepareQueryEvent(QPoint click);
+  void                keyPressEvent(QKeyEvent *event);
+  void                wheelEvent(QWheelEvent *event);
+  void                mousePressEvent(QMouseEvent *event);
+  void                mouseMoveEvent(QMouseEvent *event);
+  vector <QImage>                 layersVector; ///< Vector of QImages
+  vector <QString>            layersNameVector; ///< Vector of layer names
+  QImage                          currentLayer;
+  QString                     currentLayerName;
+  QPoint lastDragPos;
+  double sx1, sy1, sx2, sy2; ///< coordinates of corner pixels of source - pixmap - rectangle
+  double dx1, dy1, dx2, dy2; ///< coordinates of corner pixels of destination - widget - rectangle  
 
 };
 

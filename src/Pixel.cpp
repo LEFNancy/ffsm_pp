@@ -24,7 +24,7 @@
 
 Pixel::Pixel(double ID_h, ThreadManager* MTHREAD_h): ID(ID_h)
 {
-	MTHREAD=MTHREAD_h;
+  MTHREAD=MTHREAD_h;
     int nft = MTHREAD->MD->getForTypeIds().size();
     vector<double> temp(nft,1);
     //vector<double> temp2(nft,0);
@@ -49,73 +49,73 @@ Fully tested on internal points as well semi-border cases, border cases and corn
 vector <Pixel *>
 Pixel::getPixelsAtDistLevel(int distLevel_h) const{
 
-	if (distLevel_h<1) {
-		msgOut(MSG_CRITICAL_ERROR, "getPixelsAtDistLevel() is defined for distances of at least 1 !");
-	}
+  if (distLevel_h<1) {
+    msgOut(MSG_CRITICAL_ERROR, "getPixelsAtDistLevel() is defined for distances of at least 1 !");
+  }
 
-	vector <Pixel *> toReturn;
-	int xNPixels = MTHREAD->GIS->getXNPixels();
-	int yNPixels = MTHREAD->GIS->getYNPixels();
-	int thisX = this->getX();
-	int thisY = this->getY();
-	int minX = max(0        , (thisX - distLevel_h)+1);
-	int maxX = min(xNPixels , thisX + distLevel_h);
-	int minY = max(0        , (thisY - distLevel_h)+1);
-	int maxY = min(yNPixels , thisY + distLevel_h);
+  vector <Pixel *> toReturn;
+  int xNPixels = MTHREAD->GIS->getXNPixels();
+  int yNPixels = MTHREAD->GIS->getYNPixels();
+  int thisX = this->getX();
+  int thisY = this->getY();
+  int minX = max(0        , (thisX - distLevel_h)+1);
+  int maxX = min(xNPixels , thisX + distLevel_h);
+  int minY = max(0        , (thisY - distLevel_h)+1);
+  int maxY = min(yNPixels , thisY + distLevel_h);
 
-	// getting the top pixels (corner exluded)...
-	if (thisY-distLevel_h >=0){
-		for(int i=minX;i<maxX;i++){
-			toReturn.push_back(MTHREAD->GIS->getPixel(i,thisY-distLevel_h));
-		}
-	}
-	// getting the right pixels (corner exluded)...
-	if (thisX+distLevel_h < xNPixels){
-		for(int i=minY;i<maxY;i++){
-			toReturn.push_back(MTHREAD->GIS->getPixel(thisX+distLevel_h,i));
-		}
-	}
-	// getting the bottom pixels (corner exluded)...
-	if (thisY+distLevel_h < yNPixels){
-		for(int i=minX;i<maxX;i++){
-			toReturn.push_back(MTHREAD->GIS->getPixel(i,thisY+distLevel_h));
-		}
-	}
-	// getting the left pixels (corner exluded)...
-	if (thisX-distLevel_h >= 0){
-		for(int i=minY;i<maxY;i++){
-			toReturn.push_back(MTHREAD->GIS->getPixel(thisX-distLevel_h,i));
-		}
-	}
+  // getting the top pixels (corner exluded)...
+  if (thisY-distLevel_h >=0){
+    for(int i=minX;i<maxX;i++){
+      toReturn.push_back(MTHREAD->GIS->getPixel(i,thisY-distLevel_h));
+    }
+  }
+  // getting the right pixels (corner exluded)...
+  if (thisX+distLevel_h < xNPixels){
+    for(int i=minY;i<maxY;i++){
+      toReturn.push_back(MTHREAD->GIS->getPixel(thisX+distLevel_h,i));
+    }
+  }
+  // getting the bottom pixels (corner exluded)...
+  if (thisY+distLevel_h < yNPixels){
+    for(int i=minX;i<maxX;i++){
+      toReturn.push_back(MTHREAD->GIS->getPixel(i,thisY+distLevel_h));
+    }
+  }
+  // getting the left pixels (corner exluded)...
+  if (thisX-distLevel_h >= 0){
+    for(int i=minY;i<maxY;i++){
+      toReturn.push_back(MTHREAD->GIS->getPixel(thisX-distLevel_h,i));
+    }
+  }
 
-	// getting the corners (correctly at the end, after already retrieved the other pixels..)...
-	// top-left..
-	if (thisX-distLevel_h >= 0 && thisY-distLevel_h >=0){
-		toReturn.push_back(MTHREAD->GIS->getPixel(thisX-distLevel_h,thisY-distLevel_h));
-	}
-	// top-right..
-	if (thisX+distLevel_h < xNPixels && thisY-distLevel_h >=0){
-		toReturn.push_back(MTHREAD->GIS->getPixel(thisX+distLevel_h,thisY-distLevel_h));
-	}
-	// bottom-right..
-	if (thisX+distLevel_h < xNPixels && thisY+distLevel_h <yNPixels){ // bug discovered 20070719
-		toReturn.push_back(MTHREAD->GIS->getPixel(thisX+distLevel_h,thisY+distLevel_h));
-	}
-	// bottom-left..
-	if (thisX-distLevel_h >= 0 && thisY+distLevel_h <yNPixels){
-		toReturn.push_back(MTHREAD->GIS->getPixel(thisX-distLevel_h,thisY+distLevel_h));
-	}
-	return toReturn;
+  // getting the corners (correctly at the end, after already retrieved the other pixels..)...
+  // top-left..
+  if (thisX-distLevel_h >= 0 && thisY-distLevel_h >=0){
+    toReturn.push_back(MTHREAD->GIS->getPixel(thisX-distLevel_h,thisY-distLevel_h));
+  }
+  // top-right..
+  if (thisX+distLevel_h < xNPixels && thisY-distLevel_h >=0){
+    toReturn.push_back(MTHREAD->GIS->getPixel(thisX+distLevel_h,thisY-distLevel_h));
+  }
+  // bottom-right..
+  if (thisX+distLevel_h < xNPixels && thisY+distLevel_h <yNPixels){ // bug discovered 20070719
+    toReturn.push_back(MTHREAD->GIS->getPixel(thisX+distLevel_h,thisY+distLevel_h));
+  }
+  // bottom-left..
+  if (thisX-distLevel_h >= 0 && thisY+distLevel_h <yNPixels){
+    toReturn.push_back(MTHREAD->GIS->getPixel(thisX-distLevel_h,thisY+distLevel_h));
+  }
+  return toReturn;
 } 
 
 /*void //moved as inline function
 Pixel::setValue(const string & layerName_h, const double & value_h){
 
-	//tempValuePair.first = layerName_h;     // type of first is string
-	//tempValuePair.second = value_h;            // type of second is double
-	//tempValuePair = make_pair (layerName_h,value_h);
-	values.insert(pair<string, double>(layerName_h, value_h));
-	//values.insert(tempValuePair);
+  //tempValuePair.first = layerName_h;     // type of first is string
+  //tempValuePair.second = value_h;            // type of second is double
+  //tempValuePair = make_pair (layerName_h,value_h);
+  values.insert(pair<string, double>(layerName_h, value_h));
+  //values.insert(tempValuePair);
 
 
 }*/
@@ -123,51 +123,51 @@ Pixel::setValue(const string & layerName_h, const double & value_h){
 /*
 inline void
 Pixel::setValue (const string& parName, const string& forName, const string& dClass, const int& year, const double& value_h){
-	values.insert(pair<string, double>(MTHREAD->GIS->pack(parName, forName, dClass, year), value_h));
+  values.insert(pair<string, double>(MTHREAD->GIS->pack(parName, forName, dClass, year), value_h));
 }
 */
 
 
 void
 Pixel::changeValue(const string &layerName_h, const double &value_h, const bool &setNoValueForZero){
-	map<string, double>::iterator p;
-	p=values.find(layerName_h);
-	if(p != values.end()){
-		if(setNoValueForZero && value_h == 0){
-			p->second = MTHREAD->GIS->getNoValue();
-		} else {
-			p->second = value_h;
-		}
-	} else {
-		msgOut(MSG_ERROR, "Coud not change pixel value for layer "+layerName_h+". Layer don't found.");
-	}
-	return;
+  map<string, double>::iterator p;
+  p=values.find(layerName_h);
+  if(p != values.end()){
+    if(setNoValueForZero && value_h == 0){
+      p->second = MTHREAD->GIS->getNoValue();
+    } else {
+      p->second = value_h;
+    }
+  } else {
+    msgOut(MSG_ERROR, "Coud not change pixel value for layer "+layerName_h+". Layer don't found.");
+  }
+  return;
 }
 
 /*
 void
 Pixel::changeValue (const double &value_h, const string& parName, const string& forName, const string &dClass, const int &year, const bool &setNoValueForZero){
-	changeValue(MTHREAD->GIS->pack(parName, forName, dClass, year), value_h, setNoValueForZero);
+  changeValue(MTHREAD->GIS->pack(parName, forName, dClass, year), value_h, setNoValueForZero);
 }
 */
 
 double
 Pixel::getDoubleValue(const string &layerName_h, const bool &returnZeroForNoValue) const{
-	vIter=values.find(layerName_h);
-	if(vIter != values.end()) {
-		if(returnZeroForNoValue && vIter->second==MTHREAD->GIS->getNoValue()){
-			return 0.0;
-		} else {
-			return vIter->second;
-		}
-	} else {
-		msgOut(MSG_WARNING, "No layer \""+layerName_h+"\" found on pixel ("+i2s(getX())+","+i2s(getY())+"). Sure you didn't mispelled it?");
-		if(returnZeroForNoValue){
-			return 0.0;
-		} else {
-			return MTHREAD->GIS->getNoValue();
-		}
-	}
+  vIter=values.find(layerName_h);
+  if(vIter != values.end()) {
+    if(returnZeroForNoValue && vIter->second==MTHREAD->GIS->getNoValue()){
+      return 0.0;
+    } else {
+      return vIter->second;
+    }
+  } else {
+    msgOut(MSG_WARNING, "No layer \""+layerName_h+"\" found on pixel ("+i2s(getX())+","+i2s(getY())+"). Sure you didn't mispelled it?");
+    if(returnZeroForNoValue){
+      return 0.0;
+    } else {
+      return MTHREAD->GIS->getNoValue();
+    }
+  }
 }
 
 /**
@@ -180,7 +180,7 @@ double
 Pixel::getMultiplier (const string& multiplierName, const string& forName, int year){
 
 
-	if(year==DATA_NOW){year = MTHREAD->SCD->getYear();}
+  if(year==DATA_NOW){year = MTHREAD->SCD->getYear();}
 
 
     double multiplierSpVar = (multiplierName == "tp_multiplier")?getSpModifier(forName):1.0;
@@ -200,14 +200,14 @@ Pixel::getMultiplier (const string& multiplierName, const string& forName, int y
       if(!MTHREAD->MD->getBoolSetting("usePixelData")) return 1.0;
       string search_for = multiplierName+"#"+forName+"##"+i2s(year);
       map <string,double>::const_iterator i = values.upper_bound(search_for); //return the position always upper to the found one, even if it's an equal match.
-      if(i!= values.begin())	i--; // this rewind the position to the one just before or equal
+      if(i!= values.begin())  i--; // this rewind the position to the one just before or equal
       const string& key = i->first;
       string search_base = search_for.substr(0,search_for.size()-4);
       if (key.compare(0, search_base.size(), search_base) == 0){
           //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
           //if(i->second != 1){
-          //	cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
-          //	exit(0);
+          //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
+          //  exit(0);
           //}
           return i->second*multiplierSpVar;
       } else {
@@ -222,18 +222,18 @@ Pixel::getMultiplier (const string& multiplierName, const string& forName, int y
 
 void
 Pixel::correctInputMultiplier (const string& multiplierName, const string& forName, double coefficient){
-	string search_for = multiplierName+"#"+forName+"#";
-	for (std::map<string,double>::iterator it=values.lower_bound(search_for); it!=values.end(); ++it){
-		if (it->first.compare(0, search_for.size(), search_for) == 0){
+  string search_for = multiplierName+"#"+forName+"#";
+  for (std::map<string,double>::iterator it=values.lower_bound(search_for); it!=values.end(); ++it){
+    if (it->first.compare(0, search_for.size(), search_for) == 0){
             //cout << ID << ";" << forName << ";" << coefficient << endl;
-			it->second = it->second * coefficient;
-		}
-	}
+      it->second = it->second * coefficient;
+    }
+  }
 }
 
 double
 Pixel::getDoubleValue (const string& parName, const string& forName, const string& dClass, const int& year, const  bool& returnZeroForNoValue){
-	return getDoubleValue(MTHREAD->GIS->pack(parName, forName, dClass, year), returnZeroForNoValue);
+  return getDoubleValue(MTHREAD->GIS->pack(parName, forName, dClass, year), returnZeroForNoValue);
 }
 
 void
@@ -243,48 +243,48 @@ Pixel::newYear(){
 
 double
 Pixel::getPastRegArea(const int& ft_idx, const int& year){
-	map <int,vector<double> >::const_iterator i=regArea.find(year);
-	if(i != regArea.end()) {
-		return i->second.at(ft_idx);
-	} else {
-		msgOut(MSG_ERROR, "Asking for a pastRegArea of a not-registered year. I don't have year "+i2s(year)+"!");
-	}
+  map <int,vector<double> >::const_iterator i=regArea.find(year);
+  if(i != regArea.end()) {
+    return i->second.at(ft_idx);
+  } else {
+    msgOut(MSG_ERROR, "Asking for a pastRegArea of a not-registered year. I don't have year "+i2s(year)+"!");
+  }
 }
 
 void
 Pixel::setPastRegArea(const double& value, const int& ft_idx, const int& year){
-	msgOut(MSG_CRITICAL_ERROR,"TODO");
-	/*map <int,vector<double> >::const_iterator i=regArea.find(year);
-	if(i != regArea.end()) {
-		// we already have this year, let's see if the vector is bif enough
-		int currsize = i->second.size();
-		for(j=0;j<ft_idx-currside;j++){
+  msgOut(MSG_CRITICAL_ERROR,"TODO");
+  /*map <int,vector<double> >::const_iterator i=regArea.find(year);
+  if(i != regArea.end()) {
+    // we already have this year, let's see if the vector is bif enough
+    int currsize = i->second.size();
+    for(j=0;j<ft_idx-currside;j++){
 
-		}
-		return i->second.at(ft_idx);
-	} else {
-		// new year
-	}
+    }
+    return i->second.at(ft_idx);
+  } else {
+    // new year
+  }
 
 
-	pair<int,vector<double> newRegArea;
-	*/
+  pair<int,vector<double> newRegArea;
+  */
 
 
 }
 
 void
 Pixel::swap(const int& swap_what){
-	switch (swap_what){
-		case VAR_VOL:
-			vol_l = vol;
-			break;
+  switch (swap_what){
+    case VAR_VOL:
+      vol_l = vol;
+      break;
         case VAR_AREA:
             area_l = area;
             break;
-		default:
-			msgOut(MSG_CRITICAL_ERROR,"Don't know how to swap "+swap_what);
-	}
+    default:
+      msgOut(MSG_CRITICAL_ERROR,"Don't know how to swap "+swap_what);
+  }
 }
 
 

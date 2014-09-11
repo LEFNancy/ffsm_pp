@@ -57,8 +57,8 @@ TEMPLATE = app
 DEPENDPATH += ". agents"
 CONFIG += warn_on \
           qt \
-	    thread \
-	    debug_and_release
+      thread \
+      debug_and_release
 #CONFIG -= release
 
 QMAKE_CXXFLAGS += -std=c++0x

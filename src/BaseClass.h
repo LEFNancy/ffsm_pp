@@ -106,15 +106,15 @@ enum emissionType {
 };
 
 enum contrainDirection {
-	CONSTR_EQ              =1, // constrain of type equality
-	CONSTR_LE0             =2, // constrain of type lower or equal than 0
+  CONSTR_EQ              =1, // constrain of type equality
+  CONSTR_LE0             =2, // constrain of type lower or equal than 0
   CONSTR_GE0             =3, // constrain of type greater or equal 0
 };
 
 enum varType {
-	VAR_VOL                =1,
-	VAR_AREA               =2,
-	VAR_IN                 =3
+  VAR_VOL                =1,
+  VAR_AREA               =2,
+  VAR_IN                 =3
 
 };
 
@@ -165,60 +165,60 @@ It provides common methods in all parts of the application for printing the outp
 class BaseClass{
 
 public:
-	                    BaseClass();
-	                   ~BaseClass();
+                      BaseClass();
+                     ~BaseClass();
 
-	void                msgOut(const int& msgCode_h, const string& msg_h, const bool& refreshGUI_h=true) const; ///< Overloaded function to print the output log
-	void                msgOut(const int& msgCode_h, const int& msg_h, const bool& refreshGUI_h=true)    const; ///< Overloaded function to print the output log
-	void                msgOut(const int& msgCode_h, const double& msg_h, const bool& refreshGUI_h=true) const; ///< Overloaded function to print the output log
+  void                msgOut(const int& msgCode_h, const string& msg_h, const bool& refreshGUI_h=true) const; ///< Overloaded function to print the output log
+  void                msgOut(const int& msgCode_h, const int& msg_h, const bool& refreshGUI_h=true)    const; ///< Overloaded function to print the output log
+  void                msgOut(const int& msgCode_h, const double& msg_h, const bool& refreshGUI_h=true) const; ///< Overloaded function to print the output log
 
-	int                 s2i (const string& string_h)         const; ///<  string  to integer conversion
-	double              s2d (const string& string_h) const; ///<  string  to double  conversion
-	double              s2d (const string& string_h, const bool& replaceComma) const; ///<  string  to double  conversion
-	bool                s2b (const string& string_h)          const; ///<  string  to bool    conversion
-	// as of 20120909 c++11 to_string(), stoi and stod functions not working in MinGw, as bug http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52015
-	// reverting to old code :-(
-	//string              i2s (const int& int_h)       const {return to_string(int_h);};    ///<  integer to string  conversion
-	//string              d2s (const double& double_h) const {return to_string(double_h);}; ///<  double  to string  conversion
-	string              i2s (const int& int_h)               const; ///<  integer to string  conversion
-	string              d2s (const double& double_h)         const; ///<  double  to string  conversion
-	string              b2s (const bool& bool_h)             const; ///<  bool    to string  conversion
+  int                 s2i (const string& string_h)         const; ///<  string  to integer conversion
+  double              s2d (const string& string_h) const; ///<  string  to double  conversion
+  double              s2d (const string& string_h, const bool& replaceComma) const; ///<  string  to double  conversion
+  bool                s2b (const string& string_h)          const; ///<  string  to bool    conversion
+  // as of 20120909 c++11 to_string(), stoi and stod functions not working in MinGw, as bug http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52015
+  // reverting to old code :-(
+  //string              i2s (const int& int_h)       const {return to_string(int_h);};    ///<  integer to string  conversion
+  //string              d2s (const double& double_h) const {return to_string(double_h);}; ///<  double  to string  conversion
+  string              i2s (const int& int_h)               const; ///<  integer to string  conversion
+  string              d2s (const double& double_h)         const; ///<  double  to string  conversion
+  string              b2s (const bool& bool_h)             const; ///<  bool    to string  conversion
 
-	vector<int>         s2i (const vector<string>& string_h) const; ///<  string  to integer conversion (vector)
-	vector<double>      s2d (const vector<string>& string_h, const bool& replaceComma = false) const; ///<  string to double conversion (vector)
-	vector<bool>        s2b (const vector<string>& string_h) const; ///<  string  to bool    conversion (vector)
-	vector<string>      i2s (const vector<int>& int_h)       const; ///<  integer to string  conversion (vector)
-	vector<string>      d2s (const vector<double>& double_h) const; ///<  double  to string  conversion (vector)
-	vector<string>      b2s (const vector<bool>& bool_h)     const; ///<  bool    to string  conversion (vector)
+  vector<int>         s2i (const vector<string>& string_h) const; ///<  string  to integer conversion (vector)
+  vector<double>      s2d (const vector<string>& string_h, const bool& replaceComma = false) const; ///<  string to double conversion (vector)
+  vector<bool>        s2b (const vector<string>& string_h) const; ///<  string  to bool    conversion (vector)
+  vector<string>      i2s (const vector<int>& int_h)       const; ///<  integer to string  conversion (vector)
+  vector<string>      d2s (const vector<double>& double_h) const; ///<  double  to string  conversion (vector)
+  vector<string>      b2s (const vector<bool>& bool_h)     const; ///<  bool    to string  conversion (vector)
 
   int                 getType(const string &type_h) const; ///< Return a type according to enum TYPE_* from a string (eg: "string" -> TYPE_STRING (2))
   void                refreshGUI() const;                  ///< Ping to periodically return the control to the GUI
 
-	//string intToString(int x);
-	template<typename T> string toString(const T& x) const;      // string s = toString(x);
-	template<typename T> T stringTo(const std::string& s) const; // e.g. int x = stringTo<int>("123");
+  //string intToString(int x);
+  template<typename T> string toString(const T& x) const;      // string s = toString(x);
+  template<typename T> T stringTo(const std::string& s) const; // e.g. int x = stringTo<int>("123");
 
-	// vector and vector of vector sums
-	int                   vSum(const vector<int>& vector_h) const {return accumulate(vector_h.begin(),vector_h.end(),0);};
-	double                vSum(const vector<double>& vector_h) const {return accumulate(vector_h.begin(),vector_h.end(),0.);};
-	int                   vSum(const vector< vector <int> >& vector_h) const;
-	double                vSum(const vector< vector <double> >& vector_h) const;
+  // vector and vector of vector sums
+  int                   vSum(const vector<int>& vector_h) const {return accumulate(vector_h.begin(),vector_h.end(),0);};
+  double                vSum(const vector<double>& vector_h) const {return accumulate(vector_h.begin(),vector_h.end(),0.);};
+  int                   vSum(const vector< vector <int> >& vector_h) const;
+  double                vSum(const vector< vector <double> >& vector_h) const;
 
-	/// Tokenize a string using a delimiter (default is space)
-	void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ") const;
+  /// Tokenize a string using a delimiter (default is space)
+  void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ") const;
 
   /// Lookup a map for a value. Return the value starting from the key
   template <typename K, typename V> V findMap(const map <K, V> &mymap, const K& key, const int& error_level=MSG_CRITICAL_ERROR, const V &notFoundValue=numeric_limits<V>::min()) const{
-		typename map<K, V>::const_iterator p;
-		p=mymap.find(key);
-		if(p != mymap.end()) {
-			return p->second;
-		}
-		else {
-			msgOut(error_level, "Error in finding a value in a map (no value found)");
+    typename map<K, V>::const_iterator p;
+    p=mymap.find(key);
+    if(p != mymap.end()) {
+      return p->second;
+    }
+    else {
+      msgOut(error_level, "Error in finding a value in a map (no value found)");
       return notFoundValue;
-		}
-	}
+    }
+  }
 
   /// Change the value stored in a map given the key and the new value
   template <typename K, typename V> void changeMapValue(map <K, V> &mymap, const K& key, const V& value, const int& error_level=MSG_CRITICAL_ERROR){
@@ -308,16 +308,16 @@ public:
 
 protected:
 
-	/**
+  /**
   * Through this pointer each derived subclass (the vast maiority of those used on FFSM) can "ask"
   * for sending signals to the GUI, like append the log or modify the map.
-	*/
-	ThreadManager*                         MTHREAD; ///< Pointer to the Thread manager.
-	// ATTENTION
-	// I can't create member variables to host return values as these would break all the const mechanism..
+  */
+  ThreadManager*                         MTHREAD; ///< Pointer to the Thread manager.
+  // ATTENTION
+  // I can't create member variables to host return values as these would break all the const mechanism..
 
 private:
-	void msgOut2(const int& msgCode_h, const string& msg_h, const bool& refreshGUI_h) const; ///< Do the job of the overloaded functions
+  void msgOut2(const int& msgCode_h, const string& msg_h, const bool& refreshGUI_h) const; ///< Do the job of the overloaded functions
 
 };
 

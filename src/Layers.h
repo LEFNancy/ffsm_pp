@@ -47,62 +47,62 @@ Layer class (setting, legend...)
 class Layers : public BaseClass{
 
 public:
-	/// In the constructor we set the main layer properties
-	                    Layers(  ThreadManager*     MTHREAD_h,
-	                             string                name_h,
-	                             string               label_h,
-	                             bool             isInteger_h,
-	                             bool        dynamicContent_h,
-															 string        fullFilename_h,
-															 bool               display_h=true);
-	                   ~Layers();
-	/// Add a legend item. @see LegendItems
-	void                addLegendItem( int             ID_h,
-	                                   string       label_h,
-	                                   int         rColor_h,
-	                                   int         gColor_h,
-	                                   int         bColor_h,
-	                                   double    minValue_h,
-	                                   double    maxValue_h   );
-	void                addLegendItems(vector <LegendItems> legendItems_h);
-	vector<LegendItems> getLegendItems(){return legendItems;};
+  /// In the constructor we set the main layer properties
+                      Layers(  ThreadManager*     MTHREAD_h,
+                               string                name_h,
+                               string               label_h,
+                               bool             isInteger_h,
+                               bool        dynamicContent_h,
+                               string        fullFilename_h,
+                               bool               display_h=true);
+                     ~Layers();
+  /// Add a legend item. @see LegendItems
+  void                addLegendItem( int             ID_h,
+                                     string       label_h,
+                                     int         rColor_h,
+                                     int         gColor_h,
+                                     int         bColor_h,
+                                     double    minValue_h,
+                                     double    maxValue_h   );
+  void                addLegendItems(vector <LegendItems> legendItems_h);
+  vector<LegendItems> getLegendItems(){return legendItems;};
 
-	/// Evaluates all the legend items to find the one that match the input code, and return its color as a QColor
-	QColor              getColor(double ID_h);
-	/// Evaluates all the legend items to find the one that match the input code, and return its label
-	string              getCategory(double ID_h);
-	/// Add a reclassification filter rule. @see ReclassRules
-	void                addReclassificationRule(int inCode_h, int outCode_h, double p_h);
-	/// Used to reclassify the land use map for "generic" categories
-	double              filterExogenousDataset(double code_h);
-	/// Count the pixels going to each legend item and print them if debug==true
-	void                countMyPixels(bool debug=false);
-	/// For some sensitivity analisys, random the values for this layer for not-empty values (only integer layers)
-	void                randomShuffle();
-	/// Return if the layer is integer or not (If integer on each legend item: minValue==maxValue==ID)
-	bool                getIsInteger() {return isInteger;}
-	/// Print the layer content as an ASCII grid map with its companion files (classification and colors). It always print the whole region, even when subregion is actived.
-	void                print();
-	/// Print a binary reppresentation of the data (a standard image, e.g. a .png file). It prints only the subregion if this is active.
-	void                printBinMap();
+  /// Evaluates all the legend items to find the one that match the input code, and return its color as a QColor
+  QColor              getColor(double ID_h);
+  /// Evaluates all the legend items to find the one that match the input code, and return its label
+  string              getCategory(double ID_h);
+  /// Add a reclassification filter rule. @see ReclassRules
+  void                addReclassificationRule(int inCode_h, int outCode_h, double p_h);
+  /// Used to reclassify the land use map for "generic" categories
+  double              filterExogenousDataset(double code_h);
+  /// Count the pixels going to each legend item and print them if debug==true
+  void                countMyPixels(bool debug=false);
+  /// For some sensitivity analisys, random the values for this layer for not-empty values (only integer layers)
+  void                randomShuffle();
+  /// Return if the layer is integer or not (If integer on each legend item: minValue==maxValue==ID)
+  bool                getIsInteger() {return isInteger;}
+  /// Print the layer content as an ASCII grid map with its companion files (classification and colors). It always print the whole region, even when subregion is actived.
+  void                print();
+  /// Print a binary reppresentation of the data (a standard image, e.g. a .png file). It prints only the subregion if this is active.
+  void                printBinMap();
 
-	string              getName() const {return name;}
-	/// Return the filename of the associated dataset
-	string              getFilename(){return fullFileName;}
-	/// Return true if the content may change during simulation period
-	bool                getDynamicContent(){return dynamicContent;}
-	bool                getDisplay(){return display;}
+  string              getName() const {return name;}
+  /// Return the filename of the associated dataset
+  string              getFilename(){return fullFileName;}
+  /// Return true if the content may change during simulation period
+  bool                getDynamicContent(){return dynamicContent;}
+  bool                getDisplay(){return display;}
 
 
 private:
-	string                                  name; ///< ID of the layer (no spaces allowed)
-	string                                 label; ///< Label of the layer (spaces allowed)
-	bool                               isInteger; ///< Type of the layer (true==integer, false==double. If true, on each legend item: minValue==maxValue==ID)
-	bool                          dynamicContent; ///< True if the content may change during simulation year
-	bool                                 display; ///< Normally true, but some layers used to just keep data shoudn't be normally processed
-	string                          fullFileName; ///< Filename of the associated dataset (map)	
-	vector<LegendItems>              legendItems; ///< Vector of legend items. @see LegendItems
-	vector<ReclassRules>      reclassRulesVector; ///< Vector of initial reclassification rules. @see ReclassRules
+  string                                  name; ///< ID of the layer (no spaces allowed)
+  string                                 label; ///< Label of the layer (spaces allowed)
+  bool                               isInteger; ///< Type of the layer (true==integer, false==double. If true, on each legend item: minValue==maxValue==ID)
+  bool                          dynamicContent; ///< True if the content may change during simulation year
+  bool                                 display; ///< Normally true, but some layers used to just keep data shoudn't be normally processed
+  string                          fullFileName; ///< Filename of the associated dataset (map)  
+  vector<LegendItems>              legendItems; ///< Vector of legend items. @see LegendItems
+  vector<ReclassRules>      reclassRulesVector; ///< Vector of initial reclassification rules. @see ReclassRules
 };
 
 /// Legend items
@@ -113,14 +113,14 @@ Struct containing data about the programm settings.
 @author Antonello Lobianco
 */
 struct LegendItems {
-	int                                       ID;
-	string                                 label;
-	int                                   rColor;
-	int                                   gColor;
-	int                                   bColor;
-	double                              minValue;
-	double                              maxValue;
-	int                              cashedCount; ///< count the pixels whitin a item range
+  int                                       ID;
+  string                                 label;
+  int                                   rColor;
+  int                                   gColor;
+  int                                   bColor;
+  double                              minValue;
+  double                              maxValue;
+  int                              cashedCount; ///< count the pixels whitin a item range
 };
 
 /// Initial reclassification rules (dataset filters)
@@ -133,10 +133,10 @@ A structure for easy reclassification of "mixed" categories in some layers.
 @author Antonello Lobianco
 */
 struct ReclassRules{
-	int                                   inCode;
-	int                                  outCode;
-	/// Probability that one pixel of code inCode will become of code outCode. 1 for fixed transformation.
-	double                                     p;
+  int                                   inCode;
+  int                                  outCode;
+  /// Probability that one pixel of code inCode will become of code outCode. 1 for fixed transformation.
+  double                                     p;
 };
 
 #endif

@@ -36,8 +36,8 @@ The constructor of the GIS (unique) instance want:
 @param MTHREAD_h Pointer to the main thread manager
 */
 Gis::Gis(ThreadManager* MTHREAD_h){
-	MTHREAD=MTHREAD_h;
-	subRegionMode = false;
+  MTHREAD=MTHREAD_h;
+  subRegionMode = false;
 }
 
 Gis::~Gis(){
@@ -57,45 +57,45 @@ Gis::setSpace(){
 
 
 
-	msgOut(MSG_INFO,"Creating the space...");
+  msgOut(MSG_INFO,"Creating the space...");
 
-	// init basic settings....
-	geoTopY = MTHREAD->MD->getDoubleSetting("geoNorthEdge");
-	geoBottomY = MTHREAD->MD->getDoubleSetting("geoSouthEdge");
-	geoLeftX = MTHREAD->MD->getDoubleSetting("geoWestEdge");
-	geoRightX = MTHREAD->MD->getDoubleSetting("geoEastEdge");
-	xNPixels = MTHREAD->MD->getIntSetting("nCols");
-	yNPixels = MTHREAD->MD->getIntSetting("nRows");
-	noValue = MTHREAD->MD->getDoubleSetting("noValue");
-	xyNPixels = xNPixels * yNPixels;
-	xMetersByPixel = (geoRightX - geoLeftX)/xNPixels;
-	yMetersByPixel = (geoTopY - geoBottomY)/yNPixels;
-	MTHREAD->treeViewerChangeGeneralPropertyValue("total plots", d2s(getXyNPixels()));
-	MTHREAD->treeViewerChangeGeneralPropertyValue("total land", d2s(xyNPixels*getHaByPixel()));
-	// creating pixels...
-	for (int i=0;i<yNPixels;i++){
-		for (int j=0;j<xNPixels;j++){
-			Pixel myPixel(i*xNPixels+j, MTHREAD);
-			myPixel.setCoordinates(j,i);
-			pxVector.push_back(myPixel);
-		}
-	}
-	initLayers();
-	loadLayersDataFromFile();
+  // init basic settings....
+  geoTopY = MTHREAD->MD->getDoubleSetting("geoNorthEdge");
+  geoBottomY = MTHREAD->MD->getDoubleSetting("geoSouthEdge");
+  geoLeftX = MTHREAD->MD->getDoubleSetting("geoWestEdge");
+  geoRightX = MTHREAD->MD->getDoubleSetting("geoEastEdge");
+  xNPixels = MTHREAD->MD->getIntSetting("nCols");
+  yNPixels = MTHREAD->MD->getIntSetting("nRows");
+  noValue = MTHREAD->MD->getDoubleSetting("noValue");
+  xyNPixels = xNPixels * yNPixels;
+  xMetersByPixel = (geoRightX - geoLeftX)/xNPixels;
+  yMetersByPixel = (geoTopY - geoBottomY)/yNPixels;
+  MTHREAD->treeViewerChangeGeneralPropertyValue("total plots", d2s(getXyNPixels()));
+  MTHREAD->treeViewerChangeGeneralPropertyValue("total land", d2s(xyNPixels*getHaByPixel()));
+  // creating pixels...
+  for (int i=0;i<yNPixels;i++){
+    for (int j=0;j<xNPixels;j++){
+      Pixel myPixel(i*xNPixels+j, MTHREAD);
+      myPixel.setCoordinates(j,i);
+      pxVector.push_back(myPixel);
+    }
+  }
+  initLayers();
+  loadLayersDataFromFile();
 
-	// Cashing the pixels owned by each region..
-	vector <ModelRegion*> regions = MTHREAD->MD->getAllRegions();
-	int nRegions = regions.size();
-	for(uint i=0;i<nRegions;i++){
-		regions[i]->setMyPixels();
-	}
+  // Cashing the pixels owned by each region..
+  vector <ModelRegion*> regions = MTHREAD->MD->getAllRegions();
+  int nRegions = regions.size();
+  for(uint i=0;i<nRegions;i++){
+    regions[i]->setMyPixels();
+  }
 
-	applySpatialStochasticValues(); // regional variance -> different tp in each pixel trought tp modifiers
-	applyStochasticRiskAdversion(); // risk adversion to each pixel
+  applySpatialStochasticValues(); // regional variance -> different tp in each pixel trought tp modifiers
+  applyStochasticRiskAdversion(); // risk adversion to each pixel
 
-	MTHREAD->fitInWindow(); // tell the gui to fit the map to the widget
-//	countItems("landUse",false); // count the various records assigned to each legendItem. Do not print debug infos
-	return;
+  MTHREAD->fitInWindow(); // tell the gui to fit the map to the widget
+//  countItems("landUse",false); // count the various records assigned to each legendItem. Do not print debug infos
+  return;
 }
 
 
@@ -106,21 +106,21 @@ Gis::setSpace(){
 
 void
 Gis::applySpatialStochasticValues(){
-	// apply regional volume growth st.dev. -> variance to pixel based t.p.
-	// - cashing value to the pixels
-	// - apply to the tp layers with change values
+  // apply regional volume growth st.dev. -> variance to pixel based t.p.
+  // - cashing value to the pixels
+  // - apply to the tp layers with change values
 
   if(!MTHREAD->MD->getBoolSetting("usePixelData")) return;
 
-	vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
-	//ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
-	//vector<Pixel*> regPixels = region->getMyPixels();
+  vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
+  //ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
+  //vector<Pixel*> regPixels = region->getMyPixels();
     //double sumc = 0;
     //double nc = 0;
-	for(uint i=0;i<regIds2.size();i++){
-		ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
-		vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
-		vector <string> fTypes = MTHREAD->MD->getForTypeIds();
+  for(uint i=0;i<regIds2.size();i++){
+    ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
+    vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
+    vector <string> fTypes = MTHREAD->MD->getForTypeIds();
 
     // regional variance
     if(MTHREAD->MD->getBoolSetting("useSpatialRegionalVariance")){
@@ -142,7 +142,7 @@ Gis::applySpatialStochasticValues(){
           //nc ++;
         }
       }
-		}
+    }
 
     // expectation types
     double avgExpTypes = MTHREAD->MD->getDoubleSetting("expType");
@@ -165,7 +165,7 @@ Gis::applySpatialStochasticValues(){
       }
     }
 
-	}
+  }
 }
 
 /**
@@ -175,29 +175,29 @@ Gis::applySpatialStochasticValues(){
  **/
 void
 Gis::applyStochasticRiskAdversion(){
-	// apply regional volume growth st.dev. -> variance to pixel based t.p.
-	// - cashing value to the pixels
-	// - apply to the tp layers with change values
+  // apply regional volume growth st.dev. -> variance to pixel based t.p.
+  // - cashing value to the pixels
+  // - apply to the tp layers with change values
 
-	if(!MTHREAD->MD->getBoolSetting("usePixelData")) return;
+  if(!MTHREAD->MD->getBoolSetting("usePixelData")) return;
 
-	vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
-	bool raEnabled = MTHREAD->MD->getBoolSetting("heterogeneousRiskAversion");
-	for(uint i=0;i<regIds2.size();i++){
-		ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
-		vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
-		for (uint z=0;z<rpx.size();z++){
-			if(raEnabled){
-				double raStDev = MTHREAD->MD->getDoubleSetting("riskAversionAgentSd");
-				double avg = MTHREAD->MD->getDoubleSetting("riskAversionAgentAverage");
-				normal_distribution<double> d(avg,raStDev); // default any how to double
-				double c = d(*MTHREAD->gen);
-				rpx[z]->setValue ("ra", c);
-			} else {
-				rpx[z]->setValue ("ra", 0.0);
-			}
-		}
-	}
+  vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
+  bool raEnabled = MTHREAD->MD->getBoolSetting("heterogeneousRiskAversion");
+  for(uint i=0;i<regIds2.size();i++){
+    ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
+    vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
+    for (uint z=0;z<rpx.size();z++){
+      if(raEnabled){
+        double raStDev = MTHREAD->MD->getDoubleSetting("riskAversionAgentSd");
+        double avg = MTHREAD->MD->getDoubleSetting("riskAversionAgentAverage");
+        normal_distribution<double> d(avg,raStDev); // default any how to double
+        double c = d(*MTHREAD->gen);
+        rpx[z]->setValue ("ra", c);
+      } else {
+        rpx[z]->setValue ("ra", 0.0);
+      }
+    }
+  }
 }
 
 
@@ -211,141 +211,141 @@ Called from setSpace(), initLayers() is responsable of:
 **/
 void
 Gis::initLayers(){
-	// setting layers...
-	//string filename_complete= MTHREAD->MD->getFilenameByType("gis");
-	string filename_complete = MTHREAD->getBaseDirectory()+MTHREAD->MD->getStringSetting("gisFilename");
+  // setting layers...
+  //string filename_complete= MTHREAD->MD->getFilenameByType("gis");
+  string filename_complete = MTHREAD->getBaseDirectory()+MTHREAD->MD->getStringSetting("gisFilename");
 
-	InputNode gisDocument;
-	bool test=gisDocument.setWorkingFile(filename_complete);
-	if (!test){msgOut(MSG_CRITICAL_ERROR, "Error opening the gis file "+filename_complete+".");}
-	vector<InputNode> layerNodes = gisDocument.getNodesByName("layer");
-	for (uint i=0; i<layerNodes.size();i++){
-		
-		string name = layerNodes.at(i).getNodeByName("name").getStringContent();
-		string label = layerNodes.at(i).getNodeByName("label").getStringContent();
-		bool isInteger = layerNodes.at(i).getNodeByName("isInteger").getBoolContent();
-		bool dynamicContent = layerNodes.at(i).getNodeByName("dynamicContent").getBoolContent();
-		string readAtStart = layerNodes.at(i).getNodeByName("readAtStart").getStringContent();
-		if (readAtStart != "true") continue;
-		string dirName = layerNodes.at(i).getNodeByName("dirName").getStringContent();
-		string fileName = layerNodes.at(i).getNodeByName("fileName").getStringContent();
-		//cout <<"getBaseDirectory(): " << MTHREAD->MD->getBaseDirectory() << endl;
-		
-		string fullFileName = MTHREAD->MD->getBaseDirectory()+dirName+fileName;
-		//cout <<"fullFileName: " << fullFileName << endl;
-		addLayer(name,label,isInteger,dynamicContent,fullFileName);
-		//legend..
-		vector<InputNode> legendItemsNodes = layerNodes.at(i).getNodesByName("legendItem");
-		for (uint j=0; j<legendItemsNodes.size();j++){
-			int lID = legendItemsNodes.at(j).getIntContent();
-			string llabel = legendItemsNodes.at(j).getStringAttributeByName("label");
-			int rColor = legendItemsNodes.at(j).getIntAttributeByName("rColor");
-			int gColor = legendItemsNodes.at(j).getIntAttributeByName("gColor");
-			int bColor = legendItemsNodes.at(j).getIntAttributeByName("bColor");
-			double minValue, maxValue;
-			if (isInteger){
-				minValue = ((double)lID);
-				maxValue = ((double)lID);
-			}
-			else {
-				minValue = legendItemsNodes.at(j).getDoubleAttributeByName("minValue");
-				maxValue = legendItemsNodes.at(j).getDoubleAttributeByName("maxValue");
-			}
-			addLegendItem(name, lID, llabel, rColor, gColor, bColor, minValue, maxValue);
-		}
-		//reclassification rule..
-		vector<InputNode> reclassificationRulesNodes = layerNodes.at(i).getNodesByName("reclassRule");
-		for (uint z=0; z<reclassificationRulesNodes.size();z++){
-			int inCode = reclassificationRulesNodes.at(z).getIntContent();
-			int outCode = reclassificationRulesNodes.at(z).getIntAttributeByName("outCode");
-			double p = reclassificationRulesNodes.at(z).getDoubleAttributeByName("p");
-			addReclassificationRule(name, inCode, outCode, p);
-		}
-	}
-	initLayersPixelData();
-	//initLayersModelData(DATA_INIT); // only the layers relative to the initial years are inserted now. All the simulation year layers will be added each year before mainSimulationyear()
+  InputNode gisDocument;
+  bool test=gisDocument.setWorkingFile(filename_complete);
+  if (!test){msgOut(MSG_CRITICAL_ERROR, "Error opening the gis file "+filename_complete+".");}
+  vector<InputNode> layerNodes = gisDocument.getNodesByName("layer");
+  for (uint i=0; i<layerNodes.size();i++){
+    
+    string name = layerNodes.at(i).getNodeByName("name").getStringContent();
+    string label = layerNodes.at(i).getNodeByName("label").getStringContent();
+    bool isInteger = layerNodes.at(i).getNodeByName("isInteger").getBoolContent();
+    bool dynamicContent = layerNodes.at(i).getNodeByName("dynamicContent").getBoolContent();
+    string readAtStart = layerNodes.at(i).getNodeByName("readAtStart").getStringContent();
+    if (readAtStart != "true") continue;
+    string dirName = layerNodes.at(i).getNodeByName("dirName").getStringContent();
+    string fileName = layerNodes.at(i).getNodeByName("fileName").getStringContent();
+    //cout <<"getBaseDirectory(): " << MTHREAD->MD->getBaseDirectory() << endl;
+    
+    string fullFileName = MTHREAD->MD->getBaseDirectory()+dirName+fileName;
+    //cout <<"fullFileName: " << fullFileName << endl;
+    addLayer(name,label,isInteger,dynamicContent,fullFileName);
+    //legend..
+    vector<InputNode> legendItemsNodes = layerNodes.at(i).getNodesByName("legendItem");
+    for (uint j=0; j<legendItemsNodes.size();j++){
+      int lID = legendItemsNodes.at(j).getIntContent();
+      string llabel = legendItemsNodes.at(j).getStringAttributeByName("label");
+      int rColor = legendItemsNodes.at(j).getIntAttributeByName("rColor");
+      int gColor = legendItemsNodes.at(j).getIntAttributeByName("gColor");
+      int bColor = legendItemsNodes.at(j).getIntAttributeByName("bColor");
+      double minValue, maxValue;
+      if (isInteger){
+        minValue = ((double)lID);
+        maxValue = ((double)lID);
+      }
+      else {
+        minValue = legendItemsNodes.at(j).getDoubleAttributeByName("minValue");
+        maxValue = legendItemsNodes.at(j).getDoubleAttributeByName("maxValue");
+      }
+      addLegendItem(name, lID, llabel, rColor, gColor, bColor, minValue, maxValue);
+    }
+    //reclassification rule..
+    vector<InputNode> reclassificationRulesNodes = layerNodes.at(i).getNodesByName("reclassRule");
+    for (uint z=0; z<reclassificationRulesNodes.size();z++){
+      int inCode = reclassificationRulesNodes.at(z).getIntContent();
+      int outCode = reclassificationRulesNodes.at(z).getIntAttributeByName("outCode");
+      double p = reclassificationRulesNodes.at(z).getDoubleAttributeByName("p");
+      addReclassificationRule(name, inCode, outCode, p);
+    }
+  }
+  initLayersPixelData();
+  //initLayersModelData(DATA_INIT); // only the layers relative to the initial years are inserted now. All the simulation year layers will be added each year before mainSimulationyear()
 }
 
 /** Init the layers of exogenous data at pixel level (e.g. time of passage, multipliers)
-		These layers will then be read from datafile
+    These layers will then be read from datafile
 */
 void
 Gis::initLayersPixelData(){
-	if (!MTHREAD->MD->getBoolSetting("usePixelData")){return;}
-	string dir = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getStringSetting("spatialDataSubfolder");
-	string fileExt = MTHREAD->MD->getStringSetting("spatialDataFileExtension");
-	vector<string> files = vector<string>();
-	string fullFilename, filename, fullPath;
-	//string parName, forName, dClass, yearString;
-	//int year;
+  if (!MTHREAD->MD->getBoolSetting("usePixelData")){return;}
+  string dir = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getStringSetting("spatialDataSubfolder");
+  string fileExt = MTHREAD->MD->getStringSetting("spatialDataFileExtension");
+  vector<string> files = vector<string>();
+  string fullFilename, filename, fullPath;
+  //string parName, forName, dClass, yearString;
+  //int year;
 
-	MTHREAD->MD->getFilenamesByDir (dir,files, fileExt); // Ugly format. Files is the output (reference)
+  MTHREAD->MD->getFilenamesByDir (dir,files, fileExt); // Ugly format. Files is the output (reference)
 
-	for (unsigned int i = 0;i < files.size();i++) {
-		fullFilename = files[i];
-		fullPath = dir+"/"+fullFilename;
-		filename = fullFilename.substr(0,fullFilename.find_last_of("."));
-		addLayer(filename,filename,false,false,fullPath,false);
-	}
+  for (unsigned int i = 0;i < files.size();i++) {
+    fullFilename = files[i];
+    fullPath = dir+"/"+fullFilename;
+    filename = fullFilename.substr(0,fullFilename.find_last_of("."));
+    addLayer(filename,filename,false,false,fullPath,false);
+  }
 }
 
 /** Init the layers of exogenous data at pixel level (e.g. time of passage)
-		These layers will NOT be read by datafile, but volume for each pixel will be calculated from regional data and area map
+    These layers will NOT be read by datafile, but volume for each pixel will be calculated from regional data and area map
 */
 /*
 void
 Gis::initLayersModelData(const int& year_h){
 
-	if (!MTHREAD->MD->getBoolSetting("usePixelData")) return;
+  if (!MTHREAD->MD->getBoolSetting("usePixelData")) return;
 
-	vector <int> years;
-	if(year_h==DATA_NOW){
-		years.push_back(MTHREAD->SCD->getYear());
-	} else if (year_h==DATA_INIT){
-		int initialYear = MTHREAD->MD->getIntSetting("initialYear");
-		int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
-		for(int y=initialYear;y<initialOptYear;y++){
-			years.push_back(y);
-		}
-	} else {
-		years.push_back(year_h);
-	}
+  vector <int> years;
+  if(year_h==DATA_NOW){
+    years.push_back(MTHREAD->SCD->getYear());
+  } else if (year_h==DATA_INIT){
+    int initialYear = MTHREAD->MD->getIntSetting("initialYear");
+    int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
+    for(int y=initialYear;y<initialOptYear;y++){
+      years.push_back(y);
+    }
+  } else {
+    years.push_back(year_h);
+  }
 
-	vector <string> dClasses = MTHREAD->MD->getStringVectorSetting("dClasses");
-	vector <string> fTypes = MTHREAD->MD->getForTypeIds();
-	//int initialYear = MTHREAD->MD->getIntSetting("initialYear");
-	//int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
-	//int simYears = MTHREAD->MD->getIntSetting("simulationYears");
-	string layerName_vol,layerName_cumTp,layerName_regArea,layerName_area;
-	for(uint i=0;i< fTypes.size();i++){
-		for(int y=0;y<years.size();y++){
-			layerName_regArea = pack("regArea",fTypes[i],"",years[y]);
-			addLayer(layerName_regArea,layerName_regArea,false,true,"",false);
-			for (uint j=0;j<dClasses.size();j++){
-				layerName_vol = pack("vol",fTypes[i],dClasses[j],years[y]);
-				layerName_cumTp = pack("cumTp",fTypes[i],dClasses[j],years[y]);
-				layerName_area = pack("area",fTypes[i],dClasses[j],years[y]);
-				addLayer(layerName_vol,layerName_vol,false,true,"",false);
-				addLayer(layerName_cumTp,layerName_cumTp,false,true,"",false);
-				addLayer(layerName_area,layerName_area,false,true,"",false);
-			}
+  vector <string> dClasses = MTHREAD->MD->getStringVectorSetting("dClasses");
+  vector <string> fTypes = MTHREAD->MD->getForTypeIds();
+  //int initialYear = MTHREAD->MD->getIntSetting("initialYear");
+  //int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
+  //int simYears = MTHREAD->MD->getIntSetting("simulationYears");
+  string layerName_vol,layerName_cumTp,layerName_regArea,layerName_area;
+  for(uint i=0;i< fTypes.size();i++){
+    for(int y=0;y<years.size();y++){
+      layerName_regArea = pack("regArea",fTypes[i],"",years[y]);
+      addLayer(layerName_regArea,layerName_regArea,false,true,"",false);
+      for (uint j=0;j<dClasses.size();j++){
+        layerName_vol = pack("vol",fTypes[i],dClasses[j],years[y]);
+        layerName_cumTp = pack("cumTp",fTypes[i],dClasses[j],years[y]);
+        layerName_area = pack("area",fTypes[i],dClasses[j],years[y]);
+        addLayer(layerName_vol,layerName_vol,false,true,"",false);
+        addLayer(layerName_cumTp,layerName_cumTp,false,true,"",false);
+        addLayer(layerName_area,layerName_area,false,true,"",false);
+      }
 
-		}
+    }
 
-	}
-	string debug = "done";
+  }
+  string debug = "done";
 
 }
 */
 
 Layers*
 Gis::getLayer(const string& layerName_h){
-	for(uint i=0;i<layerVector.size();i++){
-		if(layerVector[i].getName() == layerName_h){
-			return &layerVector[i];
-		}
-	}
-	msgOut(MSG_CRITICAL_ERROR, "Layer "+layerName_h+" not found. Aborting.");
+  for(uint i=0;i<layerVector.size();i++){
+    if(layerVector[i].getName() == layerName_h){
+      return &layerVector[i];
+    }
+  }
+  msgOut(MSG_CRITICAL_ERROR, "Layer "+layerName_h+" not found. Aborting.");
 }
 
 void
@@ -357,58 +357,58 @@ Gis:: applyForestReclassification(){
  per ogni pixel
  */
 
-	// caching
-	int nReclassRules = MTHREAD->MD->getNReclRules();
-	vector <reclRule*> RRs;
-	for(uint z=0;z<nReclassRules;z++){
-		RRs.push_back(MTHREAD->MD->getReclRule(z));
-	}
+  // caching
+  int nReclassRules = MTHREAD->MD->getNReclRules();
+  vector <reclRule*> RRs;
+  for(uint z=0;z<nReclassRules;z++){
+    RRs.push_back(MTHREAD->MD->getReclRule(z));
+  }
 
 
 
-	for (uint i=0;i< MTHREAD->MD->getNForTypes();i++){
-		forType* FT = MTHREAD->MD->getForType(i);
-		if(!layerExist(FT->forLayer)){
-			addLayer(FT->forLayer, "Are layer for forest type "+FT->forTypeId, false, true);
-			resetLayer(FT->forLayer);
-			Layers* newLayer = getLayer(FT->forLayer);
-			Layers* ereditatedLayer = getLayer(MTHREAD->MD->getForType(FT->ereditatedFrom)->forLayer);
-			newLayer->addLegendItems(ereditatedLayer->getLegendItems());
-		}
-	}
+  for (uint i=0;i< MTHREAD->MD->getNForTypes();i++){
+    forType* FT = MTHREAD->MD->getForType(i);
+    if(!layerExist(FT->forLayer)){
+      addLayer(FT->forLayer, "Are layer for forest type "+FT->forTypeId, false, true);
+      resetLayer(FT->forLayer);
+      Layers* newLayer = getLayer(FT->forLayer);
+      Layers* ereditatedLayer = getLayer(MTHREAD->MD->getForType(FT->ereditatedFrom)->forLayer);
+      newLayer->addLegendItems(ereditatedLayer->getLegendItems());
+    }
+  }
 
 
-	for (uint i=0;i< MTHREAD->MD->getNForTypes();i++){
-		forType* FT = MTHREAD->MD->getForType(i);
-		for(uint j=0;j<xyNPixels;j++){
-			Pixel* PX = getPixel(j);
-			//int regL1 =  PX->getDoubleValue ("regLev_1");
-			int regL2 =  PX->getDoubleValue ("regLev_2");
-			double value =  PX->getDoubleValue (FT->forLayer, true);
-			for(uint z=0;z<nReclassRules;z++){
-				reclRule* RR = RRs[z];
-				//if( (RR->regId == regL2 || RR->regId == regL1) && RR->forTypeOut == FT->forTypeId ){ // we found a reclassification rule for the region where is located this pixel and that output on the for type we are using
-				if( RR->regId == regL2  && RR->forTypeOut == FT->forTypeId ){ // we found a reclassification rule for the region where is located this pixel and that output on the for type we are using
-					string debugForTypeIn = RR->forTypeIn;
-					double inputValue = PX->getDoubleValue(MTHREAD->MD->getForType(RR->forTypeIn)->forLayer, true);
-					double reclassCoeff = RR->coeff;
-					value += inputValue * reclassCoeff ;
-					// not breaking because we may have more than one input for the same output
-				}
-			}
-			PX->changeValue(FT->forLayer, value, true);
-		}
-		updateImage(FT->forLayer);
-	}
-	//countItems("forType_B_HF", true);
-	refreshGUI();
-	/*Pixel* DP = getPixel(8386);
-	msgOut(MSG_DEBUG,"Debug info on plot 8386");
-	for (uint i=0;i< MTHREAD->MD->getNForTypes();i++){
-		forType* FT = MTHREAD->MD->getForType(i);
-		msgOut(MSG_DEBUG,FT->forTypeId+" - "+d2s(DP->getDoubleValue (FT->forLayer)));
-	}
-	*/
+  for (uint i=0;i< MTHREAD->MD->getNForTypes();i++){
+    forType* FT = MTHREAD->MD->getForType(i);
+    for(uint j=0;j<xyNPixels;j++){
+      Pixel* PX = getPixel(j);
+      //int regL1 =  PX->getDoubleValue ("regLev_1");
+      int regL2 =  PX->getDoubleValue ("regLev_2");
+      double value =  PX->getDoubleValue (FT->forLayer, true);
+      for(uint z=0;z<nReclassRules;z++){
+        reclRule* RR = RRs[z];
+        //if( (RR->regId == regL2 || RR->regId == regL1) && RR->forTypeOut == FT->forTypeId ){ // we found a reclassification rule for the region where is located this pixel and that output on the for type we are using
+        if( RR->regId == regL2  && RR->forTypeOut == FT->forTypeId ){ // we found a reclassification rule for the region where is located this pixel and that output on the for type we are using
+          string debugForTypeIn = RR->forTypeIn;
+          double inputValue = PX->getDoubleValue(MTHREAD->MD->getForType(RR->forTypeIn)->forLayer, true);
+          double reclassCoeff = RR->coeff;
+          value += inputValue * reclassCoeff ;
+          // not breaking because we may have more than one input for the same output
+        }
+      }
+      PX->changeValue(FT->forLayer, value, true);
+    }
+    updateImage(FT->forLayer);
+  }
+  //countItems("forType_B_HF", true);
+  refreshGUI();
+  /*Pixel* DP = getPixel(8386);
+  msgOut(MSG_DEBUG,"Debug info on plot 8386");
+  for (uint i=0;i< MTHREAD->MD->getNForTypes();i++){
+    forType* FT = MTHREAD->MD->getForType(i);
+    msgOut(MSG_DEBUG,FT->forTypeId+" - "+d2s(DP->getDoubleValue (FT->forLayer)));
+  }
+  */
 }
 
 /**
@@ -426,56 +426,56 @@ Called at init time from initLayers, or during model run-time, this function wil
 void
 Gis::addLayer(string name_h, string label_h, bool isInteger_h, bool dynamicContent_h, string fullFileName_h, bool display_h){
 
-	for(uint i=0; i<layerVector.size(); i++){
-		if (layerVector.at(i).getName() == name_h){
-			msgOut(MSG_ERROR, "Layer already exist with that name");
-			return;
-		}
-	}
-	Layers LAYER (MTHREAD, name_h, label_h, isInteger_h, dynamicContent_h, fullFileName_h, display_h);
-	layerVector.push_back(LAYER);
+  for(uint i=0; i<layerVector.size(); i++){
+    if (layerVector.at(i).getName() == name_h){
+      msgOut(MSG_ERROR, "Layer already exist with that name");
+      return;
+    }
+  }
+  Layers LAYER (MTHREAD, name_h, label_h, isInteger_h, dynamicContent_h, fullFileName_h, display_h);
+  layerVector.push_back(LAYER);
 
-	for (uint i=0;i<xyNPixels; i++){
-		pxVector[i].setValue(name_h,noValue);
-	}
-	if(display_h){
-		MTHREAD->addLayer(name_h,label_h);
-	}
-	
+  for (uint i=0;i<xyNPixels; i++){
+    pxVector[i].setValue(name_h,noValue);
+  }
+  if(display_h){
+    MTHREAD->addLayer(name_h,label_h);
+  }
+  
 }
 
 void
 Gis::resetLayer(string layerName_h){
 
-	for(uint i=0; i<layerVector.size(); i++){
-		if (layerVector.at(i).getName() == layerName_h){
-			for (uint i=0;i<xyNPixels; i++){
-				pxVector.at(i).changeValue(layerName_h,noValue); // bug solved 20071022, Antonello
-			}
-			return;
-		}
-	}
-	msgOut(MSG_ERROR, "I could not reset layer "+layerName_h+" as it doesn't exist!");	
+  for(uint i=0; i<layerVector.size(); i++){
+    if (layerVector.at(i).getName() == layerName_h){
+      for (uint i=0;i<xyNPixels; i++){
+        pxVector.at(i).changeValue(layerName_h,noValue); // bug solved 20071022, Antonello
+      }
+      return;
+    }
+  }
+  msgOut(MSG_ERROR, "I could not reset layer "+layerName_h+" as it doesn't exist!");  
 }
 
 bool
 Gis::layerExist(const string& layerName_h, bool exactMatch) const{
 
-	if(exactMatch){
-		for(uint i=0; i<layerVector.size(); i++){
-			if (layerVector.at(i).getName() == layerName_h){
-				return true;
-			}
-		}
-	} else { // partial matching (stored layer name begin with search parameter)
-		for(uint i=0; i<layerVector.size(); i++){
-			if (layerVector.at(i).getName().compare(0, layerName_h.size(),layerName_h )){
-				return true;
-			}
-		}
-	}
+  if(exactMatch){
+    for(uint i=0; i<layerVector.size(); i++){
+      if (layerVector.at(i).getName() == layerName_h){
+        return true;
+      }
+    }
+  } else { // partial matching (stored layer name begin with search parameter)
+    for(uint i=0; i<layerVector.size(); i++){
+      if (layerVector.at(i).getName().compare(0, layerName_h.size(),layerName_h )){
+        return true;
+      }
+    }
+  }
 
-	return false;
+  return false;
 }
 
 /**
@@ -487,15 +487,15 @@ Search within the layerVector and call addLegendItem(...) to the appropriate one
 */
 void
 Gis::addLegendItem(string name_h, int ID_h, string label_h, int rColor_h, int gColor_h, int bColor_h, double minValue_h, double maxValue_h){
-	
-	for(uint i=0; i<layerVector.size(); i++){
-		if (layerVector.at(i).getName() == name_h){
-			layerVector.at(i).addLegendItem(ID_h, label_h, rColor_h, gColor_h, bColor_h, minValue_h, maxValue_h);
-			return;
-		}
-	}
-	msgOut(MSG_ERROR, "Trying to add a legend item to a layer that doesn't exist.");
-	return;
+  
+  for(uint i=0; i<layerVector.size(); i++){
+    if (layerVector.at(i).getName() == name_h){
+      layerVector.at(i).addLegendItem(ID_h, label_h, rColor_h, gColor_h, bColor_h, minValue_h, maxValue_h);
+      return;
+    }
+  }
+  msgOut(MSG_ERROR, "Trying to add a legend item to a layer that doesn't exist.");
+  return;
 }
 
 /**
@@ -508,14 +508,14 @@ Search within the layerVector and call countMyPixels(...) to the appropriate one
 void
 Gis::countItems(const string &layerName_h, const bool &debug){
 
-	for(uint i=0; i<layerVector.size(); i++){
-		if (layerVector.at(i).getName() == layerName_h){
-			layerVector.at(i).countMyPixels(debug);
-			return;
-		}
-	}
-	msgOut(MSG_ERROR, "Trying to get statistics (count pixels) of a layer that doesn't exist.");
-	return;
+  for(uint i=0; i<layerVector.size(); i++){
+    if (layerVector.at(i).getName() == layerName_h){
+      layerVector.at(i).countMyPixels(debug);
+      return;
+    }
+  }
+  msgOut(MSG_ERROR, "Trying to get statistics (count pixels) of a layer that doesn't exist.");
+  return;
 }
 
 /**
@@ -526,14 +526,14 @@ Called at init time from initLayers, or during model run-time.
 */
 void
 Gis::addReclassificationRule(string name_h, int inCode_h, int outCode_h, double p_h){
-	for(uint i=0; i<layerVector.size(); i++){
-		if (layerVector.at(i).getName() == name_h){
-			layerVector.at(i).addReclassificationRule(inCode_h, outCode_h, p_h);
-			return;
-		}
-	}
-	msgOut(MSG_ERROR, "Trying to add a reclassification rule to a layer that doesn't exist.");
-	return; 
+  for(uint i=0; i<layerVector.size(); i++){
+    if (layerVector.at(i).getName() == name_h){
+      layerVector.at(i).addReclassificationRule(inCode_h, outCode_h, p_h);
+      return;
+    }
+  }
+  msgOut(MSG_ERROR, "Trying to add a reclassification rule to a layer that doesn't exist.");
+  return; 
 }
 
 /**
@@ -549,73 +549,73 @@ NOTE: It uses some Qt functions!!!
 */
 void
 Gis::loadLayersDataFromFile(){
-	double localNoValue = noValue;
-	double inputValue;
-	double outputValue;
-	QColor color;
+  double localNoValue = noValue;
+  double inputValue;
+  double outputValue;
+  QColor color;
 
-	for(uint i=0;i<layerVector.size();i++){
-		string layerName =layerVector.at(i).getName();
-		string fileName=layerVector.at(i).getFilename();
-		if(fileName == "") continue; // BUGGED !!! 20121017, Antonello. It was "return", so it wasn't reading any layers following a layer with no filename
-		QFile file(fileName.c_str());
-		if (!file.open(QFile::ReadOnly)) {
-			cerr << "Cannot open file for reading: "
-				<< qPrintable(file.errorString()) << endl;
-			msgOut(MSG_ERROR, "Cannot open map file "+fileName+" for reading.");
-			continue;
-		}
-		QTextStream in(&file);
-		int countRow = 0;
-		QImage image = QImage(xNPixels, yNPixels, QImage::Format_RGB32);
-		image.fill(qRgb(255, 255, 255));
-		while (!in.atEnd()) {
-			QString line = in.readLine();
-			QStringList fields = line.split(' ');
-			if ( 
-				(fields.at(0)== "north:" && fields.at(1).toDouble() != geoTopY)
-				|| ((fields.at(0)== "south:" || fields.at(0) == "yllcorner" ) && fields.at(1).toDouble() != geoBottomY)
-				|| (fields.at(0)== "east:" && fields.at(1).toDouble() != geoRightX)
-				|| ((fields.at(0)== "west:" || fields.at(0) == "xllcorner" ) && fields.at(1).toDouble() != geoLeftX)
-				|| ((fields.at(0)== "rows:" || fields.at(0) == "nrows" ) && fields.at(1).toInt() != yNPixels)
-				|| ((fields.at(0)== "cols:" || fields.at(0) == "ncols" ) && fields.at(1).toInt() != xNPixels)
-			)
-			{
-				msgOut(MSG_ERROR, "Layer "+layerName+" has different coordinates. Aborting reading.");
-				break;
-			} else if (fields.at(0)== "null:" || fields.at(0) == "NODATA_value" || fields.at(0) == "nodata_value" ) {
-				localNoValue = fields.at(1).toDouble();
-			} else if (fields.size() > 5) {
-				for (int countColumn=0;countColumn<xNPixels;countColumn++){
-					inputValue = fields.at(countColumn).toDouble();
-					if (inputValue == localNoValue){
-						outputValue = noValue;
-						pxVector.at((countRow*xNPixels+countColumn)).changeValue(layerName,outputValue);
-						QColor nocolor(255,255,255);
-						color = nocolor;
-					}
-					else {
-						outputValue=layerVector.at(i).filterExogenousDataset(fields.at(countColumn).toDouble());
-						pxVector.at((countRow*xNPixels+countColumn)).changeValue(layerName,outputValue);
-						color = layerVector.at(i).getColor(outputValue);
-					}
-					image.setPixel(countColumn,countRow,color.rgb());
-				}
-				countRow++;
-			}
-		}
-		if (MTHREAD->MD->getBoolSetting("initialRandomShuffle") ){
-			layerVector.at(i).randomShuffle();
-		}
-		this->filterSubRegion(layerName);
-		if(layerVector.at(i).getDisplay()){
-			MTHREAD->updateImage(layerName,image);
-			//send the image to the gui...
-			refreshGUI();
-		}
+  for(uint i=0;i<layerVector.size();i++){
+    string layerName =layerVector.at(i).getName();
+    string fileName=layerVector.at(i).getFilename();
+    if(fileName == "") continue; // BUGGED !!! 20121017, Antonello. It was "return", so it wasn't reading any layers following a layer with no filename
+    QFile file(fileName.c_str());
+    if (!file.open(QFile::ReadOnly)) {
+      cerr << "Cannot open file for reading: "
+        << qPrintable(file.errorString()) << endl;
+      msgOut(MSG_ERROR, "Cannot open map file "+fileName+" for reading.");
+      continue;
+    }
+    QTextStream in(&file);
+    int countRow = 0;
+    QImage image = QImage(xNPixels, yNPixels, QImage::Format_RGB32);
+    image.fill(qRgb(255, 255, 255));
+    while (!in.atEnd()) {
+      QString line = in.readLine();
+      QStringList fields = line.split(' ');
+      if ( 
+        (fields.at(0)== "north:" && fields.at(1).toDouble() != geoTopY)
+        || ((fields.at(0)== "south:" || fields.at(0) == "yllcorner" ) && fields.at(1).toDouble() != geoBottomY)
+        || (fields.at(0)== "east:" && fields.at(1).toDouble() != geoRightX)
+        || ((fields.at(0)== "west:" || fields.at(0) == "xllcorner" ) && fields.at(1).toDouble() != geoLeftX)
+        || ((fields.at(0)== "rows:" || fields.at(0) == "nrows" ) && fields.at(1).toInt() != yNPixels)
+        || ((fields.at(0)== "cols:" || fields.at(0) == "ncols" ) && fields.at(1).toInt() != xNPixels)
+      )
+      {
+        msgOut(MSG_ERROR, "Layer "+layerName+" has different coordinates. Aborting reading.");
+        break;
+      } else if (fields.at(0)== "null:" || fields.at(0) == "NODATA_value" || fields.at(0) == "nodata_value" ) {
+        localNoValue = fields.at(1).toDouble();
+      } else if (fields.size() > 5) {
+        for (int countColumn=0;countColumn<xNPixels;countColumn++){
+          inputValue = fields.at(countColumn).toDouble();
+          if (inputValue == localNoValue){
+            outputValue = noValue;
+            pxVector.at((countRow*xNPixels+countColumn)).changeValue(layerName,outputValue);
+            QColor nocolor(255,255,255);
+            color = nocolor;
+          }
+          else {
+            outputValue=layerVector.at(i).filterExogenousDataset(fields.at(countColumn).toDouble());
+            pxVector.at((countRow*xNPixels+countColumn)).changeValue(layerName,outputValue);
+            color = layerVector.at(i).getColor(outputValue);
+          }
+          image.setPixel(countColumn,countRow,color.rgb());
+        }
+        countRow++;
+      }
+    }
+    if (MTHREAD->MD->getBoolSetting("initialRandomShuffle") ){
+      layerVector.at(i).randomShuffle();
+    }
+    this->filterSubRegion(layerName);
+    if(layerVector.at(i).getDisplay()){
+      MTHREAD->updateImage(layerName,image);
+      //send the image to the gui...
+      refreshGUI();
+    }
 
 
-	}
+  }
 }
 
 /**
@@ -625,50 +625,50 @@ Update an ALREADY EXISTING image and send the updated image to the GUI.
 */
 void
 Gis::updateImage(string layerName_h){
-	msgOut (1, "Update image "+layerName_h+"...");
+  msgOut (1, "Update image "+layerName_h+"...");
 
-	// sub{X,Y}{R,L,T,B} refer to the subregion coordinates, but when this is not active they coincide with the whole region
-	QImage image = QImage(subXR-subXL+1, subYB-subYT+1, QImage::Format_RGB32);
+  // sub{X,Y}{R,L,T,B} refer to the subregion coordinates, but when this is not active they coincide with the whole region
+  QImage image = QImage(subXR-subXL+1, subYB-subYT+1, QImage::Format_RGB32);
 
-	image.fill(qRgb(255, 255, 255));
-	int layerIndex=-1;
-	for (uint i=0;i<layerVector.size();i++){
-		if (layerVector.at(i).getName() == layerName_h){
-			layerIndex=i;
-			break;
-		}
-	}
-	if (layerIndex <0) msgOut(MSG_CRITICAL_ERROR, "Layer not found in Gis::updateImage()");
+  image.fill(qRgb(255, 255, 255));
+  int layerIndex=-1;
+  for (uint i=0;i<layerVector.size();i++){
+    if (layerVector.at(i).getName() == layerName_h){
+      layerIndex=i;
+      break;
+    }
+  }
+  if (layerIndex <0) msgOut(MSG_CRITICAL_ERROR, "Layer not found in Gis::updateImage()");
 
-	for (int countRow=subYT;countRow<subYB;countRow++){
-		for (int countColumn=subXL;countColumn<subXR;countColumn++){			
-			double value = pxVector.at((countRow*xNPixels+countColumn)).getDoubleValue(layerName_h);
-			QColor color = layerVector.at(layerIndex).getColor(value);
-			image.setPixel(countColumn-subXL,countRow-subYT,color.rgb());
-		}
-	}
-	MTHREAD->updateImage(layerName_h,image);
-	refreshGUI();
+  for (int countRow=subYT;countRow<subYB;countRow++){
+    for (int countColumn=subXL;countColumn<subXR;countColumn++){      
+      double value = pxVector.at((countRow*xNPixels+countColumn)).getDoubleValue(layerName_h);
+      QColor color = layerVector.at(layerIndex).getColor(value);
+      image.setPixel(countColumn-subXL,countRow-subYT,color.rgb());
+    }
+  }
+  MTHREAD->updateImage(layerName_h,image);
+  refreshGUI();
 }
 
 Pixel*
 Gis::getRandomPlotByValue(string layer_h, int layerValue_h){
-	
-	vector <Pixel* > candidates;
-	vector <uint> counts;
-	for(uint i=0;i<pxVector.size();i++) counts.push_back(i);
-	random_shuffle(counts.begin(), counts.end()); // randomize the elements of the array.
+  
+  vector <Pixel* > candidates;
+  vector <uint> counts;
+  for(uint i=0;i<pxVector.size();i++) counts.push_back(i);
+  random_shuffle(counts.begin(), counts.end()); // randomize the elements of the array.
 
-	for (uint i=0;i<counts.size();i++){
-		if(pxVector.at(counts.at(i)).getDoubleValue(layer_h) == layerValue_h ) {
-				return &pxVector.at(counts.at(i));
-		}
-	}
+  for (uint i=0;i<counts.size();i++){
+    if(pxVector.at(counts.at(i)).getDoubleValue(layer_h) == layerValue_h ) {
+        return &pxVector.at(counts.at(i));
+    }
+  }
 
-	msgOut(MSG_CRITICAL_ERROR,"We can't find any plot with "+d2s(layerValue_h)+" value on layer "+layer_h+".");
-	Pixel* toReturn;
-	toReturn =0;
-	return toReturn;
+  msgOut(MSG_CRITICAL_ERROR,"We can't find any plot with "+d2s(layerValue_h)+" value on layer "+layer_h+".");
+  Pixel* toReturn;
+  toReturn =0;
+  return toReturn;
 }
 /**
 
@@ -681,25 +681,25 @@ Gis::getRandomPlotByValue(string layer_h, int layerValue_h){
 */
 vector <Pixel*>
 Gis::getAllPlotsByValue(string layer_h, int layerValue_h, int outputLevel){
-	// this would be easier to mantain and cleaned code, but slighly slower:
-	//vector<int> layerValues;
-	//layerValues.push_back(layerValue_h);
-	//return getAllPlotsByValue(layer_h, layerValues, onlyFreePlots, outputLevel);
+  // this would be easier to mantain and cleaned code, but slighly slower:
+  //vector<int> layerValues;
+  //layerValues.push_back(layerValue_h);
+  //return getAllPlotsByValue(layer_h, layerValues, onlyFreePlots, outputLevel);
 
-	vector <Pixel* > candidates;
-	for (uint i=0;i<pxVector.size();i++){
-		if(pxVector.at(i).getDoubleValue(layer_h) == layerValue_h){
-			candidates.push_back(&pxVector.at(i));
-		}
-	}
+  vector <Pixel* > candidates;
+  for (uint i=0;i<pxVector.size();i++){
+    if(pxVector.at(i).getDoubleValue(layer_h) == layerValue_h){
+      candidates.push_back(&pxVector.at(i));
+    }
+  }
 
-	if (candidates.size()>0){
-		random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
-	}
-	else {
-		msgOut(outputLevel,"We can't find any free plot with "+d2s(layerValue_h)+" value on layer "+layer_h+".");
-	}
-	return candidates;
+  if (candidates.size()>0){
+    random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
+  }
+  else {
+    msgOut(outputLevel,"We can't find any free plot with "+d2s(layerValue_h)+" value on layer "+layer_h+".");
+  }
+  return candidates;
 }
 
 /**
@@ -713,29 +713,29 @@ Gis::getAllPlotsByValue(string layer_h, int layerValue_h, int outputLevel){
 */
 vector <Pixel*>
 Gis::getAllPlotsByValue(string layer_h, vector<int> layerValues_h, int outputLevel){
-	vector <Pixel* > candidates;
-	string valuesToMatch;
-	unsigned int z;
+  vector <Pixel* > candidates;
+  string valuesToMatch;
+  unsigned int z;
 
-	//string of the required land values to match;
-	for (uint j=0;j<layerValues_h.size();j++){
-		valuesToMatch = valuesToMatch + " " + i2s(layerValues_h.at(j));
-	}
+  //string of the required land values to match;
+  for (uint j=0;j<layerValues_h.size();j++){
+    valuesToMatch = valuesToMatch + " " + i2s(layerValues_h.at(j));
+  }
 
-	for (uint i=0;i<pxVector.size();i++){
-		z = valuesToMatch.find(d2s(pxVector.at(i).getDoubleValue(layer_h))); // search if in the string of required values is included also the value of the current plot
-		if(z!=string::npos){ //z is not at the end of the string, means found!
-			candidates.push_back(&pxVector.at(i));
-		}
-	}
+  for (uint i=0;i<pxVector.size();i++){
+    z = valuesToMatch.find(d2s(pxVector.at(i).getDoubleValue(layer_h))); // search if in the string of required values is included also the value of the current plot
+    if(z!=string::npos){ //z is not at the end of the string, means found!
+      candidates.push_back(&pxVector.at(i));
+    }
+  }
 
-	if (candidates.size()>0){
-		random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
-	}
-	else {
-		msgOut(outputLevel,"We can't find any free plot with the specified values ("+valuesToMatch+") on layer "+layer_h+".");
-	}
-	return candidates;
+  if (candidates.size()>0){
+    random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
+  }
+  else {
+    msgOut(outputLevel,"We can't find any free plot with the specified values ("+valuesToMatch+") on layer "+layer_h+".");
+  }
+  return candidates;
 }
 
 /**
@@ -746,80 +746,80 @@ Gis::getAllPlotsByValue(string layer_h, vector<int> layerValues_h, int outputLev
 */
 vector <Pixel*>
 Gis::getAllPlots(int outputLevel){
-	vector <Pixel* > candidates;
-	for (uint i=0;i<pxVector.size();i++){
-		candidates.push_back(&pxVector.at(i));
-	}
-	if (candidates.size()>0){
-		random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
-	}
-	else {
-		msgOut(outputLevel,"We can't find any free plot.");
-	}
-	return candidates;
+  vector <Pixel* > candidates;
+  for (uint i=0;i<pxVector.size();i++){
+    candidates.push_back(&pxVector.at(i));
+  }
+  if (candidates.size()>0){
+    random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
+  }
+  else {
+    msgOut(outputLevel,"We can't find any free plot.");
+  }
+  return candidates;
 }
 
 /// Return the vector of all plots by a specific region (main region or subregion), optionally shuffled;
 vector <Pixel*>
 Gis::getAllPlotsByRegion(ModelRegion &region_h, bool shuffle){
-	vector <Pixel*> regionalPixels = region_h.getMyPixels();
-	if(shuffle){
-		random_shuffle(regionalPixels.begin(), regionalPixels.end()); // randomize the elements of the array.
-	}
-	return regionalPixels;
+  vector <Pixel*> regionalPixels = region_h.getMyPixels();
+  if(shuffle){
+    random_shuffle(regionalPixels.begin(), regionalPixels.end()); // randomize the elements of the array.
+  }
+  return regionalPixels;
 }
 
 vector <Pixel*>
 Gis::getAllPlotsByRegion(int regId_h, bool shuffle){
-		ModelRegion* reg = MTHREAD->MD->getRegion(regId_h);
-		return getAllPlotsByRegion(*reg,shuffle);
+    ModelRegion* reg = MTHREAD->MD->getRegion(regId_h);
+    return getAllPlotsByRegion(*reg,shuffle);
 }
 
 
 
 vector <string>
 Gis::getLayerNames(){
-	vector <string> toReturn;
-	for (uint i=0;i<layerVector.size();i++){
-		toReturn.push_back(layerVector[i].getName());
-	}
-	return toReturn;
+  vector <string> toReturn;
+  for (uint i=0;i<layerVector.size();i++){
+    toReturn.push_back(layerVector[i].getName());
+  }
+  return toReturn;
 }
 
 vector <Layers*>
 Gis::getLayerPointers(){
-	vector <Layers*> toReturn;
-	for (uint i=0;i<layerVector.size();i++){
-		toReturn.push_back(&layerVector[i]);
-	}
-	return toReturn;
+  vector <Layers*> toReturn;
+  for (uint i=0;i<layerVector.size();i++){
+    toReturn.push_back(&layerVector[i]);
+  }
+  return toReturn;
 }
 
 void
 Gis::printDebugValues (string layerName_h, int min_h, int max_h){
-	int min=min_h;
-	int max;
-	int ID, X, Y;
-	string out;
-	double value;
-	//double noValue = MTHREAD->MD->getDoubleSetting("noValue");
-	if (max_h==0){
-		max= pxVector.size();
-	}
-	else {
-		max = max_h;
-	}
-	msgOut(MSG_DEBUG,"Printing debug information for layer "+layerName_h+".");
-	for (int i=min;i<max;i++){
-		value = pxVector.at(i).getDoubleValue(layerName_h);
-		if (value != noValue){ 
-			ID    = i;
-			X     = pxVector.at(i).getX();
-			Y     = pxVector.at(i).getY();
-			out = "Px. "+i2s(ID)+" ("+i2s(X)+","+i2s(Y)+"): "+d2s(value);
-			msgOut(MSG_DEBUG,out);
-		}
-	}
+  int min=min_h;
+  int max;
+  int ID, X, Y;
+  string out;
+  double value;
+  //double noValue = MTHREAD->MD->getDoubleSetting("noValue");
+  if (max_h==0){
+    max= pxVector.size();
+  }
+  else {
+    max = max_h;
+  }
+  msgOut(MSG_DEBUG,"Printing debug information for layer "+layerName_h+".");
+  for (int i=min;i<max;i++){
+    value = pxVector.at(i).getDoubleValue(layerName_h);
+    if (value != noValue){ 
+      ID    = i;
+      X     = pxVector.at(i).getX();
+      Y     = pxVector.at(i).getY();
+      out = "Px. "+i2s(ID)+" ("+i2s(X)+","+i2s(Y)+"): "+d2s(value);
+      msgOut(MSG_DEBUG,out);
+    }
+  }
 }
 
 /**
@@ -830,122 +830,122 @@ When the subRegionMode is actived also agents mouldCoefficients are rescaled to 
 */
 void
 Gis::filterSubRegion(string layerName_h){
-	if (MTHREAD->MD->getBoolSetting("subRegionMode")){
-		subRegionMode = true;
-		subXL  = MTHREAD->MD->getIntSetting("subRegionXLeft");
-		subXR   = MTHREAD->MD->getIntSetting("subRegionXRight");
-		subYT = MTHREAD->MD->getIntSetting("subRegionYTop");
-		subYB = MTHREAD->MD->getIntSetting("subRegionYBottom");
-		for (int y=0;y<yNPixels;y++){
-			for (int x=0;x<xNPixels;x++){
-				if (x>=subXL && x<= subXR && y>=subYT && y<=subYB){
-				}
-				else {
-					this->getPixel(x,y)->changeValue(layerName_h, noValue);
-				}
-			}
-		}
-		updateImage(layerName_h);
-	}
-	else {
-		subXL = 0;
-		subYT = 0;
-		subXR = xNPixels-1;
-		subYB = yNPixels-1;	
-	}
+  if (MTHREAD->MD->getBoolSetting("subRegionMode")){
+    subRegionMode = true;
+    subXL  = MTHREAD->MD->getIntSetting("subRegionXLeft");
+    subXR   = MTHREAD->MD->getIntSetting("subRegionXRight");
+    subYT = MTHREAD->MD->getIntSetting("subRegionYTop");
+    subYB = MTHREAD->MD->getIntSetting("subRegionYBottom");
+    for (int y=0;y<yNPixels;y++){
+      for (int x=0;x<xNPixels;x++){
+        if (x>=subXL && x<= subXR && y>=subYT && y<=subYB){
+        }
+        else {
+          this->getPixel(x,y)->changeValue(layerName_h, noValue);
+        }
+      }
+    }
+    updateImage(layerName_h);
+  }
+  else {
+    subXL = 0;
+    subYT = 0;
+    subXR = xNPixels-1;
+    subYB = yNPixels-1;  
+  }
 }
 
 double
 Gis::getDistance(const Pixel* px1, const Pixel* px2){
-	return sqrt (
-				pow ( (((double)px1->getX()) - ((double)px2->getX()))*xMetersByPixel,2)
-				+
-				pow ( (((double)px1->getY()) - ((double)px2->getY()))*yMetersByPixel,2)
-			);
+  return sqrt (
+        pow ( (((double)px1->getX()) - ((double)px2->getX()))*xMetersByPixel,2)
+        +
+        pow ( (((double)px1->getY()) - ((double)px2->getY()))*yMetersByPixel,2)
+      );
 }
 
 
 
 void
 Gis::printLayers(string layerName_h){
-	msgOut(MSG_DEBUG,"Printing the layers");
-	int iteration = MTHREAD->SCD->getIteration(); // are we on the first year of the simulation ??
-	if(layerName_h == ""){
-		for (uint i=0;i<layerVector.size();i++){
-			// not printing if we are in a not-0 iteration and the content of the map doesn't change
-			if (!iteration || layerVector[i].getDynamicContent()) layerVector[i].print();
-		}
-	} else {
-		for (uint i=0;i<layerVector.size();i++){
-			if(layerVector[i].getName() == layerName_h){
-				if (!iteration || layerVector[i].getDynamicContent()) layerVector[i].print();
-				return;
-			}
-		}
-		msgOut(MSG_ERROR, "Layer "+layerName_h+" unknow. No layer printed.");
-	}
+  msgOut(MSG_DEBUG,"Printing the layers");
+  int iteration = MTHREAD->SCD->getIteration(); // are we on the first year of the simulation ??
+  if(layerName_h == ""){
+    for (uint i=0;i<layerVector.size();i++){
+      // not printing if we are in a not-0 iteration and the content of the map doesn't change
+      if (!iteration || layerVector[i].getDynamicContent()) layerVector[i].print();
+    }
+  } else {
+    for (uint i=0;i<layerVector.size();i++){
+      if(layerVector[i].getName() == layerName_h){
+        if (!iteration || layerVector[i].getDynamicContent()) layerVector[i].print();
+        return;
+      }
+    }
+    msgOut(MSG_ERROR, "Layer "+layerName_h+" unknow. No layer printed.");
+  }
 }
 
 void
 Gis::printBinMaps(string layerName_h){
-	msgOut(MSG_DEBUG,"Printing the maps as images");
-	int iteration = MTHREAD->SCD->getIteration(); // are we on the first year of the simulation ??
-	if(layerName_h == ""){
-		for (uint i=0;i<layerVector.size();i++){
-			if (!iteration || layerVector[i].getDynamicContent()) {layerVector[i].printBinMap();}
-		}
-	} else {
-		for (uint i=0;i<layerVector.size();i++){
-			if(layerVector[i].getName() == layerName_h){
-				if (!iteration || layerVector[i].getDynamicContent()) {layerVector[i].printBinMap();}
-				return;
-			}
-		}
-		msgOut(MSG_ERROR, "Layer "+layerName_h+" unknow. No layer printed.");
-	}
+  msgOut(MSG_DEBUG,"Printing the maps as images");
+  int iteration = MTHREAD->SCD->getIteration(); // are we on the first year of the simulation ??
+  if(layerName_h == ""){
+    for (uint i=0;i<layerVector.size();i++){
+      if (!iteration || layerVector[i].getDynamicContent()) {layerVector[i].printBinMap();}
+    }
+  } else {
+    for (uint i=0;i<layerVector.size();i++){
+      if(layerVector[i].getName() == layerName_h){
+        if (!iteration || layerVector[i].getDynamicContent()) {layerVector[i].printBinMap();}
+        return;
+      }
+    }
+    msgOut(MSG_ERROR, "Layer "+layerName_h+" unknow. No layer printed.");
+  }
 }
 
 int
 Gis::sub2realID(int id_h){
-	// IMPORTANT: this function is called at refreshGUI() times, so if there are output messages, call them with the option to NOT refresh the gui, otherwise we go to an infinite loop...
-	if (!MTHREAD->MD->getBoolSetting("subRegionMode")) {return id_h;}
-	int subX, subY, realX, realY;
-	subX = id_h%((subXR-subXL)+1);
-	subY = id_h/((subXR-subXL)+1);
+  // IMPORTANT: this function is called at refreshGUI() times, so if there are output messages, call them with the option to NOT refresh the gui, otherwise we go to an infinite loop...
+  if (!MTHREAD->MD->getBoolSetting("subRegionMode")) {return id_h;}
+  int subX, subY, realX, realY;
+  subX = id_h%((subXR-subXL)+1);
+  subY = id_h/((subXR-subXL)+1);
 
-	realX = subX+subXL;
-	realY = subY+subYT;
+  realX = subX+subXL;
+  realY = subY+subYT;
 
-	if ( (realX<subXL) || (realX>subXR) || (realY < subYT) || (realY>subYB)  ){
-		msgOut(MSG_ERROR, "Calling sub2realID() function with an ID that is out of subregion range!!", false);
-		return -1;
-	}
-	return realX+realY*xNPixels;
+  if ( (realX<subXL) || (realX>subXR) || (realY < subYT) || (realY>subYB)  ){
+    msgOut(MSG_ERROR, "Calling sub2realID() function with an ID that is out of subregion range!!", false);
+    return -1;
+  }
+  return realX+realY*xNPixels;
 
 }
 
 void
 Gis::unpack(const string& key, string& parName, string& forName, string& dClass, int& year) const{
-	int parNameDelimiter = key.find("#",0);
-	int forNameDelimiter = key.find("#",parNameDelimiter+1);
-	int dClassDelimiter = key.find("#",forNameDelimiter+1);
-	int yearDelimiter = key.find("#",dClassDelimiter+1);
-	if (yearDelimiter == string::npos){
-		msgOut(MSG_CRITICAL_ERROR, "Error in unpacking the key for the layer.");
-	}
-	parName.assign(key,0,parNameDelimiter);
-	forName.assign(key,parNameDelimiter+1,forNameDelimiter-parNameDelimiter-1);
-	dClass.assign(key,forNameDelimiter+1,dClassDelimiter-forNameDelimiter-1);
-	string yearString="";
-	yearString.assign(key,dClassDelimiter+1,yearDelimiter-dClassDelimiter-1);
-	year = s2i(yearString);
+  int parNameDelimiter = key.find("#",0);
+  int forNameDelimiter = key.find("#",parNameDelimiter+1);
+  int dClassDelimiter = key.find("#",forNameDelimiter+1);
+  int yearDelimiter = key.find("#",dClassDelimiter+1);
+  if (yearDelimiter == string::npos){
+    msgOut(MSG_CRITICAL_ERROR, "Error in unpacking the key for the layer.");
+  }
+  parName.assign(key,0,parNameDelimiter);
+  forName.assign(key,parNameDelimiter+1,forNameDelimiter-parNameDelimiter-1);
+  dClass.assign(key,forNameDelimiter+1,dClassDelimiter-forNameDelimiter-1);
+  string yearString="";
+  yearString.assign(key,dClassDelimiter+1,yearDelimiter-dClassDelimiter-1);
+  year = s2i(yearString);
 }
 
 void
 Gis::swap(const int& swap_what){
 
-	for(uint i=0;i<pxVector.size();i++) {
-		pxVector[i].swap(swap_what);
-	}
+  for(uint i=0;i<pxVector.size();i++) {
+    pxVector[i].swap(swap_what);
+  }
 
 }

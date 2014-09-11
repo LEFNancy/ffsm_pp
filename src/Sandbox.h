@@ -30,7 +30,7 @@
 /**
 This is a test class used when I need to test some C++ or other library functions. It can safelly be removed by the project if needed.
 
-	@author Antonello Lobianco <antonello@regmas.org>
+  @author Antonello Lobianco <antonello@regmas.org>
 */
 
 struct TestStructure;
@@ -39,51 +39,51 @@ class Sandbox : public BaseClass {
 
 public:
                              Sandbox(ThreadManager* MTHREAD_h);
-							 Sandbox();
+               Sandbox();
                             ~Sandbox();
 
-	template <class T> T     getSetting(string name_h, int type);
-	template <class T> vector <T> getVectorSetting(string name_h, int type);
-	template <class T> T      test2(const std::string& s); // e.g. int x = test<int>("123");
-	void                     printAString(string what){cout << "You printed: "<< what << endl;};
-	vector <TestStructure*>  getTestStructure();
-	void                     testThreads();
-	void                     basicTest(); ///< Simple tests that doesn't require anything else (are encapsulated) and so they can be run at the beginning of the program. Normally empty
-	void                     fullTest(); ///< Tests that require a full sandbox object including MTHREAD. Normally empty
-	void                     testIpopt();
-	int                      testAdolc();
-	void                     testPartMatching(); ///< How to partial matching the key of a map
-	void                     testPartMatching2(); ///< How to partial matching the key of a map
+  template <class T> T     getSetting(string name_h, int type);
+  template <class T> vector <T> getVectorSetting(string name_h, int type);
+  template <class T> T      test2(const std::string& s); // e.g. int x = test<int>("123");
+  void                     printAString(string what){cout << "You printed: "<< what << endl;};
+  vector <TestStructure*>  getTestStructure();
+  void                     testThreads();
+  void                     basicTest(); ///< Simple tests that doesn't require anything else (are encapsulated) and so they can be run at the beginning of the program. Normally empty
+  void                     fullTest(); ///< Tests that require a full sandbox object including MTHREAD. Normally empty
+  void                     testIpopt();
+  int                      testAdolc();
+  void                     testPartMatching(); ///< How to partial matching the key of a map
+  void                     testPartMatching2(); ///< How to partial matching the key of a map
 
 private:
-	vector <TestStructure>  testVector;
-	// How to partial matching the key of a map
-//	map<string, string>::iterator FindPrefix(const map<string, string>& map, const string& search_for);
-	void                       testSearchMap(const map<string, string>& map, const string& search_for);
-	void                       testSearchMap2(const map<string, string>& map_h, const string& search_for);
+  vector <TestStructure>  testVector;
+  // How to partial matching the key of a map
+//  map<string, string>::iterator FindPrefix(const map<string, string>& map, const string& search_for);
+  void                       testSearchMap(const map<string, string>& map, const string& search_for);
+  void                       testSearchMap2(const map<string, string>& map_h, const string& search_for);
 };
 
 struct TestStructure {
 
-	int                                        i;
-	string                                     s;
-	double                           cachedOffer;
-	double                                random;
+  int                                        i;
+  string                                     s;
+  double                           cachedOffer;
+  double                                random;
 };
 
 
 class testThread : public QThread {
-	Q_OBJECT
+  Q_OBJECT
 
 public:
-	testThread();
-	void                assignJob(TestStructure* agent_h);
+  testThread();
+  void                assignJob(TestStructure* agent_h);
 
 protected:
-	void run();
+  void run();
 
 private:
-	volatile TestStructure* agent;
+  volatile TestStructure* agent;
 };
 
 

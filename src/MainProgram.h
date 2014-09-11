@@ -45,9 +45,9 @@ There is only one istance of this class. It is responsable to load the setting f
 class MainProgram: public BaseClass {
 
 public:
-	                    MainProgram(ThreadManager* MTHREAD);
-					   ~MainProgram();
-	void                run(); ///< Run the program
+                      MainProgram(ThreadManager* MTHREAD);
+             ~MainProgram();
+  void                run(); ///< Run the program
 
 };
 

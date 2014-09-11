@@ -31,7 +31,7 @@ typedef pair<string, vector <double> > DataPair;
 
 
 Output::Output(ThreadManager* MTHREAD_h){
-	MTHREAD=MTHREAD_h;
+  MTHREAD=MTHREAD_h;
 }
 
 Output::~Output(){
@@ -42,24 +42,24 @@ Output::~Output(){
 
 void
 Output::initOutput(){
-	commonInit();
-	initOutputMaps();
+  commonInit();
+  initOutputMaps();
   initDebugOutput();
-	initOutputForestData();
-	initOutputProductData();
-	initOptimisationLog();
+  initOutputForestData();
+  initOutputProductData();
+  initOptimisationLog();
   initCarbonBalance();
 }
 
 
 void
 Output::commonInit(){
-	oLevel       = MTHREAD->MD->getIntSetting("outputLevel");
-	d            = getOutputFieldDelimiter();
-	inYear       = MTHREAD->MD->getIntSetting("initialYear");
-	nYears       = MTHREAD->MD->getIntSetting("simulationYears");
-	baseDir      = MTHREAD->MD->getBaseDirectory();
-	oDir         = MTHREAD->MD->getOutputDirectory();
+  oLevel       = MTHREAD->MD->getIntSetting("outputLevel");
+  d            = getOutputFieldDelimiter();
+  inYear       = MTHREAD->MD->getIntSetting("initialYear");
+  nYears       = MTHREAD->MD->getIntSetting("simulationYears");
+  baseDir      = MTHREAD->MD->getBaseDirectory();
+  oDir         = MTHREAD->MD->getOutputDirectory();
 //    bool initSeed = MTHREAD->MD->getBoolSetting("newRandomSeed");
 //    if (initSeed){
 //        uniform_int_distribution<> d(1, 1000000);
@@ -70,28 +70,28 @@ Output::commonInit(){
 //    }
   scenarioName = MTHREAD->getScenarioName();
   //scenarioName = "debug2";
-	oFileExt     = MTHREAD->MD->getStringSetting("outputFileExtension");
-	oHRedeable   = MTHREAD->MD->getBoolSetting("outputHumanReadable");
-	oSingleFile  = MTHREAD->MD->getBoolSetting("outputSingleFile");
-	oYears       = MTHREAD->MD->getIntVectorSetting("outYears");
-	wRegId_l1    = MTHREAD->MD->getIntSetting("worldCodeLev1");
-	wRegId_l2    = MTHREAD->MD->getIntSetting("worldCodeLev2");
-	outForVariables          = MTHREAD->MD->getStringVectorSetting("outForVariables");
-	outProdVariables         = MTHREAD->MD->getStringVectorSetting("outProdVariables");
-	dClasses                 = MTHREAD->MD->getStringVectorSetting("dClasses");
+  oFileExt     = MTHREAD->MD->getStringSetting("outputFileExtension");
+  oHRedeable   = MTHREAD->MD->getBoolSetting("outputHumanReadable");
+  oSingleFile  = MTHREAD->MD->getBoolSetting("outputSingleFile");
+  oYears       = MTHREAD->MD->getIntVectorSetting("outYears");
+  wRegId_l1    = MTHREAD->MD->getIntSetting("worldCodeLev1");
+  wRegId_l2    = MTHREAD->MD->getIntSetting("worldCodeLev2");
+  outForVariables          = MTHREAD->MD->getStringVectorSetting("outForVariables");
+  outProdVariables         = MTHREAD->MD->getStringVectorSetting("outProdVariables");
+  dClasses                 = MTHREAD->MD->getStringVectorSetting("dClasses");
   pDClasses.insert(pDClasses.end(), dClasses.begin()+1, dClasses.end() ); // production diameter classes
   dClasses.push_back(""); // needed for reporting of variables without diameter attribute
-	outStepRange             = MTHREAD->MD->getIntSetting("outStepRange");
-	forestDiamDetailedOutput = MTHREAD->MD->getBoolSetting("forestDiamDetailedOutput");
-	fTypes                   = MTHREAD->MD->getForTypeIds();
+  outStepRange             = MTHREAD->MD->getIntSetting("outStepRange");
+  forestDiamDetailedOutput = MTHREAD->MD->getBoolSetting("forestDiamDetailedOutput");
+  fTypes                   = MTHREAD->MD->getForTypeIds();
 
-	priPr    = MTHREAD->MD->getStringVectorSetting("priProducts");
-	secPr    = MTHREAD->MD->getStringVectorSetting("secProducts");
-	allPr    = priPr;
-	allPr.insert( allPr.end(), secPr.begin(), secPr.end() );
-	nPriPr   = priPr.size();
-	nSecPr   = secPr.size();
-	nAllPr   = allPr.size();
+  priPr    = MTHREAD->MD->getStringVectorSetting("priProducts");
+  secPr    = MTHREAD->MD->getStringVectorSetting("secProducts");
+  allPr    = priPr;
+  allPr.insert( allPr.end(), secPr.begin(), secPr.end() );
+  nPriPr   = priPr.size();
+  nSecPr   = secPr.size();
+  nAllPr   = allPr.size();
   l1regIds = MTHREAD->MD->getRegionIds(1, true);
   nL2r     = MTHREAD->MD->getRegionIds(2, true).size();
   spMode   = MTHREAD->MD->getBoolSetting("usePixelData");
@@ -100,23 +100,23 @@ Output::commonInit(){
     //}
 
 
-	for(uint i=0;i<l1regIds.size();i++){
-		std::vector<int> l2ChildrenIds;
-		ModelRegion* l1Region = MTHREAD->MD->getRegion(l1regIds[i]);
-		std::vector<ModelRegion*> l2Childrens = l1Region->getChildren(true);
-		for(uint j=0;j<l2Childrens.size();j++){
-			l2ChildrenIds.push_back(l2Childrens[j]->getRegId());
-		}
-		if(l2ChildrenIds.size()){
-			l2r.push_back(l2ChildrenIds);
-		}
-	}
+  for(uint i=0;i<l1regIds.size();i++){
+    std::vector<int> l2ChildrenIds;
+    ModelRegion* l1Region = MTHREAD->MD->getRegion(l1regIds[i]);
+    std::vector<ModelRegion*> l2Childrens = l1Region->getChildren(true);
+    for(uint j=0;j<l2Childrens.size();j++){
+      l2ChildrenIds.push_back(l2Childrens[j]->getRegId());
+    }
+    if(l2ChildrenIds.size()){
+      l2r.push_back(l2ChildrenIds);
+    }
+  }
 
 }
 
 void
 Output::initOptimisationLog(){
-	if(oLevel<OUTVL_AGGREGATED) return;
+  if(oLevel<OUTVL_AGGREGATED) return;
 
     if (oSingleFile){
          logFilename = baseDir+oDir+"optimisationLogs/optimisationLogs.txt";
@@ -126,31 +126,31 @@ Output::initOptimisationLog(){
     }
 
 
-	ifstream in(logFilename.c_str(), ios::in);
-	if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
-		in.close();
-		cleanScenario(logFilename, scenarioName, d);
-		ofstream out(logFilename.c_str(), ios::app);
-		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+logFilename+" for writing.");}
-		time_t now;
-		time(&now);
-		struct tm *current = localtime(&now);
-		string timemessage = i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
-		out << scenarioName << d << "0000" << d << timemessage << d << d << d <<"\n";
-		out.close();
-		return;
-	} else { // file doesn't exist
-		in.close();
-		ofstream out(logFilename.c_str(), ios::out);
-		if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+logFilename+" for writing.");}
-		out << "scenario" << d << "year" << d << "time" << d << "opt flag" << d << "iterations" << d <<"\n";
-		time_t now;
-		time(&now);
-		struct tm *current = localtime(&now);
-		string timemessage = i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
-		out << scenarioName << d << "0000" << d << timemessage << d << d << d <<"\n";
-		out.close();
-	}
+  ifstream in(logFilename.c_str(), ios::in);
+  if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
+    in.close();
+    cleanScenario(logFilename, scenarioName, d);
+    ofstream out(logFilename.c_str(), ios::app);
+    if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+logFilename+" for writing.");}
+    time_t now;
+    time(&now);
+    struct tm *current = localtime(&now);
+    string timemessage = i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
+    out << scenarioName << d << "0000" << d << timemessage << d << d << d <<"\n";
+    out.close();
+    return;
+  } else { // file doesn't exist
+    in.close();
+    ofstream out(logFilename.c_str(), ios::out);
+    if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+logFilename+" for writing.");}
+    out << "scenario" << d << "year" << d << "time" << d << "opt flag" << d << "iterations" << d <<"\n";
+    time_t now;
+    time(&now);
+    struct tm *current = localtime(&now);
+    string timemessage = i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
+    out << scenarioName << d << "0000" << d << timemessage << d << d << d <<"\n";
+    out.close();
+  }
 }
 
 void
@@ -192,66 +192,66 @@ Output::initDebugOutput(){
 
 void
 Output::initOutputForestData(){
-	if(oLevel<OUTVL_AGGREGATED) return;
+  if(oLevel<OUTVL_AGGREGATED) return;
 
-	if(oSingleFile){
-		outFileName = baseDir+oDir+"results/forestData"+oFileExt;
-		ifstream in(outFileName.c_str(), ios::in);
-		if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
-			in.close();
-			cleanScenario(outFileName, scenarioName, d);
-			return;
-		} else {
-			in.close();
-		}
-	} else {
-		outFileName = baseDir+oDir+"results/forestData_"+scenarioName+oFileExt;
-	}
+  if(oSingleFile){
+    outFileName = baseDir+oDir+"results/forestData"+oFileExt;
+    ifstream in(outFileName.c_str(), ios::in);
+    if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
+      in.close();
+      cleanScenario(outFileName, scenarioName, d);
+      return;
+    } else {
+      in.close();
+    }
+  } else {
+    outFileName = baseDir+oDir+"results/forestData_"+scenarioName+oFileExt;
+  }
 
-	ofstream out(outFileName.c_str(), ios::out);
-	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
+  ofstream out(outFileName.c_str(), ios::out);
+  if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
     out << "scen" << d << "parName" << d << "country" << d << "region" << d << "forType" << d << "freeDim" << d;
-	if(oHRedeable){
-		for(int i=0;i<nYears;i++){
-			out << i+inYear << d;
-		}
-	} else {
-		out << "year" << d << "value" << d;
-	}
-	out << "\n";
-	out.close();
+  if(oHRedeable){
+    for(int i=0;i<nYears;i++){
+      out << i+inYear << d;
+    }
+  } else {
+    out << "year" << d << "value" << d;
+  }
+  out << "\n";
+  out.close();
 }
 
 void
 Output::initOutputProductData(){
-	if(oLevel<OUTVL_AGGREGATED) return;
+  if(oLevel<OUTVL_AGGREGATED) return;
 
-	if(oSingleFile){
-		outFileName = baseDir+oDir+"results/productData"+oFileExt;
-		ifstream in(outFileName.c_str(), ios::in);
-		if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
-			in.close();
-			cleanScenario(outFileName, scenarioName, d);
-			return;
-		} else {
-			in.close();
-		}
-	} else {
-		outFileName = baseDir+oDir+"results/productData_"+scenarioName+oFileExt;
-	}
+  if(oSingleFile){
+    outFileName = baseDir+oDir+"results/productData"+oFileExt;
+    ifstream in(outFileName.c_str(), ios::in);
+    if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
+      in.close();
+      cleanScenario(outFileName, scenarioName, d);
+      return;
+    } else {
+      in.close();
+    }
+  } else {
+    outFileName = baseDir+oDir+"results/productData_"+scenarioName+oFileExt;
+  }
 
-	ofstream out(outFileName.c_str(), ios::out);
-	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
-	out << "scen" << d << "parName" << d << "country" << d << "region" << d << "prod" << d << "freeDim" << d;
-	if(oHRedeable){
-		for(int i=0;i<nYears;i++){
-			out << i+inYear << d;
-		}
-	} else {
-		out << "year" << d << "value" << d;
-	}
-	out << "\n";
-	out.close();
+  ofstream out(outFileName.c_str(), ios::out);
+  if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
+  out << "scen" << d << "parName" << d << "country" << d << "region" << d << "prod" << d << "freeDim" << d;
+  if(oHRedeable){
+    for(int i=0;i<nYears;i++){
+      out << i+inYear << d;
+    }
+  } else {
+    out << "year" << d << "value" << d;
+  }
+  out << "\n";
+  out.close();
 }
 
 void
@@ -275,9 +275,9 @@ Output::initCarbonBalance(){
   if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
     out << "scen" << d << "country" << d << "region" << d << "balItem" << d;
   //if(oHRedeable){
-  //	for(int i=0;i<nYears;i++){
-  //		out << i+inYear << d;
-  //	}
+  //  for(int i=0;i<nYears;i++){
+  //    out << i+inYear << d;
+  //  }
   //} else {
     out << "year" << d << "value" << d;
   //}
@@ -292,199 +292,199 @@ Resetting the list of printed layers and the scenario name..
 */
 void
 Output::initOutputMaps(){
-	if(oLevel<OUTVL_MAPS) return;
-	string mapBaseDirectory = baseDir+oDir+"maps/";
+  if(oLevel<OUTVL_MAPS) return;
+  string mapBaseDirectory = baseDir+oDir+"maps/";
     string filenameToSaveScenarioName = mapBaseDirectory+"scenarioNames/"+scenarioName;
     string filenameListIntLayers = mapBaseDirectory+"integerListLayers/"+scenarioName;
     string filenameListFloatLayers = mapBaseDirectory+"floatListLayers/"+scenarioName;
 
-	// printing the scenario name in the "scenarioName file"...
-	ofstream outSN(filenameToSaveScenarioName.c_str(), ios::out);
-	if (!outSN){ msgOut(MSG_ERROR,"Error in opening the file "+filenameToSaveScenarioName+".");}
-	outSN << scenarioName << "\n";
-	outSN.close();
-	// cleaning the "integerListLayers" and "floatListLayers" file...
-	ofstream outi(filenameListIntLayers.c_str(), ios::out);
-	outi.close();
-	ofstream outf(filenameListFloatLayers.c_str(), ios::out);
-	outf.close();
+  // printing the scenario name in the "scenarioName file"...
+  ofstream outSN(filenameToSaveScenarioName.c_str(), ios::out);
+  if (!outSN){ msgOut(MSG_ERROR,"Error in opening the file "+filenameToSaveScenarioName+".");}
+  outSN << scenarioName << "\n";
+  outSN.close();
+  // cleaning the "integerListLayers" and "floatListLayers" file...
+  ofstream outi(filenameListIntLayers.c_str(), ios::out);
+  outi.close();
+  ofstream outf(filenameListFloatLayers.c_str(), ios::out);
+  outf.close();
 }
 
 void
 Output::print(){
-	int cYear = MTHREAD->SCD->getYear();
-	int initialSimulationYear = MTHREAD->MD->getIntSetting("initialOptYear");
+  int cYear = MTHREAD->SCD->getYear();
+  int initialSimulationYear = MTHREAD->MD->getIntSetting("initialOptYear");
 
-	if (outStepRange != -1 && (cYear-initialSimulationYear)%outStepRange != 0 && cYear != (initialSimulationYear+nYears)-1 ) {
-		cout << cYear << " not printed" << endl;
-		return;
-	}
-	bool printThisYear = false;
-	for(uint i=0;i<oYears.size();i++){
-		if (outStepRange == -1 && oYears[i] == cYear) printThisYear = true;
-	}
-	if(outStepRange == -1 && !printThisYear) return;
+  if (outStepRange != -1 && (cYear-initialSimulationYear)%outStepRange != 0 && cYear != (initialSimulationYear+nYears)-1 ) {
+    cout << cYear << " not printed" << endl;
+    return;
+  }
+  bool printThisYear = false;
+  for(uint i=0;i<oYears.size();i++){
+    if (outStepRange == -1 && oYears[i] == cYear) printThisYear = true;
+  }
+  if(outStepRange == -1 && !printThisYear) return;
 
 
-	cout << "printing " << cYear << endl;
-	printMaps();
-	MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
-	printForestData(false);
-	printProductData(false);
+  cout << "printing " << cYear << endl;
+  printMaps();
+  MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
+  printForestData(false);
+  printProductData(false);
   printCarbonBalance();
   printDebugOutput();
-	MTHREAD->MD->setErrorLevel(MSG_ERROR);
+  MTHREAD->MD->setErrorLevel(MSG_ERROR);
 }
 
 void
 Output::printMaps(){
-	if(oLevel<OUTVL_MAPS) return;
-	MTHREAD->GIS->printLayers();
-	if(oLevel<OUTVL_BINMAPS) return;
-	MTHREAD->GIS->printBinMaps();
+  if(oLevel<OUTVL_MAPS) return;
+  MTHREAD->GIS->printLayers();
+  if(oLevel<OUTVL_BINMAPS) return;
+  MTHREAD->GIS->printBinMaps();
 }
 
 void
 Output::printFinalOutput(){
-	// we do this only if we choosed the outputHumanReadable settings, as we flush the data all in ones at the end.
-	// oterwise we flush data every year
-	if(oHRedeable){
-		MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
-		printForestData(true);
+  // we do this only if we choosed the outputHumanReadable settings, as we flush the data all in ones at the end.
+  // oterwise we flush data every year
+  if(oHRedeable){
+    MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
+    printForestData(true);
     printProductData(true);
-		MTHREAD->MD->setErrorLevel(MSG_ERROR);
-	}
+    MTHREAD->MD->setErrorLevel(MSG_ERROR);
+  }
 }
 
 void
 Output::printForestData(bool finalFlush){
 
-	if(oLevel<OUTVL_DETAILED) return;
-	if(oHRedeable && !finalFlush) return;
+  if(oLevel<OUTVL_DETAILED) return;
+  if(oHRedeable && !finalFlush) return;
 
-	msgOut(MSG_INFO, "Printing forest data..");
-	int currentYear = MTHREAD->SCD->getYear();
-	if(oSingleFile){
-		outFileName = baseDir+oDir+"results/forestData"+oFileExt;
-	} else {
-		outFileName = baseDir+oDir+"results/forestData_"+scenarioName+oFileExt;
-	}
-	ofstream out (outFileName.c_str(), ios::app);
-	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
-	double outvalue;
-	for(uint v=0;v<outForVariables.size();v++){
-		for (uint r1=0;r1<l2r.size();r1++){
-			for (uint r2=0;r2<l2r[r1].size();r2++){
-				for(uint ft=0;ft<fTypes.size();ft++){
-					if(forestDiamDetailedOutput){
-						for(uint dc=0;dc<dClasses.size();dc++){
-							out << scenarioName << d;
-							out << outForVariables[v] << d;
-							out << l1regIds.at(r1) << d;
-							out << l2r[r1][r2] << d;
-							out << fTypes[ft] << d;
-							out << dClasses[dc] << d;
-							if (oHRedeable){
-								for(int y=0;y<nYears;y++){
-									outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],dClasses[dc],y+inYear);
-									out << outvalue << d;
-								}
-								out << "\n";
-							} else {
-								outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],dClasses[dc]);
-								out << currentYear << d;
-								out << outvalue << d;
-								out << "\n";
-							}
-						}
-					} else {
-						out << scenarioName << d;
-						out << outForVariables[v] << d;
-						out << l1regIds.at(r1) << d;
-						out << l2r[r1][r2] << d;
-						out << fTypes[ft] << d;
-						out << d;
-						if (oHRedeable){
-							for(int y=0;y<nYears;y++){
-								outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],DIAM_ALL,y+inYear);
-								out << outvalue << d;
-							}
-							out << "\n";
-						} else {
-							outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],DIAM_ALL);
-							out << currentYear << d;
-							out << outvalue << d;
-							out << "\n";
-						}
-					}
-				}
-			}
-		}
-	}
-	/*
-	DataMap::const_iterator i;
-	string key;
-	vector <double> values;
-	string parName;
-	int regId;
-	string forType;
-	string diamClass;
-	for(i=MTHREAD->MD->forDataMap.begin();i!=MTHREAD->MD->forDataMap.end();i++){
-		key = i->first;
-		values = i->second;
-		MTHREAD->MD->unpackKeyForData(key, parName, regId, forType, diamClass);
-		ModelRegion* REG = MTHREAD->MD->getRegion(regId);
-		// we don't want to output data from residual region unless it's the world region we are speaking of
-		if(REG->getIsResidual() && !(regId==wRegId_l1 || regId==wRegId_l2)) continue;
-		out << scenarioName << d;
-		out << parName << d;
-		if (REG->getRegLevel()==2){
-			ModelRegion* pREG = MTHREAD->MD->getRegion(REG->getParRegId());
-			out << pREG->getRegSName() << d;
-			out << REG->getRegSName() << d;
-		} else if (REG->getRegLevel()==1){
-			out << REG->getRegSName() << d;
-			out << d;
-		} else {
-			out << d << d;
-		}
-		out << forType << d;
-		out << diamClass << d;
-		if (oHRedeable){
-			for(int y=0;y<nYears;y++){
-				out << MTHREAD->MD->getTimedData(values,y+inYear) << d;
-			}
-			out << "\n";
-		} else {
-			out << currentYear << d;
-			out << MTHREAD->MD->getTimedData(values,currentYear) << d;
-			out << "\n";
-		}
-	}
-	*/
-	out.close();
+  msgOut(MSG_INFO, "Printing forest data..");
+  int currentYear = MTHREAD->SCD->getYear();
+  if(oSingleFile){
+    outFileName = baseDir+oDir+"results/forestData"+oFileExt;
+  } else {
+    outFileName = baseDir+oDir+"results/forestData_"+scenarioName+oFileExt;
+  }
+  ofstream out (outFileName.c_str(), ios::app);
+  if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
+  double outvalue;
+  for(uint v=0;v<outForVariables.size();v++){
+    for (uint r1=0;r1<l2r.size();r1++){
+      for (uint r2=0;r2<l2r[r1].size();r2++){
+        for(uint ft=0;ft<fTypes.size();ft++){
+          if(forestDiamDetailedOutput){
+            for(uint dc=0;dc<dClasses.size();dc++){
+              out << scenarioName << d;
+              out << outForVariables[v] << d;
+              out << l1regIds.at(r1) << d;
+              out << l2r[r1][r2] << d;
+              out << fTypes[ft] << d;
+              out << dClasses[dc] << d;
+              if (oHRedeable){
+                for(int y=0;y<nYears;y++){
+                  outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],dClasses[dc],y+inYear);
+                  out << outvalue << d;
+                }
+                out << "\n";
+              } else {
+                outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],dClasses[dc]);
+                out << currentYear << d;
+                out << outvalue << d;
+                out << "\n";
+              }
+            }
+          } else {
+            out << scenarioName << d;
+            out << outForVariables[v] << d;
+            out << l1regIds.at(r1) << d;
+            out << l2r[r1][r2] << d;
+            out << fTypes[ft] << d;
+            out << d;
+            if (oHRedeable){
+              for(int y=0;y<nYears;y++){
+                outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],DIAM_ALL,y+inYear);
+                out << outvalue << d;
+              }
+              out << "\n";
+            } else {
+              outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],DIAM_ALL);
+              out << currentYear << d;
+              out << outvalue << d;
+              out << "\n";
+            }
+          }
+        }
+      }
+    }
+  }
+  /*
+  DataMap::const_iterator i;
+  string key;
+  vector <double> values;
+  string parName;
+  int regId;
+  string forType;
+  string diamClass;
+  for(i=MTHREAD->MD->forDataMap.begin();i!=MTHREAD->MD->forDataMap.end();i++){
+    key = i->first;
+    values = i->second;
+    MTHREAD->MD->unpackKeyForData(key, parName, regId, forType, diamClass);
+    ModelRegion* REG = MTHREAD->MD->getRegion(regId);
+    // we don't want to output data from residual region unless it's the world region we are speaking of
+    if(REG->getIsResidual() && !(regId==wRegId_l1 || regId==wRegId_l2)) continue;
+    out << scenarioName << d;
+    out << parName << d;
+    if (REG->getRegLevel()==2){
+      ModelRegion* pREG = MTHREAD->MD->getRegion(REG->getParRegId());
+      out << pREG->getRegSName() << d;
+      out << REG->getRegSName() << d;
+    } else if (REG->getRegLevel()==1){
+      out << REG->getRegSName() << d;
+      out << d;
+    } else {
+      out << d << d;
+    }
+    out << forType << d;
+    out << diamClass << d;
+    if (oHRedeable){
+      for(int y=0;y<nYears;y++){
+        out << MTHREAD->MD->getTimedData(values,y+inYear) << d;
+      }
+      out << "\n";
+    } else {
+      out << currentYear << d;
+      out << MTHREAD->MD->getTimedData(values,currentYear) << d;
+      out << "\n";
+    }
+  }
+  */
+  out.close();
 }
 
 void
 Output::printProductData(bool finalFlush){
 
-	if(oLevel<OUTVL_DETAILED) return;
-	if(oHRedeable && !finalFlush) return;
+  if(oLevel<OUTVL_DETAILED) return;
+  if(oHRedeable && !finalFlush) return;
 
-	msgOut(MSG_INFO, "Printing market data..");
-	int currentYear = MTHREAD->SCD->getYear();
+  msgOut(MSG_INFO, "Printing market data..");
+  int currentYear = MTHREAD->SCD->getYear();
 
-	if(oSingleFile){
-		outFileName = baseDir+oDir+"results/productData"+oFileExt;
-	} else {
-		outFileName = baseDir+oDir+"results/productData_"+scenarioName+oFileExt;
-	}
-	ofstream out (outFileName.c_str(), ios::app);
-	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
+  if(oSingleFile){
+    outFileName = baseDir+oDir+"results/productData"+oFileExt;
+  } else {
+    outFileName = baseDir+oDir+"results/productData_"+scenarioName+oFileExt;
+  }
+  ofstream out (outFileName.c_str(), ios::app);
+  if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
 
 
-  //11042	hardWSawnW	11083	0.00230651
-  //11042	hardWSawnW	11082	0.0390874
+  //11042  hardWSawnW  11083  0.00230651
+  //11042  hardWSawnW  11082  0.0390874
 
   //if(MTHREAD->SCD->getYear() == 2007){
 //  double test  = MTHREAD->MD->getProdData("rt",11042,"hardWSawnW",DATA_NOW);
@@ -494,11 +494,11 @@ Output::printProductData(bool finalFlush){
 //  exit(0);
 //  }
 
-	double outvalue;
-	for(uint v=0;v<outProdVariables.size();v++){
-		for (uint r1=0;r1<l2r.size();r1++){
-			for (uint r2=0;r2<l2r[r1].size();r2++){
-				for(uint p=0;p<allPr.size();p++){
+  double outvalue;
+  for(uint v=0;v<outProdVariables.size();v++){
+    for (uint r1=0;r1<l2r.size();r1++){
+      for (uint r2=0;r2<l2r[r1].size();r2++){
+        for(uint p=0;p<allPr.size();p++){
 
           if(outProdVariables[v]=="rt"){
             for(uint r2b=0;r2b<l2r[r1].size();r2b++){
@@ -546,57 +546,57 @@ Output::printProductData(bool finalFlush){
             }
 
           }
-				}
-			}
-		}
-	}
+        }
+      }
+    }
+  }
 
 
 
 
 /*
-	DataMap::const_iterator i;
-	string key;
-	vector <double> values;
-	string parName;
-	int regId;
-	string prod;
-	string freeDim;
-	for(i=MTHREAD->MD->prodDataMap.begin();i!=MTHREAD->MD->prodDataMap.end();i++){
-		key = i->first;
-		values = i->second;
-		MTHREAD->MD->unpackKeyProdData(key, parName, regId, prod, freeDim);
-		ModelRegion* REG = MTHREAD->MD->getRegion(regId);
-		// we don't want to output data from residual region unless it's the world region we are speaking of
-		if(REG->getIsResidual() && !(regId==wRegId_l1 || regId==wRegId_l2)) continue;
-		out << scenarioName << d;
-		out << parName << d;
-		if (REG->getRegLevel()==2){
-			ModelRegion* pREG = MTHREAD->MD->getRegion(REG->getParRegId());
-			out << pREG->getRegSName() << d;
-			out << REG->getRegSName() << d;
-		} else if (REG->getRegLevel()==1){
-			out << REG->getRegSName() << d;
-			out << d;
-		} else {
-			out << d << d;
-		}
-		out << prod << d;
-		out << freeDim << d;
-		if (oHRedeable){
-			for(int y=0;y<nYears;y++){
-				out << MTHREAD->MD->getTimedData(values,y+inYear) << d;
-			}
-			out << "\n";
-		} else {
-			out << currentYear << d;
-			out << MTHREAD->MD->getTimedData(values,currentYear) << d;
-			out << "\n";
-		}
-	}
+  DataMap::const_iterator i;
+  string key;
+  vector <double> values;
+  string parName;
+  int regId;
+  string prod;
+  string freeDim;
+  for(i=MTHREAD->MD->prodDataMap.begin();i!=MTHREAD->MD->prodDataMap.end();i++){
+    key = i->first;
+    values = i->second;
+    MTHREAD->MD->unpackKeyProdData(key, parName, regId, prod, freeDim);
+    ModelRegion* REG = MTHREAD->MD->getRegion(regId);
+    // we don't want to output data from residual region unless it's the world region we are speaking of
+    if(REG->getIsResidual() && !(regId==wRegId_l1 || regId==wRegId_l2)) continue;
+    out << scenarioName << d;
+    out << parName << d;
+    if (REG->getRegLevel()==2){
+      ModelRegion* pREG = MTHREAD->MD->getRegion(REG->getParRegId());
+      out << pREG->getRegSName() << d;
+      out << REG->getRegSName() << d;
+    } else if (REG->getRegLevel()==1){
+      out << REG->getRegSName() << d;
+      out << d;
+    } else {
+      out << d << d;
+    }
+    out << prod << d;
+    out << freeDim << d;
+    if (oHRedeable){
+      for(int y=0;y<nYears;y++){
+        out << MTHREAD->MD->getTimedData(values,y+inYear) << d;
+      }
+      out << "\n";
+    } else {
+      out << currentYear << d;
+      out << MTHREAD->MD->getTimedData(values,currentYear) << d;
+      out << "\n";
+    }
+  }
 
 */
-	out.close();
+  out.close();
 }
 
 
@@ -679,42 +679,42 @@ Output::printCarbonBalance(){
 
 char
 Output::getOutputFieldDelimiter(){
-	int delimiterID = MTHREAD->MD->getIntSetting("outputFieldDelimiter");
-	switch (delimiterID) {
-		case 1:
-			return ',';
-			break;
-		case 2:
-			return ';';
-			break;
-		case 3:
-			return ':';
-			break;
-		case 4:
-			return '\t';
-			break;
-		case 5:
-			return ' ';
-			break;
-		default:
-			msgOut(MSG_ERROR, "You have specified an unknow output file field delimiter. Using \";\".");
-			return ',';
-	}
+  int delimiterID = MTHREAD->MD->getIntSetting("outputFieldDelimiter");
+  switch (delimiterID) {
+    case 1:
+      return ',';
+      break;
+    case 2:
+      return ';';
+      break;
+    case 3:
+      return ':';
+      break;
+    case 4:
+      return '\t';
+      break;
+    case 5:
+      return ' ';
+      break;
+    default:
+      msgOut(MSG_ERROR, "You have specified an unknow output file field delimiter. Using \";\".");
+      return ',';
+  }
 }
 
 void
 Output::printOptLog(bool optimal, int &nIterations, double &obj){
-	if(oLevel<OUTVL_AGGREGATED) return;
+  if(oLevel<OUTVL_AGGREGATED) return;
 
-	ofstream out(logFilename.c_str(), ios::app);
-	if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+logFilename+" for writing.");}
-	time_t now;
-	time(&now);
-	struct tm *current = localtime(&now);
-	string timemessage = i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
-	out << scenarioName << d << MTHREAD->SCD->getYear() << d << timemessage << d << optimal;
-	out << d << nIterations << d << obj << "\n";
-	out.close();
+  ofstream out(logFilename.c_str(), ios::app);
+  if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+logFilename+" for writing.");}
+  time_t now;
+  time(&now);
+  struct tm *current = localtime(&now);
+  string timemessage = i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
+  out << scenarioName << d << MTHREAD->SCD->getYear() << d << timemessage << d << optimal;
+  out << d << nIterations << d << obj << "\n";
+  out.close();
 
 }
 
@@ -766,25 +766,25 @@ Other scenarios are untouched. The scenarioName must be in the first row.
 */
 void
 Output::cleanScenario(string fileName, string scenarioName, char d){
-	string dStr(&d,1);
-	vector <string> rows;
-	string tempRow;
-	ifstream inFile (fileName.c_str(), ios::in);
-	if (!inFile){
-		msgOut(MSG_ERROR,"Error in opening the file "+fileName+" for reading.");
-		return;
-	}
-	while( getline (inFile,tempRow) ){
-		vector<string> tokens;
-		tokenize(tempRow,tokens,dStr);
-		if(tokens[0] != scenarioName)
-			rows.push_back( tempRow );
-	}
-	inFile.close();
-	ofstream out(fileName.c_str(), ios::out);
-	for(uint i=0;i<rows.size();i++){
-		out << rows[i];
-		out << "\n";
-	}
+  string dStr(&d,1);
+  vector <string> rows;
+  string tempRow;
+  ifstream inFile (fileName.c_str(), ios::in);
+  if (!inFile){
+    msgOut(MSG_ERROR,"Error in opening the file "+fileName+" for reading.");
+    return;
+  }
+  while( getline (inFile,tempRow) ){
+    vector<string> tokens;
+    tokenize(tempRow,tokens,dStr);
+    if(tokens[0] != scenarioName)
+      rows.push_back( tempRow );
+  }
+  inFile.close();
+  ofstream out(fileName.c_str(), ios::out);
+  for(uint i=0;i<rows.size();i++){
+    out << rows[i];
+    out << "\n";
+  }
 }
 
