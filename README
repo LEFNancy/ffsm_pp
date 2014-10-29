@@ -1,13 +1,13 @@
 *** To compile and install: ***
 
-1) qmake  (or qmake-qt4)
+1) qmake  (or qmake-qt5)
 2) make
 3) ./regmas
 
 Notes:
 - a project file for Kdevelop is attahced. Hovewer you can use whatsoever IDE to work with the project. The interface file was generated using QTDesigner;
-- you need the Qt4 development library to compile this program as well as the GLPK library.
-- on some Linux distros you have to use qmake-qt4 in order to use Qt4 instead of the "old" Qt3 libraries. For the same reason on some distros when using Kdevelop you have to manually lunch the command qmake-qt4 from the console before start working on kdevelop.
+- you need the Qt5 development library to compile this program as well as the GLPK library.
+- on some Linux distros you have to use qmake-qt5 in order to use Qt5 instead of the "old" Qt3/Qt4 libraries. For the same reason on some distros when using Kdevelop you have to manually lunch the command qmake-qt4 from the console before start working on kdevelop.
 - detailed compiling instructions for both Linux and Windows are available on the regmas.org web site
 
 *** To use: ***
