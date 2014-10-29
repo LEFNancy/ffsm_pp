@@ -1342,8 +1342,37 @@ ModelCoreSpatial::sumRegionalForData(){
       sfd(vReg,"vReg",regId,ft,"",DATA_NOW, true);
       sfd(regArea,"regArea",regId,ft,"",DATA_NOW, true);
       sfd(sumExpReturns/sumArea,"expReturns",regId,ft,"",DATA_NOW, true);
+      sfd(sumExpReturns,"sumExpReturns",regId,ft,"",DATA_NOW, true);
       sfd(sumArea,"forArea",regId,ft,"",DATA_NOW, true);
-    }
+    } // end of for each ft
+
+    double totRegExpReturn = 0.0;
+    double totRegForArea = 0.0;
+
+    for (uint p=0;p<regPx.size();p++){
+      Pixel* px = regPx[p];
+      double totPxForArea = vSum(px->area);
+
+#ifdef QT_DEBUG
+      double totPxForArea_debug = 0.0;
+      for(uint j=0;j<fTypes.size();j++){
+        string ft = fTypes[j];
+        totPxForArea_debug += (px->getDoubleValue("forArea_"+ft,true)/10000);
+      }
+
+      if ( (totPxForArea - totPxForArea_debug) > 0.0001 || (totPxForArea - totPxForArea_debug) < -0.0001 ){
+        cout << "*** ERROR: area discrepance in pixel " << px->getID() << " of " << (totPxForArea - totPxForArea_debug) << " ha!" << endl;
+        msgOut(MSG_CRITICAL_ERROR,"Total forest area in pixel do not coincide if token from layer forArea or (pixel) vector area!");
+      }
+#endif
+
+      double bestExpectedReturn = *max_element(px->expectedReturns.begin(), px->expectedReturns.end());
+      double totPxExpReturn = bestExpectedReturn * totPxForArea;
+      totRegExpReturn += totPxExpReturn;
+      totRegForArea += totPxForArea;
+    } // end of each pixel
+    sfd(totRegExpReturn/totRegForArea,"expReturns",regId,"","",DATA_NOW, true);
+    sfd(totRegExpReturn,"sumExpReturns",regId,"","",DATA_NOW, true);
   }
 
 }

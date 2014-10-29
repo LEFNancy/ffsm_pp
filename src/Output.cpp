@@ -373,25 +373,29 @@ Output::printForestData(bool finalFlush){
   if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
   double outvalue;
   for(uint v=0;v<outForVariables.size();v++){
+    vector<string>fTypes_temp = fTypes;
+    if( outForVariables[v]=="expReturns" || outForVariables[v]=="sumExpReturns") {
+      fTypes_temp.push_back(""); // adding an empty forest type to report for variables that doesn't have a forestType dimension
+    }
     for (uint r1=0;r1<l2r.size();r1++){
       for (uint r2=0;r2<l2r[r1].size();r2++){
-        for(uint ft=0;ft<fTypes.size();ft++){
+        for(uint ft=0;ft<fTypes_temp.size();ft++){
           if(forestDiamDetailedOutput){
-            for(uint dc=0;dc<dClasses.size();dc++){
+            for(uint dc=0;dc<dClasses.size();dc++){ // an empty "" dc has been already added to the vector
               out << scenarioName << d;
               out << outForVariables[v] << d;
               out << l1regIds.at(r1) << d;
               out << l2r[r1][r2] << d;
-              out << fTypes[ft] << d;
+              out << fTypes_temp[ft] << d;
               out << dClasses[dc] << d;
               if (oHRedeable){
                 for(int y=0;y<nYears;y++){
-                  outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],dClasses[dc],y+inYear);
+                  outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes_temp[ft],dClasses[dc],y+inYear);
                   out << outvalue << d;
                 }
                 out << "\n";
               } else {
-                outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],dClasses[dc]);
+                outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes_temp[ft],dClasses[dc]);
                 out << currentYear << d;
                 out << outvalue << d;
                 out << "\n";
@@ -402,16 +406,16 @@ Output::printForestData(bool finalFlush){
             out << outForVariables[v] << d;
             out << l1regIds.at(r1) << d;
             out << l2r[r1][r2] << d;
-            out << fTypes[ft] << d;
+            out << fTypes_temp[ft] << d;
             out << d;
             if (oHRedeable){
               for(int y=0;y<nYears;y++){
-                outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],DIAM_ALL,y+inYear);
+                outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes_temp[ft],DIAM_ALL,y+inYear);
                 out << outvalue << d;
               }
               out << "\n";
             } else {
-              outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes[ft],DIAM_ALL);
+              outvalue = MTHREAD->MD->getForData(outForVariables[v],l2r[r1][r2],fTypes_temp[ft],DIAM_ALL);
               out << currentYear << d;
               out << outvalue << d;
               out << "\n";
