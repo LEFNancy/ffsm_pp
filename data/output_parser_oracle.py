@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 
 forIFiles = [  
-  'output_bau/results/forestData_bau.csv',  
+  'output_oracle/results/forestData_oracle_bau.csv',
   'output_oracle/results/forestData_arpege_a1b.csv',
   'output_oracle/results/forestData_arpege_a2.csv',
   'output_oracle/results/forestData_arpege_b1.csv',
@@ -32,11 +32,12 @@ forIFiles = [
   'output_oracle/results/forestData_MPEH5C_1.csv',
   'output_oracle/results/forestData_MPEH5C_2.csv',
   'output_oracle/results/forestData_MPEH5C_3.csv',
-  
+  'output_oracle/results/forestData_arpege_a1b_fullExpectations.csv',
+  'output_oracle/results/forestData_arpege_a1b_noExpectations.csv',
 ]
 
 scenarios = {
-  'bau':                 '#610e0e',
+  'oracle_bau':          '#610e0e',
   'arpege_a1b':          '#6dcaf1',
   'arpege_a2':           '#6c77e7',
   'arpege_b1':           '#0015db',
@@ -51,13 +52,18 @@ scenarios = {
   'IPCM4_3':             '#0015db',
   'MPEH5C_1':            '#6dcaf1',
   'MPEH5C_2':            '#6c77e7',
-  'MPEH5C_3':            '#0015db', 
+  'MPEH5C_3':            '#0015db',
+  'arpege_a1b_noExpectations':   '#0015db', 
+  'arpege_a1b_fullExpectations': '#6dcaf1',
+
 }
 
-years = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026','2027','2028','2029','2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085']
+#years = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026','2027','2028','2029','2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085']
+years = ['2007','2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026','2027','2028','2029','2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085','2086','2087','2088','2089','2090','2091','2092','2093','2094','2095','2096']
 
-printCharts = True
-printTablae = True
+
+printChartsFlag = False
+printTablesFlag = True
 ofilename = 'output_cc.csv'
 chartoutdir = 'output_oracle/charts'
 tableoutdir = 'output_oracle/tables'
@@ -117,7 +123,7 @@ sortedregions = []
 
 # =============================================================================
 def main():  
-  global sortedregions
+  global sortedregions, printChartsFlag, printTablesFlag
   
   print "Creating nicely formatted output and charts.."
   
@@ -264,11 +270,13 @@ def main():
   file_c.close()
   
   # H - Printing charts
-  if printCharts:
+  if printChartsFlag:
+    print "didn't get it.."
+    print printChartsFlag
     printCharts()
   
   # I - Print tables
-  if printTables:
+  if printTablesFlag:
     printTables()
   
   print "Done!"
@@ -510,23 +518,26 @@ def printCharts():
     title('c','subsection',regions[region])
 
     title('c','subsubsection',"IPCC scenarios (using arpege)")
-    plotMultivariable(['bau','arpege_a1b', 'arpege_a2', 'arpege_b1'],['expReturns','vReg','vol','hV','forArea'],region,'IPCC Scenarios','ipcc_scenarios')
+    plotMultivariable(['oracle_bau','arpege_a1b', 'arpege_a2', 'arpege_b1'],['expReturns','vReg','vol','hV','forArea'],region,'IPCC Scenarios','ipcc_scenarios')
     
     title('c','subsubsection',"IPCC scenario a1b")
-    plotMultivariable(['bau','arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea'],region,'All a1b scenarios','a1b',False)
-    plotMultivariable(['bau','arpege_a1b'],['expReturns','vReg','vol','hV','forArea'],region,'Arpege a1b','arpege')
-    plotMultivariable(['bau','CNCM33_1'],['expReturns','vReg','vol','hV','forArea'],region,'CNCM33','cncm33')
-    plotMultivariable(['bau','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3'],['expReturns','vReg','vol','hV','forArea'],region,'DMIEH5C','dmieh5c')    
-    plotMultivariable(['bau','EGMAM2_3'],['expReturns','vReg','vol','hV','forArea'],region,'EGMAM2','egmam2') 
-    plotMultivariable(['bau','HADGEM2_1'],['expReturns','vReg','vol','hV','forArea'],region,'HADGEM2','hadgem2') 
-    plotMultivariable(['bau','IPCM4_1','IPCM4_2','IPCM4_3'],['expReturns','vReg','vol','hV','forArea'],region,'IPCM4','ipcm4') 
-    plotMultivariable(['bau','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea'],region,'MPEH5C','mpeh5c') 
+    plotMultivariable(['oracle_bau','arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea'],region,'All a1b scenarios','a1b',False)
+    plotMultivariable(['oracle_bau','arpege_a1b'],['expReturns','vReg','vol','hV','forArea'],region,'Arpege a1b','arpege')
+    plotMultivariable(['oracle_bau','CNCM33_1'],['expReturns','vReg','vol','hV','forArea'],region,'CNCM33','cncm33')
+    plotMultivariable(['oracle_bau','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3'],['expReturns','vReg','vol','hV','forArea'],region,'DMIEH5C','dmieh5c')    
+    plotMultivariable(['oracle_bau','EGMAM2_3'],['expReturns','vReg','vol','hV','forArea'],region,'EGMAM2','egmam2') 
+    plotMultivariable(['oracle_bau','HADGEM2_1'],['expReturns','vReg','vol','hV','forArea'],region,'HADGEM2','hadgem2') 
+    plotMultivariable(['oracle_bau','IPCM4_1','IPCM4_2','IPCM4_3'],['expReturns','vReg','vol','hV','forArea'],region,'IPCM4','ipcm4') 
+    plotMultivariable(['oracle_bau','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea'],region,'MPEH5C','mpeh5c') 
 
 # =============================================================================  
 def printTables():
   print "Printing tables.."
 
-  oyears = ['2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085']
+  #oyears = ['2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085']
+  oyears = ['2007','2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026','2027','2028','2029','2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085','2086','2087','2088','2089','2090','2091','2092','2093','2094','2095','2096']
+
+  # ATTENCTION: CHANGED OYEARS in 2008-2096 but not changeg titles and filename of tables !!!
   
   #text('t',"Automatically generated result tables.")
   
@@ -536,33 +547,46 @@ def printTables():
     title('t','subsection',regions[region])
 
     title('c','subsubsection',"IPCC scenario a1b")
-    printTable('bau',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'IPCC scenario a1b (average of all models) [avg. 2030-2085]','a1b_all_2030-2085_'+region)
-    printTable('bau',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'IPCC scenario a1b (average of all models) [2085]','a1b_all_2085_'+region)
-    printTable('bau',['arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege\_a1b [avg. 2030-2085]','arpege_a1b_2030-2085_'+region)
-    printTable('bau',['arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'arpege\_a1b [2085]','arpege_a1b_2085_'+region)
-    printTable('bau',['CNCM33_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'CNCM33 [avg. 2030-2085]','cncm33_2030-2085_'+region)
-    printTable('bau',['CNCM33_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'CNCM33 [2085]','cncm33_2085_'+region)
-    printTable('bau',['DMIEH5C_1','DMIEH5C_2','DMIEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'DMIEH5C [avg. 2030-2085]','dmieh5c_2030-2085_'+region)
-    printTable('bau',['DMIEH5C_1','DMIEH5C_2','DMIEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'DMIEH5C [2085]','dmieh5c_2085_'+region)
-    printTable('bau',['EGMAM2_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'EGMAM2 [avg. 2030-2085]','egmam2_2030-2085_'+region)
-    printTable('bau',['EGMAM2_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'EGMAM2 [2085]','egmam2_2085_'+region)
-    printTable('bau',['HADGEM2_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'HADGEM2 [avg. 2030-2085]','hadgem2_2030-2085_'+region)
-    printTable('bau',['HADGEM2_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'HADGEM2 [2085]','hadgem2_2085_'+region)
-    printTable('bau',['IPCM4_1','IPCM4_2','IPCM4_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'IPCM4 [avg. 2030-2085]','ipcm4_2030-2085_'+region)
-    printTable('bau',['IPCM4_1','IPCM4_2','IPCM4_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'IPCM4 [2085]','ipcm4_2085_'+region)
-    printTable('bau',['MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'MPEH5C [avg. 2030-2085]','mpeh5c_2030-2085_'+region)
-    printTable('bau',['MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'MPEH5C [2085]','mpeh5c_2085_'+region)
+    #printTable('oracle_bau',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'IPCC scenario a1b (average of all models) [avg. 2030-2085]','a1b_all_2030-2085_'+region)
+    #printTable('oracle_bau',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2096'],'IPCC scenario a1b (average of all models) [2085]','a1b_all_2085_'+region)
+ 
+    printTable('oracle_bau',['arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege\_a1b [avg. 2030-2085]','arpege_a1b_2030-2085_'+region)
+    printTable('oracle_bau',['arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2096'],'arpege\_a1b [2085]','arpege_a1b_2085_'+region)
+    #printTable('oracle_bau',['CNCM33_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'CNCM33 [avg. 2030-2085]','cncm33_2030-2085_'+region)
+    #printTable('oracle_bau',['CNCM33_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'CNCM33 [2085]','cncm33_2085_'+region)
+    #printTable('oracle_bau',['DMIEH5C_1','DMIEH5C_2','DMIEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'DMIEH5C [avg. 2030-2085]','dmieh5c_2030-2085_'+region)
+    #printTable('oracle_bau',['DMIEH5C_1','DMIEH5C_2','DMIEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'DMIEH5C [2085]','dmieh5c_2085_'+region)
+    #printTable('oracle_bau',['EGMAM2_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'EGMAM2 [avg. 2030-2085]','egmam2_2030-2085_'+region)
+    #printTable('oracle_bau',['EGMAM2_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'EGMAM2 [2085]','egmam2_2085_'+region)
+    #printTable('oracle_bau',['HADGEM2_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'HADGEM2 [avg. 2030-2085]','hadgem2_2030-2085_'+region)
+    #printTable('oracle_bau',['HADGEM2_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'HADGEM2 [2085]','hadgem2_2085_'+region)
+    #printTable('oracle_bau',['IPCM4_1','IPCM4_2','IPCM4_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'IPCM4 [avg. 2030-2085]','ipcm4_2030-2085_'+region)
+    #printTable('oracle_bau',['IPCM4_1','IPCM4_2','IPCM4_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'IPCM4 [2085]','ipcm4_2085_'+region)
+    #printTable('oracle_bau',['MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'MPEH5C [avg. 2030-2085]','mpeh5c_2030-2085_'+region)
+    #printTable('oracle_bau',['MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'MPEH5C [2085]','mpeh5c_2085_'+region)
     
     text('t',"\clearpage")
     
     title('c','subsubsection',"IPCC scenario a2")
-    printTable('bau',['arpege_a2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege\_a2 [avg. 2030-2085]','arpege_a2_2030-2085_'+region)
-    printTable('bau',['arpege_a2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'arpege\_a2 [2085]','arpege_a2_2085_'+region)
+    #printTable('oracle_bau',['arpege_a2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege\_a2 [avg. 2030-2085]','arpege_a2_2030-2085_'+region)
+    #printTable('oracle_bau',['arpege_a2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'arpege\_a2 [2085]','arpege_a2_2085_'+region)
+    printTable('arpege_a1b',['arpege_a2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege a1b vs a2 [avg. 2030-2085]','arpege_a1b_a2_2030-2085_'+region)
+    printTable('arpege_a1b',['arpege_a2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2096'],'arpege a1b vs a2 [2085]','arpege_a1b_a2_2085_'+region)
     title('c','subsubsection',"IPCC scenario b1")    
-    printTable('bau',['arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege\_b1 [avg. 2030-2085]','arpege_b1_2030-2085_'+region)
-    printTable('bau',['arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'arpege\_b1 [2085]','arpege_b1_2085_'+region)
-    
-   
+    #printTable('oracle_bau',['arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege\_b1 [avg. 2030-2085]','arpege_b1_2030-2085_'+region)
+    #printTable('oracle_bau',['arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'arpege\_b1 [2085]','arpege_b1_2085_'+region)
+    printTable('arpege_a1b',['arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege a1b vs b1 [avg. 2030-2085]','arpege_a1b_b1_2030-2085_'+region)
+    printTable('arpege_a1b',['arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2096'],'arpege a1b vs b1 [2085]','arpege_a1b_b1_2085_'+region)   
+    title('c','subsubsection',"Expectations")    
+    printTable('arpege_a1b',['arpege_a1b_noExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'noExp [avg. 2030-2085]','noExp_2030-2085_'+region)
+    printTable('arpege_a1b',['arpege_a1b_noExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2096'],'noExp [2085]','noExp_2085_'+region)
+    printTable('arpege_a1b',['arpege_a1b_fullExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'fullExp [avg. 2030-2085]','fullExp_2030-2085_'+region)
+    printTable('arpege_a1b',['arpege_a1b_fullExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2096'],'fullExp [2085]','fullExp_2085_'+region)   
+    printTable('arpege_a1b_noExpectations',['arpege_a1b_fullExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'noExp vs fullExp [avg. 2030-2085]','noVsfullExp_2030-2085_'+region)
+    printTable('arpege_a1b_noExpectations',['arpege_a1b_fullExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2096'],'noExp vs fullExp [2096]','noVsfullExp_2096_'+region)   
+
+
+
 # =============================================================================
 # EXECUTION ACTUALLY STARTS HERE.....
 main()
