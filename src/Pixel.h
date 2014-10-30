@@ -56,7 +56,7 @@ public:
   void                newYear();
   double              getPastRegArea(const int& ft_idx, const int& year);
   void                setPastRegArea(const double& value, const int& ft_idx, const int& year);
-    ModelRegion*        getMyRegion(const int& rLevel = 2);
+  ModelRegion*        getMyRegion(const int& rLevel = 2);
 
 
   // space..
@@ -128,7 +128,8 @@ public:
 
   // management variables (pixel==agent)
   double                          portfolioVarRa; ///< Sampling derived risk aversion on portfolio variance for of this agent
-  double                                 expType; ///< Sampling derived expectation types of this agent
+  double                                 expType; ///< Sampling derived expectation types of this agent (forest bilogical parameters: growth, mortality)
+  double                           expTypePrices; ///< Sampling derived expectation types of this agent (prices)
   bool                              usePortfolio; ///< Sampling derived usage of portfolio management (false/true)
 
 

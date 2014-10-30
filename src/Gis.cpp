@@ -115,8 +115,8 @@ Gis::applySpatialStochasticValues(){
   vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
   //ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
   //vector<Pixel*> regPixels = region->getMyPixels();
-    //double sumc = 0;
-    //double nc = 0;
+  //double sumc = 0;
+  //double nc = 0;
   for(uint i=0;i<regIds2.size();i++){
     ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
     vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
@@ -145,26 +145,34 @@ Gis::applySpatialStochasticValues(){
     }
 
     // expectation types
-    double avgExpTypes = MTHREAD->MD->getDoubleSetting("expType");
-    double expTypes_cv = MTHREAD->MD->getDoubleSetting("expType_cv");
+    double avgExpTypes       = MTHREAD->MD->getDoubleSetting("expType");
+    double avgExpTypesPrices = MTHREAD->MD->getDoubleSetting("expTypePrices");
+    double expTypes_cv       = MTHREAD->MD->getDoubleSetting("expType_cv");
+    double expTypesPrices_cv = MTHREAD->MD->getDoubleSetting("expTypePrices_cv");
     if((avgExpTypes<0 || avgExpTypes>1) && avgExpTypes != -1){
       msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
     }
+    if(avgExpTypesPrices<0 || avgExpTypesPrices>1){
+      msgOut(MSG_CRITICAL_ERROR, "vgExpTypesPrices parameter must be between 1 (expectations) and 0 (adaptative).");
+    }
     //cout << avgExpTypes << "     " << expTypes_cv << endl;
 
-    normal_distribution<double> ext_distr(avgExpTypes,expTypes_cv *avgExpTypes); // default any how to double
+    normal_distribution<double> exp_distr(avgExpTypes,expTypes_cv *avgExpTypes); // works only for double, but default any how to double
+    normal_distribution<double> expPrices_distr(avgExpTypesPrices,expTypesPrices_cv *avgExpTypesPrices);
+
     for (uint z=0;z<rpx.size();z++){
       if(avgExpTypes == -1){
-          rpx[z]->expType = -1;
+        rpx[z]->expType = -1;
       } else {
-        double c = ext_distr(*MTHREAD->gen);
+        //double c = exp_distr(*MTHREAD->gen);
         //double c2 = max(0.0,min(1.0,c)); /// Bounded [0,1]. With simmetric boundary on the cv I do not change the average, but of course I slighly reduce the stdev. See file monte_carlo_with_multipliers_sample_proof.ods
-        double c3 = normSample(ext_distr,*MTHREAD->gen,0.0,1.0);
-        //cout << "Sampled:\t" << c2 << '\t' << c3 <<  endl;
+        double c3 = normSample(exp_distr,*MTHREAD->gen,0.0,1.0);
+        //cout << "Sampled:\t" << c3 <<  endl;
         rpx[z]->expType = c3;
       }
+      double cPrice = normSample(expPrices_distr,*MTHREAD->gen,0.0,1.0);
+      rpx[z]->expTypePrices = cPrice;
     }
-
   }
 }
 

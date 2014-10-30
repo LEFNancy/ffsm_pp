@@ -689,7 +689,7 @@ ModelCore::cacheSettings(){
   l2r = MD->getRegionIds();
   regType = MTHREAD->MD->getStringSetting("regType"); // how the regeneration should be computed (exogenous, from hr, from allocation choises)
   expType = MD->getDoubleSetting("expType");
-    rescaleFrequencies = MD->getBoolSetting("rescaleFrequencies");
+  rescaleFrequencies = MD->getBoolSetting("rescaleFrequencies");
   if((expType<0 || expType>1) && expType != -1){
     msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
   }

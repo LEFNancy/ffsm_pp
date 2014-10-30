@@ -592,6 +592,7 @@ ModelCoreSpatial::runManagementModule(){
   msgOut(MSG_INFO, "Starting management module..");
   vector<string> allFTypes = MTHREAD->MD->getForTypeIds(true);
   map<string,double> hAreaByFTypeGroup = vectorToMap(allFTypes,0.0);
+  int thisYear = MTHREAD->SCD->getYear();
 
   // Post optimisation management mobule..
   for(uint i=0;i<regIds2.size();i++){
@@ -640,8 +641,11 @@ ModelCoreSpatial::runManagementModule(){
           double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
           double cumTp_u = px->cumTp_exp.at(j).at(u);
           for (uint pp=0;pp<priProducts.size();pp++){
-            double pw    = gpd("pw",regId,priProducts[pp]); // note that this is the OBSERVED price. If we call it at current year+cumTp_u we would have the expected price. But we would first have to compute it, as pw is weigthed price world-local and we don't have local price for the future.
-            double raw_amount = finalHarvestFlag*pw*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
+            double pw            = gpd("pw",regId,priProducts[pp]); // note that this is the OBSERVED price. If we call it at current year+cumTp_u we would have the expected price. But we would first have to compute it, as pw is weigthed price world-local and we don't have local price for the future.
+            double worldCurPrice = gpd("pl",WL2,priProducts[pp]);
+            double worldFutPrice = gpd("pl",WL2,priProducts[pp],thisYear+cumTp_u);
+            double pw_exp        = computeExpectedPrice(pw, worldCurPrice, worldFutPrice, px->expTypePrices); //20141030: added the expected price!
+            double raw_amount = finalHarvestFlag*pw_exp*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
             double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
             if (anualised_amount>expReturns) {
               expReturns=anualised_amount;
@@ -1430,4 +1434,19 @@ ModelCoreSpatial::registerCarbonEvents(){
       MTHREAD->CBAL->registerTransports(distQProd, rfrom);
     }
   }
+}
+
+/**
+ * Compute the expectation price of a local or weithed price based on the ratio of the international (world) price between the future and now.
+ *
+ * @param curPrice the local or weithered current price
+ * @param worldCurPrice the world current price
+ * @param worldFutPrice the world future price
+ * @param expCoef the expectation coefficient for prices for the agent [0,1]
+ * @return the expType-averaged local (or weighter) price
+ */
+double
+ModelCoreSpatial::computeExpectedPrice(const double & curPrice, const double & worldCurPrice, const double & worldFutPrice, const double & expCoef){
+  double fullExpPrice = curPrice*(worldFutPrice/worldCurPrice);
+  return curPrice * (1-expCoef) + fullExpPrice * expCoef;
 }
