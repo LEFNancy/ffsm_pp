@@ -80,10 +80,10 @@ public:
   void                setPxComments ( std::string pxComments_h ) {pxComments = pxComments_h;};
   void                setCachedDouble(double cachedDouble_h){cachedDouble=cachedDouble_h;};
   void                clearCache(){cachedDouble=0;};
-    void                setSpModifier(const double& value, const int& ftindex){spMods.at(ftindex)=value;};
-    double              getSpModifier(const string& ft);
-    void                swap(const int &swap_what); ///< Assign to the delayed value the current values, e.g. vol_l = vol
-    void                setMyRegion(ModelRegion* region_h){l2region = region_h;};
+  void                setSpModifier(const double& value, const int& ftindex){spMods.at(ftindex)=value;};
+  double              getSpModifier(const string& ft);
+  void                swap(const int &swap_what); ///< Assign to the delayed value the current values, e.g. vol_l = vol
+  void                setMyRegion(ModelRegion* region_h){l2region = region_h;};
 
   // matrices of (ft,dc)
   /*MatrixXd                                   vol;
@@ -108,12 +108,13 @@ public:
   map <int, vector <double> >            regArea; // by year, ft
   //vector <double>                             in; // by pp
   //vector <double>                             hr; // by pp
-  vector <double>                          vReg; // by ft
-  vector <vector <double> >               vMort; // by ft,dc
+  vector <double>                           vReg; // by ft
+  vector <vector <double> >                vMort; // by ft,dc
   vector <double>                expectedReturns; // by ft
+  vector <double>     expectedReturnsNotCorrByRa; ///< by ft. Attenction, reported expReturns at "forest" level (compared with those at forest type level) do NOT include ra
 
-  vector <vector <double> >                vol_l;  // store the volumes of the previous year
-  vector <vector <double> >               area_l; // store the areas of the previous year
+  vector <vector <double> >                vol_l; ///< store the volumes of the previous year
+  vector <vector <double> >               area_l; ///< store the areas of the previous year
 
   vector <vector <double> >                 beta;
   vector <vector <double> >                 mort;

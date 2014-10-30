@@ -649,6 +649,7 @@ ModelCoreSpatial::runManagementModule(){
             }
           }
         }
+        px->expectedReturnsNotCorrByRa.push_back(expReturns);
         if(MD->getBoolSetting("heterogeneousRiskAversion")){
           double ra = px->getDoubleValue("ra");
           double cumMort = 1-px->cumAlive_exp.at(j).at(optDc);
@@ -1366,7 +1367,7 @@ ModelCoreSpatial::sumRegionalForData(){
       }
 #endif
 
-      double bestExpectedReturn = *max_element(px->expectedReturns.begin(), px->expectedReturns.end());
+      double bestExpectedReturn = *max_element(px-> expectedReturnsNotCorrByRa.begin(), px->expectedReturnsNotCorrByRa.end()); /// Attenction, reported expReturns at "forest" level (compared with those at forest type level) do NOT include ra
       double totPxExpReturn = bestExpectedReturn * totPxForArea;
       totRegExpReturn += totPxExpReturn;
       totRegForArea += totPxForArea;
