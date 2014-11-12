@@ -81,9 +81,9 @@ ModelCoreSpatial::initMarketModule(){
     //RPAR('pl',i,p_tr,t-1)   =  sum(p_pr, a(p_pr,p_tr)*RPAR('pl',i,p_pr,t-1))+m(i,p_tr);
     for(uint sp=0;sp<secProducts.size();sp++){
       double value = 0;
-            for (uint pp=0;pp<priProducts.size();pp++){
+      for (uint pp=0;pp<priProducts.size();pp++){
         value += gpd("pl",r2,priProducts[pp],secondYear)*
-             gpd("a",r2,priProducts[pp],secondYear,secProducts[sp]);
+        gpd("a",r2,priProducts[pp],secondYear,secProducts[sp]);
       }
       value += gpd("m",r2,secProducts[sp],secondYear);
       spd(value,"pl",r2,secProducts[sp],secondYear);
@@ -93,7 +93,7 @@ ModelCoreSpatial::initMarketModule(){
       double value=0;
       for(uint sp=0;sp<secProducts.size();sp++){
         value += gpd("sl",r2,secProducts[sp],secondYear)*
-             gpd("a",r2,priProducts[pp],secondYear, secProducts[sp]);
+        gpd("a",r2,priProducts[pp],secondYear, secProducts[sp]);
       }
       spd(value,"dl",r2,priProducts[pp],secondYear,true);
     }
@@ -101,9 +101,9 @@ ModelCoreSpatial::initMarketModule(){
     // RPAR('dt',i,prd,t-1)    =  RPAR('dl',i,prd,t-1)+RPAR('da',i,prd,t-1);
     for (uint ap=0;ap<allProducts.size();ap++){
       double stvalue =   gpd("sl",r2,allProducts[ap],secondYear)
-               + gpd("sa",r2,allProducts[ap],secondYear);
+                       + gpd("sa",r2,allProducts[ap],secondYear);
       double dtvalue =   gpd("dl",r2,allProducts[ap],secondYear)
-               + gpd("da",r2,allProducts[ap],secondYear);
+                       + gpd("da",r2,allProducts[ap],secondYear);
       spd(stvalue,"st",r2,allProducts[ap],secondYear,true);
       spd(dtvalue,"dt",r2,allProducts[ap],secondYear,true);
     }
@@ -201,7 +201,7 @@ ModelCoreSpatial::runMarketModule(){
   // *** PRE-OPTIMISATION YEARLY OPERATIONS..
   for(uint i=0;i<regIds2.size();i++){
     int r2 = regIds2[i];
-        for(uint sp=0;sp<secProducts.size();sp++){
+    for(uint sp=0;sp<secProducts.size();sp++){
       double g1    = gpd("g1",r2,secProducts[sp],previousYear);
       double sigma = gpd("sigma",r2,secProducts[sp]);
       double pc_1  = gpd("pc",r2,secProducts[sp],previousYear);
@@ -1214,6 +1214,8 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
       // doesn't solve with no-forest in a region.
       // Even with 0.0001 doesn't solve !!
       // With 0.001 some scenarios doesn't solve in 2093
+      // With 0.003 vRegFixed doesn't solve in 2096
+      // Tried with 0.2 but no changes, so put it back on 0.003
       spd(max(0.003,in_reg.at(pp)),"in",r2,priProducts[pp],DATA_NOW,true);
       #ifdef QT_DEBUG
       if (in_reg.at(pp) < -0.0){
