@@ -641,10 +641,12 @@ ModelCoreSpatial::runManagementModule(){
           double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
           double cumTp_u = px->cumTp_exp.at(j).at(u);
           for (uint pp=0;pp<priProducts.size();pp++){
-            double pw            = gpd("pw",regId,priProducts[pp]); // note that this is the OBSERVED price. If we call it at current year+cumTp_u we would have the expected price. But we would first have to compute it, as pw is weigthed price world-local and we don't have local price for the future.
+            double pl            = gpd("pl",regId,priProducts[pp]); // note that this is the OBSERVED price. If we call it at current year+cumTp_u we would have the expected price. But we would first have to compute it, as pw is weigthed price world-local and we don't have local price for the future. DONE 20141202 ;-)
             double worldCurPrice = gpd("pl",WL2,priProducts[pp]);
             double worldFutPrice = gpd("pl",WL2,priProducts[pp],thisYear+cumTp_u);
-            double pw_exp        = computeExpectedPrice(pw, worldCurPrice, worldFutPrice, px->expTypePrices); //20141030: added the expected price!
+            double sl            = gpd("sl",regId,priProducts[pp]);
+            double sa            = gpd("sa",regId,priProducts[pp]);
+            double pw_exp        = computeExpectedPrice(pl, worldCurPrice, worldFutPrice, sl, sa, px->expTypePrices); //20141030: added the expected price!
             double raw_amount = finalHarvestFlag*pw_exp*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
             double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
             if (anualised_amount>expReturns) {
@@ -1439,16 +1441,19 @@ ModelCoreSpatial::registerCarbonEvents(){
 }
 
 /**
- * Compute the expectation price of a local or weithed price based on the ratio of the international (world) price between the future and now.
+ * Compute the expectation weighted price based on the ratio of the international (world) price between the future and now.
  *
- * @param curPrice the local or weithered current price
- * @param worldCurPrice the world current price
- * @param worldFutPrice the world future price
- * @param expCoef the expectation coefficient for prices for the agent [0,1]
- * @return the expType-averaged local (or weighter) price
+ * @param curLocPrice The local current price
+ * @param worldCurPrice The world current price
+ * @param worldFutPrice The world future price
+ * @param sl Supply local
+ * @param sa Supply abroad
+ * @param expCoef The expectation coefficient for prices for the agent [0,1]
+ * @return The expType-averaged local (or weighter) price
  */
 double
-ModelCoreSpatial::computeExpectedPrice(const double & curPrice, const double & worldCurPrice, const double & worldFutPrice, const double & expCoef){
-  double fullExpPrice = curPrice*(worldFutPrice/worldCurPrice);
-  return curPrice * (1-expCoef) + fullExpPrice * expCoef;
+ModelCoreSpatial::computeExpectedPrice(const double & curLocPrice, const double & worldCurPrice, const double & worldFutPrice, const double & sl, const double & sa, const double & expCoef){
+  double fullExpWPrice = (curLocPrice*(worldFutPrice/worldCurPrice)*sl+worldFutPrice*sa)/(sa+sl);
+  double curWPrice = (curLocPrice*sl+worldCurPrice*sa)/(sl+sa);
+  return curWPrice * (1-expCoef) + fullExpWPrice * expCoef;
 }

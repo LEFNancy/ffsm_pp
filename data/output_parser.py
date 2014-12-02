@@ -19,7 +19,10 @@ forIFiles = [
   'output_homSpace/results/forestData_homSpace.csv',
   'output_vRegEnd070/results/forestData_vRegEnd070.csv',
   'output_withRisk06/results/forestData_withRisk06.csv',
-  'output_withRisk08/results/forestData_withRisk08.csv', 
+  'output_withRisk08/results/forestData_withRisk08.csv',
+  'output_withRisk08-01/results/forestData_withRisk08-01.csv',
+  'output_withRisk08-03/results/forestData_withRisk08-03.csv',
+  'output_withRisk08-04/results/forestData_withRisk08-04.csv',
   'output_withRisk10/results/forestData_withRisk10.csv',
   'output_hetSpace/results/forestData_hetSpace.csv',
   'output_bau/results/forestData_bau.csv',
@@ -79,6 +82,9 @@ scenarios = {
   'vRegEnd070':           '#ff7200',
   'withRisk06':           '#6dcaf1',
   'withRisk08':           '#6c77e7',
+  'withRisk08-01':        '#6c77e7',
+  'withRisk08-03':        '#6c77e7',
+  'withRisk08-04':        '#6c77e7',
   'withRisk10':           '#0015db',   
   'hetSpace':             '#d4a4d7',
   'bau':                  '#610e0e',
@@ -96,9 +102,9 @@ scenarios = {
   
   #randomSpace scenarios
   'randomSpace_49393':    '#d9d9d9',
-  'randomSpace_111737':    '#d9d9d9',
-  'randomSpace_177633':    '#d9d9d9',
-  'randomSpace_208136':    '#d9d9d9',
+  'randomSpace_111737':   '#d9d9d9',
+  'randomSpace_177633':   '#d9d9d9',
+  'randomSpace_208136':   '#d9d9d9',
   'randomSpace_233499':   '#d9d9d9',
   'randomSpace_248642':   '#d9d9d9',
   'randomSpace_296214':   '#d9d9d9',
@@ -631,7 +637,16 @@ def printTables():
     printTable('homSpace',['withRisk10'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger risk effect [avg. 2030-2100]','withRisk10_2030-2100_'+region)
     printTable('homSpace',['withRisk08'],['expReturns','vReg','vol','hV'],[region],['2100'],'Risk effect [2100]','withRisk08_2100_'+region)
     printTable('homSpace',['withRisk10'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger risk effect [2100]','withRisk10_2100_'+region)
-   
+
+
+    title('t','subsubsection',"Sensitivity analysis over the s.d. of the ra coefficient")
+    printTable('withRisk08',['withRisk08-01'],['expReturns','vReg','vol','hV','forArea'],[region],oyears,'Risk sa: 08-01 [avg. 2030-2100]','withRisk08-01_2030-2100_'+region)
+    printTable('withRisk08',['withRisk08-01'],['expReturns','vReg','vol','hV','forArea'],[region],['2100'],'Risk sa: 08-01 [2100]','withRisk08-01_2100_'+region)
+    printTable('withRisk08',['withRisk08-03'],['expReturns','vReg','vol','hV','forArea'],[region],oyears,'Risk sa: 08-03 [avg. 2030-2100]','withRisk08-03_2030-2100_'+region)
+    printTable('withRisk08',['withRisk08-03'],['expReturns','vReg','vol','hV','forArea'],[region],['2100'],'Risk sa: 08-03 [2100]','withRisk08-03_2100_'+region)
+    printTable('withRisk08',['withRisk08-04'],['expReturns','vReg','vol','hV','forArea'],[region],oyears,'Risk sa: 08-04 [avg. 2030-2100]','withRisk08-04_2030-2100_'+region)
+    printTable('withRisk08',['withRisk08-04'],['expReturns','vReg','vol','hV','forArea'],[region],['2100'],'Risk sa: 08-04 [2100]','withRisk08-04_2100_'+region)
+    
     title('t','subsection',"Heterogeneous environment")
     printTable('homSpace',['hetSpace'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Spatial variance effect [avg. 2030-2100]','hetSpace_2030-2100_'+region)
     printTable('homSpace',['hetSpace'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Spatial variance effect [2100]','hetSpace_2100_'+region)

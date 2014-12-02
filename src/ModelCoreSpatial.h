@@ -42,7 +42,7 @@ public:
   void                  computeInventary();       ///< in=f(vol_t-1)
   void                  computeCumulativeData();  ///< computes cumTp_exp, vHa_exp, vHa
   void                  updateMapAreas();         ///< computes forArea_{ft}
-  double                computeExpectedPrice(const double & curPrice, const double & worldCurPrice, const double & worldFutPrice, const double & expCoef); ///< Compute local (or weighted local-world) expected price for a given product.
+  double                computeExpectedPrice(const double & curLocPrice, const double & worldCurPrice, const double & worldFutPrice, const double & sl, const double & sa, const double & expCoef); ///< Compute weighted expected price for a given product.
 
   // convenient handles to equivalent ModelData functions..
   double              gpd(const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const string &freeDim_h="") const {return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};
