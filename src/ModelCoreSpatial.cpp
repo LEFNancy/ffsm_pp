@@ -659,6 +659,7 @@ ModelCoreSpatial::runManagementModule(){
         if(MD->getBoolSetting("heterogeneousRiskAversion")){
           double ra = px->getDoubleValue("ra");
           double cumMort = 1-px->cumAlive_exp.at(j).at(optDc);
+          //cout << px->getID() << "\t" << ft << "\t\t" << "optDc" << optDc << "\t" << cumMort << endl;
           double origExpReturns = expReturns;
           expReturns = origExpReturns * (1.0 - ra*cumMort);
         }
