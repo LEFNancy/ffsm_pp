@@ -47,26 +47,31 @@
 
 using namespace Ipopt;
 
-typedef std::map<std::string, int >  DomainMap;
-typedef std::pair<std::string, int > DomainPair;
+typedef std::map<string, endvar>        VarMap;
+typedef std::pair<std::string, endvar > VarPair;
 
 // ****** MODEL IMPLEMENTATION START HERE ********************************
 
 void
 Opt::declareVariables(){
-    // filling the list of variables and their domain
+    // filling the list of variables and their domain and optionally their bonds
     // if you add variables in the model that enter optimisation you'll have to add them here
-    // the map goes automatically in alphabetical order
+    // the underlying map goes automatically in alphabetical order
     // original order: pc,pl,dc,dl,da,sc,sl,sa,exp
-    vars.insert(DomainPair("da", DOM_SEC_PR));
-    vars.insert(DomainPair("dc", DOM_SEC_PR));
-    vars.insert(DomainPair("dl", DOM_ALL_PR));
-    vars.insert(DomainPair("pc", DOM_ALL_PR));
-    vars.insert(DomainPair("pl", DOM_ALL_PR));
-    vars.insert(DomainPair("rt", DOM_R2_ALL_PR)); // regional trade, it was exp in gams
-    vars.insert(DomainPair("sa", DOM_PRI_PR));
-    vars.insert(DomainPair("sc", DOM_PRI_PR));
-    vars.insert(DomainPair("sl", DOM_ALL_PR));
+    // 20140328: if these vars have a lower bound > 0 the model doesn't solve when volumes in a region go to zero !!!
+
+    // syntax: declareVariable("name", domainType, lbound[default=0], ubound[default= +inf])
+
+    // all variables have upper or equal than zero bound:
+    declareVariable("da", DOM_SEC_PR);
+    declareVariable("dc", DOM_SEC_PR);
+    declareVariable("dl", DOM_ALL_PR);
+    declareVariable("pc", DOM_ALL_PR);
+    declareVariable("pl", DOM_ALL_PR);
+    declareVariable("rt", DOM_R2_ALL_PR); // regional trade, it was exp in gams
+    declareVariable("sa", DOM_PRI_PR);
+    declareVariable("sc", DOM_PRI_PR);
+    declareVariable("sl", DOM_ALL_PR);
 }
 /**
 Declare the constrains and their properties. For the domain type @see BaseClass
@@ -518,39 +523,15 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 bool
 Opt::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Number* g_u){
 
+  // Set the bounds for the endogenous variables..
+  for (Index i=0; i<n; i++) {
+    x_l[i] =  getBoundByIndex(LBOUND,i);
+    x_u[i] =  getBoundByIndex(UBOUND,i);
+  }
 
-  // all variables have upper or equal than zero bound
-    /*for (Index i=0; i<n; i++) {
-  // removed 20120812, as not really needed.. doesn't actually change either obj or efforts to reach it
-    if(
-            //   ( n>=gip("dc")&& n<(gip("dc")+nSecPr*nL2r))
-            //  || ( n>=gip("sc")&& n<(gip("sc")+nPriPr*nL2r))
-         ( n>=gip("dl")&& n<gip("dl")+getVarInstances("dl"))
-      || ( n>=gip("sa")&& n<gip("sa")+getVarInstances("sa"))
-      || ( n>=gip("sl")&& n<gip("sl")+getVarInstances("sl"))
-      || ( n>=gip("da")&& n<gip("da")+getVarInstances("da"))
-      || ( n>=gip("pl")&& n<gip("sa")+getVarInstances("sa"))
-    ) {  // I could make a function to return the number of positions by a certain variable name, looking up the the map that define its domain
-            //x_l[i] = 0.00000001;
-            x_l[i] =         0.; //20140328: if these vars have a lower bound > 0 the model doesn't solve when volumes in a region go to zero !!!
-      x_u[i] =       1e20;
-    } else {
-      x_l[i] =         0.;
-      x_u[i] =       1e20;
-    }
-    }*/
-
-    for (Index i=0; i<n; i++) {
-            x_l[i] =         0.; //20140328: if these vars have a lower bound > 0 the model doesn't solve when volumes in a region go to zero !!!
-            x_u[i] =       1e20;
-    }
-
-
-
-  // Set the bounds for the constraints
+  // Set the bounds for the constraints..
   for (Index i=0; i<m; i++) {
     int direction = getConstrainDirectionByIndex(i);
-    //cout << "i: " << i << "direction: " << direction << endl;
     switch (direction){
       case CONSTR_EQ:
         g_l[i] = 0.;
@@ -586,12 +567,12 @@ Opt::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Number* z_
   assert(init_z == false);
   assert(init_lambda == false);
 
-  map<string, int>::iterator viter;
+  VarMap::iterator viter;
 
   // fixing the starting points for each variable at the level of the previous years
   for (viter = vars.begin(); viter != vars.end(); ++viter) {
     //string debugs = viter->first;
-    int vdomtype = viter->second;
+    int vdomtype = viter->second.domain;
     if(vdomtype==DOM_PRI_PR){
       for(uint r1=0;r1<l2r.size();r1++){
         for(uint r2=0;r2<l2r[r1].size();r2++){
@@ -648,12 +629,12 @@ Opt::finalize_solution(SolverReturn status,
 
   // --> here is where to code the assignment of optimal values to to spd()
 
-    map<string, int>::iterator viter;
+  VarMap::iterator viter;
 
   // fixing the starting points for each variable at the level of the previous years
   for (viter = vars.begin(); viter != vars.end(); ++viter) {
     //string debugs = viter->first;
-    int vdomtype = viter->second;
+    int vdomtype = viter->second.domain;
     if(vdomtype==DOM_PRI_PR){
       for(uint r1=0;r1<l2r.size();r1++){
         for(uint r2=0;r2<l2r[r1].size();r2++){
@@ -1198,10 +1179,10 @@ Opt::gip(const int &cn) const { // get initial position
 
 const int
 Opt::gdt(const string &varName){ // get domain type
-  map<string, int>::const_iterator p;
+  VarMap::const_iterator p;
   p=vars.find(varName);
-  if(p != initPos.end()) {
-    return p->second;
+  if(p != vars.end()) {
+    return p->second.domain;
   }
   else {
     msgOut(MSG_CRITICAL_ERROR, "Asking the domain type of a variable ("+varName+") that doesn't exist!");
@@ -1276,10 +1257,11 @@ void
 Opt::cacheInitialPosition(){
   int vInitialPosition = 0;
   int cInitialPosition = 0;
-  map<string, int>::iterator viter;
+  VarMap::iterator viter;
   for (viter = vars.begin(); viter != vars.end(); ++viter) {
     initPos.insert(pair<string, int>(viter->first, vInitialPosition));
-    vInitialPosition += getDomainElements(viter->second);
+    initPos_rev.insert(pair<int, string>(vInitialPosition,viter->first));
+    vInitialPosition += getDomainElements(viter->second.domain);
   }
   for (uint i=0;i<cons.size();i++){
     cInitPos.push_back(cInitialPosition);
@@ -1291,9 +1273,9 @@ void
 Opt::cachePositions(){
 
   // variables..
-  map<string, int>::iterator viter;
+  VarMap::iterator viter;
   for (viter = vars.begin(); viter != vars.end(); ++viter) {
-    vpositions.insert(pair<string, vector < vector < vector < vector <int> > > > >(viter->first,  buildPositionVector(viter->first, viter->second)));
+    vpositions.insert(pair<string, vector < vector < vector < vector <int> > > > >(viter->first,  buildPositionVector(viter->first, viter->second.domain)));
   }
   // constrains..
   for (uint i=0; i<cons.size();i++){
@@ -1350,9 +1332,9 @@ void
 Opt::calculateNumberVariablesConstrains(){
     // calculating the number of variables and the initial positions in the concatenated array..
     nVar = 0;
-    map<string, int>::iterator viter;
+    VarMap::iterator viter;
     for (viter = vars.begin(); viter != vars.end(); ++viter) {
-        nVar += getDomainElements(viter->second);
+        nVar += getDomainElements(viter->second.domain);
     }
 
     // calculating the number of constrains..
@@ -1426,6 +1408,29 @@ Opt::getConstrainDirectionByIndex(int idx){
   }
   msgOut(MSG_CRITICAL_ERROR, "Asking contrain direction for an out of range contrain index!");
 }
+
+double Opt::getBoundByIndex(const int & bound_type, int idx){
+
+  map <int, string>::const_iterator p;
+  p=initPos_rev.upper_bound(idx);
+  p--;
+  VarMap::const_iterator p2;
+  p2=vars.find(p->second);
+  if(p2 != vars.end()) {
+    if (bound_type==LBOUND){
+      return p2->second.l_bound;
+    } else if (bound_type==UBOUND){
+      return p2->second.u_bound;
+    } else {
+      msgOut(MSG_CRITICAL_ERROR, "Asking the bound with a type ("+i2s(bound_type)+") that I don't know how to handle !");
+    }
+  }
+  else {
+    msgOut(MSG_CRITICAL_ERROR, "Asking the bound from a variable ("+p->second+") that doesn't exist!");
+  }
+  return 0.;
+}
+
 
 constrain*
 Opt::getConstrainByIndex(int idx){
@@ -1615,3 +1620,22 @@ Opt::mymax ( const T& a, const T& b ){
   return (a<b)?b:a;
 }
 */
+/**
+ * @brief Opt::declareVariable
+ * Define a single variable together with its domain and optionally its lower and upper bound (default 0.0, +inf)
+ *
+ * @param name    var name
+ * @param domain  domain of the variable
+ * @param l_bound lower bound
+ * @param u_bound upper bound
+ */
+
+void
+Opt::declareVariable(const string &name, const int & domain, const double & l_bound, const double & u_bound){
+   endvar end_var;
+   end_var.name = name;
+   end_var.domain = domain;
+   end_var.l_bound = l_bound;
+   end_var.u_bound = u_bound;
+   vars.insert(std::pair<std::string, endvar >(name, end_var));
+}

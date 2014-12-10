@@ -115,7 +115,11 @@ enum varType {
   VAR_VOL                =1,
   VAR_AREA               =2,
   VAR_IN                 =3
+};
 
+enum boundType {
+  LBOUND                 =1,
+  UBOUND                 =2
 };
 
 // mathematical defines (not correctly implemented in some compilers, namely MS VisualStudio..)
@@ -154,6 +158,16 @@ enum varType {
 #ifndef FT_ALL
 #define FT_ALL "FT_ALL"               ///< All forest types
 #endif
+
+// Bounds for optimisation
+#ifndef LBOUND_MIN
+#define LBOUND_MIN -10000000000000000000.0 ///< Lower bound in optimisation -10^19
+#endif
+#ifndef UBOUND_MAX
+#define UBOUND_MAX 10000000000000000000.0  ///< Upper bound in optimisation 10^19
+#endif
+
+
 
 /// Base class for the regmas application.
 /**

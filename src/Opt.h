@@ -47,6 +47,7 @@
 using namespace Ipopt;
 
 struct constrain;
+struct endvar;
 
 class Opt: public BaseClass, public TNLP{
 public:
@@ -139,7 +140,8 @@ public:
   //***************    end   ADOL-C part ***********************************
 
   // **************   start FFSM part ************************************
-  void                declareVariables(); ///< declare the variables and their domains
+  void                declareVariables(); ///< declare the variables, their domains and their bounds
+  void                declareVariable(const string &name, const int & domain, const double & l_bound=0.0, const double & u_bound=UBOUND_MAX);  ///< Declare a single variable, its domain and its bounds
   void                declareConstrains(); ///< declare the constrains, their domain, their direction and their associated evaluation function
   void                cacheInitialPosition(); ///< cache the initial positions of the variables and the constrains
   void                calculateNumberVariablesConstrains(); ///< calculate the number of variables and constrains
@@ -177,6 +179,7 @@ protected:
   const int           gdt(const string &varName); ///< Get the domain type of a given variable
   const int           gdt(const int &cn); ///< Get the domain type of a given constrain
   int                 getConstrainDirectionByIndex(int idx); ///< Return the direction of a given constrain
+  double                 getBoundByIndex(const int & bound_type, int idx);  ///< Return the bound of a given variable (by index)
   constrain*          getConstrainByIndex(int idx);
   void                unpack(int ix_h, int domain, int initial, int &r1_h, int &r2_h, int&p_h, int&r2to_h, bool fullp=false); ///< Return the dimensions given a certain index, domain type and initial position
   int                 getConNumber(constrain* con); ///< Return the position in the cons vector
@@ -190,9 +193,10 @@ protected:
   vector<string>                           secPr;
   vector<string>                           allPr;
   vector < vector <int> >                    l2r;
-  map <string, int>                      initPos; ///< A map that return the initial index position in the concatenated array for each variable
-  vector<int>                           cInitPos; ///< A vector that return the initial index position in the concatenated array for each constrain
-  map <string, int>                         vars; ///< List of variables in the model and their domain: pr product, sec prod, all products or all products over each subregion pair (exports)
+  map <string, int>                      initPos; ///< A map that returns the initial index position in the concatenated array for each variable
+  map <int, string>                  initPos_rev; ///< A map with the name of the variable keyed by its initial position in the index
+  vector<int>                           cInitPos; ///< A vector that returns the initial index position in the concatenated array for each constrain
+  map <string, endvar>                      vars; ///< List of variables in the model and their domain: pr product, sec prod, all products or all products over each subregion pair (exports)
   map <string, vector < vector < vector < vector <int> > > > > vpositions; ///< cached position in the concatenated vector for each variables. Dimensions are l1reg, l2reg, prod, (l2To region).
   vector < vector < vector < vector < vector <int> > > > > cpositions; ///< cached position in the concatenated vector for each variables. Dimensions are contrain number, l1reg, l2reg, prod, (l2To region).
   int                                     nPriPr;
@@ -266,6 +270,14 @@ struct constrain{
   int                                  direction;
 
 };
+
+struct endvar{
+  string                                    name;
+  int                                     domain;
+  double                                 l_bound;
+  double                                 u_bound;
+};
+
 
 
 #endif
