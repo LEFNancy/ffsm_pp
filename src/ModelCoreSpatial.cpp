@@ -261,7 +261,7 @@ ModelCoreSpatial::runMarketModule(){
     return;
   }
 
-    msgOut(MSG_INFO,"Running optimisation problem for this year (it may take a few minutes for large models)..");
+  msgOut(MSG_INFO,"Running optimisation problem for this year (it may take a few minutes for large models)..");
   status = application->OptimizeTNLP(MTHREAD->OPT);
 
 
