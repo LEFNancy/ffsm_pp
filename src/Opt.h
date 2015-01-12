@@ -141,7 +141,7 @@ public:
 
   // **************   start FFSM part ************************************
   void                declareVariables(); ///< declare the variables, their domains and their bounds
-  void                declareVariable(const string &name, const int & domain, const double & l_bound=0.0, const double & u_bound=UBOUND_MAX);  ///< Declare a single variable, its domain and its bounds
+  void                declareVariable(const string &name, const int & domain, const double & l_bound=0.0, const double & u_bound=UBOUND_MAX, const string & l_bound_var="", const string & u_bound_var="");  ///< Declare a single variable, its domain and its bounds
   void                declareConstrains(); ///< declare the constrains, their domain, their direction and their associated evaluation function
   void                cacheInitialPosition(); ///< cache the initial positions of the variables and the constrains
   void                calculateNumberVariablesConstrains(); ///< calculate the number of variables and constrains
@@ -171,15 +171,16 @@ protected:
   void                spd(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h="") const {MTHREAD->MD->setProdData(value_h, type_h, regId_h, prodId_h, year, allowCreate, freeDim_h);};
   void                sfd(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &diamClass_h, const int& year=DATA_NOW, const bool& allowCreate=false) const {MTHREAD->MD->setForData(value_h, type_h, regId_h, forType_h, diamClass_h, year, allowCreate);};
   bool                app(const string &prod_h, const string &forType_h, const string &dClass_h) const {return MTHREAD->MD->assessProdPossibility(prod_h, forType_h, dClass_h);};
-  const int          gip(const string &varName) const; ///< Get the initial index position of a given variable in the concatenated array
-  const int          gip(const int &cn) const; ///< Return the initial index position of a certain constrain
+  const int           gip(const string &varName) const; ///< Get the initial index position of a given variable in the concatenated array
+  const int           gip(const int &cn) const; ///< Return the initial index position of a certain constrain
   template<class T> const int gix_uncached(const T &v_or_c, int r1Ix, int r2Ix, int prIx, int r2IxTo=0); ///< Get the index in the concatenated array gived a certain var name (string) or constrain index (int), the reg lev1 index, the reg lev2 index and the prod. index
-  const int          gix(const string &varName, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo=0) const; ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
-  const int          gix(const int &cn, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo=0) const; ///< Get the index in the concatenated array gived a certain constrain, the reg lev1 index, the reg lev2 index and the prod. index
+  const int           gix(const string &varName, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo=0) const; ///< Get the index in the concatenated array gived a certain var name, the reg lev1 index, the reg lev2 index and the prod. index
+  const int           gix(const int &cn, const int& r1Ix, const int& r2Ix, const int& prIx, const int& r2IxTo=0) const; ///< Get the index in the concatenated array gived a certain constrain, the reg lev1 index, the reg lev2 index and the prod. index
   const int           gdt(const string &varName); ///< Get the domain type of a given variable
   const int           gdt(const int &cn); ///< Get the domain type of a given constrain
   int                 getConstrainDirectionByIndex(int idx); ///< Return the direction of a given constrain
-  double                 getBoundByIndex(const int & bound_type, int idx);  ///< Return the bound of a given variable (by index)
+  double              getBoundByIndex(const int & bound_type, const int & idx);  ///< Return the bound of a given variable (by index)
+  double              getDetailedBoundByVarAndIndex(const endvar & var, const int & idx, const int & bType); ///< Return the bound of a given variable given the variable and the required index. Called by getBoundByIndex().
   constrain*          getConstrainByIndex(int idx);
   void                unpack(int ix_h, int domain, int initial, int &r1_h, int &r2_h, int&p_h, int&r2to_h, bool fullp=false); ///< Return the dimensions given a certain index, domain type and initial position
   int                 getConNumber(constrain* con); ///< Return the position in the cons vector
@@ -274,8 +275,10 @@ struct constrain{
 struct endvar{
   string                                    name;
   int                                     domain;
-  double                                 l_bound;
-  double                                 u_bound;
+  double                                 l_bound; ///< A fixed numerical lower bound for all the domain
+  double                                 u_bound; ///< A fixed numerical upper bound for all the domain
+  string                             l_bound_var; ///< A variable giving the lower bound. If present, the value defined in the variable overrides l_bound.
+  string                             u_bound_var; ///< A variable giving the upper bound. If present, the value defined in the variable overrides u_bound.
 };
 
 

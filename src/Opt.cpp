@@ -60,7 +60,7 @@ Opt::declareVariables(){
     // original order: pc,pl,dc,dl,da,sc,sl,sa,exp
     // 20140328: if these vars have a lower bound > 0 the model doesn't solve when volumes in a region go to zero !!!
 
-    // syntax: declareVariable("name", domainType, lbound[default=0], ubound[default= +inf])
+    // syntax: declareVariable("name", domainType, lbound[default=0], ubound[default= +inf], variable defining lower bounds[default=""], variable defining upper bound[default=""])
 
     // all variables have upper or equal than zero bound:
     declareVariable("da", DOM_SEC_PR);
@@ -72,6 +72,7 @@ Opt::declareVariables(){
     declareVariable("sa", DOM_PRI_PR);
     declareVariable("sc", DOM_PRI_PR);
     declareVariable("sl", DOM_ALL_PR);
+    //declareVariable("st", DOM_PRI_PR,0.0,UBOUND_MAX,"","in");
 }
 /**
 Declare the constrains and their properties. For the domain type @see BaseClass
@@ -173,6 +174,12 @@ Opt::declareConstrains (){
   mkeq26.domain=DOM_R2_ALL_PR;
   mkeq26.direction = CONSTR_LE0;
 
+  constrain stdef;
+  stdef.name="st definition";
+  stdef.comment="Definition of the total supply (only for primary product)";
+  stdef.domain=DOM_PRI_PR;
+  stdef.direction = CONSTR_EQ;
+
   cons.push_back(mkeq2);
   cons.push_back(mkeq6);
   cons.push_back(mkeq7);
@@ -188,6 +195,7 @@ Opt::declareConstrains (){
   cons.push_back(mkeq18);
   cons.push_back(mkeq26);
   cons.push_back(mkeq25);
+  //cons.push_back(stdef);
 ;
 
 
@@ -224,7 +232,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
       //  )
       for (uint p=0;p<priPr.size();p++){
         bb = gpd("bb",l2r[r1][r2],priPr[p]);
-        sigma = gpd("sigma",l2r[r1][r2],priPr[p]);
+        sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p]);
         obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - bb*pow(mymax(zeromax,x[gix("sc",r1,r2,p)]),((sigma+1)/sigma));
       }
       //  // trasformations between primary products
@@ -237,7 +245,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
         for (uint p2=0;p2<priPr.size();p2++){
           a_pr = gpd("a_pr",l2r[r1][r2],priPr[p1],DATA_NOW,priPr[p2]);
           bb = gpd("bb",l2r[r1][r2],priPr[p2]);
-          sigma = gpd("sigma",l2r[r1][r2],priPr[p2]);
+          sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p2]);
           obj_value += x[gix("pc",r1,r2,p2)]*a_pr*x[gix("sc",r1,r2,p1)]-bb*pow(mymax(zeromax,a_pr*x[gix("sc",r1,r2,p1)]),(sigma+1)/sigma);
         }
       }
@@ -282,7 +290,7 @@ It could be possible to change this in a map and uses name, but then we would lo
 template<class T> bool
 Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
-  double a_pr, a, sigma, ff, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv;
+  double a_pr, a, sigma, ff, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1;
   Index cix = 0;
   Index debug = 0;
 
@@ -355,8 +363,15 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
   // mkteq5(i,p_pr)..  RVAR('sc',i,p_pr)  =e=  FF(i,p_pr)*(RVAR('pc',i,p_pr)**sigma(p_pr)); // eq. 21
   CONSTRAIN_START_LOOP(priPr,7)
     ff = gpd("ff",l2r[r1][r2],priPr[p]);
-    sigma = gpd("sigma",l2r[r1][r2],priPr[p]);
-    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma);
+    sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p]);
+
+    //in = gpd("in",l2r[r1][r2],priPr[p]);
+    //in_1 = gpd("in",l2r[r1][r2],priPr[p],previousYear);
+    //if(in <= 0.01 ) {
+    //  g[cix] = x[gix("sc",r1,r2,p)]-0.0005;
+    //} else {
+      g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma);
+    //}
   CONSTRAIN_END_LOOP
 
 
@@ -396,8 +411,8 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
   // mkteq18(i,p_pr).. RVAR('sa',i,p_pr)+RVAR('sl',i,p_pr)  =l=  dispor(i,p_pr); // total supply lower than the available stock
   CONSTRAIN_START_LOOP(priPr,12)
-    dispor = gpd("dispor",l2r[r1][r2],priPr[p]);
-    g[cix] = x[gix("sa",r1,r2,p)]+x[gix("sl",r1,r2,p)]-dispor;
+    in = gpd("in",l2r[r1][r2],priPr[p]);
+    g[cix] = x[gix("sa",r1,r2,p)]+x[gix("sl",r1,r2,p)]-in;
   CONSTRAIN_END_LOOP
 
   // mkeq26(i,prd,j).. RVAR('pl',j,prd)-RVAR('pl',i,prd)-CT(i,j,prd) =l= 0;
@@ -418,6 +433,10 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
       g[cix] += a * x[gix("pl",r1,r2,p2)];
     }
   CONSTRAIN_END_LOOP
+
+//  CONSTRAIN_START_LOOP(priPr,15)
+//    g[cix] = x[gix("st",r1,r2,p)]-x[gix("sa",r1,r2,p)]-x[gix("sl",r1,r2,p)];
+//  CONSTRAIN_END_LOOP
 
   return true;
 }
@@ -1409,7 +1428,8 @@ Opt::getConstrainDirectionByIndex(int idx){
   msgOut(MSG_CRITICAL_ERROR, "Asking contrain direction for an out of range contrain index!");
 }
 
-double Opt::getBoundByIndex(const int & bound_type, int idx){
+double
+Opt::getBoundByIndex(const int & bound_type, const int & idx){
 
   map <int, string>::const_iterator p;
   p=initPos_rev.upper_bound(idx);
@@ -1418,9 +1438,17 @@ double Opt::getBoundByIndex(const int & bound_type, int idx){
   p2=vars.find(p->second);
   if(p2 != vars.end()) {
     if (bound_type==LBOUND){
-      return p2->second.l_bound;
+      if (p2->second.l_bound_var == ""){ // this var don't specific a variable as bound
+        return p2->second.l_bound;
+      } else {
+        return getDetailedBoundByVarAndIndex(p2->second,idx,LBOUND);
+      }
     } else if (bound_type==UBOUND){
-      return p2->second.u_bound;
+      if (p2->second.u_bound_var == ""){ // this var don't specific a variable as bound
+        return p2->second.u_bound;
+      } else {
+        return getDetailedBoundByVarAndIndex(p2->second,idx,UBOUND);
+      }
     } else {
       msgOut(MSG_CRITICAL_ERROR, "Asking the bound with a type ("+i2s(bound_type)+") that I don't know how to handle !");
     }
@@ -1431,6 +1459,28 @@ double Opt::getBoundByIndex(const int & bound_type, int idx){
   return 0.;
 }
 
+double
+Opt::getDetailedBoundByVarAndIndex(const endvar & var, const int & idx, const int & bType){
+  // Tested 2015.01.08 with DOM_ALL_PR, DOM_PRI_PR, DOM_ALL_PR, DOM_R2_ALL_PR.
+  int r1,r2,p,r2to;
+  unpack(idx,var.domain,gip(var.name),r1,r2,p,r2to,true);
+  //cout << "getBoundByVarAndIndex():\t" << var.name << '\t' << idx << '\t' << gip(var.name) << '\t' << r1 << '\t' << r2 << '\t' << p << '\t' << r2to << endl;
+  //cout << "  --variables:\t" << var.l_bound_var << '\t' << var.u_bound_var << '\t' << "" << '\t' << l2r[r1][r2] << '\t' << "" << '\t' << allPr[p] << '\t' << l2r[r1][r2to] << endl;
+  if(bType==LBOUND){
+    if(r2to){
+       return gpd(var.l_bound_var,l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2to]));
+    } else {
+      return gpd(var.l_bound_var,l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2to]));
+    }
+  } else {
+    if(r2to){
+       return gpd(var.u_bound_var,l2r[r1][r2],allPr[p]);
+    } else {
+      //cout << gpd(var.u_bound_var,l2r[r1][r2],allPr[p]) << endl;
+      return gpd(var.u_bound_var,l2r[r1][r2],allPr[p]);
+    }
+  }
+}
 
 constrain*
 Opt::getConstrainByIndex(int idx){
@@ -1451,7 +1501,6 @@ Opt::getConstrainByIndex(int idx){
 
 void
 Opt::unpack(int ix_h, int domain, int initial, int &r1_h, int &r2_h, int&p_h, int&r2to_h, bool fullp){
-
   ix_h = ix_h-initial;
   double ix=0;
   bool r2flag = false;
@@ -1472,7 +1521,7 @@ Opt::unpack(int ix_h, int domain, int initial, int &r1_h, int &r2_h, int&p_h, in
   if(domain==DOM_R2_PRI_PR || domain==DOM_R2_SEC_PR ||domain==DOM_R2_ALL_PR){
     r2flag = true;
   }
-  if(fullp && (domain==DOM_ALL_PR || domain==DOM_R2_ALL_PR)){ // not working, lead to crash
+  if(fullp && (domain==DOM_SEC_PR || domain==DOM_R2_SEC_PR)){ // changed 20140107 (any how, previously the unpack() function was not used!!)
     pIndexToAdd = nPriPr;
     //cout << "pindexToAdd: " << pIndexToAdd << endl;
   }
@@ -1626,16 +1675,20 @@ Opt::mymax ( const T& a, const T& b ){
  *
  * @param name    var name
  * @param domain  domain of the variable
- * @param l_bound lower bound
- * @param u_bound upper bound
+ * @param l_bound lower bound (fixed)
+ * @param u_bound upper bound (fixed)
+ * @param l_bound_var variable name defining lower bound
+ * @param u_bound_var variable name defining upper bound
  */
 
 void
-Opt::declareVariable(const string &name, const int & domain, const double & l_bound, const double & u_bound){
+Opt::declareVariable(const string &name, const int & domain, const double & l_bound, const double & u_bound, const string & l_bound_var, const string & u_bound_var){
    endvar end_var;
    end_var.name = name;
    end_var.domain = domain;
    end_var.l_bound = l_bound;
    end_var.u_bound = u_bound;
+   end_var.l_bound_var = l_bound_var;
+   end_var.u_bound_var = u_bound_var;
    vars.insert(std::pair<std::string, endvar >(name, end_var));
 }

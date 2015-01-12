@@ -220,18 +220,34 @@ ModelCoreSpatial::runMarketModule(){
     // BB(i,p_pr)   =   (sigma(p_pr)/(sigma(p_pr)+1))*RPAR('pc',i,p_pr,t-1)*(RPAR('sc',i,p_pr,t-1)**(-1/sigma(p_pr)))*(In(i,p_pr,t-1)/In(i,p_pr,t))**(gamma(p_pr)/sigma(p_pr));
     // FF(i,p_pr)   =   RPAR('sc',i,p_pr,t-1)*((RPAR('pc',i,p_pr,t-1))**(-sigma(p_pr)))*(In(i,p_pr,t)/In(i,p_pr,t-1))**(gamma(p_pr)); //chi
     for(uint pp=0;pp<priProducts.size();pp++){
-      double gamma = gpd("gamma",r2,priProducts[pp]);
-      double sigma = gpd("sigma",r2,priProducts[pp]);
+      double gamma = gpd("gamma",r2,priProducts[pp]); // elast supply to stock
+      double sigma = gpd("sigma",r2,priProducts[pp]); // elast supply to price
+      double sigmaCorr = sigma;
       double pc_1  = gpd("pc",r2,priProducts[pp],previousYear);
       double sc_1  = gpd("sc",r2,priProducts[pp],previousYear);
       double in    = gpd("in",r2,priProducts[pp]);
       double in_1  = gpd("in",r2,priProducts[pp],previousYear);
 
-      double bb = (sigma/(sigma+1))*pc_1*pow(sc_1,-1/sigma)*pow(in_1/in,gamma/sigma);
-      double ff = sc_1*pow(pc_1,-sigma)*pow(in/in_1,gamma); //chi
+      // //When inventary for a resource is almost null and further decreasing supply depends less from the price and more from the resource
+      // No longer needed, but it could be used again if we face a problem where in go to zero due to too much harvesting/growth
+      // cout << "gamma orig: " << gamma << endl;
+      // if (in<=0.3 && in <= in_1) {
+      //   gamma = gamma * 1.3; // 0.65;
+      //   sigmaCorr = sigma*0.4;
+      //   //cout << "gamma mod: " << gamma << endl;
+      // }  else if(in<=1.0 && in <= in_1){
+      //   gamma = gamma * 1.24; // 0.62;
+      //   sigmaCorr = sigma*0.4;
+      //   //cout << "gamma mod: " << gamma << endl;
+      // }
+
+
+      double bb = (sigmaCorr/(sigmaCorr+1))*pc_1*pow(sc_1,-1/sigmaCorr)*pow(in_1/in,gamma/sigmaCorr);
+      double ff = sc_1*pow(pc_1,-sigmaCorr)*pow(in/in_1,gamma); //chi
 
       spd(bb,"bb",r2,priProducts[pp],DATA_NOW,true);
       spd(ff,"ff",r2,priProducts[pp],DATA_NOW,true);
+      spd(sigmaCorr,"sigmaCorr",r2,priProducts[pp],DATA_NOW,true);
     }
 
   } // end for each region in level 2 (and updating variables)
@@ -1219,7 +1235,8 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
       // With 0.001 some scenarios doesn't solve in 2093
       // With 0.003 vRegFixed doesn't solve in 2096
       // Tried with 0.2 but no changes, so put it back on 0.003
-      spd(max(0.003,in_reg.at(pp)),"in",r2,priProducts[pp],DATA_NOW,true);
+      //spd(max(0.001,in_reg.at(pp)),"in",r2,priProducts[pp],DATA_NOW,true);
+      spd(in_reg.at(pp),"in",r2,priProducts[pp],DATA_NOW,true);
       #ifdef QT_DEBUG
       if (in_reg.at(pp) < -0.0){
         msgOut(MSG_CRITICAL_ERROR,"Negative inventory");

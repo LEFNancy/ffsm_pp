@@ -161,10 +161,10 @@ enum boundType {
 
 // Bounds for optimisation
 #ifndef LBOUND_MIN
-#define LBOUND_MIN -10000000000000000000.0 ///< Lower bound in optimisation -10^19
+#define LBOUND_MIN -20000000000000000000.0 ///< Lower bound in optimisation -10^19
 #endif
 #ifndef UBOUND_MAX
-#define UBOUND_MAX 10000000000000000000.0  ///< Upper bound in optimisation 10^19
+#define UBOUND_MAX 20000000000000000000.0  ///< Upper bound in optimisation 10^19
 #endif
 
 
