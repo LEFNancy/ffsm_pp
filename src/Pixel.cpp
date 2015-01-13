@@ -190,7 +190,7 @@ Pixel::getMultiplier (const string& multiplierName, const string& forName, int y
     if(std::find(modifiersFromTable.begin(), modifiersFromTable.end(), multiplierName) != modifiersFromTable.end()) {
       // load multiplier from forData table..
       int regId = getMyRegion()->getRegId();
-      double multiplier = MTHREAD->MD->getForData("tp_multiplier", regId, forName, "",year);
+      double multiplier = MTHREAD->MD->getForData(multiplierName, regId, forName, "",year);
       return multiplier*multiplierSpVar;
 
     } else {

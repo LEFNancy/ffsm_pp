@@ -29,18 +29,18 @@ rm -rf optimisationLogs/*
 rm -rf debugs/*
 
 # copy back the do-not-remove warning file..
-cp doNotRemove.txt maps/asciiGrids/
-cp doNotRemove.txt maps/bitmaps/
-cp doNotRemove.txt maps/cats/
-cp doNotRemove.txt maps/colr/
-cp doNotRemove.txt maps/floatListLayers/
-cp doNotRemove.txt maps/integerListLayers/
-cp doNotRemove.txt maps/scenarioNames/
-cp doNotRemove.txt charts/
-cp doNotRemove.txt charts/png/
-cp doNotRemove.txt tables/
-cp doNotRemove.txt optimisationLogs/
-cp doNotRemove.txt debugs/
+cp 00_doNotRemove.txt maps/asciiGrids/
+cp 00_doNotRemove.txt maps/bitmaps/
+cp 00_doNotRemove.txt maps/cats/
+cp 00_doNotRemove.txt maps/colr/
+cp 00_doNotRemove.txt maps/floatListLayers/
+cp 00_doNotRemove.txt maps/integerListLayers/
+cp 00_doNotRemove.txt maps/scenarioNames/
+cp 00_doNotRemove.txt charts/
+cp 00_doNotRemove.txt charts/png/
+cp 00_doNotRemove.txt tables/
+cp 00_doNotRemove.txt optimisationLogs/
+cp 00_doNotRemove.txt debugs/
 
 # cp the results ods template
 cp results_template.ods results/results.ods
