@@ -207,7 +207,7 @@ Define the objective function
 template<class T> bool
 Opt::eval_obj(Index n, const T *x, T& obj_value){
 
-  double aa, bb, dc0, sigma, a_pr, ct, m, zeromax;
+  double aa, bb, dc0, sigma, a_pr, ct, m, zeromax,supCorr2;
   obj_value = 0.;
   zeromax = 0.;
 
@@ -233,6 +233,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
       for (uint p=0;p<priPr.size();p++){
         bb = gpd("bb",l2r[r1][r2],priPr[p]);
         sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p]);
+        //supCorr2 = gpd("supCorr2",l2r[r1][r2],priPr[p]);
         obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - bb*pow(mymax(zeromax,x[gix("sc",r1,r2,p)]),((sigma+1)/sigma));
       }
       //  // trasformations between primary products
@@ -290,7 +291,7 @@ It could be possible to change this in a map and uses name, but then we would lo
 template<class T> bool
 Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
-  double a_pr, a, sigma, ff, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1;
+  double a_pr, a, sigma, ff, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1, supCorr;
   Index cix = 0;
   Index debug = 0;
 
@@ -364,7 +365,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
   CONSTRAIN_START_LOOP(priPr,7)
     ff = gpd("ff",l2r[r1][r2],priPr[p]);
     sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p]);
-
+    //supCorr = gpd("supCorr",l2r[r1][r2],priPr[p]);
     //in = gpd("in",l2r[r1][r2],priPr[p]);
     //in_1 = gpd("in",l2r[r1][r2],priPr[p],previousYear);
     //if(in <= 0.01 ) {
@@ -434,9 +435,9 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     }
   CONSTRAIN_END_LOOP
 
-//  CONSTRAIN_START_LOOP(priPr,15)
-//    g[cix] = x[gix("st",r1,r2,p)]-x[gix("sa",r1,r2,p)]-x[gix("sl",r1,r2,p)];
-//  CONSTRAIN_END_LOOP
+  //CONSTRAIN_START_LOOP(priPr,15)
+  //  g[cix] = x[gix("st",r1,r2,p)]-x[gix("sa",r1,r2,p)]-x[gix("sl",r1,r2,p)];
+  //CONSTRAIN_END_LOOP
 
   return true;
 }

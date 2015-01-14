@@ -175,6 +175,7 @@ getMultiplier() returns the value of the multiplier as memorized in the spatialD
 It will looks for exact match or for lower years if available.
 If no layers are available or the usePixelData option is not used, it will return 1.
 If the tp_multiplier is asked for, it will adjusts for spatial variance coefficient.
+If the mortCoef_multiplier is used and we are in the table settings it will adjust it by mortCoef_link.
 */
 double
 Pixel::getMultiplier (const string& multiplierName, const string& forName, int year){
@@ -191,6 +192,9 @@ Pixel::getMultiplier (const string& multiplierName, const string& forName, int y
       // load multiplier from forData table..
       int regId = getMyRegion()->getRegId();
       double multiplier = MTHREAD->MD->getForData(multiplierName, regId, forName, "",year);
+      if (multiplierName == "mortCoef_multiplier"){
+        return pow(multiplier,MTHREAD->MD->getDoubleSetting("mortMultiplier_link"))*multiplierSpVar; //Added to account that our multipliers are based on probability of presence and not on planted/managed forests, where mortality is somhow reduced
+      }
       return multiplier*multiplierSpVar;
 
     } else {
