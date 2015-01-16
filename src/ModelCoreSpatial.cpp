@@ -804,6 +804,7 @@ ModelCoreSpatial::cacheSettings(){
   oldVol2AreaMethod = MD->getBoolSetting("oldVol2AreaMethod");
   mr = MD->getDoubleSetting("mr");
 
+
 }
 
 void
@@ -1257,6 +1258,41 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
         msgOut(MSG_CRITICAL_ERROR,"Negative inventory");
       }
       #endif
+    }
+
+    // 20150116: As the same (ft,dc) can be used in more than one product knowing -and bounding the supply in the optimisation- each single
+    // in(pp) is NOT enought.
+    // We need to bound the supply for each possible combination, that is for 2^(number of prim.pr)
+
+    int nbounds = pow(2,priProducts.size());
+    for (uint i=0; i<nbounds; i++){
+      vector<int> concernedPriProducts;
+      double bound = 0.0;
+      for(uint j=0;j<priProducts.size();j++){
+        uint j2 = pow(2,j);
+        if(i & j2){ // bit a bit operator, p217 C++ book
+          concernedPriProducts.push_back(j);
+        }
+      }
+      // for each ft and dc if at least one app with concerning product is 1 we add the volumes
+      for(uint ft=0;ft<fTypes.size();ft++){
+        for(uint dc=0;dc<dClasses.size();dc++){
+          bool addIt = false;
+          for(uint z=0;z<concernedPriProducts.size();z++){
+            if (app(priProducts[concernedPriProducts[z]],fTypes[ft],dClasses[dc])){
+              addIt = true;
+              break;
+            }
+          }
+          if (addIt){
+            for (uint p=0;p<regPx.size();p++){
+              Pixel* px = regPx[p];
+              bound += px->vol_l.at(ft).at(dc);
+            }
+          }
+        }
+      }
+      REG->inResByAnyCombination[i] = bound;
     }
   } // end each region
 }

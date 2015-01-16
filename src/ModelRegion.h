@@ -57,7 +57,7 @@ public:
   void                setChildren(vector<ModelRegion*> children_h) {chRegions = children_h;}; ///< Childrens are all the lvel-1 region that are parts of this region.
   void                addForData(forData* data_h){forDataVector.push_back(data_h);};
   void                addProdData(prodData* data_h){prodDataVector.push_back(data_h);};
-    void                setMyPixels(); ///< It sets a double link pixels <--> region
+  void                setMyPixels(); ///< It sets a double link pixels <--> region
   void                swap(const int& swap_what);
 
   // "get" methods..
@@ -76,6 +76,8 @@ public:
   int                 getNChildren(bool excludeResidual = true);
   vector<Pixel*>      getMyPixels(){return myPixels;};
 
+  vector<double>     inResByAnyCombination; ///< Vector of inventory resource for each possible combination of primary products
+
 private:
   int                                regId; ///< Regional unique ID
   string                          regSName; ///< A short name of the region
@@ -88,6 +90,7 @@ private:
   vector<forData*>           forDataVector; ///< Vector of pointers of forestry data (owned by ModelData)
   vector<prodData*>         prodDataVector; ///< Vector of pointers of product data (owned by ModelData)
   vector<Pixel*>                  myPixels; ///< Vector of pixels for this region
+
 
 
 };
