@@ -1263,8 +1263,10 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
     // 20150116: As the same (ft,dc) can be used in more than one product knowing -and bounding the supply in the optimisation- each single
     // in(pp) is NOT enought.
     // We need to bound the supply for each possible combination, that is for 2^(number of prim.pr)
+    // Here we compute the detailed inventory. TODO: Create the pounds in Opt.
 
     int nbounds = pow(2,priProducts.size());
+
     for (uint i=0; i<nbounds; i++){
       vector<int> concernedPriProducts;
       double bound = 0.0;
@@ -1274,6 +1276,7 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
           concernedPriProducts.push_back(j);
         }
       }
+      //concernedPriProducts.push_back(i);
       // for each ft and dc if at least one app with concerning product is 1 we add the volumes
       for(uint ft=0;ft<fTypes.size();ft++){
         for(uint dc=0;dc<dClasses.size();dc++){

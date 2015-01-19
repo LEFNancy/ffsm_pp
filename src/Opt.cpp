@@ -144,12 +144,6 @@ Opt::declareConstrains (){
   mkeq17.direction = CONSTR_LE0;
 
 
-  constrain mkeq18;
-  mkeq18.name="mkeq18";
-  mkeq18.comment="Constrain on raw material supply (lower than gross regional biological availability)";
-  mkeq18.domain=DOM_PRI_PR;
-  mkeq18.direction = CONSTR_LE0;
-
   constrain mkeq23;
   mkeq23.name="mkeq23";
   mkeq23.comment="[h3] Composit demand eq. (Dp)";
@@ -162,23 +156,29 @@ Opt::declareConstrains (){
   mkeq24.domain=DOM_PRI_PR;
   mkeq24.direction = CONSTR_EQ;
 
-  constrain mkeq25;
-  mkeq25.name="mkeq25";
-  mkeq25.comment="Verification of the null trasformers supply (price of raw product + trasf product > trasf product)";
-  mkeq25.domain=DOM_SEC_PR;
-  mkeq25.direction = CONSTR_GE0;
-
   constrain mkeq26;
   mkeq26.name="mkeq26";
   mkeq26.comment="[eq ] Verification of the null transport agents supply";
   mkeq26.domain=DOM_R2_ALL_PR;
   mkeq26.direction = CONSTR_LE0;
 
-  constrain stdef;
-  stdef.name="st definition";
-  stdef.comment="Definition of the total supply (only for primary product)";
-  stdef.domain=DOM_PRI_PR;
-  stdef.direction = CONSTR_EQ;
+  constrain mkeq25;
+  mkeq25.name="mkeq25";
+  mkeq25.comment="Verification of the null trasformers supply (price of raw product + trasf product > trasf product)";
+  mkeq25.domain=DOM_SEC_PR;
+  mkeq25.direction = CONSTR_GE0;
+
+  constrain mkeq18;
+  mkeq18.name="mkeq18";
+  mkeq18.comment="Constrain on raw material supply (lower than inventory)";
+  mkeq18.domain=DOM_PRI_PR;
+  mkeq18.direction = CONSTR_LE0;
+
+  constrain resbounds;
+  resbounds.name="resbounds";
+  resbounds.comment="Constrain on raw material supply (lower than inventory, for each possible combination of primary products)";
+  resbounds.domain=DOM_PRI_PR_ALLCOMBS;
+  resbounds.direction = CONSTR_LE0;
 
   cons.push_back(mkeq2);
   cons.push_back(mkeq6);
@@ -192,10 +192,10 @@ Opt::declareConstrains (){
   cons.push_back(mkeq14);
   cons.push_back(mkeq24);
   cons.push_back(mkeq17);
-  cons.push_back(mkeq18);
   cons.push_back(mkeq26);
   cons.push_back(mkeq25);
-  //cons.push_back(stdef);
+  //cons.push_back(mkeq18);
+  cons.push_back(resbounds);
 ;
 
 
@@ -365,14 +365,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
   CONSTRAIN_START_LOOP(priPr,7)
     ff = gpd("ff",l2r[r1][r2],priPr[p]);
     sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p]);
-    //supCorr = gpd("supCorr",l2r[r1][r2],priPr[p]);
-    //in = gpd("in",l2r[r1][r2],priPr[p]);
-    //in_1 = gpd("in",l2r[r1][r2],priPr[p],previousYear);
-    //if(in <= 0.01 ) {
-    //  g[cix] = x[gix("sc",r1,r2,p)]-0.0005;
-    //} else {
-      g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma);
-    //}
+    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma);
   CONSTRAIN_END_LOOP
 
 
@@ -404,29 +397,23 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
         );
   CONSTRAIN_END_LOOP
 
-  // mkteq17(i,p_tr).. RVAR('sl',i,p_tr)                    =l=  Kt(i,p_tr);     // h16 in the presentation paper
+  // mkteq17(i,p_tr).. RVAR('sl',i,p_tr)  =l=  Kt(i,p_tr);     // h16 in the presentation paper
   CONSTRAIN_START_LOOP(secPr,11)
     k = gpd("k",l2r[r1][r2],secPr[p]);
     g[cix] = x[gix("sl",r1,r2,p+nPriPr)]-k;
   CONSTRAIN_END_LOOP
 
-  // mkteq18(i,p_pr).. RVAR('sa',i,p_pr)+RVAR('sl',i,p_pr)  =l=  dispor(i,p_pr); // total supply lower than the available stock
-  CONSTRAIN_START_LOOP(priPr,12)
-    in = gpd("in",l2r[r1][r2],priPr[p]);
-    g[cix] = x[gix("sa",r1,r2,p)]+x[gix("sl",r1,r2,p)]-in;
-  CONSTRAIN_END_LOOP
-
   // mkeq26(i,prd,j).. RVAR('pl',j,prd)-RVAR('pl',i,prd)-CT(i,j,prd) =l= 0;
-  CONSTRAIN_START_LOOP(allPr,13)
+  CONSTRAIN_START_LOOP(allPr,12)
     for (uint r2To=0;r2To<l2r[r1].size();r2To++){
-      cix = gix(13, r1, r2, p,r2To); // attenction we must redefine it, as we are now in a r2to loop
+      cix = gix(12, r1, r2, p,r2To); // attenction we must redefine it, as we are now in a r2to loop
       ct = gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2To]));
       g[cix] = (x[gix("pl",r1,r2To,p)]-x[gix("pl",r1,r2,p)]-ct);
     }
   CONSTRAIN_END_LOOP
 
   // mkteq25(i,p_tr).. sum(p_pr, a(p_pr,p_tr)*RVAR('pl',i,p_pr))+m(i,p_tr)  =g=  (RVAR('pl',i,p_tr));        // price of raw products + transf cost > trasf product
-  CONSTRAIN_START_LOOP(secPr,14)
+  CONSTRAIN_START_LOOP(secPr,13)
     mv = gpd("m",l2r[r1][r2],secPr[p]);
     g[cix] = mv - x[gix("pl",r1,r2,p+nPriPr)];
     for (uint p2=0;p2<priPr.size();p2++){
@@ -435,9 +422,27 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     }
   CONSTRAIN_END_LOOP
 
-  //CONSTRAIN_START_LOOP(priPr,15)
-  //  g[cix] = x[gix("st",r1,r2,p)]-x[gix("sa",r1,r2,p)]-x[gix("sl",r1,r2,p)];
-  //CONSTRAIN_END_LOOP
+//  // mkteq18(i,p_pr).. RVAR('sa',i,p_pr)+RVAR('sl',i,p_pr)  =l=  dispor(i,p_pr); // total supply lower than the available stock
+//  CONSTRAIN_START_LOOP(priPr,14)
+//    in = gpd("in",l2r[r1][r2],priPr[p]);
+//    double d1 = gix("sa",r1,r2,p);
+//    double d2 = gix("sl",r1,r2,p);
+//    g[cix] = x[gix("sa",r1,r2,p)]+x[gix("sl",r1,r2,p)]-in;
+//  CONSTRAIN_END_LOOP
+
+  // resbounds(i, p_pr_comb).. RVAR('sa',i,p_pr)+RVAR('sl',i,p_pr)  =l=  dispor(i,p_pr); // total supply lower than the available stock - FOR all combination subsets of ins
+  CONSTRAIN_START_LOOP(priPrCombs,14)
+    //ModelRegion* REG = MTHREAD->MD->getRegion(l2r[r1][r2]); // possibly slower
+    //in = REG->inResByAnyCombination[p];
+    in = ins[r1][r2][p];
+    //if(p==0){
+    //  in = 1.0; // workaround to lead -1<0 rather than 0<0 for the first (empty) subset - notneeded
+    //}
+    g[cix] = -in;
+    for(uint i=0;i<priPrCombs[p].size();i++){
+      g[cix] += x[gix("sa",r1,r2,priPrCombs[p][i])]+x[gix("sl",r1,r2,priPrCombs[p][i])];
+    }
+  CONSTRAIN_END_LOOP
 
   return true;
 }
@@ -490,6 +495,10 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
       }
     }
 
+    // Create a vector with all possible combinations of primary products
+    priPrCombs = createCombinationsVector(nPriPr);
+    nPriPrCombs = priPrCombs.size();
+
     // put the variables and their domain in the vars map
     declareVariables();
 
@@ -516,6 +525,8 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
   n = nVar; // 300; // nVar;
   m = nCons; // 70; // nCons;
 
+  copyInventoryResourses();
+
   generate_tapes(n, m, nnz_jac_g, nnz_h_lag);
 
   //if(initOpt){
@@ -523,15 +534,6 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
   //  calculateSparsityPatternH();
     //tempDebug();
   //}
-
-  // in this example the jacobian is dense. Hence, it contains n*m nonzeros
-  //nnz_jac_g = n*m;
-  //nnz_jac_g = nzjelements.size();
-
-  // the hessian is also dense and has n*n total nonzeros, but we
-  // only need the lower left corner (since it is symmetric)
-  //nnz_h_lag = n*(n-1)/2+n;
-  //nnz_h_lag = nzhelements.size();
 
   // use the C style indexing (0-based)
   index_style = C_STYLE;
@@ -1243,10 +1245,12 @@ Opt::gix_uncached(const T &v_or_c, int r1Ix, int r2Ix, int prIx, int r2IxTo){
       return gip(v_or_c)+(othCountriesRegions_r2case)*nAllPr+(r2Ix*nSecPr+prIx)*l2r[r1Ix].size()+r2IxTo;
     case DOM_R2_ALL_PR:
       return gip(v_or_c)+(othCountriesRegions_r2case)*nAllPr+(r2Ix*nAllPr+prIx)*l2r[r1Ix].size()+r2IxTo; // new 20120814, looping r1,r2,p,r2to
-            // initial position + (other countries region pairs + same country other regions from pair + regions to)* number of all products+product
+      // initial position + (other countries region pairs + same country other regions from pair + regions to)* number of all products+product
       //return gip(v_or_c)+(othCountriesRegions_r2case+r2Ix*l2r[r1Ix].size()+r2IxTo)*nAllPr+prIx; // looping r1,r2,r2to,p
     case DOM_SCALAR:
       return gip(v_or_c);
+    case DOM_PRI_PR_ALLCOMBS:
+      return gip(v_or_c)+(othCountriesRegions+r2Ix)*nPriPrCombs+prIx;
   default:
     msgOut(MSG_CRITICAL_ERROR,"Try to calculate the position of a variable (or constrain) of unknow type.");
     return 0;
@@ -1306,34 +1310,44 @@ Opt::cachePositions(){
 
 template<class T> vector < vector < vector < vector <int> > > >
 Opt::buildPositionVector(const T &v_or_c, int dType){
+  int pVectorSize;
+
   switch (dType){
     case DOM_PRI_PR:
-      return buildPositionVector(v_or_c, priPr);
+      pVectorSize= priPr.size();
+      break;
     case DOM_SEC_PR:
-      return buildPositionVector(v_or_c, secPr);
+      pVectorSize= secPr.size();
+      break;
     case DOM_ALL_PR:
-      return buildPositionVector(v_or_c, allPr);
+      pVectorSize= allPr.size();
+      break;
     case DOM_R2_PRI_PR:
-      return buildPositionVector(v_or_c, priPr);
+      pVectorSize= priPr.size();
+      break;
     case DOM_R2_SEC_PR:
-      return buildPositionVector(v_or_c, secPr);
+      pVectorSize= secPr.size();
+      break;
     case DOM_R2_ALL_PR:
-      return buildPositionVector(v_or_c, allPr);
+      pVectorSize= allPr.size();
+      break;
     case DOM_SCALAR:
-      return buildPositionVector(v_or_c, allPr); // it will simply fill the matrix all with the same value (the ip)
-  default:
-    msgOut(MSG_CRITICAL_ERROR,"Try to build the position of a variable (or contrain) of unknow type.");
+      pVectorSize= allPr.size(); // it will simply fill the matrix all with the same value (the ip)
+      break;
+    case DOM_PRI_PR_ALLCOMBS:
+      pVectorSize= priPrCombs.size();
+      break;
+    default:
+      msgOut(MSG_CRITICAL_ERROR,"Try to build the position of a variable (or contrain) of unknow type.");
   }
-}
 
-template<class T> vector < vector < vector < vector <int> > > >
-Opt::buildPositionVector(const T &v_or_c, vector<string> &prVector){
+
   vector < vector < vector < vector <int> > > > positionsToAdd;
   for(uint r1=0;r1<l2r.size();r1++){
     vector < vector < vector <int> > > dim1;
     for(uint r2=0;r2<l2r[r1].size();r2++){
       vector < vector <int> > dim2;
-      for(uint p=0;p<prVector.size();p++){
+      for(uint p=0;p<pVectorSize;p++){
         vector <int> dim3;
           for(uint r2To=0;r2To<l2r[r1].size();r2To++){
             dim3.push_back(gix_uncached(v_or_c,r1,r2,p,r2To));
@@ -1408,6 +1422,8 @@ Opt::getDomainElements(int domain){
       return elements;
     case DOM_SCALAR:
       return 1;
+    case DOM_PRI_PR_ALLCOMBS:
+      return nL2r*nPriPrCombs;
   default:
     msgOut(MSG_CRITICAL_ERROR, "Asking for an unknown domain type ("+i2s(domain)+")");
   }
@@ -1692,4 +1708,64 @@ Opt::declareVariable(const string &name, const int & domain, const double & l_bo
    end_var.l_bound_var = l_bound_var;
    end_var.u_bound_var = u_bound_var;
    vars.insert(std::pair<std::string, endvar >(name, end_var));
+}
+/**
+ * @brief Opt::createCombinationsVector
+ * Return a vector containing any possible combination of nItems items (including all subsets).
+ *
+ * For example with nItems = 3:
+ * 0: []; 1: [0]; 2: [1]; 3: [0,1]; 4: [2]; 5: [0,2]; 6: [1,2]; 7: [0,1,2]
+
+ * @param nItems number of items to create p
+ * @return A vector with in each slot the items present in that specific combination subset.
+ */
+vector < vector <int> >
+Opt::createCombinationsVector(const int& nItems) {
+  // Not confound combination with permutation where order matter. Here it doesn't matter, as much as the algorithm is the same and returns
+  // to as each position always the same subset
+  vector < vector <int> > toReturn;
+  int nCombs = pow(2,nItems);
+  //int nCombs = nItems;
+  for (uint i=0; i<nCombs; i++){
+    vector<int> thisCombItems; //concernedPriProducts;
+    for(uint j=0;j<nItems;j++){
+      uint j2 = pow(2,j);
+      if(i & j2){ // bit a bit operator, p217 C++ book
+        thisCombItems.push_back(j);
+      }
+    }
+    toReturn.push_back(thisCombItems);
+  }
+
+//    cout << "N items:\t" << nItems << endl;
+//    for (uint i=0;i<nCombs; i++){
+//      cout << "  "<< i << ":\t";
+//      for (uint j=0;j<toReturn[i].size();j++){
+//        cout << toReturn[i][j] << "  ";
+//      }
+//      cout << endl;
+//    }
+//    exit(0);
+  return toReturn;
+}
+
+void
+Opt::copyInventoryResourses(){
+  // This function is not really needed, as actually the solver works also picking the region and the in dynamically
+  // Caching the inventories in a vector should however be faster.
+  vector < vector < vector <double> > >  in_temp;
+  for (uint r1=0;r1<l2r.size();r1++){
+     vector < vector <double> > dim1;
+    for (uint r2=0;r2<l2r[r1].size();r2++){
+      vector <double> dim2;
+      ModelRegion* REG = MTHREAD->MD->getRegion(l2r[r1][r2]);
+      for (uint p=0;p<priPrCombs.size();p++){
+        double this_in = REG->inResByAnyCombination[p];
+        dim2.push_back(this_in);
+      }
+      dim1.push_back(dim2);
+    }
+    in_temp.push_back(dim1);
+  }
+  ins = in_temp;
 }

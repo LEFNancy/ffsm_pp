@@ -35,8 +35,6 @@
 #define tag_L 3
 #define HPOFF 30 //original: 30
 
-
-
 /// Class containing the optimization problem (the matrix and its methods)
 
 /**
@@ -148,7 +146,6 @@ public:
   void                cachePositions(); ///< cache the exact position index (initial+f(r1,r2,p,r2To) for each variable and constrain
   int                 getDomainElements(int domain); ///< return the number of elements of a domain
 template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, int dType); ///< build the matrix of the positions for a given variable or contrain
-template<class T> vector < vector < vector < vector <int> > > > buildPositionVector(const T &v_or_c, vector<string> &prVector);
   int                 getVarInstances(const string& varName); ///< return the number of instances of a variable, given his domain type
   ///< build the matrix of the positions for a given variable or contrain
   void                calculateSparsityPatternJ();
@@ -184,7 +181,8 @@ protected:
   constrain*          getConstrainByIndex(int idx);
   void                unpack(int ix_h, int domain, int initial, int &r1_h, int &r2_h, int&p_h, int&r2to_h, bool fullp=false); ///< Return the dimensions given a certain index, domain type and initial position
   int                 getConNumber(constrain* con); ///< Return the position in the cons vector
-
+  vector < vector <int> > createCombinationsVector(const int& nItems); ///< Return a vector containing any possible combination of nItems items (including any possible subset). The returned vector has in each slot the items present in that specific combination.
+  void                copyInventoryResourses(); ///< Copy the inventoried resources in the in vector for better performances
 
   void tempDebug();
 
@@ -194,6 +192,8 @@ protected:
   vector<string>                           secPr;
   vector<string>                           allPr;
   vector < vector <int> >                    l2r;
+  vector < vector <int> >             priPrCombs; ///< A vector with all the possible combinations of primary products
+  vector < vector < vector <double> > >      ins; ///< A copy of the inventoried resourses by region and primary product combination. It works also with dynamic loading of the region and the in, but it may be slower.
   map <string, int>                      initPos; ///< A map that returns the initial index position in the concatenated array for each variable
   map <int, string>                  initPos_rev; ///< A map with the name of the variable keyed by its initial position in the index
   vector<int>                           cInitPos; ///< A vector that returns the initial index position in the concatenated array for each constrain
@@ -201,6 +201,7 @@ protected:
   map <string, vector < vector < vector < vector <int> > > > > vpositions; ///< cached position in the concatenated vector for each variables. Dimensions are l1reg, l2reg, prod, (l2To region).
   vector < vector < vector < vector < vector <int> > > > > cpositions; ///< cached position in the concatenated vector for each variables. Dimensions are contrain number, l1reg, l2reg, prod, (l2To region).
   int                                     nPriPr;
+  int                                nPriPrCombs;
   int                                     nSecPr;
   int                                     nAllPr;
   int                                       nL2r;
@@ -219,8 +220,6 @@ protected:
   vector <constrain>                        cons;
   vector <vector <Index> >             nzjelements; ///< nzero elements for the jacobian matrix. nzelements[i][0] -> row (constrain), nzelements[i][1] -> column (variable)
   vector <vector <Index> >             nzhelements; ///< nzero elements for the hessian matrix
-  //int                               nnzjelements; ///< number of non zero elements
-
 
 
   /**@name Methods to block default compiler methods.

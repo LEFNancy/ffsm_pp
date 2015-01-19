@@ -40,6 +40,7 @@ ModelRegion::ModelRegion(ThreadManager* MTHREAD_h, int regId_h, string regSName_
 
   // Create an empty vector of inventory bounds for each possible primary products combination
   int nInBounds = pow(2,MTHREAD->MD->getStringVectorSetting("priProducts").size());
+  //int nInBounds = MTHREAD->MD->getStringVectorSetting("priProducts").size(); // TODO todo !Important
   vector <double> inBounds(nInBounds,0.); // should have ceated a vector of size priProducts.size(), all filled with zeros
   inResByAnyCombination = inBounds;
 }

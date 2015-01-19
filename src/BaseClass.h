@@ -91,6 +91,7 @@ enum domains {
   DOM_R2_SEC_PR          =5,             ///< Secondary products over r2 couple regions (in-country commercial flows)
   DOM_R2_ALL_PR          =6,             ///< All products over r2 couple regions (in-country commercial flows)
   DOM_SCALAR             =7,             ///< Scalar variable (not used)
+  DOM_PRI_PR_ALLCOMBS    =8,             ///< All possible combinations of primary products (2^ number of primary products)
 };
 /// Carbon stocks
 enum carbonStocks {
