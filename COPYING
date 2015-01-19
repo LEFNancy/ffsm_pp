@@ -1,3 +1,21 @@
+FFSM++ License
+
+This software is covered by the above reported GNU GPL version 3 licence
+with the following exceptions that prevail over the GNU GPL version:
+
+#1: Any public communication (not limited: working papers, articles, technical reports)
+of results derived from running a modified version of this software requires the
+publication of the source code corresponding to such modifications;
+
+#2: Publishing communications derived from unmodified versions of the software
+on which new data is applied doesn't require the publication of the data;
+
+#3: The modifications of which to the first point must be released under the same 
+licence of the unmodified software, including these exceptions.
+
+
+
+
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 

@@ -1,12 +1,13 @@
-
 /***************************************************************************
- *   Copyright (C) 2012 by Laboratoire d'Economie Forestière               *
- *   http://www.nancy.inra.fr/lef_eng                                      *
+ *   Copyright (C) 2015 by Laboratoire d'Economie Forestière               *
+ *   http://ffsm-project.org                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 3 of the License, or     *
- *   (at your option) any later version.                                   *
+ *   (at your option) any later version, given the compliance with the     *
+ *   exceptions listed in the file COPYING that is distribued together     *
+ *   with this file.                                                       *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
