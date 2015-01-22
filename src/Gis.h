@@ -156,6 +156,7 @@ private:
   void                loadLayersDataFromFile(); ///< Load the data of a layer its datafile
   void          applySpatialStochasticValues(); ///< Apply stochastic simulation, e.g. regional volume growth s.d. -> tp multipliers
   void          applyStochasticRiskAdversion(); ///< Give to each agend a stochastic risk adversion. For now Pixel = Agent
+  void                      cachePixelValues(); ///< For computational reasons cache some values in constant layers directly as properties of the pixel object
   vector <Pixel>                      pxVector; ///< array of Pixel objects
   vector <Layers>                  layerVector; ///< array of Layer objects  
   vector <double>                   lUseTotals; ///< totals, in ha, of area in the region for each type (cached values)

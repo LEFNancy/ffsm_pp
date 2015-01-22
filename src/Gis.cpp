@@ -94,6 +94,7 @@ Gis::setSpace(){
 
   applySpatialStochasticValues(); // regional variance -> different tp in each pixel trought tp modifiers
   applyStochasticRiskAdversion(); // risk adversion to each pixel
+  cachePixelValues(); // For computational reasons cache some values in the constant layers directly as properties of the pixel object
 
   MTHREAD->fitInWindow(); // tell the gui to fit the map to the widget
 //  countItems("landUse",false); // count the various records assigned to each legendItem. Do not print debug infos
@@ -210,6 +211,24 @@ Gis::applyStochasticRiskAdversion(){
   }
 }
 
+void
+Gis::cachePixelValues(){
+  /// Set the avalCoef (availability coefficient) from layer
+  if(!MTHREAD->MD->getBoolSetting("usePixelData")) return;
+
+  bool applyAvalCoef = MTHREAD->MD->getBoolSetting("applyAvalCoef");
+  vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
+
+  for(uint i=0;i<regIds2.size();i++){
+    ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
+    vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
+    for (uint p=0;p<rpx.size();p++){
+      if(applyAvalCoef){
+        rpx[p]->avalCoef = rpx[p]->getDoubleValue("avalCoef", true);
+      }
+    }
+  }
+}
 
 /**
 Called from setSpace(), initLayers() is responsable of:

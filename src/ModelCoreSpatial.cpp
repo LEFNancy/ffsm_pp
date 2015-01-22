@@ -81,7 +81,7 @@ ModelCoreSpatial::runSimulationYear(){
   resetPixelValues();          // swap volumes->lagged_volumes and reset the other pixel vectors
   cachePixelExogenousData();   // compute pixel tp, meta and mort
   computeInventary();          // in=f(vol_t-1)
-  runMarketModule();
+  runMarketModule();           // RUN THE MARKET OPTIMISATION HERE
   computeCumulativeData();     // compute cumTp_exp, vHa_exp
   cachePixelExogenousData();
   runBiologicalModule();
@@ -523,9 +523,9 @@ ModelCoreSpatial::runBiologicalModule(){
             double in = gpd("in",r2,priProducts[pp]);
             double hr_pr = app(priProducts[pp],ft,dc)*st/ in;
             hr += hr_pr;
-            hV_byPrd.push_back( hr_pr*pastYearVol);
+            hV_byPrd.push_back( hr_pr*pastYearVol*px->avalCoef);
           }
-          double hV = hr*pastYearVol;
+          double hV = hr*pastYearVol*px->avalCoef;
           hV_byDiam.push_back(hV);
           hV_byDiamAndPrd.push_back(hV_byPrd);
 
@@ -568,9 +568,10 @@ ModelCoreSpatial::runBiologicalModule(){
             double inc = (u==dClasses.size()-1)?0:1./tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
             double tp_1 = px->tp.at(j).at(u-1); //gfd("tp",regId,ft,dClasses[u-1]);
             double pastYearVol_1 = px->vol_l.at(j).at(u-1); //gfd("vol",regId,ft,dClasses[u-1],thisYear-1);
-            vol = max(0.0,(1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1);
+            //vol = max(0.0,(1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1);
+            vol = max(0.0,(1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1); // I can't use any more hr as it it the harvesting rate over the available volumes, not the whole ones
             #ifdef QT_DEBUG
-            if ((1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1 < -0.00001){
+            if ((1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1 < -0.00001){
               msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
             }
             #endif
@@ -585,7 +586,7 @@ ModelCoreSpatial::runBiologicalModule(){
               hArea_byDc.push_back(finalHarvestFlag*1000000*hV/vHa); // volumes are in Mm^3, area in ha, vHa in m^3/ha
             } else {
               double finalHarvestedVolumes = finalHarvestFlag* hV;
-              double finalHarvestedRate = pastYearVol?finalHarvestedVolumes/pastYearVol:0.0;
+              double finalHarvestedRate = pastYearVol?finalHarvestedVolumes/pastYearVol:0.0; // Here we want the harvested rate over the whole volumes, not just the available ones, so we don't need to multiply to px->avalCoef
               hArea_byDc.push_back(finalHarvestedRate*pastArea); // volumes are in Mm^3, area in ha, vHa in m^3/ha
             }
             px->area.at(j).at(u) = px->area_l.at(j).at(u) - areasMovingUp.at(u) + areasMovingUp.at(u-1) - hArea_byDc.at(u);
@@ -633,6 +634,28 @@ ModelCoreSpatial::runBiologicalModule(){
         #endif
       } // end of each forest type
     } // end of each pixel
+
+    #ifdef QT_DEBUG
+    // checking that in a region the total hVol is equal to the st for each products. 20150122 Test passed with the new availCoef
+    double sumSt = 0.0;
+    double sumHv = 0.0;
+    for(uint pp=0;pp<priProducts.size();pp++){
+      sumSt += gpd("st",r2,priProducts[pp]);
+    }
+    for (uint p=0;p<regPx.size();p++){
+      for(uint j=0;j<fTypes.size();j++){
+        for (uint u=0; u<dClasses.size(); u++){
+          for(uint pp=0;pp<priProducts.size();pp++){
+            // by ft, dc, pp
+            sumHv += regPx[p]->hVol_byPrd[j][u][pp];
+          }
+        }
+      }
+    }
+    if(abs(sumSt-sumHv) > 0.000001){
+      msgOut(MSG_CRITICAL_ERROR, "St and harvested volumes diverge in region "+REG->getRegSName());
+    }
+    #endif
   } // end of each region
 
 }
@@ -1258,7 +1281,7 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
         double in = 0;
         for(uint ft=0;ft<fTypes.size();ft++){
           for(uint dc=0;dc<dClasses.size();dc++){
-            in += app(priProducts[pp],fTypes[ft],dClasses[dc])*px->vol_l.at(ft).at(dc);
+            in += app(priProducts[pp],fTypes[ft],dClasses[dc])*px->vol_l.at(ft).at(dc)*px->avalCoef;
           }
         }
         //px->in.push_back(in);
@@ -1311,7 +1334,7 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
           if (addIt){
             for (uint p=0;p<regPx.size();p++){
               Pixel* px = regPx[p];
-              bound += px->vol_l.at(ft).at(dc);
+              bound += px->vol_l.at(ft).at(dc)*px->avalCoef;
             }
           }
         }

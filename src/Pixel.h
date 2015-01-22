@@ -133,7 +133,7 @@ public:
   double                                 expType; ///< Sampling derived expectation types of this agent (forest bilogical parameters: growth, mortality)
   double                           expTypePrices; ///< Sampling derived expectation types of this agent (prices)
   bool                              usePortfolio; ///< Sampling derived usage of portfolio management (false/true)
-
+  double                                avalCoef; ///< Availability (of wood resources) coefficient. A [0,1] coefficient that reduce avaiability of wood resources to exploitation due to local reasons (protected area, altimetry..)
 
 private:  
   map<string, double>            values;  ///< Map of values for each layer

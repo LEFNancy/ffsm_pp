@@ -31,6 +31,7 @@ Pixel::Pixel(double ID_h, ThreadManager* MTHREAD_h): ID(ID_h)
     vector<double> temp(nft,1);
     //vector<double> temp2(nft,0);
     spMods = temp;
+    avalCoef = 1;
     //vMort  = temp2;
     //std::fill(v.begin(), v.end(), 0);
 }
