@@ -14,9 +14,10 @@ import matplotlib.pyplot as plt
 # input data expected format
 # - scen;parName;country;region;forType;diamClass;year;value;
 forIFiles = [  
+  # management paper..
   'output_vRegFixed/results/forestData_vRegFixed.csv',
   'output_vRegFromHr/results/forestData_vRegFromHr.csv', 
-  'output_homSpace/results/forestData_homSpace.csv',
+  'output_reference/results/forestData_reference.csv',
   'output_vRegEnd070/results/forestData_vRegEnd070.csv',
   'output_withRisk06/results/forestData_withRisk06.csv',
   'output_withRisk08/results/forestData_withRisk08.csv',
@@ -24,50 +25,51 @@ forIFiles = [
   'output_withRisk08-03/results/forestData_withRisk08-03.csv',
   'output_withRisk08-04/results/forestData_withRisk08-04.csv',
   'output_withRisk10/results/forestData_withRisk10.csv',
-  'output_hetSpace/results/forestData_hetSpace.csv',
+  # space paper..
   'output_bau/results/forestData_bau.csv',
-  'output_cc1/results/forestData_cc1.csv', 
   'output_bau_nospvar/results/forestData_bau_nospvar.csv',
+  'output_cc1/results/forestData_cc1.csv', 
   'output_cc1_nospvar/results/forestData_cc1_nospvar.csv', 
+  'output_cc1_hetAgents/results/forestData_cc1_hetAgents.csv', 
   'output_cc2/results/forestData_cc2.csv',
   'output_cc2_nospvar/results/forestData_cc2_nospvar.csv',
   'output_cc3/results/forestData_cc3.csv',
   'output_cc3_nospvar/results/forestData_cc3_nospvar.csv',
   'output_cc4/results/forestData_cc4.csv',
   'output_cc4_nospvar/results/forestData_cc4_nospvar.csv',
+  'output_cc4_hetAgents/results/forestData_cc4_hetAgents.csv', 
   'output_cc5/results/forestData_cc5.csv',
   'output_cc5_nospvar/results/forestData_cc5_nospvar.csv',
-  
-  'output_randomSpace/results/forestData_randomSpace_49393.csv',
-  'output_randomSpace/results/forestData_randomSpace_111737.csv',
-  'output_randomSpace/results/forestData_randomSpace_177633.csv',
-  'output_randomSpace/results/forestData_randomSpace_208136.csv',
-  'output_randomSpace/results/forestData_randomSpace_233499.csv',
-  'output_randomSpace/results/forestData_randomSpace_248642.csv',
-  'output_randomSpace/results/forestData_randomSpace_296214.csv',
-  'output_randomSpace/results/forestData_randomSpace_301359.csv',
-  'output_randomSpace/results/forestData_randomSpace_302681.csv',
-  'output_randomSpace/results/forestData_randomSpace_310227.csv',
-  'output_randomSpace/results/forestData_randomSpace_338943.csv',
-  'output_randomSpace/results/forestData_randomSpace_344678.csv',
-  'output_randomSpace/results/forestData_randomSpace_347417.csv',
-  'output_randomSpace/results/forestData_randomSpace_371709.csv',
-  'output_randomSpace/results/forestData_randomSpace_420780.csv',
-  'output_randomSpace/results/forestData_randomSpace_504660.csv',
-  'output_randomSpace/results/forestData_randomSpace_529107.csv',
-  'output_randomSpace/results/forestData_randomSpace_566950.csv',
-  'output_randomSpace/results/forestData_randomSpace_569498.csv',
-  'output_randomSpace/results/forestData_randomSpace_580374.csv',
-  'output_randomSpace/results/forestData_randomSpace_663118.csv',
-  'output_randomSpace/results/forestData_randomSpace_703743.csv',
-  'output_randomSpace/results/forestData_randomSpace_703885.csv',
-  'output_randomSpace/results/forestData_randomSpace_708759.csv',
-  'output_randomSpace/results/forestData_randomSpace_767794.csv',
-  'output_randomSpace/results/forestData_randomSpace_768599.csv',
-  'output_randomSpace/results/forestData_randomSpace_816082.csv',
-  'output_randomSpace/results/forestData_randomSpace_873308.csv',
-  'output_randomSpace/results/forestData_randomSpace_976417.csv',
-  #'output_randomSpace/results/forestData_randomSpace_xxxxxx.csv',
+  'output_randomSpace/results/forestData_randomSpace_21363.csv',
+  'output_randomSpace/results/forestData_randomSpace_39917.csv',
+  'output_randomSpace/results/forestData_randomSpace_111500.csv',
+  'output_randomSpace/results/forestData_randomSpace_125252.csv',
+  'output_randomSpace/results/forestData_randomSpace_173633.csv',
+  'output_randomSpace/results/forestData_randomSpace_192853.csv',
+  'output_randomSpace/results/forestData_randomSpace_210687.csv',
+  'output_randomSpace/results/forestData_randomSpace_264281.csv',
+  'output_randomSpace/results/forestData_randomSpace_283288.csv',
+  'output_randomSpace/results/forestData_randomSpace_323303.csv',
+  'output_randomSpace/results/forestData_randomSpace_380078.csv',
+  'output_randomSpace/results/forestData_randomSpace_384255.csv',
+  'output_randomSpace/results/forestData_randomSpace_401853.csv',
+  'output_randomSpace/results/forestData_randomSpace_408020.csv',
+  'output_randomSpace/results/forestData_randomSpace_447374.csv',
+  'output_randomSpace/results/forestData_randomSpace_463518.csv',
+  'output_randomSpace/results/forestData_randomSpace_495219.csv',
+  'output_randomSpace/results/forestData_randomSpace_528605.csv',
+  'output_randomSpace/results/forestData_randomSpace_571231.csv',
+  'output_randomSpace/results/forestData_randomSpace_586306.csv',
+  'output_randomSpace/results/forestData_randomSpace_592342.csv',
+  'output_randomSpace/results/forestData_randomSpace_629011.csv',
+  'output_randomSpace/results/forestData_randomSpace_655505.csv',
+  'output_randomSpace/results/forestData_randomSpace_721782.csv',
+  'output_randomSpace/results/forestData_randomSpace_733669.csv',
+  'output_randomSpace/results/forestData_randomSpace_873190.csv',
+  'output_randomSpace/results/forestData_randomSpace_933955.csv',
+  'output_randomSpace/results/forestData_randomSpace_949204.csv',
+  'output_randomSpace/results/forestData_randomSpace_978694.csv',
+  'output_randomSpace/results/forestData_randomSpace_979650.csv',
 ]
 
 prodIFile = [
@@ -76,9 +78,10 @@ prodIFile = [
 ]
 
 scenarios = {
+  # Management paper..
   'vRegFixed':            '#416c47',
   'vRegFromHr':           '#a1a612',  
-  'homSpace':             '#f80000',  
+  'reference':            '#f80000',  
   'vRegEnd070':           '#ff7200',
   'withRisk06':           '#6dcaf1',
   'withRisk08':           '#6c77e7',
@@ -87,8 +90,9 @@ scenarios = {
   'withRisk08-04':        '#6c77e7',
   'withRisk10':           '#0015db',   
   'hetSpace':             '#d4a4d7',
+  # Space paper..
   'bau':                  '#610e0e',
-  'cc1':                  '#d6e5de',   
+  'cc1':                  '#d6e5de',
   'cc2':                  '#9ce1db',  
   'cc3':                  '#7786e0',  
   'cc4':                  '#2d44cb',  
@@ -98,39 +102,40 @@ scenarios = {
   'cc2_nospvar':          '#d9d87e',  
   'cc3_nospvar':          '#99bf6c',   
   'cc4_nospvar':          '#417700',     
-  'cc5_nospvar':          '#203b00',   
-  
-  #randomSpace scenarios
-  'randomSpace_49393':    '#d9d9d9',
-  'randomSpace_111737':   '#d9d9d9',
-  'randomSpace_177633':   '#d9d9d9',
-  'randomSpace_208136':   '#d9d9d9',
-  'randomSpace_233499':   '#d9d9d9',
-  'randomSpace_248642':   '#d9d9d9',
-  'randomSpace_296214':   '#d9d9d9',
-  'randomSpace_301359':   '#d9d9d9',
-  'randomSpace_302681':   '#d9d9d9',
-  'randomSpace_310227':   '#d9d9d9',
-  'randomSpace_338943':   '#d9d9d9',
-  'randomSpace_344678':   '#d9d9d9',
-  'randomSpace_347417':   '#d9d9d9',
-  'randomSpace_371709':   '#d9d9d9',
-  'randomSpace_420780':   '#d9d9d9',
-  'randomSpace_504660':   '#d9d9d9',
-  'randomSpace_529107':   '#d9d9d9',
-  'randomSpace_566950':   '#d9d9d9',
-  'randomSpace_569498':   '#d9d9d9',
-  'randomSpace_580374':   '#d9d9d9',
-  'randomSpace_663118':   '#d9d9d9',
-  'randomSpace_703743':   '#d9d9d9',
-  'randomSpace_703885':   '#d9d9d9',
-  'randomSpace_708759':   '#d9d9d9',
-  'randomSpace_767794':   '#d9d9d9',
-  'randomSpace_768599':   '#d9d9d9',
-  'randomSpace_816082':   '#d9d9d9',
-  'randomSpace_873308':   '#d9d9d9',
-  'randomSpace_976417':   '#d9d9d9',
-#  'randomSpace_xxxxxx':   '#d9d9d9',
+  'cc5_nospvar':          '#203b00',  
+  'cc1_hetAgents':        '#e5b1cb',
+  'cc4_hetAgents':        '#cb2d52',
+  #randomSpace scenarios..
+  'randomSpace_21363' :   '#d9d9d9',
+  'randomSpace_39917' :   '#d9d9d9',
+  'randomSpace_111500':   '#d9d9d9',
+  'randomSpace_125252':   '#d9d9d9',
+  'randomSpace_173633':   '#d9d9d9',
+  'randomSpace_192853':   '#d9d9d9',
+  'randomSpace_210687':   '#d9d9d9',
+  'randomSpace_264281':   '#d9d9d9',
+  'randomSpace_283288':   '#d9d9d9',
+  'randomSpace_323303':   '#d9d9d9',
+  'randomSpace_380078':   '#d9d9d9',
+  'randomSpace_384255':   '#d9d9d9',
+  'randomSpace_401853':   '#d9d9d9',
+  'randomSpace_408020':   '#d9d9d9',
+  'randomSpace_447374':   '#d9d9d9',
+  'randomSpace_463518':   '#d9d9d9',
+  'randomSpace_495219':   '#d9d9d9',
+  'randomSpace_528605':   '#d9d9d9',
+  'randomSpace_571231':   '#d9d9d9',
+  'randomSpace_586306':   '#d9d9d9',
+  'randomSpace_592342':   '#d9d9d9',
+  'randomSpace_629011':   '#d9d9d9',
+  'randomSpace_655505':   '#d9d9d9',
+  'randomSpace_721782':   '#d9d9d9',
+  'randomSpace_733669':   '#d9d9d9',
+  'randomSpace_873190':   '#d9d9d9',
+  'randomSpace_933955':   '#d9d9d9',
+  'randomSpace_949204':   '#d9d9d9',
+  'randomSpace_978694':   '#d9d9d9',
+  'randomSpace_979650':   '#d9d9d9',
 }
 
 #years = ['2007','2008','2009','2010','2011','2012','2013','2014','2015','2020','2030','2040','2050','2060','2070','2080','2090','2100']
@@ -138,6 +143,7 @@ years = ['2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','
 
 printChartsFlag = True
 printTablesFlag = True
+printAATablesFlag = True
 ofilename = 'output_cc.csv'
 chartoutdir = 'output/charts'
 tableoutdir = 'output/tables'
@@ -199,7 +205,7 @@ sortedregions = []
 
 # =============================================================================
 def main():  
-  global sortedregions, printChartsFlag, printTablesFlag
+  global sortedregions, printChartsFlag, printTablesFlag, printAATablesFlag
 
   
   print "Creating nicely formatted output and charts.."
@@ -353,6 +359,10 @@ def main():
   # I - Print tables
   if printTablesFlag:
     printTables()
+    
+  # L - Print arera allocation confrontation
+  if printAATablesFlag:
+    printAATables()
   
   print "Done!"
 
@@ -549,6 +559,79 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
   omfile.close()
 
 # =============================================================================
+def printAATable(ref_scenarios, comparing_scenarios, regions_h, years_h, title, filename) :
+#def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename): 
+#printAATable(['cc1','cc1_nospvar','cc2','cc2_nospvar','cc3','cc3_nospvar','cc3','cc3_nospvar'],['bau','bau_nospvar','bau','bau_nospvar','bau','bau_nospvar','bau','bau_nospvar'], selectedregions, ['2100'],'Area allocation [% variation over bau]', 'area_allocation')
+  d = " & "
+  el = " \\\\"
+  
+  scenario_labels = []
+  nscen = len(ref_scenarios)
+  nscen_comp = len(comparing_scenarios)
+  if nscen <> nscen_comp:
+    print "Error in printAATable: number of comparing vs reference scenarios must be the same !"
+    exit(1)
+  nyears = len(years_h)
+  nregions = len(regions_h)
+  ntotcol = nscen+1
+  for scenario in comparing_scenarios:
+    scenario_labels.append(scenario.replace("_", "\\_"))
+    
+    
+  oString = ""
+  oString += "\\begin{table}[htbp]\n"
+  oString += "\\begin{center}\n"
+  oString += "\\begin{threeparttable}\n"
+  oString += "\\centering\n"
+  oString += "\\caption{"+title.replace("_", "\\_").replace("%", "\\%")+"}\n"
+  oString += "\\begin{footnotesize}\n"
+  oString += "\\begin{tabularx}{\\textwidth}{l "
+  for i in range(nscen):
+    oString += " r"
+  oString += "}\n"
+
+  oString += "\\hline\n"
+  oString += "Region"
+  for scenario in scenario_labels:
+    oString += d+scenario
+  oString += el+'\n'      
+  for spGroup in sorted(spAggregates.keys()):
+    oString += "\\multicolumn{"+str(ntotcol)+"}{l}{"+spGroup.replace("_", "\\_")+"}"+el+'\n'
+    for region in regions_h:
+      oString += regions[region]
+      for s in range(len(comparing_scenarios)):
+        sum_value_b = 0.0
+        sum_value_c = 0.0
+        for year in years_h:
+          key_b = region, 'forArea', ref_scenarios[s], spGroup, year
+          key_c = region, 'forArea', comparing_scenarios[s], spGroup, year
+          sum_value_b += idata[key_b]
+          sum_value_c += idata[key_c]
+        reldiff = (100*(sum_value_c-sum_value_b)/sum_value_b) if  sum_value_b != 0 else 0
+        oString +=  d+"%+0.3f"%(reldiff)
+      oString += el+'\n'
+     
+     
+  oString += "\\hline\n"
+  oString += "\\end{tabularx}\n"
+  oString += "\\end{footnotesize}\n"
+  oString += "\\label{tab:"+filename+"}\n"
+  oString += "\\end{threeparttable}\n"
+  oString += "\\end{center}\n"
+  oString += "\\end{table}\n" 
+  
+  ofilename = tableoutdir+'/'+filename+'.tex'
+  ofile = open(ofilename,'w')
+  ofile.write(oString)
+  ofile.close()
+  
+  omasterfilename = tableoutdir+'/'+tablesmaster+'.tex'
+  omfile = open(omasterfilename,'a')
+  omfile.write("\\input{"+tableoutdir+'/'+filename+"}\n")
+  omfile.close()
+
+
+# =============================================================================
 def title (cat, level, title):
   filename = ""
   if cat == 't':
@@ -590,25 +673,25 @@ def printCharts():
     title('c','section',regions[region])
 
     title('c','subsection',"Active management")
-    plotMultivariable(['vRegFromHr', 'homSpace','vRegEnd070'],['expReturns','vReg','vol','hV'],region,'Management effect','management')
+    plotMultivariable(['vRegFromHr', 'reference','vRegEnd070'],['expReturns','vReg','vol','hV'],region,'Management effect','management')
     
     title('c','subsection',"Risk aversion")
-    plotMultivariable(['homSpace','withRisk06','withRisk08','withRisk10'],['expReturns','vReg','vol','hV'],region,'Risk effect','risk')
+    plotMultivariable(['reference','withRisk06','withRisk08','withRisk10'],['expReturns','vReg','vol','hV'],region,'Risk effect','risk')
     
     title('c','subsection',"Heterogeneous environment")
-    plotMultivariable(['homSpace','hetSpace'],['expReturns','vReg','vol','hV','forArea'],region,'Spatial explicit effects','space')
-    
-    title('c','subsection',"Combined effects of risk aversion and spatial heterogeneity")
-    plotMultivariable(['homSpace','bau'],['expReturns','vReg','vol','hV'],region,'Combined effect of risk and spatial heterogeneity','bau')
+    plotMultivariable(['bau_nospvar','bau'],['expReturns','vReg','vol','hV','forArea'],region,'Spatial explicit effects','space')
     
     title('c','subsection',"A spatial application: effects of an increased mortality in coniferous at the lower/southesr edges of ranges")
-    plotMultivariable(['bau','cc1'],['expReturns','vReg','vol','hV','forArea',],region,'cc1 scenario output','cc1')
-    plotMultivariable(['bau_nospvar','cc1_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'cc1 scenario output when spatial variance is not considered','cc1_nospvar')
+    plotMultivariable(['bau','cc1'],['expReturns','vReg','vol','hV','forArea',],region,'Cc1 scenario output','cc1')
+    plotMultivariable(['bau_nospvar','cc1_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'Cc1 scenario output when spatial variance is not considered','cc1_nospvar')
     title('c','subsubsection',"Stronger mortality effect") 
-    plotMultivariable(['bau','cc1','cc2','cc3','cc4'],['expReturns','vReg','vol','hV','forArea',],region,'stronger cc scenarios output','ccs')
-    plotMultivariable(['bau_nospvar','cc1_nospvar','cc2_nospvar','cc3_nospvar','cc4_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'stronger cc scenarios output when spatial variance is not considered','ccs_nospvar')
+    plotMultivariable(['bau','cc1','cc2','cc3','cc4'],['expReturns','vReg','vol','hV','forArea',],region,'Stronger cc scenarios output','ccs')
+    plotMultivariable(['bau_nospvar','cc1_nospvar','cc2_nospvar','cc3_nospvar','cc4_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'Stronger cc scenarios output when spatial variance is not considered','ccs_nospvar')
     plotMultivariable(['cc2','cc4','cc2_nospvar','cc4_nospvar'],['expReturns','vReg','vol','hV','forArea',],region,'Sp. heterogenity effect in cc scenarios','ccs_sp_effect')
-  
+    title('c','subsection',"Heterogeneous agents")
+    text('c',"CC scenarios with homogeneous agents are compared with cc scenarios with heterogeneous agents.")
+    plotMultivariable(['cc1','cc1_hetAgents','cc4','cc4_hetAgents'],['expReturns','vReg','vol','hV','forArea',],region,'Heterogneous agents','hatAgents')
+    
 # =============================================================================  
 def printTables():
   print "Printing tables.."
@@ -625,18 +708,18 @@ def printTables():
     title('t','section',regions[region])
 
     title('t','subsection',"Active management")
-    printTable('vRegFromHr',['homSpace'],['expReturns','vReg','vol','hV'],[region],oyears,'Management effect [avg. 2030-2100]','homSpace_management_2030-2100_'+region)
-    printTable('vRegFromHr',['homSpace'],['expReturns','vReg','vol','hV'],[region],['2100'],'Management effect [2100]','homSpace_management_2100_'+region)
+    printTable('vRegFromHr',['reference'],['expReturns','vReg','vol','hV'],[region],oyears,'Management effect [avg. 2030-2100]','reference_management_2030-2100_'+region)
+    printTable('vRegFromHr',['reference'],['expReturns','vReg','vol','hV'],[region],['2100'],'Management effect [2100]','reference_management_2100_'+region)
     printTable('vRegFromHr',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger management effect [avg. 2030-2100]','vRegEnd070_2030-2100_'+region)
     printTable('vRegFromHr',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger management effect [2100]','vRegEnd070_2100_'+region)
-    printTable('homSpace',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger management effect compared with homSpace [avg. 2030-2100]','vRegEnd070_to_homSpace_2030-2100_'+region)
-    printTable('homSpace',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger management effect compared with homSpace [2100]','vRegEnd070_to_homSpace_2100_'+region)
+    printTable('reference',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger management effect compared with reference [avg. 2030-2100]','vRegEnd070_to_reference_2030-2100_'+region)
+    printTable('reference',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger management effect compared with reference [2100]','vRegEnd070_to_reference_2100_'+region)
  
     title('t','subsection',"Risk aversion")
-    printTable('homSpace',['withRisk08'],['expReturns','vReg','vol','hV'],[region],oyears,'Risk effect [avg. 2030-2100]','withRisk08_2030-2100_'+region)
-    printTable('homSpace',['withRisk10'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger risk effect [avg. 2030-2100]','withRisk10_2030-2100_'+region)
-    printTable('homSpace',['withRisk08'],['expReturns','vReg','vol','hV'],[region],['2100'],'Risk effect [2100]','withRisk08_2100_'+region)
-    printTable('homSpace',['withRisk10'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger risk effect [2100]','withRisk10_2100_'+region)
+    printTable('reference',['withRisk08'],['expReturns','vReg','vol','hV'],[region],oyears,'Risk effect [avg. 2030-2100]','withRisk08_2030-2100_'+region)
+    printTable('reference',['withRisk10'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger risk effect [avg. 2030-2100]','withRisk10_2030-2100_'+region)
+    printTable('reference',['withRisk08'],['expReturns','vReg','vol','hV'],[region],['2100'],'Risk effect [2100]','withRisk08_2100_'+region)
+    printTable('reference',['withRisk10'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger risk effect [2100]','withRisk10_2100_'+region)
 
 
     title('t','subsubsection',"Sensitivity analysis over the s.d. of the ra coefficient")
@@ -648,22 +731,18 @@ def printTables():
     printTable('withRisk08',['withRisk08-04'],['expReturns','vReg','vol','hV','forArea'],[region],['2100'],'Risk sa: 08-04 [2100]','withRisk08-04_2100_'+region)
     
     title('t','subsection',"Heterogeneous environment")
-    printTable('homSpace',['hetSpace'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Spatial variance effect [avg. 2030-2100]','hetSpace_2030-2100_'+region)
-    printTable('homSpace',['hetSpace'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Spatial variance effect [2100]','hetSpace_2100_'+region)
+    printTable('bau_nospvar',['bau'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Spatial variance effect [avg. 2030-2100]','hetSpace_2030-2100_'+region)
+    printTable('bau_nospvar',['bau'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Spatial variance effect [2100]','hetSpace_2100_'+region)
     title('t','subsubsection',"Stability of stochastic simulations")
-    printTable('homSpace',
-      ['randomSpace_49393','randomSpace_111737','randomSpace_177633','randomSpace_208136','randomSpace_233499',
-       'randomSpace_248642','randomSpace_296214','randomSpace_301359','randomSpace_302681','randomSpace_310227',
-       'randomSpace_338943','randomSpace_344678','randomSpace_347417','randomSpace_371709','randomSpace_420780',
-       'randomSpace_504660','randomSpace_529107','randomSpace_566950','randomSpace_569498','randomSpace_580374',
-       'randomSpace_663118','randomSpace_703743','randomSpace_703885','randomSpace_708759','randomSpace_767794',
-       'randomSpace_768599','randomSpace_816082','randomSpace_873308','randomSpace_976417',],
+    printTable('bau_nospvar',
+      ['randomSpace_21363','randomSpace_39917','randomSpace_111500','randomSpace_125252','randomSpace_173633',
+       'randomSpace_192853','randomSpace_210687','randomSpace_264281','randomSpace_283288','randomSpace_323303',
+       'randomSpace_380078','randomSpace_384255','randomSpace_401853','randomSpace_408020','randomSpace_447374',
+       'randomSpace_463518','randomSpace_495219','randomSpace_528605','randomSpace_571231','randomSpace_586306',
+       'randomSpace_592342','randomSpace_629011','randomSpace_655505','randomSpace_721782','randomSpace_733669',
+       'randomSpace_873190','randomSpace_933955','randomSpace_949204','randomSpace_978694','randomSpace_979650'],    
       ['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Significance test of the stochastic scenario, '+regions[region]+' [2100]','randomSpace_2100_'+region)
    
-    title('t','subsection',"Combined effects of risk aversion and spatial heterogeneity")
-    printTable('homSpace',['bau'],['expReturns','vReg','vol','hV'],[region],oyears,'Risk and spatial variance effect [avg. 2030-2100]','bau_2030-2100_'+region)
-    printTable('homSpace',['bau'],['expReturns','vReg','vol','hV'],[region],['2100'],'Risk and spatial variance effect [2100]','bau_2100_'+region)
-    
     title('t','subsection',"A spatial application: effects of an increased mortality in coniferous at the lower/southesr edges of ranges")  
     printTable('bau', ['cc1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Mortality scenario effect, '+regions[region]+" [2100]",'cc1_2100_'+region)    
     printTable('bau', ['cc1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Mortality scenario effect, '+regions[region]+" [avg. 2030-2100]",'cc1_2030-2100_'+region)
@@ -686,16 +765,25 @@ def printTables():
     printTable('bau', ['cc4'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect, '+regions[region]+" [2100]",'cc4_2100_'+region)
     printTable('bau', ['cc4'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2030-2100]",'cc4_2030-2100_'+region)
     printTable('bau_nospvar', ['cc4_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc4_nospvar_2100_'+region)  
-    printTable('bau_nospvar', ['cc4_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2030-2100]",'cc4_nospvar_2030-2100_'+region)
+    printTable('bau_nospvar', ['cc4_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2030-2100]",'cc4_nospvar_2030-2100_'+region)   
+    
+    title('t','subsection',"Heterogeneous agents")
+    printTable('cc1', ['cc1_hetAgents'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Heterogeneous agents effect on cc1, '+regions[region]+" [2100]",'cc1_hetAgents_2100_'+region)
+    printTable('cc1', ['cc1_hetAgents'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Heterogeneous agents effect on cc1, '+regions[region]+" [avg. 2030-2100]",'cc1_hetAgents_2030-2100_'+region)
+    printTable('cc4', ['cc4_hetAgents'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Heterogeneous agents effect on cc4, '+regions[region]+" [2100]",'cc4_hetAgents_2100_'+region)  
+    printTable('cc4', ['cc4_hetAgents'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Heterogeneous agents effect on cc4, '+regions[region]+" [avg. 2030-2100]",'cc4_hetAgents_2030-2100_'+region)   
+    
+# =============================================================================  
+def printAATables():
+  print "Printing area allocation tables.."
 
-    title('t','subsubsection',"CC5 -Stronger mortality effect")
-    printTable('bau', ['cc5'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect, '+regions[region]+" [2100]",'cc5_2100_'+region)
-    printTable('bau', ['cc5'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect, '+regions[region]+" [avg. 2030-2100]",'cc5_2030-2100_'+region)
-    printTable('bau_nospvar', ['cc5_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [2100]",'cc5_nospvar_2100_'+region)  
-    printTable('bau_nospvar', ['cc5_nospvar'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Stronger mortality scenario effect (without considering sp. het.), '+regions[region]+" [avg. 2030-2100]",'cc5_nospvar_2030-2100_'+region)
-    
-    
-    
+  oyears = ['2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085','2086','2087','2088','2089','2090','2091','2092','2093','2094','2095','2096','2097','2098','2099','2100']
+  
+  #selectedregions=['11000', '11041', '11061', '11062', '11081', '11071', '11082', '11083']
+  selectedregions=['11000', '11061', '11062','11071','11081','11082','11083','11041','11063','11072','11053','11026','11043']
+  title('t','section',"Area allocation")
+  
+  printAATable(['bau','bau_nospvar','bau','bau_nospvar','bau','bau_nospvar','bau','bau_nospvar'],['cc1','cc1_nospvar','cc2','cc2_nospvar','cc3','cc3_nospvar','cc3','cc3_nospvar'], selectedregions, ['2100'],'Area allocation [% variation over bau]', 'area_allocation')
     
 # =============================================================================
 # EXECUTION ACTUALLY STARTS HERE.....

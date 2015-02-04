@@ -967,6 +967,7 @@ ModelCoreSpatial::initializePixelArea(){
         //tempAreas.at(0) = sumTempArea * sharedc0;
         //sumTempArea = vSum(tempAreas);
         double normCoef = sumTempArea?pxArea/ sumTempArea:0;
+        //cout << i << '\t' << pxid << '\t' << ft << '\t' << normCoef << endl;
         #ifdef QT_DEBUG
         if(normCoef < 0.0){
             msgOut(MSG_CRITICAL_ERROR, "Negative normCoef in initializePixelArea");
@@ -988,7 +989,6 @@ ModelCoreSpatial::initializePixelArea(){
       px->area = px->area_l;  //Assigning initial value of area to the area of the old year
     } // end px
   } // end region
-
 }
 
 void
