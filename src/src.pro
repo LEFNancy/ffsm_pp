@@ -120,7 +120,7 @@ HEADERS += Adolc_debugtest.h \
            MainWindow.h \
            ModelData.h \
            ModelRegion.h \
-           Set.h \
+           #Set.h \
            Opt.h \
            Output.h \
            Pixel.h \

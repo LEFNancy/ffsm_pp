@@ -36,7 +36,6 @@
 #include "Scheduler.h"
 #include "ModelRegion.h"
 #include "Opt.h"
-#include "Set.h"
 
 #define CONSTRAIN_START_LOOP(pVector,cn) \
   for (uint r1=0;r1<l2r.size();r1++){ \
@@ -55,19 +54,6 @@ typedef std::pair<std::string, endvar > VarPair;
 
 // ****** MODEL IMPLEMENTATION START HERE ********************************
 
-void
-Opt::declareSets(){
-  declareSet("pr",allPr);
-  exit(0);
-}
-
-template<class T> void
-Opt::declareSet(const string& name, T skeleton){
-   //Set<T> newset = new Set<T>(skeleton);
-   Set<T> newset(name, skeleton);
-   //sets.insert(std::pair<std::string, Set<T>* >(name, newset));
-
-}
 
 void
 Opt::declareVariables(){
@@ -515,9 +501,6 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
     // Create a vector with all possible combinations of primary products
     priPrCombs = createCombinationsVector(nPriPr);
     nPriPrCombs = priPrCombs.size();
-
-    // Declare the sets
-    declareSets();
 
     // put the variables and their domain in the vars map
     declareVariables();
