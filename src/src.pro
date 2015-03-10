@@ -20,6 +20,8 @@ unix {
      INCLUDEPATH += /usr/include/adolc
      INCLUDEPATH += `PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig: /usr/bin/pkg-config --cflags ipopt` $(ADDINCFLAGS)
      LIBS += `PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig: /usr/bin/pkg-config --libs ipopt`
+     # Next line if we want compile also Coin::Flop++ models:
+     # LIBS += `PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig: pkg-config --libs flopcpp osi-cbc osi-clp`
      #LIBS += -lcoinmetis -lcoinmumps -lblas -llapack
      #LIBS += -lpthread -lgfortran -lcoinmetis -lblas
      #QMAKE_CXXFLAGS_RELEASE += -O3 -pipe -DNDEBUG -pedantic-errors -Wparentheses -Wreturn-type -Wcast-qual -Wall -Wpointer-arith -Wwrite-strings -Wconversion -Wno-unknown-pragmas -Wno-long-long   -DIPOPT_BUILD
@@ -118,6 +120,7 @@ HEADERS += Adolc_debugtest.h \
            MainWindow.h \
            ModelData.h \
            ModelRegion.h \
+           Set.h \
            Opt.h \
            Output.h \
            Pixel.h \
@@ -135,7 +138,7 @@ HEADERS += Adolc_debugtest.h \
            ScenarioSelectionWidget.h \
            ModelCore.h \
            ModelCoreSpatial.h \
-           Carbon.h \
+           Carbon.h
 
 FORMS   += MainWindow.ui
 SOURCES += Adolc_debugtest.cpp \
@@ -149,6 +152,7 @@ SOURCES += Adolc_debugtest.cpp \
            MainProgram.cpp \
            ModelData.cpp \
            ModelRegion.cpp \
+           #Set.cpp \
            Opt.cpp \
            Output.cpp \
            Pixel.cpp \

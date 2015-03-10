@@ -31,6 +31,7 @@
 #include "BaseClass.h"
 #include "ThreadManager.h"
 #include "ModelData.h"
+//#include "Set.h"
 
 #define tag_f 1
 #define tag_g 2
@@ -48,6 +49,9 @@ using namespace Ipopt;
 
 struct constrain;
 struct endvar;
+//template<class T> class Set;
+
+//class Set;
 
 class Opt: public BaseClass, public TNLP{
 public:
@@ -140,6 +144,8 @@ public:
   //***************    end   ADOL-C part ***********************************
 
   // **************   start FFSM part ************************************
+  void                declareSets(); ///< declare the sets (indices) over variables are defined
+  template<class T> void declareSet(const string& name, T skeleton); ///< Declare a single set
   void                declareVariables(); ///< declare the variables, their domains and their bounds
   void                declareVariable(const string &name, const int & domain, const double & l_bound=0.0, const double & u_bound=UBOUND_MAX, const string & l_bound_var="", const string & u_bound_var="");  ///< Declare a single variable, its domain and its bounds
   void                declareConstrains(); ///< declare the constrains, their domain, their direction and their associated evaluation function
@@ -199,6 +205,7 @@ protected:
   map <string, int>                      initPos; ///< A map that returns the initial index position in the concatenated array for each variable
   map <int, string>                  initPos_rev; ///< A map with the name of the variable keyed by its initial position in the index
   vector<int>                           cInitPos; ///< A vector that returns the initial index position in the concatenated array for each constrain
+  //map <string, Set*>                        sets; ///< The map of sets
   map <string, endvar>                      vars; ///< List of variables in the model and their domain: pr product, sec prod, all products or all products over each subregion pair (exports)
   map <string, vector < vector < vector < vector <int> > > > > vpositions; ///< cached position in the concatenated vector for each variables. Dimensions are l1reg, l2reg, prod, (l2To region).
   vector < vector < vector < vector < vector <int> > > > > cpositions; ///< cached position in the concatenated vector for each variables. Dimensions are contrain number, l1reg, l2reg, prod, (l2To region).

@@ -58,6 +58,13 @@
 //#include <iostream>
 //#include <iomanip>
 
+
+//Testing FlopC++ (requires modified src.pro qmake file)
+//#include "flopc.hpp"
+//using namespace flopc;
+//#include <OsiClpSolverInterface.hpp>
+//#include <OsiCbcSolverInterface.hpp>
+
 #include "IpIpoptApplication.hpp"
 #include "IpSolveStatistics.hpp"
 
@@ -122,6 +129,70 @@ struct GccTest
 // --------------------------------------
 void
 Sandbox::basicTest(){
+
+  /*
+  // Testing FlopC++
+  // For a single file compile as:
+  // -- two passages:
+  // g++ -O3 -I /usr/include/coin -DFLOPCPP_BUILD `PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig: pkg-config --libs flopcpp osi-cbc osi-clp` transport.cpp -c -o  transport.o
+  // g++ -o transport2 transport.o -Wl,-rpath,'$ORIGIN' -L . -DFLOPCPP_BUILD `PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig: pkg-config --libs flopcpp osi-cbc osi-clp`
+  // -- single passage:
+  // g++ -O3 -I /usr/include/coin transport.cpp -DFLOPCPP_BUILD `PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig: pkg-config --libs flopcpp osi-cbc osi-clp`  -o  transport3
+
+  MP_model::getDefaultModel().setSolver(new OsiClpSolverInterface);
+  //MP_model::getDefaultModel().setSolver(new OsiCbcSolverInterface);
+  enum  {seattle, sandiego, numS};
+  enum  {newyork, chicago, topeka,numD};
+
+  MP_set S(numS);          // Sources
+  MP_set D(numD);          // Destinations
+  MP_subset<2> Link(S,D);  // Transportation links (sparse subset of S*D)
+
+  Link.insert(seattle,newyork);
+  Link.insert(seattle,chicago);
+  Link.insert(sandiego,chicago);
+  Link.insert(sandiego,topeka);
+
+  MP_data SUPPLY(S);
+  MP_data DEMAND(D);
+
+  SUPPLY(seattle)=350;  SUPPLY(sandiego)=600;
+  DEMAND(newyork)=325;  DEMAND(chicago)=300;  DEMAND(topeka)=275;
+
+  MP_data COST(Link);
+
+  COST(Link(seattle,newyork)) = 2.5;
+  COST(Link(seattle,chicago)) = 1.7;
+  COST(Link(sandiego,chicago))= 1.8;
+  COST(Link(sandiego,topeka)) = 1.4;
+
+  COST(Link) = 90 * COST(Link) / 1000.0;
+
+  MP_variable x(Link);
+  x.display("...");
+
+  MP_constraint supply(S);
+  MP_constraint demand(D);
+
+  supply.display("...");
+
+  supply(S) =  sum( Link(S,D), x(Link) ) <= SUPPLY(S);
+  demand(D) =  sum( Link(S,D), x(Link) ) >= DEMAND(D);
+
+  cout<<"Here"<<endl;
+
+  minimize( sum(Link, COST(Link)*x(Link)) );
+  assert(MP_model::getDefaultModel()->getNumRows()==5);
+  assert(MP_model::getDefaultModel()->getNumCols()==4);
+  assert(MP_model::getDefaultModel()->getNumElements()==8);
+  assert(MP_model::getDefaultModel()->getObjValue()>=156.14 && MP_model::getDefaultModel()->getObjValue()<=156.16);
+
+  x.display("Optimal solution:");
+  supply.display("Supply dual solution");
+  cout<<"Test transport passed."<<endl;
+  */
+
+
 
   /*
   // Testing limits for 0
