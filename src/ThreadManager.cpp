@@ -130,7 +130,7 @@ ThreadManager::runFromConsole(QString inputFileName_h, QString scenarioName_h){
 
     MainProgram* myProgram = new MainProgram(this);
 
-    if( scenarioName_h == ""){ // if the scenario option has not been shoosed, go for the first one!
+    if( scenarioName_h == ""){ // if the scenario option has not been choosed, go for the first one!
       vector<string> scenarios = MD->getScenarios();
       scenarioName = scenarios.at(0).c_str();
     }

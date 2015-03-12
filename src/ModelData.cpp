@@ -74,6 +74,15 @@ ModelData::getForType(string &forTypeId_h){
   msgOut(MSG_CRITICAL_ERROR,"forTypeId "+forTypeId_h+" not found. Aborting.");
 }
 
+int
+ModelData::getForTypeCounter(string& forTypeId_h, bool all){
+  vector <string> fTIds = getForTypeIds(all);
+  for(int i=0;i<fTIds.size();i++){
+    if(fTIds[i]==forTypeId_h) return i;
+  }
+  msgOut(MSG_CRITICAL_ERROR,"forTypeId "+forTypeId_h+" not found in "+((string) __func__ )+". Aborting.");
+}
+
 string
 ModelData::getForTypeParentId(const string &forTypeId_h){
     for(int i=0;i<forTypes.size();i++){
@@ -360,8 +369,9 @@ ModelData::getRegionIds( bool excludeResidual){
 vector <string>
 ModelData::getForTypeIds(bool all){
   vector <string> toReturn;
+  bool useSpExplicitForestTypes = getBoolSetting("useSpExplicitForestTypes");
   for(uint i=0;i<forTypes.size();i++){
-    if(all || forTypes[i].memType==2){
+    if(forTypes[i].memType!=1 || all) {
       toReturn.push_back(forTypes[i].forTypeId);
     }
   }
@@ -543,6 +553,7 @@ ModelData::setForestTypes(){
     FTYPE.memType = s2i(table.getData(i,"memType"));
     FTYPE.forLayer = table.getData(i,"forLayer");
     FTYPE.ereditatedFrom = table.getData(i,"ereditatedFrom");
+    if(FTYPE.memType == 3 && !getBoolSetting("useSpExplicitForestTypes")) continue;
     forTypes.push_back(FTYPE);
   }
 }
@@ -1026,7 +1037,7 @@ ModelData::getForData(const string &type_h, const int& regId_h, const string &fo
   } else {
     fTypes.push_back(forType_h);
   }
-    if(freeDim_h == DIAM_ALL){
+  if(freeDim_h == DIAM_ALL){
     dClasses = diamClasses;
     dClasses.push_back("");
     } else if (freeDim_h == DIAM_PROD){
@@ -1261,12 +1272,12 @@ ModelData::loadInput(){
   QString iFile(MTHREAD->getInputFileName().c_str());
   //cout << "PIPPO !!!!! " << MTHREAD->getInputFileName().c_str() << endl;
 
-    std::random_device rd;
-    std::mt19937 localgen(rd());
-    std::uniform_int_distribution<> dis(10, 1000000);
-    int randomNumber = dis(localgen);
+  std::random_device rd;
+  std::mt19937 localgen(rd());
+  std::uniform_int_distribution<> dis(10, 1000000);
+  int randomNumber = dis(localgen);
 
-    QString oDir((MTHREAD->getBaseDirectory()+"tempInput-"+MTHREAD->getScenarioName()+i2s(randomNumber)).c_str());
+  QString oDir((MTHREAD->getBaseDirectory()+"tempInput-"+MTHREAD->getScenarioName()+i2s(randomNumber)).c_str());
   string forDataCachedFilename = MTHREAD->getBaseDirectory()+"cachedInput/forData.csv";
   string prodDataCachedFilename = MTHREAD->getBaseDirectory()+"cachedInput/prodData.csv";
   
@@ -1294,16 +1305,15 @@ ModelData::loadInput(){
     //return false;
   }
   ec = uz.extractAll(oDir);
-  if (ec != UnZip::Ok)
-  {
-        //cout << "Extraction failed: " << uz.formatError(ec).toAscii().data() << endl << endl; // Qt4
-        cout << "Extraction failed: " << uz.formatError(ec).toLatin1().data() << endl << endl;  // Qt5
+  if (ec != UnZip::Ok){
+    //cout << "Extraction failed: " << uz.formatError(ec).toAscii().data() << endl << endl; // Qt4
+    cout << "Extraction failed: " << uz.formatError(ec).toLatin1().data() << endl << endl;  // Qt5
     uz.closeArchive();
     //return false;
   }
   
   // loading input file into memory...
-    string inputXMLFileName = MTHREAD->getBaseDirectory()+"tempInput-"+MTHREAD->getScenarioName()+i2s(randomNumber)+"/content.xml";
+  string inputXMLFileName = MTHREAD->getBaseDirectory()+"tempInput-"+MTHREAD->getScenarioName()+i2s(randomNumber)+"/content.xml";
   //string inputXMLFileName = MTHREAD->getBaseDirectory()+"test/content.xml";
   //cout << "inputXMLFileName: " << inputXMLFileName << endl;
   //mainDocument = new InputDocument();

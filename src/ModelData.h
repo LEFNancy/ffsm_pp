@@ -105,6 +105,7 @@ public:
   int                 getNReclRules(){return reclRules.size();}
   forType*            getForType(int position){return &forTypes[position];}
   forType*            getForType(string& forTypeId_h);
+  int                 getForTypeCounter(string& forTypeId_h, bool all=false); ///< By default it doesn't return forTypes used only as input
   vector <string>     getForTypeIds(bool all=false); ///< By default it doesn't return forTypes used only as input
   string              getForTypeParentId(const string& forTypeId_h);
   int                 getNForTypesChilds(const string& forTypeId_h);
@@ -242,7 +243,7 @@ struct forToProd {
 /// Forest types (struct)
 /**
 Struct containing the list of the forest types managed in the model.
-@par memType Parameter to define if this type is used only in initial data reading, then is reclassed and no more used (1) or if it is generated from the reclass rule and then used in the model (2)
+@par memType Parameter to define if this type is used only in initial data reading, then is reclassed and no more used (1) or if it is generated from the reclass rule and then used in the model (2). New 20150311: (3) means a layer with spatial data of vol and area added directly in tables initSpVols and initSpAreas respectivly.
 */
 struct forType {
   string                                        forTypeId;
@@ -263,6 +264,7 @@ struct reclRule {
   string                                      forTypeOut;
   double                                           coeff;
 };
+
 
 /// Low level data. XML input is reversed here after unzipping oocalc file and parsing content.xml
 class LLData: public BaseClass{

@@ -38,6 +38,31 @@
 #include "ModelData.h"
 #include "Pixel.h"
 
+/**
+* \brief The core of the model (spatial version).
+*
+* Once the environment is initialised (mainly data load, space created), the model is run through the two functions runInitPeriod()
+* and runSimulationYear().
+*
+*
+*  Some importan notes:
+*    V (volumes)    -> at the end of the year
+*    In (inventary) -> at the beginning of the year
+*    Area           -> at the end of the year
+*    Harvesting     -> at the beginning of the year
+*    Volumes are in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2, vHa in m^3/ha
+*
+*    BALANCE:
+*    PROD_forLocal (sl) + PROD_forExp (sa) + IMP (da) = CONS_fromLocal (dl) + CONS_fromImp (da) + EXP (sa)
+*
+* Where are volumes information ?
+* - ip px->vol                                                         - by px, ft and dc
+* - in forDataMap (through gft())                                      - by reg, ft and dc
+* Where is area information ?
+* - in px->area                                                        - by px, ft and dc
+* - in forDataMap (through gft())                                      - by reg, ft and dc
+* - in  px->values map (forArea_* layer, through px->getDoubleValue()) - by px and ft
+*/
 class ModelCoreSpatial : public BaseClass {
 
 public:
@@ -56,7 +81,7 @@ public:
 
   void                  registerCarbonEvents();   ///< call registerHarvesting(), registerDeathBiomass(), registerProducts() and registerTransports()
   void                  cacheSettings();          ///< just cache exogenous settings from ModelData
-  void                  initializePixelValues();  ///< distribuite regional exogenous volumes to pixel volumes using corine land cover area as weight
+  void                  initializePixelVolumes();  ///< distribuite regional exogenous volumes to pixel volumes using corine land cover area as weight
   void                  initializePixelArea();    ///< compute px->area for each ft and dc
   void                  resetPixelValues();       ///< swap volumes->lagged_volumes and reset the other pixel vectors
   void                  cachePixelExogenousData();///< computes pixel level tp, meta and mort
@@ -64,6 +89,9 @@ public:
   void                  computeCumulativeData();  ///< computes cumTp_exp, vHa_exp, vHa
   void                  updateMapAreas();         ///< computes forArea_{ft}
   double                computeExpectedPrice(const double & curLocPrice, const double & worldCurPrice, const double & worldFutPrice, const double & sl, const double & sa, const double & expCoef); ///< Compute weighted expected price for a given product.
+
+
+  void                  loadExogenousForestLayers(const string & what); ///< Set pixel volumes (what="vol") OR areas (what="area") by specific forest types as defined in tables initSpVols and initSpAreas..
 
   // convenient handles to equivalent ModelData functions..
   double              gpd(const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const string &freeDim_h="") const {return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};

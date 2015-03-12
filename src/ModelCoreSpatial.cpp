@@ -44,33 +44,22 @@ ModelCoreSpatial::~ModelCoreSpatial(){
 
 void
 ModelCoreSpatial::runInitPeriod(){
-  /**
-  Some importan notes:
-    V (volumes)    -> at the end of the year
-    In (inventary) -> at the beginning of the year
-    Area           -> at the end of the year
-    Harvesting     -> at the beginning of the year
-    Volumes are in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2, vHa in m^3/ha
 
-    BALANCE:
-    PROD_forLocal (sl) + PROD_forExp (sa) + IMP (da) = CONS_fromLocal (dl) + CONS_fromImp (da) + EXP (sa)
-
-    */
-  cacheSettings();             // cashe things like first year, second year, dClasses...
-  initializePixelValues();     // compute px volumes vol for 2005
-  initMarketModule();          // inside it uses first year, second year
+  cacheSettings();             ///< cashe things like first year, second year, dClasses...
+  initializePixelVolumes();    ///< compute px volumes vol for 2005 (including exogenous loaded volumes)
+  initMarketModule();          ///< inside it uses first year, second year
   MTHREAD->DO->print();
-  MTHREAD->SCD->advanceYear(); // 2005->2006
+  MTHREAD->SCD->advanceYear(); ///< 2005->2006
   int thisYear = MTHREAD->SCD->getYear(); // for debugging
-  resetPixelValues();          // swap volumes->lagged_volumes and reset the other pixel vectors
-  cachePixelExogenousData();   // compute pixel tp, meta and mort
-  computeInventary();          // in=f(vol_t-1)
-  computeCumulativeData();     // compute cumTp_exp, vHa_exp, vHa
-  initializePixelArea();       // compute px->area for each ft and dc
+  resetPixelValues();          ///< swap volumes->lagged_volumes and reset the other pixel vectors
+  cachePixelExogenousData();   ///< compute pixel tp, meta and mort
+  computeInventary();          ///< in=f(vol_t-1)
+  computeCumulativeData();     ///< compute cumTp_exp, vHa_exp, vHa
+  initializePixelArea();       ///< compute px->area for each ft and dc (including exogenous loaded areas)
   runBiologicalModule();       //
   runManagementModule();
-  updateMapAreas();            // update the forArea_{ft} layer on each pixel as old value-hArea+regArea
-  sumRegionalForData();        // only for printing stats as forest data is never used at regional level
+  updateMapAreas();            ///< update the forArea_{ft} layer on each pixel as old value-hArea+regArea
+  sumRegionalForData();        ///< only for printing stats as forest data is never used at regional level
   initialiseCarbonModule();
   MTHREAD->DO->print();
 }
@@ -852,7 +841,7 @@ ModelCoreSpatial::cacheSettings(){
 }
 
 void
-ModelCoreSpatial::initializePixelValues(){
+ModelCoreSpatial::initializePixelVolumes(){
   msgOut(MSG_INFO, "Starting initializing pixel-level values");
 
   // pxVol = regVol * pxArea/regForArea
@@ -873,7 +862,7 @@ ModelCoreSpatial::initializePixelValues(){
           regVol = z ? gfd("vol",regIds2[i],fTypes[y],dClasses[z],firstYear) : 0 ; // if z=0-> regVol= gfd(), otherwise regVol=0;
           double pxArea = rpx[j]->getDoubleValue("forArea_"+fTypes[y], true); // bug solved 20121109. get zero for not data
           if (pxArea<0.0){
-            msgOut(MSG_CRITICAL_ERROR,"Error in initializePixelValues, negative pxArea!");
+            msgOut(MSG_CRITICAL_ERROR,"Error in initializePixelVolumes, negative pxArea!");
           }
           double pxVol = regForArea ? regVol * pxArea/regForArea: 0; // if we introduce new forest types without initial area we must avoid a 0/0 division
           //rpx[j]->changeValue(pxVol,"vol",fTypes[y],dClasses[z],firstYear);
@@ -883,6 +872,7 @@ ModelCoreSpatial::initializePixelValues(){
       }
     }
   }
+  loadExogenousForestLayers("vol");
 }
 
 void
@@ -985,10 +975,12 @@ ModelCoreSpatial::initializePixelArea(){
         }
         #endif
         px->area_l.push_back(areasByFt);
+        /// \todo here I have finally also area_ft_dc_px and I can implement the new one I am in 2006
       } // end ft
       px->area = px->area_l;  //Assigning initial value of area to the area of the old year
     } // end px
   } // end region
+  loadExogenousForestLayers("area");
 }
 
 void
@@ -1573,3 +1565,50 @@ ModelCoreSpatial::computeExpectedPrice(const double & curLocPrice, const double 
   double curWPrice = (curLocPrice*sl+worldCurPrice*sa)/(sl+sa);
   return curWPrice * (1-expCoef) + fullExpWPrice * expCoef;
 }
+
+/**
+ * It uses data from tables initSpVols and initSpAreas to "move" either volumes or area from one forest type to the other.
+ * It acts on the pix->vol and pix->area vectors, and it doesn't cash the results on the other data containers, that is the
+ * forDataMAp and, for areas, the px->values "layer" map.
+ *
+ * It is called in initializePixelVolumes() and initializePixelAreas().
+ *
+ */
+void
+ModelCoreSpatial::loadExogenousForestLayers(const string & what){
+  if(!MD->getBoolSetting("useSpExplicitForestTypes")) return;
+  LLData table(MTHREAD,"");
+  if(what=="vol"){
+    table = MD->getTable(MD->getStringSetting("spExplicitForTypesVols"), MSG_CRITICAL_ERROR);
+  } else if(what=="area"){
+    table = MD->getTable(MD->getStringSetting("spExplicitForTypesAreas"), MSG_CRITICAL_ERROR);
+  } else {
+    msgOut(MSG_CRITICAL_ERROR, "Unknown what par in "+ ( (string) __func__ ) +".");
+  }
+  int nheaders = table.nheaders();
+  for(int i=0; i< table.nrecords(); i++){
+    int pixId = s2i(table.getData(i,"pxId"));
+    Pixel* px = MTHREAD->GIS->getPixel(pixId);
+    string ftInString = table.getData(i,"ftIn");
+    string ftToString = table.getData(i,"ftTo");
+    int ftIn = MD->getForTypeCounter(ftInString);
+    int ftTo = MD->getForTypeCounter(ftToString);
+    vector<string> dc = MD->getDiameterClasses();
+    vector<double> vols_by_dc;
+    if (what == "vol"){
+      for (int u=0;u<dc.size();u++){
+        double newvol = s2d(table.getData(i,"value_"+i2s(u)));
+        px->vol.at(ftIn).at(u) = max(0.0,px->vol.at(ftIn).at(u)-newvol);
+        px->vol.at(ftTo).at(u) = newvol;
+      }
+    } else {
+      for (int u=0;u<dc.size();u++){
+        double newarea = s2d(table.getData(i,"value_"+i2s(u)));
+        px->area_l.at(ftIn).at(u) = max(0.0,px->area_l.at(ftIn).at(u)-newarea);
+        px->area_l.at(ftTo).at(u) = newarea;
+      }
+      px->area = px->area_l;
+    }
+  }
+}
+
