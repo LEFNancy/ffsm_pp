@@ -6,7 +6,7 @@
 
 
 # It can be run in parallel using GNU parallel:
-# parallel --jobs <n of jobs> -a runscenarios_oracle.sh 
+# parallel --jobs <n of jobs> -a runscenarios_2015_oracle.sh 
 
 # Oracle scenarios
  ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'oracle_bau'
@@ -28,3 +28,4 @@
  ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'MPEH5C_2'
  ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'MPEH5C_3'
  
+ #last run: 20150515, git commit b00ad5fe37ca79effb571805a2fba7ff23f4fb43 Thu Mar 12 15:46:40 2015 +0100 Added option to add forest type from known spatial data of area and vol
