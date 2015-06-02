@@ -50,6 +50,10 @@ def override_globals():
     'output_oracle/results/forestData_MPEH5C_3.csv',
     'output_oracle/results/forestData_arpege_a1b_fullExpectations.csv',
     'output_oracle/results/forestData_arpege_a1b_noExpectations.csv',
+    'output_oracle/results/forestData_arpege_a1b_natevol.csv',
+    'output_oracle/results/forestData_arpege_a1b_active.csv',
+    'output_oracle/results/forestData_arpege_a1b_rneutral.csv',  
+    'output_oracle/results/forestData_arpege_a1b_strongra.csv',  
   ]
   
   g.carbonIFile = [
@@ -57,6 +61,24 @@ def override_globals():
     'output_oracle/results/carbonBalance_arpege_a1b.csv',
     'output_oracle/results/carbonBalance_arpege_a2.csv',
     'output_oracle/results/carbonBalance_arpege_b1.csv',
+    'output_oracle/results/carbonBalance_CNCM33_1.csv',
+    'output_oracle/results/carbonBalance_DMIEH5C_1.csv',
+    'output_oracle/results/carbonBalance_DMIEH5C_2.csv',
+    'output_oracle/results/carbonBalance_DMIEH5C_3.csv',
+    'output_oracle/results/carbonBalance_EGMAM2_3.csv',
+    'output_oracle/results/carbonBalance_HADGEM2_1.csv',
+    'output_oracle/results/carbonBalance_IPCM4_1.csv',
+    'output_oracle/results/carbonBalance_IPCM4_2.csv',
+    'output_oracle/results/carbonBalance_IPCM4_3.csv',
+    'output_oracle/results/carbonBalance_MPEH5C_1.csv',
+    'output_oracle/results/carbonBalance_MPEH5C_2.csv',
+    'output_oracle/results/carbonBalance_MPEH5C_3.csv',    
+    'output_oracle/results/carbonBalance_arpege_a1b_fullExpectations.csv',
+    'output_oracle/results/carbonBalance_arpege_a1b_noExpectations.csv',
+    'output_oracle/results/carbonBalance_arpege_a1b_natevol.csv',
+    'output_oracle/results/carbonBalance_arpege_a1b_active.csv',
+    'output_oracle/results/carbonBalance_arpege_a1b_rneutral.csv',
+    'output_oracle/results/carbonBalance_arpege_a1b_strongra.csv',
   ]
 
   g.scenarios = {
@@ -78,6 +100,10 @@ def override_globals():
     'MPEH5C_3':            '#0015db',
     'arpege_a1b_noExpectations':   '#0015db', 
     'arpege_a1b_fullExpectations': '#6dcaf1',
+    'arpege_a1b_natevol':          '#6dcaf1',
+    'arpege_a1b_active':           '#0015db',      
+    'arpege_a1b_rneutral':         '#d6e5de',
+    'arpege_a1b_strongra':         '#2d44cb',
 
   }
   g.years = [str(y) for y in range(2007,2101)]     # [2007-2100]
@@ -137,7 +163,7 @@ def printTables():
 
   #oyears = ['2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085','2086','2087','2088','2089','2090','2091','2092','2093','2094','2095','2096','2097','2098','2099','2100']
   oyears = [str(y) for y in range(2015,2101)]     # [2015-2100]
-  oyears_exp = [str(y) for y in range(2007,2086)] # [2007-2100]
+  oyears_exp = [str(y) for y in range(2015,2086)] # [2015-2085]
   
   #text('t',"Automatically generated result tables.")
   
@@ -192,7 +218,26 @@ def printTables():
   text('t',"\clearpage")
   
   title('t','subsection',"Carbon table")  
+  #printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year_end, title, filename, avg=False, singleComparation=True )
   printCarbonTable('oracle_bau',['arpege_a1b','arpege_a2','arpege_b1'],'11000', '2015', '2100', "\\ce{CO2} balance [yearly avg. 2015-2100]",'cbalance_2015-2100_11000', True, False)
+  printCarbonTable('oracle_bau',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],'11000', '2015', '2100', "\\ce{CO2} balance a1b [yearly avg. 2015-2100]",'cbalance_a1b_2015-2100_11000', True, True)
+  printCarbonTable('oracle_bau',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],'11000', '2007', '2100', "\\ce{CO2} balance a1b [yearly avg. 2007-2100]",'cbalance_a1b_2007-2100_11000', True, True)
+  
+  #def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename, singleComparation=True, refYear=0):
+  title('t','subsection',"Active management effect")
+  printTable('arpege_a1b', ['arpege_a1b_natevol','arpege_a1b_active'], ['expReturns','regArea','harvestedArea','vReg'], ['11000'], oyears, 'Active mgm effect, flow vars [avg. 2015-2100]', 'mgm_effect_2015-2100_11000', False)
+  printTable('arpege_a1b', ['arpege_a1b_natevol','arpege_a1b_active'], ['vol','forArea'], ['11000'], ['2100'], 'Active mgm effect, stock vars [2100]', 'mgm_effect_2100_11000', False)
+  printCarbonTable('arpege_a1b',['arpege_a1b_natevol','arpege_a1b_active'],'11000', '2015', '2100', "Active management effect, \\ce{CO2} balance [yearly avg. 2015-2100]",'mgm_effect_cbalance_2015-2100_11000', True, False)
+  
+  title('t','subsection',"Expectations effect") 
+  printTable('arpege_a1b', ['arpege_a1b_noExpectations','arpege_a1b_fullExpectations'], ['expReturns','regArea','harvestedArea','vReg'], ['11000'], oyears, 'Expectations effect, flow vars [avg. 2015-2100]', 'expectations_2015-2100_11000', False)
+  printTable('arpege_a1b', ['arpege_a1b_noExpectations','arpege_a1b_fullExpectations'], ['vol','forArea'], ['11000'], ['2100'], 'Expectations effect, stock vars [2100]', 'expectations_2100_11000', False)
+  printCarbonTable('arpege_a1b',['arpege_a1b_noExpectations','arpege_a1b_fullExpectations'],'11000', '2015', '2100', "Expectations effects, \\ce{CO2} balance [yearly avg. 2015-2100]",'expectations_cbalance_2015-2100_11000', True, False)
+  title('t','subsection',"Risk effect") 
+  printTable('arpege_a1b', ['arpege_a1b_rneutral','arpege_a1b_strongra'], ['expReturns','regArea','harvestedArea','vReg'], ['11000'], oyears, 'Risk effect, flow vars [avg. 2015-2100]', 'risk_2015-2100_11000', False)
+  printTable('arpege_a1b', ['arpege_a1b_rneutral','arpege_a1b_strongra'], ['vol','forArea'], ['11000'], ['2100'], 'Risk effect, stock vars [2100]', 'risk_2100_11000', False)
+  printCarbonTable('arpege_a1b',['arpege_a1b_rneutral','arpege_a1b_strongra'],'11000', '2015', '2100', "Risk effects, \\ce{CO2} balance [yearly avg. 2015-2100]",'risk_cbalance_2015-2100_11000', True, False)
+  
   
 # =============================================================================  
 def printAATables():
