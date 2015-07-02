@@ -1754,6 +1754,7 @@ LLData::clean(){
   int hsize = headers.size();
   for (uint i=0;i<records.size();i++){
     if(records[i].size() != hsize){
+      vector <string> record = records[i];
       msgOut(MSG_CRITICAL_ERROR,"Error in the input reading table "+tableName+". Record "+i2s(i)+" has "+i2s(records[i].size())+" fields instead of "+i2s(hsize)+".");
     }
   }

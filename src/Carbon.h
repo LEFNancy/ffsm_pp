@@ -58,11 +58,12 @@ public:
 
   void                  registerHarvesting(const double & value, const int & regId, const string &fType);   ///< Registers the harvesting of trees increasing the value of cumEmittedForOper
   void                  registerDeathBiomass(const double &value, const int & regId, const string &fType);  ///< Registers the "death" of a given amount of biomass, storing it in the deathBiomass map
-  void                  registerProducts(const double &value, const int & regId, const string &productName);///< Registers the production of a given amount of products, storing it in the products maps
+  void                  registerProducts(const double &value, const int & regId, const string &productName);///< Registers the production of a given amount of products, storing it in the products maps. Also increase material substitution.
   void                  registerTransports(const double &distQ, const int & regId);                         ///< Registers the quantities emitted by transport of wood FROM a given region
-  void                  initialiseDeathBiomassStocks(const vector<double> & deathByFt, const int & regId);  ///< Initialise the stocks of death biomass for the avgLive_* years before the simulation starts
-  void                  initialiseProductsStocks(const vector<double> & qByProduct, const int &regId);      ///< Initialise the stocks of products for the avgLive_* years before the simulation starts
-  void                  initialiseEmissionCounters();                                                       ///< Initialise the emission counters to zero.
+  void                  initialiseDeathBiomassStocks(const vector<double> & deathByFt, const int & regId);  ///< Initialises the stocks of death biomass for the avgLive_* years before the simulation starts
+  void                  initialiseProductsStocks(const vector<double> & qByProduct, const int &regId);      ///< Initialises the stocks of products for the avgLive_* years before the simulation starts
+  void                  initialiseEmissionCounters();                                                       ///< Initialises the emission counters to zero.
+  void                  HWP_eol2energy();                                                                   ///< Computes the energy substitution for the quota of HWP that reachs end of life and doesn't go to landfill
 
 
 private:

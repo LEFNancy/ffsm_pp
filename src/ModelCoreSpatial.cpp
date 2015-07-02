@@ -1546,6 +1546,8 @@ ModelCoreSpatial::registerCarbonEvents(){
       MTHREAD->CBAL->registerTransports(distQProd, rfrom);
     }
   }
+  MTHREAD->CBAL->HWP_eol2energy(); // used to compute the energy substitution from hwp that reach the end of life and doesn't go to landfil. Previously the energy substitution was computed in registerProducts(), that is at the time when the product was produced.
+
 }
 
 /**

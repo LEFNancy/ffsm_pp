@@ -260,7 +260,7 @@ Carbon::registerProducts(const double &value, const int & regId, const string & 
   // subEnergyCoeff and subMaterialCoeff:  [kgCO2/m^3 wood]
   // desidered output: Mt CO2
   // ==> I must divide by 1000
-  addSavedEmissions(subEnergyCoeff*value/1000,regId,EM_ENSUB);
+  //addSavedEmissions(subEnergyCoeff*value/1000,regId,EM_ENSUB);
   addSavedEmissions(subMaterialCoeff*value/1000,regId,EM_MATSUB);
 }
 
@@ -275,6 +275,39 @@ Carbon::registerTransports(const double &distQ, const int & regId){
   // ==> I must divide by 1000
   double transportEmissionsCoeff = MTHREAD->MD->getDoubleSetting("transportEmissionsCoeff");
   addSavedEmissions(-transportEmissionsCoeff*distQ/1000,regId,EM_FOROP);
+}
+
+void
+Carbon::HWP_eol2energy(){
+
+  int currentYear = MTHREAD->SCD->getYear();
+  int initialYear = MTHREAD->MD->getIntSetting("initialYear");
+  vector <string> priProducts = MTHREAD->MD->getStringVectorSetting("priProducts");
+  vector <string> secProducts = MTHREAD->MD->getStringVectorSetting("secProducts");
+  vector <string> allProducts = priProducts;
+  allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
+
+  vector<int> regIds = MTHREAD->MD->getRegionIds(2);
+  for (uint r=0;r<regIds.size();r++){
+    double regId = regIds[r];
+    for(uint i=0;i<allProducts.size();i++){
+      string pr = allProducts[i];
+      double life  = MTHREAD->MD->getProdData("avgLife_products",regId,pr,DATA_NOW,"");
+      double eol2e_share      = MTHREAD->MD->getProdData("eol2e_share",regId,pr,DATA_NOW,"");
+      double subEnergyCoeff   = MTHREAD->MD->getProdData("co2sub_energy",regId,pr,DATA_NOW,"");
+      if(eol2e_share > 0 && subEnergyCoeff>0){
+        for(int y=(initialYear-100);y<currentYear;y++){ // notice the minor operator and not minor equal: energy substitution for products produced this year assigned to the following year, otherwise double counring in the process of making dicrete the exponential function
+          iiskey key(y,regId,pr);
+          double originalStock = findMap(products,key,MSG_NO_MSG,0.0);
+          double remainingStockLastYear = getRemainingStock(originalStock,life,currentYear-y-1);
+          double remainingStockThisYear = getRemainingStock(originalStock,life,currentYear-y);
+          double eofThisYear = remainingStockLastYear-remainingStockThisYear;
+          addSavedEmissions(subEnergyCoeff*eofThisYear*eol2e_share/1000,regId,EM_ENSUB);
+        }
+      }
+    }
+  }
+
 }
 
 
@@ -299,6 +332,10 @@ Carbon::addSavedEmissions(const double & value, const int & regId, const int & e
 
 double
 Carbon::getRemainingStock(const double & initialValue, const double & halfLife, const double & years) const{
+  // // TODO: remove this test
+  //if(years>0) return 0.0;
+  //return initialValue;
+
   double k  = log(2)/halfLife;
   return initialValue*exp(-k*years);
 }
