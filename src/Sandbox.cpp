@@ -130,6 +130,7 @@ struct GccTest
 void
 Sandbox::basicTest(){
 
+
   /*
   // Testing FlopC++
   // For a single file compile as:
@@ -269,7 +270,7 @@ Sandbox::basicTest(){
     */
 
     /*
-    // Testing the new changeMapValue(), incrMapValue(), resetMapValues() and vectorToMap() funcions
+    // Testing the new changeMapValue(), incrMapValue(), resetMapValues(), incrOrAddMapValue(map, key, value) and vectorToMap() funcions
     map<int,double> testMap;
     for (uint i=0;i<5;i++){
         pair<int,double> mypair(i,i*2.5);
@@ -283,6 +284,10 @@ Sandbox::basicTest(){
     cout << findMap(testMap,3,MSG_NO_MSG)<< endl;
     incrMapValue(testMap,3,5.0,MSG_ERROR);
     cout << findMap(testMap,3,MSG_NO_MSG)<< endl;
+    incrOrAddMapValue(testMap, 3, 200.0);
+    cout << findMap(testMap,3,MSG_NO_MSG)<< endl;
+    incrOrAddMapValue(testMap, 10, 100.0);
+    cout << findMap(testMap,10,MSG_NO_MSG)<< endl;
     cout << "done" << endl;
 
     vector<string> mykeys;

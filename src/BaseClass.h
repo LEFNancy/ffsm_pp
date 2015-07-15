@@ -263,6 +263,22 @@ public:
       }
   }
 
+  /// Increments a value stored in a map of the specified value, given the key
+  template <typename K, typename V> void incrOrAddMapValue(map <K, V> &mymap, const K& key, const V& value){
+      typename map<K, V>::iterator p;
+      p=mymap.find(key);
+      if(p != mymap.end()) {
+          // We found the key, we gonna add the value..
+          p->second = p->second + value;
+          return;
+      }
+      else {
+          // We didn't find the key, we gonna add it together with the value
+          pair<K,V> myPair(key,value);
+          mymap.insert(myPair);
+      }
+  }
+
   /// Reset all values stored in a map to the specified one
   template <typename K, typename V> void resetMapValues(map <K, V> &mymap, const V& value){
       typename map<K, V>::iterator p;

@@ -1516,7 +1516,7 @@ ModelCoreSpatial::registerCarbonEvents(){
       double deathBiomass = gfd("vMort",regIds2[i],fTypes[j],DIAM_ALL,DATA_NOW);
       double harvesting = gfd("hV",regIds2[i],fTypes[j],DIAM_ALL,DATA_NOW);
       MTHREAD->CBAL->registerDeathBiomass(deathBiomass, regIds2[i], fTypes[j]);  // register new stock
-      MTHREAD->CBAL->registerHarvesting(harvesting, regIds2[i], fTypes[j]);      // account for emissions
+      MTHREAD->CBAL->registerHarvesting(harvesting, regIds2[i], fTypes[j]);      // account for emissions. Added 201500715: it also moves the extra biomass to the death biomass pool
     }
 
     for(uint p=0;p<priProducts.size();p++){

@@ -230,6 +230,12 @@ Carbon::registerHarvesting(const double & value, const int & regId, const string
   // desidered output: Mt CO2
   // ==> I must divide by 1000
   addSavedEmissions(-convCoeff*value/1000,regId,EM_FOROP);
+  // Add the extraBiomass associated to the harvested volumes to the deathBiomassExtra pool
+  int    year               = MTHREAD->SCD->getYear();
+  double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fType,"",DATA_NOW);
+  double newDeathBiomass = value*extraBiomass_ratio;
+  iiskey key(year,regId,fType);
+  incrOrAddMapValue(deathBiomassExtra, key, newDeathBiomass);
 }
 
 
@@ -238,10 +244,12 @@ Carbon::registerDeathBiomass(const double &value, const int & regId, const strin
   int year = MTHREAD->SCD->getYear();
   iiskey key(year,regId,fType);
   double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fType,"",DATA_NOW);
-  pair<iiskey,double> mypairInventory(key,value);
-  pair<iiskey,double> mypairExtra(key,value*extraBiomass_ratio);
-  deathBiomassInventory.insert(mypairInventory);
-  deathBiomassExtra.insert(mypairExtra);
+  //pair<iiskey,double> mypairInventory(key,value);
+  //pair<iiskey,double> mypairExtra(key,value*extraBiomass_ratio);
+  incrOrAddMapValue(deathBiomassInventory, key, value);
+  incrOrAddMapValue(deathBiomassExtra, key, value*extraBiomass_ratio);
+  //deathBiomassInventory.insert(mypairInventory);
+  //deathBiomassExtra.insert(mypairExtra);
 
 }
 
