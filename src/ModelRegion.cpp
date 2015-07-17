@@ -100,6 +100,73 @@ ModelRegion::getVolumes(int fType_h, string dClass_h){
   return toReturn;
 }
 
+
+double
+ModelRegion::getArea(const string &fType_h, const string &dClass_h){
+  vector <string> dClasses = MTHREAD->MD->getStringVectorSetting("dClasses");
+  vector <string> fTypes= MTHREAD->MD->getForTypeIds();
+  int ft_pos = -1000;
+  int dc_pos = -1000;
+  for(uint j=0;j<fTypes.size();j++){
+    if (fTypes[j] == fType_h){
+      ft_pos = j;
+      break;
+    }
+  }
+  for(uint u=0;u<dClasses.size();u++){
+    if (dClasses[u] == dClass_h){
+      dc_pos = u;
+      break;
+    }
+  }
+  if(ft_pos<0) msgOut(MSG_CRITICAL_ERROR,"Forest type "+fType_h+" not found in getArea() function.");
+  if(dc_pos<0) msgOut(MSG_CRITICAL_ERROR,"Diameter class"+dClass_h+" not found in getArea() function.");
+
+  return getArea(ft_pos, dc_pos);
+}
+
+double
+ModelRegion::getArea(const string &fType_h){
+  vector <string> fTypes= MTHREAD->MD->getForTypeIds();
+  int ft_pos = -1000;
+  for(uint j=0;j<fTypes.size();j++){
+    if (fTypes[j] == fType_h){
+      ft_pos = j;
+      break;
+    }
+  }
+  if(ft_pos<0) msgOut(MSG_CRITICAL_ERROR,"Forest type "+fType_h+" not found in getArea() function.");
+  return getArea(ft_pos);
+}
+
+double
+ModelRegion::getArea(const int& ft_pos, const int& dc_pos){
+  double totalarea = 0.0;
+  for(uint i=0;i<myPixels.size(); i++){
+     totalarea += myPixels[i]->area.at(ft_pos).at(dc_pos);
+  }
+  return totalarea;
+}
+
+double
+ModelRegion::getArea(const int& ft_pos){
+  double totalarea = 0.0;
+  for(uint i=0;i<myPixels.size(); i++){
+     totalarea += vSum(myPixels[i]->area.at(ft_pos));
+  }
+  return totalarea;
+}
+
+double
+ModelRegion::getArea(){
+  vector<Pixel*> regPx = this->getMyPixels();
+  double totalarea = 0.0;
+  for(uint i=0;i<myPixels.size(); i++){
+     totalarea += vSum(myPixels[i]->area);
+  }
+  return totalarea;
+}
+
 double
 ModelRegion::getValue(string layerName, int op){
   int nPx = myPixels.size();
@@ -117,6 +184,7 @@ ModelRegion::getValue(string layerName, int op){
   }
   return 0.;
 }
+
 /***
  * It establishs a link between pixels and regions.
  *

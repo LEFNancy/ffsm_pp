@@ -79,7 +79,6 @@ ModelCoreSpatial::runSimulationYear(){
   sumRegionalForData();      // only for printing stats as forest data is never used at regional level
   registerCarbonEvents();
   MTHREAD->DO->print();
-
 }
 
 void
@@ -386,7 +385,7 @@ ModelCoreSpatial::runMarketModule(){
  *   95     --------->      +areaMovingUp85 - hArea_95 - areaMovingUp_95
  *   105    --------->      +areaMovingUp95 - hArea_105
  *
- *   note: regArea is computed in the management module, not here
+ *   note: regArea is computed in the management module, not here. Further, regArea is already the net one of forest area changes
  */
 void
 ModelCoreSpatial::runBiologicalModule(){
@@ -664,20 +663,45 @@ ModelCoreSpatial::runManagementModule(){
     int regId = r2;
     ModelRegion* REG = MTHREAD->MD->getRegion(r2);
     regPx = REG->getMyPixels();
+
+    // Dealing with area change..
+    double fArea_reg     = REG->getArea();
+    double fArea_diff    = 0.0;
+    double fArea_reldiff = 0.0;
+    if(forestAreaChangeMethod=="relative"){
+      fArea_reldiff = gfd("forestChangeAreaIncrementsRel",r2,"","",DATA_NOW);
+      fArea_diff    = fArea_reg * fArea_reldiff;
+    } else if (forestAreaChangeMethod=="absolute"){
+      fArea_diff    = gfd("forestChangeAreaIncrementsHa",r2,"","",DATA_NOW);
+      //fArea_reldiff = fArea_diff / fArea_reg;
+    }
+    double regHArea = 0.0; // for the warning
+
+
+
+
     for (uint p=0;p<regPx.size();p++){
       Pixel* px = regPx[p];
       px->expectedReturns.clear();
       resetMapValues(hAreaByFTypeGroup,0.0);
-      double totalHarvestedArea = vSum(px->hArea);
+      double totalHarvestedArea = vSum(px->hArea); // still need to remove the forest decrease areas..
       vector<double> thisYearRegAreas(fTypes.size(),0.0); // initialize a vector of fTypes.size() zeros.
       vector<double> expectedReturns(fTypes.size(),0.0);  // uncorrected expected returns (without considering transaction costs)
+
+      double fArea_px = vSum(px->area);
+      double fArea_diff_px = fArea_px * fArea_diff/ fArea_reg;
+      double fArea_incr = max(0.0,fArea_diff_px);
+      double fArea_decr = - min(0.0,fArea_diff_px);
+      double fArea_decr_rel = min(1.0,fArea_decr/totalHarvestedArea);
+      regHArea += totalHarvestedArea;
+      totalHarvestedArea = totalHarvestedArea *(1-fArea_decr_rel);
 
 
       // A - Computing the harvestingArea by parent ft group (for the allocation according to the prob of presence):
       for(uint j=0;j<fTypes.size();j++){
         string ft = fTypes[j];
         string parentFt = MTHREAD->MD->getForTypeParentId(ft);
-        double hAreaThisFt=vSum(px->hArea.at(j));
+        double hAreaThisFt=vSum(px->hArea.at(j))*(1-fArea_decr_rel);
         incrMapValue(hAreaByFTypeGroup,parentFt,hAreaThisFt); // increment the parent ft of the harvested area, neeed for assigning the frequences (prob. of presence)
       }
 
@@ -734,7 +758,7 @@ ModelCoreSpatial::runManagementModule(){
       for(uint j=0;j<fTypes.size();j++){
         string ft = fTypes[j];
 
-        double harvestedAreaForThisFT = vSum(px->hArea.at(j)); // gfd("harvestedArea",regId,ft,DIAM_ALL);
+        double harvestedAreaForThisFT = vSum(px->hArea.at(j))*(1-fArea_decr_rel); // gfd("harvestedArea",regId,ft,DIAM_ALL);
         vector<double> corrExpectedReturns(fTypes.size(),0.0); //  uncorrected expected returns (without considering transaction costs)
 
         // C - Computing the corrected expected returns including transaction costs
@@ -767,6 +791,7 @@ ModelCoreSpatial::runManagementModule(){
 
 
         thisYearRegAreas[getMaxPos(corrExpectedReturns)] += harvestedAreaForThisFT*mr;
+        thisYearRegAreas[getMaxPos(expectedReturns)] += fArea_incr*mr/((double)fTypes.size()); // mr quota of new forest area assigned to highest expected returns ft (not considering transaction costs). Done for each forest types
 
 
         // E - Assigning unmanaged area
@@ -785,9 +810,11 @@ ModelCoreSpatial::runManagementModule(){
                 hRatio = 1.0/nFtChilds;
             }
             thisYearRegAreas[j] +=  totalHarvestedArea*(1-mr)*freq*hRatio;
+            thisYearRegAreas[j] +=  fArea_incr*(1-mr)*freq*hRatio; // non-managed quota of new forest area assigning proportionally on pp at sp group level
             //thisYearRegAreas[j2] +=  harvestedAreaForThisFT*(1-mr)*freq*hRatio;
           } else {
             thisYearRegAreas[j] += harvestedAreaForThisFT*(1-mr);
+            thisYearRegAreas[j] += fArea_incr*harvestedAreaForThisFT/totalHarvestedArea*(1-mr); // non-managed quota of new forest area assigning proportionally on harvested
             //thisYearRegAreas[j2] += harvestedAreaForThisFT*(1-mr);
           }
         //}
@@ -810,6 +837,10 @@ ModelCoreSpatial::runManagementModule(){
       #endif
       px->regArea.insert(pair <int, vector<double> > (MTHREAD->SCD->getYear(), thisYearRegAreas));
     } // end of each pixel
+    if (-fArea_diff > regHArea){
+      msgOut(MSG_WARNING,"In region "+ i2s(regId) + " the exogenous area decrement ("+ d2s(-fArea_diff) +" ha) is higger than the harvesting ("+ d2s(regHArea) +" ha). Ratio forced to 1.");
+    }
+
   } // end of each region
 }
 
@@ -836,6 +867,7 @@ ModelCoreSpatial::cacheSettings(){
   rescaleFrequencies = MD->getBoolSetting("rescaleFrequencies");
   oldVol2AreaMethod = MD->getBoolSetting("oldVol2AreaMethod");
   mr = MD->getDoubleSetting("mr");
+  forestAreaChangeMethod =  MTHREAD->MD->getStringSetting("forestAreaChangeMethod");
 
 
 }

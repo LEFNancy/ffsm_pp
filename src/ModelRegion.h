@@ -75,6 +75,12 @@ public:
   vector<double>      getVolumes(int fType_h);
   double              getValue(string layerName, int op=OP_SUM); ///< return the values of its own pixels for the specified layer. Possible operations: OP_SUM or OP_AVG
   vector < vector <double> > getVolumes(int fType_h, string dClass_h);
+  double              getArea(const string &fType_h, const string &dClass_h); ///< Get area by ft and dc (from pixel->area matrix)
+  double              getArea(const string &fType_h); ///< Get area by ft (from pixel->area matrix)
+  double              getArea(const int& ft_pos, const int& dc_pos); ///< Get area by ft and dc positions (from pixel->area matrix)
+  double              getArea(const int& ft_pos); ///< Get area by ft position (from pixel->area matrix)
+  double              getArea(); ///< Get whole forest area (from pixel->area matrix)
+
   int                 getNChildren(bool excludeResidual = true);
   vector<Pixel*>      getMyPixels(){return myPixels;};
 

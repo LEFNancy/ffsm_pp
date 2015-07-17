@@ -475,6 +475,34 @@ void
 Sandbox::fullTest(){
 
   /*
+  // Testing the reg->getArea() functions
+  // Actually this need to be run further later, as pixels doesn't yet have area information
+  vector <string> dClasses = MTHREAD->MD->getStringVectorSetting("dClasses");
+  vector <string> fTypes= MTHREAD->MD->getForTypeIds();
+  ModelRegion* REG = MTHREAD->MD->getRegion(11041);
+  cout << "Total ft area: "<< REG->getArea()<< endl;
+
+  for(uint j=0;j<fTypes.size();j++){
+    cout << fTypes[j] << "\t" << REG->getArea(fTypes[j]) << "\t" << REG->getArea(j) << endl;
+  }
+  for(uint j=0;j<fTypes.size();j++){
+    cout << fTypes[j] << "\t" << REG->getArea(fTypes[j]) << "\t";
+    for(uint u=0;u<dClasses.size();u++){
+      cout << REG->getArea(j,u) << " ";
+    }
+    cout << endl;
+  }
+  */
+
+  /*
+  // Testing getForData() function with no forest id specified
+  double vartest= MTHREAD->MD->getForData("forestChangeAreaIncrementsHa",11042,"","",2015);
+  cout << vartest << endl;
+  exit(0);
+  */
+
+
+  /*
   // Testing the decay model  - ok, passed
   double initialValue = 100;
   double halfLife = 2;

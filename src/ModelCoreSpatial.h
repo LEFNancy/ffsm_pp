@@ -120,6 +120,7 @@ private:
   vector <Pixel*> regPx; // pixels behaving to the current region
   bool rescaleFrequencies;
   bool oldVol2AreaMethod;
+  string forestAreaChangeMethod;
 };
 
 #endif // MODELCORESPATIAL_H

@@ -1031,21 +1031,21 @@ ModelData::getForData(const string &type_h, const int& regId_h, const string &fo
   double value = 0;
 
   // creating the arrays to look up if keywords were specified..
-  if (forType_h == FT_ALL){
+  if (forType_h == FT_ALL){ // || forType_h == ""){
     fTypes = getForTypeIds();
     fTypes.push_back("");
   } else {
     fTypes.push_back(forType_h);
   }
-  if(freeDim_h == DIAM_ALL){
+  if(freeDim_h == DIAM_ALL){ // || freeDim_h == ""){
     dClasses = diamClasses;
     dClasses.push_back("");
-    } else if (freeDim_h == DIAM_PROD){
+  } else if (freeDim_h == DIAM_PROD){
     dClasses = getDiameterClasses(true);
-    } else if (freeDim_h == DIAM_FIRST){
+  } else if (freeDim_h == DIAM_FIRST){
     dClasses.push_back(diamClasses.at(0));
   } else  {
-        dClasses.push_back(freeDim_h);
+    dClasses.push_back(freeDim_h);
   }
   // Make sure to set the new value to all l2 regions if requested for a reg1 level
   if(getRegion(regId_h)->getRegLevel()==2){
