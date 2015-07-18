@@ -121,6 +121,7 @@ private:
   bool rescaleFrequencies;
   bool oldVol2AreaMethod;
   string forestAreaChangeMethod;
+  double ir; // interest rate
 };
 
 #endif // MODELCORESPATIAL_H

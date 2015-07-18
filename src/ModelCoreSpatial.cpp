@@ -686,7 +686,7 @@ ModelCoreSpatial::runManagementModule(){
       resetMapValues(hAreaByFTypeGroup,0.0);
       double totalHarvestedArea = vSum(px->hArea); // still need to remove the forest decrease areas..
       vector<double> thisYearRegAreas(fTypes.size(),0.0); // initialize a vector of fTypes.size() zeros.
-      vector<double> expectedReturns(fTypes.size(),0.0);  // uncorrected expected returns (without considering transaction costs)
+      vector<double> expectedReturns(fTypes.size(),0.0);  // uncorrected expected returns (without considering transaction costs). These are in form of eai
 
       double fArea_px = vSum(px->area);
       double fArea_diff_px = fArea_px * fArea_diff/ fArea_reg;
@@ -759,13 +759,15 @@ ModelCoreSpatial::runManagementModule(){
         string ft = fTypes[j];
 
         double harvestedAreaForThisFT = vSum(px->hArea.at(j))*(1-fArea_decr_rel); // gfd("harvestedArea",regId,ft,DIAM_ALL);
-        vector<double> corrExpectedReturns(fTypes.size(),0.0); //  uncorrected expected returns (without considering transaction costs)
+        vector<double> corrExpectedReturns(fTypes.size(),0.0); //  corrected expected returns (considering transaction costs). These are in form of  NPV
 
         // C - Computing the corrected expected returns including transaction costs
         for(uint j2=0;j2<fTypes.size();j2++){
           string ft2 = fTypes[j2];
-          double invTransConstCoeff = gfd("invTransConstCoeff",regId,ft,ft2,DATA_NOW);
-          corrExpectedReturns[j2] = expectedReturns[j2]*invTransConstCoeff;
+          // double invTransConstCoeff = gfd("invTransConstCoeff",regId,ft,ft2,DATA_NOW);
+          // corrExpectedReturns[j2] = expectedReturns[j2]*invTransConstCoeff;
+          double invTransConst = gfd("invTransConst",regId,ft,ft2,DATA_NOW);
+          corrExpectedReturns[j2] = (expectedReturns[j2]/ir)+invTransConst; // changed 20150718: npv = eai/ir + tr. cost
         }
 
         //int highestReturnFtIndex = getMaxPos(corrExpectedReturns);
@@ -868,6 +870,7 @@ ModelCoreSpatial::cacheSettings(){
   oldVol2AreaMethod = MD->getBoolSetting("oldVol2AreaMethod");
   mr = MD->getDoubleSetting("mr");
   forestAreaChangeMethod =  MTHREAD->MD->getStringSetting("forestAreaChangeMethod");
+  ir = MD->getDoubleSetting("ir");
 
 
 }
