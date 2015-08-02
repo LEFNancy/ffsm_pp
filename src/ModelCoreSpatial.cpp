@@ -814,9 +814,14 @@ ModelCoreSpatial::runManagementModule(){
             thisYearRegAreas[j] +=  totalHarvestedArea*(1-mr)*freq*hRatio;
             thisYearRegAreas[j] +=  fArea_incr*(1-mr)*freq*hRatio; // non-managed quota of new forest area assigning proportionally on pp at sp group level
             //thisYearRegAreas[j2] +=  harvestedAreaForThisFT*(1-mr)*freq*hRatio;
-          } else {
+          } else { // prob presence not used..
             thisYearRegAreas[j] += harvestedAreaForThisFT*(1-mr);
-            thisYearRegAreas[j] += fArea_incr*harvestedAreaForThisFT/totalHarvestedArea*(1-mr); // non-managed quota of new forest area assigning proportionally on harvested
+            // Allocating non-managed quota of new forest area to ft proportionally to the current area share by ft
+            double newAreaThisFt = vSum(px->area) ? fArea_incr*(1-mr)*vSum(px->area.at(j))/vSum(px->area): 0.0;
+            thisYearRegAreas[j] +=  newAreaThisFt;
+            if(! (thisYearRegAreas[j] >= 0.0) ){
+              msgOut(MSG_ERROR,"thisYearRegAreas[j] is not non negative.");
+            }
             //thisYearRegAreas[j2] += harvestedAreaForThisFT*(1-mr);
           }
         //}
@@ -1485,11 +1490,16 @@ ModelCoreSpatial::sumRegionalForData(){
 
       for (uint p=0;p<regPx.size();p++){
         Pixel* px = regPx[p];
+        int debug_pxid = px->getID();
         vReg += px->vReg.at(j);
         regArea += findMap(px->regArea,currentYear).at(j);
         pxForArea = (px->getDoubleValue("forArea_"+ft,true)/10000);
         sumExpReturns += (px->expectedReturns.at(j)* pxForArea);
         sumArea += pxForArea;
+        double debug1 = sumArea;
+        if(! (sumArea >= 0.0) ){
+          msgOut(MSG_CRITICAL_ERROR,"sumArea is not non negative.");
+        }
       }
       sfd(vReg,"vReg",regId,ft,"",DATA_NOW, true);
       sfd(regArea,"regArea",regId,ft,"",DATA_NOW, true);
