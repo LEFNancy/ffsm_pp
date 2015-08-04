@@ -496,7 +496,7 @@ Sandbox::fullTest(){
 
   /*
   // Testing getForData() function with no forest id specified
-  double vartest= MTHREAD->MD->getForData("forestChangeAreaIncrementsHa",11042,"","",2015);
+  double vartest= MTHREAD->MD->getForData("forestChangeAreaIncrementsRel",11061,"","",2009);
   cout << vartest << endl;
   exit(0);
   */

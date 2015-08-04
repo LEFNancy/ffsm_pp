@@ -19,4 +19,4 @@
 ./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'withRisk08-01'
 ./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'withRisk08-03'
 ./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'withRisk08-04'
-
+./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'areaIncrease'

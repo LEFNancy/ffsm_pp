@@ -1055,7 +1055,7 @@ ModelData::getForData(const string &type_h, const int& regId_h, const string &fo
       regIds.push_back(getRegion(regId_h)->getChildren()[i]->getRegId());
     }
   } else {
-    msgOut(MSG_CRITICAL_ERROR, "Error in setProdData(). Setting a value for the whole World is not supported.");
+    msgOut(MSG_CRITICAL_ERROR, "Error in getProdData(). Setting a value for the whole World is not supported.");
   }
   int regIdsS = regIds.size();
 
