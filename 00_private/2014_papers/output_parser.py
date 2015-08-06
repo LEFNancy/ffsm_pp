@@ -15,66 +15,70 @@ import matplotlib.pyplot as plt
 # - scen;parName;country;region;forType;diamClass;year;value;
 forIFiles = [  
   # management paper..
-  'output_vRegFixed/results/forestData_vRegFixed.csv',
-  'output_vRegFromHr/results/forestData_vRegFromHr.csv', 
-  'output_reference/results/forestData_reference.csv',
-  'output_vRegEnd070/results/forestData_vRegEnd070.csv',
-  'output_withRisk06/results/forestData_withRisk06.csv',
-  'output_withRisk08/results/forestData_withRisk08.csv',
-  'output_withRisk08-01/results/forestData_withRisk08-01.csv',
-  'output_withRisk08-03/results/forestData_withRisk08-03.csv',
-  'output_withRisk08-04/results/forestData_withRisk08-04.csv',
-  'output_withRisk10/results/forestData_withRisk10.csv',
+  'data/output_vRegFixed/results/forestData_vRegFixed.csv',
+  'data/output_vRegFromHr/results/forestData_vRegFromHr.csv', 
+  'data/output_reference/results/forestData_reference.csv',
+  'data/output_vRegEnd070/results/forestData_vRegEnd070.csv',
+  'data/output_withRisk06/results/forestData_withRisk06.csv',
+  'data/output_withRisk08/results/forestData_withRisk08.csv',
+  'data/output_withRisk08-01/results/forestData_withRisk08-01.csv',
+  'data/output_withRisk08-03/results/forestData_withRisk08-03.csv',
+  'data/output_withRisk08-04/results/forestData_withRisk08-04.csv',
+  'data/output_withRisk10/results/forestData_withRisk10.csv',
+  'data/output_areaIncrease/results/forestData_areaIncrease.csv',
+  'data/output_ccPhImpact/results/forestData_ccPhImpact.csv',
+  'data/output_lowerTrCosts/results/forestData_lowerTrCosts.csv',
+  'data/output_higherTrCosts/results/forestData_higherTrCosts.csv',
   # space paper..
-  'output_bau/results/forestData_bau.csv',
-  'output_bau_nospvar/results/forestData_bau_nospvar.csv',
-  'output_cc1/results/forestData_cc1.csv', 
-  'output_cc1_nospvar/results/forestData_cc1_nospvar.csv', 
-  'output_cc1_hetAgents/results/forestData_cc1_hetAgents.csv', 
-  'output_cc2/results/forestData_cc2.csv',
-  'output_cc2_nospvar/results/forestData_cc2_nospvar.csv',
-  'output_cc3/results/forestData_cc3.csv',
-  'output_cc3_nospvar/results/forestData_cc3_nospvar.csv',
-  'output_cc4/results/forestData_cc4.csv',
-  'output_cc4_nospvar/results/forestData_cc4_nospvar.csv',
-  'output_cc4_hetAgents/results/forestData_cc4_hetAgents.csv', 
-  'output_cc5/results/forestData_cc5.csv',
-  'output_cc5_nospvar/results/forestData_cc5_nospvar.csv',
-  'output_randomSpace/results/forestData_randomSpace_21363.csv',
-  'output_randomSpace/results/forestData_randomSpace_39917.csv',
-  'output_randomSpace/results/forestData_randomSpace_111500.csv',
-  'output_randomSpace/results/forestData_randomSpace_125252.csv',
-  'output_randomSpace/results/forestData_randomSpace_173633.csv',
-  'output_randomSpace/results/forestData_randomSpace_192853.csv',
-  'output_randomSpace/results/forestData_randomSpace_210687.csv',
-  'output_randomSpace/results/forestData_randomSpace_264281.csv',
-  'output_randomSpace/results/forestData_randomSpace_283288.csv',
-  'output_randomSpace/results/forestData_randomSpace_323303.csv',
-  'output_randomSpace/results/forestData_randomSpace_380078.csv',
-  'output_randomSpace/results/forestData_randomSpace_384255.csv',
-  'output_randomSpace/results/forestData_randomSpace_401853.csv',
-  'output_randomSpace/results/forestData_randomSpace_408020.csv',
-  'output_randomSpace/results/forestData_randomSpace_447374.csv',
-  'output_randomSpace/results/forestData_randomSpace_463518.csv',
-  'output_randomSpace/results/forestData_randomSpace_495219.csv',
-  'output_randomSpace/results/forestData_randomSpace_528605.csv',
-  'output_randomSpace/results/forestData_randomSpace_571231.csv',
-  'output_randomSpace/results/forestData_randomSpace_586306.csv',
-  'output_randomSpace/results/forestData_randomSpace_592342.csv',
-  'output_randomSpace/results/forestData_randomSpace_629011.csv',
-  'output_randomSpace/results/forestData_randomSpace_655505.csv',
-  'output_randomSpace/results/forestData_randomSpace_721782.csv',
-  'output_randomSpace/results/forestData_randomSpace_733669.csv',
-  'output_randomSpace/results/forestData_randomSpace_873190.csv',
-  'output_randomSpace/results/forestData_randomSpace_933955.csv',
-  'output_randomSpace/results/forestData_randomSpace_949204.csv',
-  'output_randomSpace/results/forestData_randomSpace_978694.csv',
-  'output_randomSpace/results/forestData_randomSpace_979650.csv',
+  'data/output_bau/results/forestData_bau.csv',
+  'data/output_bau_nospvar/results/forestData_bau_nospvar.csv',
+  'data/output_cc1/results/forestData_cc1.csv', 
+  'data/output_cc1_nospvar/results/forestData_cc1_nospvar.csv', 
+  'data/output_cc1_hetAgents/results/forestData_cc1_hetAgents.csv', 
+  'data/output_cc2/results/forestData_cc2.csv',
+  'data/output_cc2_nospvar/results/forestData_cc2_nospvar.csv',
+  'data/output_cc3/results/forestData_cc3.csv',
+  'data/output_cc3_nospvar/results/forestData_cc3_nospvar.csv',
+  'data/output_cc4/results/forestData_cc4.csv',
+  'data/output_cc4_nospvar/results/forestData_cc4_nospvar.csv',
+  'data/output_cc4_hetAgents/results/forestData_cc4_hetAgents.csv', 
+  'data/output_cc5/results/forestData_cc5.csv',
+  'data/output_cc5_nospvar/results/forestData_cc5_nospvar.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_21363.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_39917.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_111500.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_125252.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_173633.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_192853.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_210687.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_264281.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_283288.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_323303.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_380078.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_384255.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_401853.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_408020.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_447374.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_463518.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_495219.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_528605.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_571231.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_586306.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_592342.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_629011.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_655505.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_721782.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_733669.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_873190.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_933955.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_949204.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_978694.csv',
+  'data/output_randomSpace/results/forestData_randomSpace_979650.csv',
 ]
 
 prodIFile = [
-  'output_bau/results/forestData_bau.csv',
-  'output_cc1/results/forestData_cc1.csv', 
+  'data/output_bau/results/forestData_bau.csv',
+  'data/output_cc1/results/forestData_cc1.csv', 
 ]
 
 scenarios = {
@@ -90,6 +94,10 @@ scenarios = {
   'withRisk08-04':        '#6c77e7',
   'withRisk10':           '#0015db',   
   'hetSpace':             '#d4a4d7',
+  'areaIncrease':         '#b2c8d9',
+  'ccPhImpact':           '#a566a1',
+  'lowerTrCosts':         '#6dcaf1',
+  'higherTrCosts':        '#0015db',     
   # Space paper..
   'bau':                  '#610e0e',
   'cc1':                  '#d6e5de',
@@ -144,9 +152,9 @@ years = ['2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','
 printChartsFlag = True
 printTablesFlag = True
 printAATablesFlag = True
-ofilename = 'output_cc.csv'
-chartoutdir = 'output/charts'
-tableoutdir = 'output/tables'
+ofilename = 'data/output_cc.csv'
+chartoutdir = 'data/output/charts'
+tableoutdir = 'data/output/tables'
 tablesmaster = '00_master_tables'
 tablesmaster_prod  = '00_master_tables_prod'
 chartsmaster = '00_master_charts'
@@ -708,31 +716,32 @@ def printTables():
     title('t','section',regions[region])
 
     title('t','subsection',"Active management")
-    printTable('vRegFromHr',['reference'],['expReturns','vReg','vol','hV'],[region],oyears,'Management effect [avg. 2030-2100]','reference_management_2030-2100_'+region)
-    printTable('vRegFromHr',['reference'],['expReturns','vReg','vol','hV'],[region],['2100'],'Management effect [2100]','reference_management_2100_'+region)
-    printTable('vRegFromHr',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger management effect [avg. 2030-2100]','vRegEnd070_2030-2100_'+region)
-    printTable('vRegFromHr',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger management effect [2100]','vRegEnd070_2100_'+region)
-    printTable('reference',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger management effect compared with reference [avg. 2030-2100]','vRegEnd070_to_reference_2030-2100_'+region)
-    printTable('reference',['vRegEnd070'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger management effect compared with reference [2100]','vRegEnd070_to_reference_2100_'+region)
+    printTable('vRegFromHr',['reference'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Management effect [avg. 2030-2100]','reference_management_2030-2100_'+region)
+    printTable('vRegFromHr',['reference'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Management effect [2100]','reference_management_2100_'+region)
+    printTable('vRegFromHr',['vRegEnd070'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Stronger management effect [avg. 2030-2100]','vRegEnd070_2030-2100_'+region)
+    printTable('vRegFromHr',['vRegEnd070'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Stronger management effect [2100]','vRegEnd070_2100_'+region)
+    printTable('reference',['vRegEnd070'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Stronger management effect compared with reference [avg. 2030-2100]','vRegEnd070_to_reference_2030-2100_'+region)
+    printTable('reference',['vRegEnd070'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Stronger management effect compared with reference [2100]','vRegEnd070_to_reference_2100_'+region)
  
     title('t','subsection',"Risk aversion")
-    printTable('reference',['withRisk08'],['expReturns','vReg','vol','hV'],[region],oyears,'Risk effect [avg. 2030-2100]','withRisk08_2030-2100_'+region)
-    printTable('reference',['withRisk10'],['expReturns','vReg','vol','hV'],[region],oyears,'Stronger risk effect [avg. 2030-2100]','withRisk10_2030-2100_'+region)
-    printTable('reference',['withRisk08'],['expReturns','vReg','vol','hV'],[region],['2100'],'Risk effect [2100]','withRisk08_2100_'+region)
-    printTable('reference',['withRisk10'],['expReturns','vReg','vol','hV'],[region],['2100'],'Stronger risk effect [2100]','withRisk10_2100_'+region)
+    printTable('reference',['withRisk08'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Risk effect [avg. 2030-2100]','withRisk08_2030-2100_'+region)
+    printTable('reference',['withRisk10'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Stronger risk effect [avg. 2030-2100]','withRisk10_2030-2100_'+region)
+    printTable('reference',['withRisk08'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Risk effect [2100]','withRisk08_2100_'+region)
+    printTable('reference',['withRisk10'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Stronger risk effect [2100]','withRisk10_2100_'+region)
 
 
     title('t','subsubsection',"Sensitivity analysis over the s.d. of the ra coefficient")
-    printTable('withRisk08',['withRisk08-01'],['expReturns','vReg','vol','hV','forArea'],[region],oyears,'Risk sa: 08-01 [avg. 2030-2100]','withRisk08-01_2030-2100_'+region)
-    printTable('withRisk08',['withRisk08-01'],['expReturns','vReg','vol','hV','forArea'],[region],['2100'],'Risk sa: 08-01 [2100]','withRisk08-01_2100_'+region)
-    printTable('withRisk08',['withRisk08-03'],['expReturns','vReg','vol','hV','forArea'],[region],oyears,'Risk sa: 08-03 [avg. 2030-2100]','withRisk08-03_2030-2100_'+region)
-    printTable('withRisk08',['withRisk08-03'],['expReturns','vReg','vol','hV','forArea'],[region],['2100'],'Risk sa: 08-03 [2100]','withRisk08-03_2100_'+region)
-    printTable('withRisk08',['withRisk08-04'],['expReturns','vReg','vol','hV','forArea'],[region],oyears,'Risk sa: 08-04 [avg. 2030-2100]','withRisk08-04_2030-2100_'+region)
-    printTable('withRisk08',['withRisk08-04'],['expReturns','vReg','vol','hV','forArea'],[region],['2100'],'Risk sa: 08-04 [2100]','withRisk08-04_2100_'+region)
+    printTable('withRisk08',['withRisk08-01'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Risk sa: 08-01 [avg. 2030-2100]','withRisk08-01_2030-2100_'+region)
+    printTable('withRisk08',['withRisk08-01'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Risk sa: 08-01 [2100]','withRisk08-01_2100_'+region)
+    printTable('withRisk08',['withRisk08-03'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Risk sa: 08-03 [avg. 2030-2100]','withRisk08-03_2030-2100_'+region)
+    printTable('withRisk08',['withRisk08-03'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Risk sa: 08-03 [2100]','withRisk08-03_2100_'+region)
+    printTable('withRisk08',['withRisk08-04'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Risk sa: 08-04 [avg. 2030-2100]','withRisk08-04_2030-2100_'+region)
+    printTable('withRisk08',['withRisk08-04'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Risk sa: 08-04 [2100]','withRisk08-04_2100_'+region)
     
     title('t','subsection',"Heterogeneous environment")
     printTable('bau_nospvar',['bau'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Spatial variance effect [avg. 2030-2100]','hetSpace_2030-2100_'+region)
     printTable('bau_nospvar',['bau'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Spatial variance effect [2100]','hetSpace_2100_'+region)
+
     title('t','subsubsection',"Stability of stochastic simulations")
     printTable('bau_nospvar',
       ['randomSpace_21363','randomSpace_39917','randomSpace_111500','randomSpace_125252','randomSpace_173633',
@@ -772,6 +781,20 @@ def printTables():
     printTable('cc1', ['cc1_hetAgents'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Heterogeneous agents effect on cc1, '+regions[region]+" [avg. 2030-2100]",'cc1_hetAgents_2030-2100_'+region)
     printTable('cc4', ['cc4_hetAgents'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], ['2100'],'Heterogeneous agents effect on cc4, '+regions[region]+" [2100]",'cc4_hetAgents_2100_'+region)  
     printTable('cc4', ['cc4_hetAgents'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'], [region], oyears,'Heterogeneous agents effect on cc4, '+regions[region]+" [avg. 2030-2100]",'cc4_hetAgents_2030-2100_'+region)   
+    
+    title('t','subsection',"Area increase")
+    printTable('reference',['areaIncrease'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Increased forest area [avg. 2030-2100]','areaIncrease_2030-2100_'+region)
+    printTable('reference',['areaIncrease'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Increased forest area [2100]','areaIncrease_2100_'+region)
+    
+    title('t','subsection',"Climate change")
+    printTable('reference',['ccPhImpact'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Physical impact of climate change [avg. 2030-2100]','ccPhImpact_to_reference_2030-2100_'+region)
+    printTable('reference',['ccPhImpact'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Physical impact of climate change [2100]','ccPhImpact_to_reference_2100_'+region)
+    
+    title('t','subsection',"SA on transaction costs")
+    printTable('reference',['lowerTrCosts'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Lower transaction costs [avg. 2030-2100]','lowerTrCosts_2030-2100_'+region)
+    printTable('reference',['lowerTrCosts'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Lower transaction costs [2100]','lowerTrCosts_2100_'+region)
+    printTable('reference',['higherTrCosts'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Higher transaction costs [avg. 2030-2100]','higherTrCosts_2030-2100_'+region)
+    printTable('reference',['higherTrCosts'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Higher transaction costs [2100]','higherTrCosts_2100_'+region)    
     
 # =============================================================================  
 def printAATables():

@@ -764,8 +764,8 @@ ModelCoreSpatial::runManagementModule(){
         // C - Computing the corrected expected returns including transaction costs
         for(uint j2=0;j2<fTypes.size();j2++){
           string ft2 = fTypes[j2];
-          // double invTransConstCoeff = gfd("invTransConstCoeff",regId,ft,ft2,DATA_NOW);
-          // corrExpectedReturns[j2] = expectedReturns[j2]*invTransConstCoeff;
+          //double invTransConstCoeff = gfd("invTransConstCoeff",regId,ft,ft2,DATA_NOW);
+          //corrExpectedReturns[j2] = expectedReturns[j2]*invTransConstCoeff;
           double invTransConst = gfd("invTransConst",regId,ft,ft2,DATA_NOW);
           corrExpectedReturns[j2] = (expectedReturns[j2]/ir)+invTransConst; // changed 20150718: npv = eai/ir + tr. cost
         }
