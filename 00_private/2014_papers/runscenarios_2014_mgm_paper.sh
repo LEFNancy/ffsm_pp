@@ -21,6 +21,10 @@
 ./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'withRisk08-04'
 ./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'areaIncrease'
 ./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'ccPhImpact'
+./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'ccPhImpact_rA'
 ./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'lowerTrCosts'
 ./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'higherTrCosts'
-
+./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'lowerTrCosts'
+./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'reference_hS'
+./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'lowerTrCosts_hS'
+./run_single_scenario.sh 'data/ffsmInput_2014_papers.ods' 'higherTrCosts_hS'

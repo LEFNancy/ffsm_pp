@@ -27,8 +27,12 @@ forIFiles = [
   'data/output_withRisk10/results/forestData_withRisk10.csv',
   'data/output_areaIncrease/results/forestData_areaIncrease.csv',
   'data/output_ccPhImpact/results/forestData_ccPhImpact.csv',
+  'data/output_ccPhImpact_rA/results/forestData_ccPhImpact_rA.csv',
   'data/output_lowerTrCosts/results/forestData_lowerTrCosts.csv',
   'data/output_higherTrCosts/results/forestData_higherTrCosts.csv',
+  'data/output_reference_hS/results/forestData_reference_hS.csv',
+  'data/output_lowerTrCosts_hS/results/forestData_lowerTrCosts_hS.csv',
+  'data/output_higherTrCosts_hS/results/forestData_higherTrCosts_hS.csv',
   # space paper..
   'data/output_bau/results/forestData_bau.csv',
   'data/output_bau_nospvar/results/forestData_bau_nospvar.csv',
@@ -96,8 +100,12 @@ scenarios = {
   'hetSpace':             '#d4a4d7',
   'areaIncrease':         '#b2c8d9',
   'ccPhImpact':           '#a566a1',
+  'ccPhImpact_rA':        '#6c77e7',
   'lowerTrCosts':         '#6dcaf1',
-  'higherTrCosts':        '#0015db',     
+  'higherTrCosts':        '#0015db',  
+  'reference_hS':         '#f80000',
+  'lowerTrCosts_hS':      '#6dcaf1',
+  'higherTrCosts_hS':     '#0015db',    
   # Space paper..
   'bau':                  '#610e0e',
   'cc1':                  '#d6e5de',
@@ -728,7 +736,9 @@ def printTables():
     printTable('reference',['withRisk10'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Stronger risk effect [avg. 2030-2100]','withRisk10_2030-2100_'+region)
     printTable('reference',['withRisk08'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Risk effect [2100]','withRisk08_2100_'+region)
     printTable('reference',['withRisk10'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Stronger risk effect [2100]','withRisk10_2100_'+region)
-
+    printTable('ccPhImpact',['ccPhImpact_rA'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Risk effect under climate change [avg. 2030-2100]','ccPhImpact_rA_2030-2100_'+region)
+    printTable('ccPhImpact',['ccPhImpact_rA'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Risk effect under climate change [2100]','ccPhImpact_rA_2100_'+region)
+  
 
     title('t','subsubsection',"Sensitivity analysis over the s.d. of the ra coefficient")
     printTable('withRisk08',['withRisk08-01'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Risk sa: 08-01 [avg. 2030-2100]','withRisk08-01_2030-2100_'+region)
@@ -789,13 +799,18 @@ def printTables():
     title('t','subsection',"Climate change")
     printTable('reference',['ccPhImpact'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Physical impact of climate change [avg. 2030-2100]','ccPhImpact_to_reference_2030-2100_'+region)
     printTable('reference',['ccPhImpact'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Physical impact of climate change [2100]','ccPhImpact_to_reference_2100_'+region)
+  
     
     title('t','subsection',"SA on transaction costs")
     printTable('reference',['lowerTrCosts'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Lower transaction costs [avg. 2030-2100]','lowerTrCosts_2030-2100_'+region)
     printTable('reference',['lowerTrCosts'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Lower transaction costs [2100]','lowerTrCosts_2100_'+region)
     printTable('reference',['higherTrCosts'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Higher transaction costs [avg. 2030-2100]','higherTrCosts_2030-2100_'+region)
     printTable('reference',['higherTrCosts'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Higher transaction costs [2100]','higherTrCosts_2100_'+region)    
-    
+    printTable('reference_hS',['lowerTrCosts_hS'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Lower transaction costs under heterogeneous space [avg. 2030-2100]','lowerTrCosts_hS_2030-2100_'+region)
+    printTable('reference_hS',['lowerTrCosts_hS'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Lower transaction costs under heterogeneous space [2100]','lowerTrCosts_hS_2100_'+region)
+    printTable('reference_hS',['higherTrCosts_hS'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Higher transaction costs under heterogeneous space [avg. 2030-2100]','higherTrCosts_hS_2030-2100_'+region)
+    printTable('reference_hS',['higherTrCosts_hS'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Higher transaction cost under heterogeneous spaces [2100]','higherTrCosts_hS_2100_'+region)    
+
 # =============================================================================  
 def printAATables():
   print "Printing area allocation tables.."
