@@ -11,6 +11,8 @@ NO: All up-to-date documentation is available at http://ffsm-project.org.
 To create the Reference Manual locally type the following commands from a SHELL/DOS prompt:
 (Reference Manual)
 doxygen ffsm_pp.doxygen
+cd referenceManual/latex/
+pdflatex refman.tex
 
 
 
