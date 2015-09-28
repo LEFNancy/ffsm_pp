@@ -290,7 +290,7 @@ public:
   /// Returns a map built using the given vector and the given (scalar) value as keys/values pairs
   template <typename K, typename V> map <K, V> vectorToMap(const vector <K>& keys, const V& value=0.0){
       map<K,V> returnMap;
-      for(uint i=0; i<keys.size();i++){
+      for(unsigned int i=0; i<keys.size();i++){
           pair<K,V> apair(keys[i],value);
           returnMap.insert(apair);
       }
