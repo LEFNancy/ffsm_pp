@@ -2,6 +2,7 @@
 
 #---------------------------------------
 #  Shell script to run a single ffsm scenario, where the scenario name is the first argument and input file is the second (optional) argument.
+# e.g. ./run_single_scenario.sh 'data/ffsmInput_2015_wdulef.ods' 'baseline'
 #---------------------------------------
 
 if [ $# -eq 2 ]

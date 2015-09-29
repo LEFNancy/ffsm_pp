@@ -79,7 +79,7 @@ public:
   Carbon*             CBAL;  ///< Module for the Carbon Balance
   Sandbox*            TEST;  ///< Various debugging code for development
   Ipopt::SmartPtr <Ipopt::TNLP>      OPT;  ///< Market optimisation
-  //std::random_device*  randev; ///< used in the sampling from normal distribution
+  //std::random_device*  randev; ///< used in the sampling from normal distribution 20150928: all random_device has been just be replaced with mt19937(time(0)), as largelly enought!
   std::mt19937*        gen;  ///< used in the sampling from normal distribution
 
   void                setMessage(const QString &message);

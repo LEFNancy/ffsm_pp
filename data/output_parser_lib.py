@@ -273,6 +273,7 @@ def plotCarbonChart(scenarios_h,region,title, filename):
       plt.plot(g.x, y, serieLineType, label=serieName, linewidth=serieWidth, color=serieColor)
   #plt.legend(loc='lower right', ncol=3, shadow=False, labelspacing=0., prop={'size':12})
   plt.legend(loc='lower right', ncol=1, shadow=False, labelspacing=0.)
+  #plt.ylim([0,18]) # This would scale the plot y axis to the desired ranges
   plt.savefig(g.chartoutdir+"/"+filename+"_"+region+"."+g.charttype, dpi=300)
   #plt.show()
   plt.close()
@@ -526,8 +527,16 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
   el = " \\\\"
   
   cvariables = [
-      ['Pools', "- Total pools", [['STOCK_INV',"- Forest pool"],['STOCK_PRODUCTS',"- Wood products pool"]]],
-      ['Emissions', "- Net energy substitution", [['EM_ENSUB',"- Energy substitution"],['EM_FOROP',"- Emissions from forest operations"]]],
+      ['Pools', "- Total pools", [
+         ['STOCK_INV',"- Inventoried forest pool"],
+         ['STOCK_EXTRA',"- Extra forest pool (branches and roots)"],
+         ['STOCK_PRODUCTS',"- Wood products pool"]
+         ]],
+      ['Emissions', "- Net substitution",
+        [['EM_ENSUB',"- Energy substitution"], 
+         ['EM_MATSUB',"- Material substitution"],
+         ['EM_FOROP',"- Emissions from forest operations"]
+         ]],
   ]       
    
   label_comparing_scenario = "comparing scenarios"
