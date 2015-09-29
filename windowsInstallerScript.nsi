@@ -1,11 +1,11 @@
-; FFSM Windows Instal Script
+; FFSM++ Windows Instal Script
 ; Writen to be compiled with NSIS
-; Antonello Lobianco, 2012 
+; Antonello Lobianco, 2015 
 
 ;--------------------------------
 ; General
 	; Things that will likelly need to be changed...
-	!define VERSIONSTRING "1.0.2"               ; Ffsm version number (as string). Used to put each version on a separate folder.
+	!define VERSIONSTRING "1.1.0"               ; Pythiaversion number (as string). Used to put each version on a separate folder.
 
 	OutFile "ffsm_${VERSIONSTRING}_setup.exe" ; Filename of the outputted installer
 	!define MINGWDIR "C:\MinGW\bin" ; Directory where thre MinGW DLL is located
@@ -13,12 +13,12 @@
 	!define EXEDIR "."                ; Directory where the EXE file is located
 
 	!include "MUI.nsh" ; Include Modern UI
-	Name "FFSM" ; Name (?)
+	Name "FFSM++" ; Name (?)
 	InstallDir "$PROGRAMFILES\FFSM\${VERSIONSTRING}" ; Default installation directory
-	!define APP_NAME "FFSM" ; Application name (mainly for links)
-	!define APP_FNAME "FFSM ${VERSIONSTRING}" ; Application name with version(mainly for links)
+	!define APP_NAME "FFSM++" ; Application name (mainly for links)
+	!define APP_FNAME "FFSM++ ${VERSIONSTRING}" ; Application name with version(mainly for links)
 	!define MAIN_APP_EXE "ffsm.exe" ; Filename of executable
-	!define WEB_SITE "http://www.nancy.inra.fr/lef_eng" ; We-site address
+	!define WEB_SITE "http://ffsm-project.org" ; We-site address
 	Var OPTIONALDATA ; We'll use this variable to put links on sample data only if users have selected to intall sample data
 	Var LOCALDOC ;If user has selected to install documentation
 	Var SM_Folder ; Application shortcuts main folder
@@ -29,15 +29,15 @@
 ; Interface Settings ( we define all settings before building the pages - next points)
 
 	!define MUI_ABORTWARNING ; We give a confirmation warning before let the user abort the installation proces 
-	!define MUI_ICON "src\imgs\regmas.ico" ; icon for the installer
-	!define MUI_UNICON "src\imgs\regmas.ico" ; icon for the uninstaller 
+	!define MUI_ICON "src\imgs\ffsm.ico" ; icon for the installer
+	!define MUI_UNICON "src\imgs\ffsm.ico" ; icon for the uninstaller 
 	!define MUI_WELCOMEFINISHPAGE_BITMAP "src\imgs\beech.bmp" ; image for the welcome and finish page 
 	!define MUI_UNWELCOMEFINISHPAGE_BITMAP "src\imgs\beech.bmp" ; image for the welcome and finish page (uninstaller)
 	!define MUI_COMPONENTSPAGE_SMALLDESC ; section description on the bottom instead on the default right
 	!define REG_START_MENU "Start Menu Folder" ; ??
-	!define MUI_STARTMENUPAGE_DEFAULTFOLDER "Ffsm\${VERSIONSTRING}" ; Default folder where to prompt the user to place links
+	!define MUI_STARTMENUPAGE_DEFAULTFOLDER "FFSM\${VERSIONSTRING}" ; Default folder where to prompt the user to place links
 	!define MUI_FINISHPAGE_RUN "$INSTDIR\${MAIN_APP_EXE}" ; What propose the user to do after the installation is completed
-	!define MUI_WELCOMEPAGE_TEXT "Version ${VERSIONSTRING}\n\nFFSM is a flexible, spatially explicit, coupled resource and economic simulator of the Forest Sector, designed for long-term simulations of effects of government policies over different forest systems.\n\n This Wizard will guide you the installation of FFSM. \n\n Press Next to start the installation."
+	!define MUI_WELCOMEPAGE_TEXT "Version ${VERSIONSTRING}\n\n FFSM++ is a flexible, spatially explicit, coupled resource and economic simulator of the Forest Sector, designed for long-term simulations of effects of government policies over different forest systems.\n\n This Wizard will guide you the installation of FFSM++. \n\n Press Next to start the installation."
    
 ;--------------------------------
 ; Installer pages (steps)
@@ -94,15 +94,16 @@ SectionEnd
 Section /o "Source" Src   ; option /o means optional - unselected by default
 	SetOutPath "$INSTDIR\src" 
 	File "src\*.h" 
-	File "src\*.cpp" 
+	File "src\*.cpp"
+	File "src\*.pro" 
 SectionEnd
 
 Section /o "Documentation" Doc   ;
 	;not yet ready...
-	;SetOutPath "$INSTDIR\doc\userManual"
-	;File "doc\userManual\ffsmUserManual.pdf"
-	;SetOutPath "$INSTDIR\doc\referenceManual\html"
-	;File "doc\referenceManual\html\*"
+	SetOutPath "$INSTDIR\doc"
+	File "doc\Install run and develop instructions.pdf"	
+	File "doc\Input and output data management.pdf"
+	File "doc\Reference manual.pdf"
 	StrCpy $LOCALDOC "true" 
 SectionEnd
 
@@ -110,11 +111,11 @@ SectionEnd
 ; Component Descriptions
 
 	; Creating "Language strings" objects for each section...
-	LangString DESC_MainProgram ${LANG_ENGLISH} "Main Ffsm files"
-	LangString DESC_Qt ${LANG_ENGLISH} "Run-time graphical libraries. Unselect this section only if you already have Qt >=4.8 installed on your PC"
+	LangString DESC_MainProgram ${LANG_ENGLISH} "Main FFSM++ files"
+	LangString DESC_Qt ${LANG_ENGLISH} "Run-time graphical libraries. Unselect this section only if you already have Qt 4.X installed on your PC"
 	LangString DESC_Data ${LANG_ENGLISH} "Sample input data (recommended)"
-	LangString DESC_Src ${LANG_ENGLISH} "Ffsm C++ source code (not needed to run Ffsm)"
-	LangString DESC_Doc ${LANG_ENGLISH} "Local copy of the documentation (NOT YET READY)"
+	LangString DESC_Src ${LANG_ENGLISH} "FFSM++ C++ source code (not needed to run the program)"
+	LangString DESC_Doc ${LANG_ENGLISH} "Local copy of the documentation (for more doc refer to the site)"
 
 	;Assign "Language strings" objects to sections
 	!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
@@ -147,15 +148,17 @@ Section -Icons_Reg
 			${EndIf}
 			${If} $LOCALDOC == 'true' ; If user has installed a local copy of the documentation
 				; Shortcut to user manual file
-				CreateShortCut "$SMPROGRAMS\$SM_Folder\User Manual.lnk" "$INSTDIR\doc\userManual\ffsmUserManual.pdf"
+				CreateShortCut "$SMPROGRAMS\$SM_Folder\Install run and develop instructions.lnk" "$INSTDIR\doc\Install run and develop instructions.pdf"			
+				; Shortcut to data management
+				CreateShortCut "$SMPROGRAMS\$SM_Folder\Input and output data management.lnk" "$INSTDIR\doc\Input and output data management.pdf"
 				; Shortcut to the reference manual
-				CreateShortCut "$SMPROGRAMS\$SM_Folder\Reference Manual.lnk" "$INSTDIR\doc\referenceManual\html\index.html"
+				CreateShortCut "$SMPROGRAMS\$SM_Folder\Reference Manual.lnk" "$INSTDIR\doc\Reference manual.pdf"				
 			${EndIf}
 			; Write internet shortcut to the main web-site and link it from the other START MENU shortcuts..
 			WriteIniStr "$INSTDIR\${APP_NAME} website.url" "InternetShortcut" "URL" "${WEB_SITE}"
 			CreateShortCut "$SMPROGRAMS\$SM_Folder\${APP_NAME} Website.lnk" "$INSTDIR\${APP_NAME} website.url"
 			; Write internet shortcut to the on-line documentation and link it from the other START MENU shortcuts..
-			WriteIniStr "$INSTDIR\${APP_NAME} documentation.url" "InternetShortcut" "URL" "${WEB_SITE}/doc"
+			WriteIniStr "$INSTDIR\${APP_NAME} documentation.url" "InternetShortcut" "URL" "${WEB_SITE}"
 			CreateShortCut "$SMPROGRAMS\$SM_Folder\${APP_NAME} Documentation.lnk" "$INSTDIR\${APP_NAME} documentation.url"
 		!insertmacro MUI_STARTMENU_WRITE_END
 	!endif
@@ -168,6 +171,6 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR" ; Recursivelly remove all files in the install directory
 	RMDir /r "$SMPROGRAMS\$SM_Folder" ; Remove links in the Start Menu ..doesn't works !!!
 	Delete "$DESKTOP\${APP_NAME}.lnk" ; Remove desktop link
-	;DeleteRegKey /ifempty HKCU "Software\Ffsm"
+	;DeleteRegKey /ifempty HKCU "Software\Pythia"
 SectionEnd
 
