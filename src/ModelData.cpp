@@ -1272,8 +1272,9 @@ ModelData::loadInput(){
   QString iFile(MTHREAD->getInputFileName().c_str());
   //cout << "PIPPO !!!!! " << MTHREAD->getInputFileName().c_str() << endl;
 
-  std::random_device rd;
-  std::mt19937 localgen(rd());
+  //std::random_device rd;
+  //std::mt19937 localgen(rd());
+  std::mt19937 localgen(time(0));
   std::uniform_int_distribution<> dis(10, 1000000);
   int randomNumber = dis(localgen);
 

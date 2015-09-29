@@ -107,13 +107,16 @@ Init::setInitLevel1(){
     // std::normal_distribution<double> d(100000,3);
     // double x = d(*MTHREAD->gen);
     srand(time(NULL));
-    std::random_device randev;
-    MTHREAD->gen = new std::mt19937(randev());
-        //TO.DO change scenarioname to scenarioname_random number
-        uniform_int_distribution<> ud(1, 1000000);
-        int randomscenario = ud(*MTHREAD->gen);
-        string oldScenarioName = MTHREAD->getScenarioName();
-        MTHREAD->setScenarioName(oldScenarioName+"_"+i2s(randomscenario));
+    //std::random_device randev;
+    //MTHREAD->gen = new std::mt19937(randev());
+    MTHREAD->gen = new std::mt19937(time(0));
+
+    //TO.DO change scenarioname to scenarioname_random number
+    uniform_int_distribution<> ud(1, 1000000);
+    int randomscenario = ud(*MTHREAD->gen);
+    string oldScenarioName = MTHREAD->getScenarioName();
+    MTHREAD->setScenarioName(oldScenarioName+"_"+i2s(randomscenario));
+
   } else {
     MTHREAD->gen = new std::mt19937(NULL);
   }
