@@ -369,7 +369,6 @@ ModelData::getRegionIds( bool excludeResidual){
 vector <string>
 ModelData::getForTypeIds(bool all){
   vector <string> toReturn;
-  bool useSpExplicitForestTypes = getBoolSetting("useSpExplicitForestTypes");
   for(uint i=0;i<forTypes.size();i++){
     if(forTypes[i].memType!=1 || all) {
       toReturn.push_back(forTypes[i].forTypeId);

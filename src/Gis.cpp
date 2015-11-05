@@ -327,6 +327,22 @@ Gis::initLayersPixelData(){
     filename = fullFilename.substr(0,fullFilename.find_last_of("."));
     addLayer(filename,filename,false,false,fullPath,false);
   }
+
+  // Loading volumes of forest types that are spatially known..
+  if(MTHREAD->MD->getBoolSetting("useSpExplicitForestTypes")){
+    string dir2 = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getStringSetting("spExplicitForTypesInputDir");
+    string fileExt2 = MTHREAD->MD->getStringSetting("spExplicitForTypesFileExtension");
+    vector<string> files2 = vector<string>();
+    string fullFilename2, filename2, fullPath2;
+    MTHREAD->MD->getFilenamesByDir (dir2,files2, fileExt2); // Ugly format. Files is the output (reference)
+    for (unsigned int i = 0;i < files2.size();i++) {
+      fullFilename2 = files2[i];
+      fullPath2 = dir2+"/"+fullFilename2;
+      filename2 = fullFilename2.substr(0,fullFilename2.find_last_of("."));
+      addLayer(filename2,filename2,false,false,fullPath2,false);
+    }
+  }
+
 }
 
 /** Init the layers of exogenous data at pixel level (e.g. time of passage)

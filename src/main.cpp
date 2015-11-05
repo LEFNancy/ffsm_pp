@@ -37,7 +37,12 @@
 using namespace std;
 
 int main(int argc, char *argv[]){
-
+  #ifdef  __GNUC__
+  #ifndef __MINGW32__
+  // I can't use this automatic runtime error, as ADOL-C, for some reasons, has some places that explicitally create inf or nan
+  //feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW); // to enable runtime error of division by zero (only in linux, not on MinGw)
+  #endif
+  #endif
 
   cout << endl;
   cout << "*******************************************************************" << endl;

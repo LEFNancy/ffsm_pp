@@ -130,6 +130,32 @@ struct GccTest
 void
 Sandbox::basicTest(){
 
+  /*
+  // Testing tokenize, untokenize functions
+  vector<string> istrings;
+  istrings.push_back("Questo");
+  istrings.push_back("cielo");
+  istrings.push_back("è");
+  istrings.push_back("sempre");
+  istrings.push_back("più");
+  istrings.push_back("blu.");
+  string delimiter = " . ";
+
+  string fullstring="";
+  vector<string> ostrings;
+  untokenize(fullstring, istrings, delimiter);
+  cout << fullstring << endl;
+
+  fullstring += delimiter;
+  cout << fullstring << endl;
+
+  tokenize(fullstring, ostrings, delimiter);
+  for (uint i=0;i<ostrings.size();i++){
+    cout << ostrings[i] << endl;
+  }
+  exit(0);
+  */
+
 
   /*
   // Testing FlopC++

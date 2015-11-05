@@ -91,7 +91,7 @@ public:
   double                computeExpectedPrice(const double & curLocPrice, const double & worldCurPrice, const double & worldFutPrice, const double & sl, const double & sa, const double & expCoef); ///< Compute weighted expected price for a given product.
 
 
-  void                  loadExogenousForestLayers(const string & what); ///< Set pixel volumes (what="vol") OR areas (what="area") by specific forest types as defined in tables initSpVols and initSpAreas..
+  void                  loadExogenousForestLayers(const string & what); ///< Set pixel volumes (what="vol") OR areas (what="area") by specific forest types as defined in gis layers for volumes and proportionally to volumes for areas.
 
   // convenient handles to equivalent ModelData functions..
   double              gpd(const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const string &freeDim_h="") const {return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};

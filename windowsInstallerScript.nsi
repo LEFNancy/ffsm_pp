@@ -7,7 +7,7 @@
 	; Things that will likelly need to be changed...
 	!define VERSIONSTRING "1.1.0"               ; Pythiaversion number (as string). Used to put each version on a separate folder.
 
-	OutFile "ffsm_${VERSIONSTRING}_setup.exe" ; Filename of the outputted installer
+	OutFile "ffsm_pp_${VERSIONSTRING}_setup.exe" ; Filename of the outputted installer
 	!define MINGWDIR "C:\MinGW\bin" ; Directory where thre MinGW DLL is located
 	!define QTDIR "C:\Qt\4.8.2\bin"   ; Directory where the Qt run-time DLLs are located
 	!define EXEDIR "."                ; Directory where the EXE file is located

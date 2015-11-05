@@ -383,6 +383,21 @@ BaseClass::tokenize(const string& str, vector<string>& tokens, const string& del
     }
 }
 
+void
+BaseClass::untokenize(string &str, vector<string>& tokens, const string& delimiter) const {
+  // add initial loken in str is not empty
+  if(str != ""){
+    str += delimiter;
+  }
+  for(int i=0;i<tokens.size();i++){
+    str += tokens[i];
+    // don't add final delimiter
+    if(i != (tokens.size()-1)){
+       str += delimiter;
+    }
+  }
+}
+
 ///////////////////////////////////// OTHER CLASSES THAN BASECLASS //////////////////
 /// iskey class ///
 iskey::iskey(){

@@ -126,7 +126,7 @@
 			<legendItem label="RA - Rhône-Alpes" rColor="230" gColor="220" bColor="077">11071</legendItem>
 		</legendItems>	
 	</layer>
-		<layer>
+	<layer>
 		<name>regLev_1</name>
 		<label>Regions (counties, nuts1)</label>
 		<isInteger>true</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
@@ -174,8 +174,7 @@
       <legendItem label="0.4 - 0-6" rColor="100" gColor="100" bColor="100" minValue="0.4" maxValue="0.6">40</legendItem>    
       <legendItem label="0.8 - 1" rColor="40" gColor="40" bColor="40" minValue="0.8" maxValue="1.001">80</legendItem>
     </legendItems>
-  </layer>	
-	
+  </layer>
 	
 </gis>
 

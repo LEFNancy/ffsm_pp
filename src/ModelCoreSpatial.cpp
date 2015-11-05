@@ -692,7 +692,7 @@ ModelCoreSpatial::runManagementModule(){
       double fArea_diff_px = fArea_px * fArea_diff/ fArea_reg;
       double fArea_incr = max(0.0,fArea_diff_px);
       double fArea_decr = - min(0.0,fArea_diff_px);
-      double fArea_decr_rel = min(1.0,fArea_decr/totalHarvestedArea);
+      double fArea_decr_rel = totalHarvestedArea?min(1.0,fArea_decr/totalHarvestedArea):0.0;
       regHArea += totalHarvestedArea;
       totalHarvestedArea = totalHarvestedArea *(1-fArea_decr_rel);
 
@@ -837,9 +837,11 @@ ModelCoreSpatial::runManagementModule(){
 
       #ifdef QT_DEBUG
       double totalRegArea = vSum(thisYearRegAreas);
-      double ratio = totalRegArea / totalHarvestedArea ;
-      if(rescaleFrequencies && (ratio < 0.99999999999 || ratio > 1.00000000001) ) {
-       // msgOut(MSG_CRITICAL_ERROR, "Sum of regeneration areas not equal to sum of harvested area in runManagementModel()!");
+      if (! (totalRegArea==0.0 && totalHarvestedArea==0.0)){
+        double ratio = totalRegArea / totalHarvestedArea ;
+        if(rescaleFrequencies && (ratio < 0.99999999999 || ratio > 1.00000000001) ) {
+          msgOut(MSG_CRITICAL_ERROR, "Sum of regeneration areas not equal to sum of harvested area in runManagementModel()!");
+        }
       }
       #endif
       px->regArea.insert(pair <int, vector<double> > (MTHREAD->SCD->getYear(), thisYearRegAreas));
@@ -1021,6 +1023,7 @@ ModelCoreSpatial::initializePixelArea(){
     } // end px
   } // end region
   loadExogenousForestLayers("area");
+  /// \todo: also update area_l
 }
 
 void
@@ -1614,48 +1617,193 @@ ModelCoreSpatial::computeExpectedPrice(const double & curLocPrice, const double 
 }
 
 /**
- * It uses data from tables initSpVols and initSpAreas to "move" either volumes or area from one forest type to the other.
- * It acts on the pix->vol and pix->area vectors, and it doesn't cash the results on the other data containers, that is the
- * forDataMAp and, for areas, the px->values "layer" map.
+ * It uses volumes from gis data to "move" volumes from one forest type to the other (when called with what="vol"). Then it moves areas
+ * proportionally and, as dc0 volumes are not defined but area it is, compute, again proportionally, area in destination forest times for dc=0
+ * It acts on the pix->vol, pix->area and pix->area_l vectors. It also create/update the px->values layer map for the area, but it doesn't cash the
+ * results in forDataMap.
  *
- * It is called in initializePixelVolumes() and initializePixelAreas().
+ * It is called first with parameter what="vol" in initializePixelVolumes() and then with what="area" in initializePixelAreas().
+ * As we need the original volumes in the area allocation, original_vols is set as a static variable.
  *
  */
 void
 ModelCoreSpatial::loadExogenousForestLayers(const string & what){
   if(!MD->getBoolSetting("useSpExplicitForestTypes")) return;
-  LLData table(MTHREAD,"");
-  if(what=="vol"){
-    table = MD->getTable(MD->getStringSetting("spExplicitForTypesVols"), MSG_CRITICAL_ERROR);
-  } else if(what=="area"){
-    table = MD->getTable(MD->getStringSetting("spExplicitForTypesAreas"), MSG_CRITICAL_ERROR);
-  } else {
-    msgOut(MSG_CRITICAL_ERROR, "Unknown what par in "+ ( (string) __func__ ) +".");
+
+  int nFTypes = fTypes.size();
+  int nDC     = dClasses.size();
+  int pxC     = 0;
+
+  for(uint ir=0;ir<regIds2.size();ir++){
+    int r2 = regIds2[ir];
+    ModelRegion* REG = MTHREAD->MD->getRegion(r2);
+    regPx = REG->getMyPixels();
+    pxC += regPx.size();
   }
-  int nheaders = table.nheaders();
-  for(int i=0; i< table.nrecords(); i++){
-    int pixId = s2i(table.getData(i,"pxId"));
-    Pixel* px = MTHREAD->GIS->getPixel(pixId);
-    string ftInString = table.getData(i,"ftIn");
-    string ftToString = table.getData(i,"ftTo");
-    int ftIn = MD->getForTypeCounter(ftInString);
-    int ftTo = MD->getForTypeCounter(ftToString);
-    vector<string> dc = MD->getDiameterClasses();
-    vector<double> vols_by_dc;
-    if (what == "vol"){
-      for (int u=0;u<dc.size();u++){
-        double newvol = s2d(table.getData(i,"value_"+i2s(u)));
-        px->vol.at(ftIn).at(u) = max(0.0,px->vol.at(ftIn).at(u)-newvol);
-        px->vol.at(ftTo).at(u) = newvol;
+
+  static vector<vector<vector<double>>> original_vols(pxC, vector<vector<double>>(nFTypes, vector<double>(nDC, 0.0))); // by px counter, ftype, dc
+
+  if(what=="vol"){
+    // first, before transfering volumes, saving the original ones..
+    for(uint i=0;i<fTypes.size();i++){
+      for (uint u=0; u<dClasses.size(); u++){
+        int pxC_loc = 0;
+        for(uint ir=0;ir<regIds2.size();ir++){
+          int r2 = regIds2[ir];
+          ModelRegion* REG = MTHREAD->MD->getRegion(r2);
+          regPx = REG->getMyPixels();
+          for (uint p=0;p<regPx.size();p++){
+            Pixel* px = regPx[p];
+            original_vols[pxC_loc][i][u] += px->vol[i][u];
+            pxC_loc ++;
+          }
+        }
       }
-    } else {
-      for (int u=0;u<dc.size();u++){
-        double newarea = s2d(table.getData(i,"value_"+i2s(u)));
-        px->area_l.at(ftIn).at(u) = max(0.0,px->area_l.at(ftIn).at(u)-newarea);
-        px->area_l.at(ftTo).at(u) = newarea;
+    }
+    for(uint i=0;i<fTypes.size();i++){
+      string fti = fTypes[i];
+      for(uint o=0;o<fTypes.size();o++){
+        string fto = fTypes[o];
+        for (uint u=1; u<dClasses.size(); u++){ // first diameter class volumes are computed from the model..
+          string layerName =  "spInput#vol#"+fto+"#"+fti+"#"+i2s(u);
+          if (MTHREAD->GIS->layerExist(layerName)){
+            for(uint ir=0;ir<regIds2.size();ir++){
+              int r2 = regIds2[ir];
+              ModelRegion* REG = MTHREAD->MD->getRegion(r2);
+              regPx = REG->getMyPixels();
+              for (uint p=0;p<regPx.size();p++){
+                Pixel* px = regPx[p];
+                double vol_transfer = min(px->getDoubleValue(layerName,true)/1000000,px->vol[i][u]) ; // Vol in the layer are in m^3, in the model in Mm^3
+                px->vol[i][u] -= vol_transfer;
+                px->vol[o][u] += vol_transfer;
+             }
+           }
+          }
+        }
       }
-      px->area = px->area_l;
     }
   }
+
+  if(what=="area"){
+    /**
+    Allocate area proportionally to volumes (see file test_proportional_computation_of_areas_from_volumes.ods)
+    Example:
+    FtIn   FtOut Vtrasfer
+    con    ash   0.2
+    brHf   ash   0.1
+    brCopp ash   0.3
+    con    oak   0.3
+    brHf   oak   0.2
+    brCopp oak   0.1
+
+           Vorig Aorig Vnew  Anew
+    con    10    30    9.5   28.5  Aorig-Aorig*(Vtrasfer1/Vorig)-Aorig(Vtrasfer2/Vorig)
+    brHf   5     20    4.7   18.8
+    brCopp 2     20    1.6   16
+    ash    0     0     0.6   4     Aorig1*Vtrasfer1/(Vorig1)+Aorig2*Vtrasfer2/(Vorig2)+...
+    oak    0     0     0.6   2.7
+                 70          70
+    */
+    // first, before transfering areas, saving the original ones (we already saved the vols in the what="vol" section, that is called before this one)..
+    vector<vector<vector<double>>> original_areas(pxC, vector<vector<double>>(nFTypes, vector<double>(nDC, 0.0))); // by px counter, ftype, dc
+    for(uint i=0;i<fTypes.size();i++){
+      for (uint u=0; u<dClasses.size(); u++){
+        int pxC_loc = 0;
+        for(uint ir=0;ir<regIds2.size();ir++){
+          int r2 = regIds2[ir];
+          ModelRegion* REG = MTHREAD->MD->getRegion(r2);
+          regPx = REG->getMyPixels();
+          for (uint p=0;p<regPx.size();p++){
+            Pixel* px = regPx[p];
+            original_areas[pxC_loc][i][u] += px->area_l[i][u];
+            pxC_loc ++;
+          }
+        }
+      }
+    }
+
+
+    // transferred areas ordered by pxcounter, i and then o ftype. Used to then repart the 0 diameter class..
+    vector<vector<vector<double>>> transferred_areas(pxC, vector<vector<double>>(nFTypes, vector<double>(nFTypes, 0.0))); // initialize a 3d vector of nFTypes zeros.
+
+    for(uint i=0;i<fTypes.size();i++){
+      string fti = fTypes[i];
+      for(uint o=0;o<fTypes.size();o++){
+        string fto = fTypes[o];
+        for (uint u=1; u<dClasses.size(); u++){ // first diameter class area is comuted proportionally..
+          string layerName =  "spInput#vol#"+fto+"#"+fti+"#"+i2s(u);
+          if (MTHREAD->GIS->layerExist(layerName)){
+            int pxC_loc = 0;
+            for(uint ir=0;ir<regIds2.size();ir++){
+              int r2 = regIds2[ir];
+              ModelRegion* REG = MTHREAD->MD->getRegion(r2);
+              regPx = REG->getMyPixels();
+              for (uint p=0;p<regPx.size();p++){
+                Pixel* px = regPx[p];
+                double vol_i_orig    = original_vols[pxC_loc][i][u];
+                double vol_transfer  = vol_i_orig?px->getDoubleValue(layerName,true)/1000000:0.0; // Vol in the layer are in m^3, in the model in Mm^3
+                double area_i_orig   = original_areas[pxC_loc][i][u];
+                double area_transfer = vol_i_orig?area_i_orig*vol_transfer/vol_i_orig:0.0;
+                px->area_l[i][u] -=  area_transfer;
+                px->area[i][u]    = px->area_l[i][u];
+                px->area_l[o][u] += area_transfer;
+                px->area[o][u]    = px->area_l[o][u];
+                transferred_areas[pxC_loc][i][o] += area_transfer;
+                pxC_loc ++;
+             }
+           }
+          }
+        }
+      }
+    }
+
+    // Moving the area in the 0 diameter class, for which no info is normally available..
+    double pxC_loc = 0;
+    for(uint ir=0;ir<regIds2.size();ir++){
+      int r2 = regIds2[ir];
+      ModelRegion* REG = MTHREAD->MD->getRegion(r2);
+      regPx = REG->getMyPixels();
+      for (uint p=0;p<regPx.size();p++){
+        Pixel* px = regPx[p];
+        for(uint i=0;i<fTypes.size();i++){
+          for(uint o=0;o<fTypes.size();o++){
+            double area_i_orig = 0.0;
+            for (uint u=1; u<dClasses.size(); u++){ // we want to skip the 0 diameter class, this is why we don't simply use vSum()..
+              area_i_orig += original_areas[pxC_loc][i][u];
+            }
+            double area_transfer_u0 = area_i_orig?original_areas[pxC_loc][i][0]*(transferred_areas[pxC_loc][i][o]/area_i_orig):0.0;
+            px->area_l[i][0] -= area_transfer_u0 ;
+            px->area[i][0] = px->area_l[i][0];
+            px->area_l[0][0] += area_transfer_u0 ;
+            px->area[0][0] = px->area_l[0][0];
+          }
+        }
+        pxC_loc++;
+      }
+    }
+
+    // Alligning the area memorised in the px layers to the new areas of the ft..
+    for(uint i=0;i<fTypes.size();i++){
+      string fti_id = fTypes[i];
+      forType* fti  = MTHREAD->MD->getForType(fti_id);
+      int ft_memType = fti->memType;
+      string ft_layerName = fti->forLayer;
+      if(ft_memType==3){
+        MTHREAD->GIS->addLayer(ft_layerName,ft_layerName,false,true);
+      }
+      if(ft_memType==3 ||ft_memType==2){
+        for(uint ir=0;ir<regIds2.size();ir++){
+          int r2 = regIds2[ir];
+          ModelRegion* REG = MTHREAD->MD->getRegion(r2);
+          regPx = REG->getMyPixels();
+          for (uint p=0;p<regPx.size();p++){
+            Pixel* px = regPx[p];
+            double area_px = vSum(px->area[i]);
+            px->changeValue(ft_layerName,area_px*10000);
+          }
+        }
+      }
+    }
+  } // end if what is area
 }
 

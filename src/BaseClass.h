@@ -42,6 +42,7 @@
 #include <numeric>
 #include <limits>
 #include <cstddef>
+#include <fenv.h> // for division by zero runtime error
 
 // regmas headers...
 
@@ -222,7 +223,8 @@ public:
   double                vSum(const vector< vector <double> >& vector_h) const;
 
   /// Tokenize a string using a delimiter (default is space)
-  void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ") const;
+  void                tokenize(const string& str, vector<string>& tokens, const string& delimiter = " ") const; // See also http://stackoverflow.com/questions/236129/split-a-string-in-c that could be faster
+  void                untokenize(string &str, vector<string>& tokens, const string& delimiter = " ") const;
 
   /// Lookup a map for a value. Return the value starting from the key
   template <typename K, typename V> V findMap(const map <K, V> &mymap, const K& key, const int& error_level=MSG_CRITICAL_ERROR, const V &notFoundValue=numeric_limits<V>::min()) const{
