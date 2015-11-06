@@ -572,6 +572,35 @@ ModelData::setReclassificationRules(){
   }
 }
 
+void
+ModelData::loadPathogenRules(){
+
+  if(!getBoolSetting("usePathogenModule")) return;
+  msgOut(MSG_DEBUG,"Loading pathogen rules..");
+  LLData table = getTable("pathRules");
+  int nheaders = table.nheaders();
+  for (int i=0; i< table.nrecords();i++){
+    pathRule PR;
+    PR.forType = table.getData(i,"forType");
+    PR.dClass = table.getData(i,"dClass");
+    PR.pathId = table.getData(i,"path_name");
+    PR.pres_min = s2d(table.getData(i,"pres_min"));
+
+    vector <double> values;
+    for (int z=0;z<nheaders-4;z++){ // don't consider forType, dClass, path_name and pres_min  headers
+      string toSearch = "year_"+i2s(z);
+      string value = table.getData(i,toSearch);
+      if (value != ""){
+        values.push_back(s2d(value));
+      }
+    }
+    PR.mortCoefficents = values;
+
+    pathRules.push_back(PR);
+  }
+}
+
+
 /// Cancel all reg1 level data and trasform them in reg2 level if not already existing
 void
 ModelData::applyOverrides(){
@@ -1735,6 +1764,19 @@ ModelData::getFilenamesByDir (const string & dir, vector<string> &files, const s
   closedir(dp);
   return 0;
 }
+
+
+vector<pathRule*>
+ModelData::getPathMortalityRule(const string& forType, const string& dC){
+  vector<pathRule*> toReturn;
+  for(uint i=0;i<pathRules.size();i++){
+    if(pathRules[i].forType == forType && pathRules[i].dClass == dC){
+      toReturn.push_back(&pathRules[i]);
+    }
+  }
+  return toReturn;
+}
+
 
 // ========================== LLData =======================================
 

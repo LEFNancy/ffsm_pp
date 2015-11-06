@@ -1061,6 +1061,7 @@ ModelCoreSpatial::computeCumulativeData(){
         double mortCoef_multiplier_t0  = px->getMultiplier("mortCoef_multiplier",ft,firstYear);
         double betaCoef_multiplier_now = px->getMultiplier("betaCoef_multiplier",ft,DATA_NOW);
         double betaCoef_multiplier_t0  = px->getMultiplier("betaCoef_multiplier",ft,firstYear);
+        double pathMort_now, pathMort_t0;
 
         // calculating the cumulative time of passage and the (cumulativelly generated) vHa for each diameter class (depending on forest owners diam growth expectations)
         //loop(u$(ord(u)=1),
@@ -1087,7 +1088,8 @@ ModelCoreSpatial::computeCumulativeData(){
           double tp, tp_exp, tp_noExp, tp_fullExp;
           double vHa_u, vHa_u_exp, vHa_u_noExp, vHa_u_fullExp, beta, beta_exp, beta_noExp, beta_fullExp, mort, mort_exp, mort_noExp, mort_fullExp;
           double cumAlive_u, cumAlive_exp_u;
-
+          pathMort_now = px->getPathMortality(ft,dc,DATA_NOW);
+          pathMort_t0 = px->getPathMortality(ft,dc,firstYear);
           // only cumTp is depending for the expectations, as it is what it is used by owner to calculate return of investments.
           // the tp, beta and mort coefficients instead are the "real" ones as predicted by scientist for that specific time
 
@@ -1119,7 +1121,7 @@ ModelCoreSpatial::computeCumulativeData(){
               vHa_u = gfd("entryVolHa",regId,ft,"",thisYear);
               mort = 0.; // not info about mortality first diameter class ("00")
             } else {
-              mort = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear)*mortCoef_multiplier_now,tp); // mortality of the previous diameter class
+              mort = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear)*mortCoef_multiplier_now+pathMort_now,tp); // mortality of the previous diameter class
               beta = gfd("betaCoef",regId,ft,dc, thisYear)*betaCoef_multiplier_now;
               vHa_u = vHa_temp[u-1]*beta*(1-mort);
             }
@@ -1142,7 +1144,7 @@ ModelCoreSpatial::computeCumulativeData(){
                 vHa_u_exp = gfd("entryVolHa",regId,ft,"",firstYear);
                 mort_exp = 0.; // not info about mortality first diameter class ("00")
               } else {
-                mort_exp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], firstYear)*mortCoef_multiplier_t0,tp_exp); // mortality rate of previous diameter class
+                mort_exp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], firstYear)*mortCoef_multiplier_t0+pathMort_t0,tp_exp); // mortality rate of previous diameter class
                 beta_exp = gfd("betaCoef",regId,ft,dc, firstYear)*betaCoef_multiplier_t0;
                 vHa_u_exp = vHa_exp_temp[u-1]*beta_exp*(1-mort_exp);
               }
@@ -1160,9 +1162,10 @@ ModelCoreSpatial::computeCumulativeData(){
                 vHa_u_exp = vHa_u_fullExp*expType+vHa_u_noExp*(1-expType);
                 mort_exp = 0.; // not info about mortality first diameter class ("00")
               } else {
-                mort_noExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW)*mortCoef_multiplier_now, tp_noExp); // mortCoef is a yearly value. Mort coeff between class is 1-(1-mortCoeff)^tp
+                mort_noExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW)*mortCoef_multiplier_now+pathMort_now, tp_noExp); // mortCoef is a yearly value. Mort coeff between class is 1-(1-mortCoeff)^tp
                 double mortCoef_multiplier_dynamic = px->getMultiplier("mortCoef_multiplier",ft,thisYear+ceil(cumTp_exp_temp[u-1]));
-                mort_fullExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic,tp_fullExp); // mortality of the previous diameter class
+                double pathMort_dynamic = px->getPathMortality(ft,dc,thisYear+ceil(cumTp_exp_temp[u-1]));
+                mort_fullExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic+pathMort_dynamic,tp_fullExp); // mortality of the previous diameter class
                 beta_noExp   = gfd("betaCoef",regId,ft,dc, DATA_NOW)*betaCoef_multiplier_now;
                 double betaCoef_multiplier_dynamic = px->getMultiplier("betaCoef_multiplier",ft,thisYear+ceil(cumTp_u));
                 beta_fullExp = gfd("betaCoef",regId,ft,dc, thisYear+ceil(cumTp_u))*betaCoef_multiplier_dynamic;
@@ -1273,8 +1276,10 @@ ModelCoreSpatial::cachePixelExogenousData(){
         double mortCoef_multiplier_now = px->getMultiplier("mortCoef_multiplier",ft,DATA_NOW);
         double betaCoef_multiplier_now = px->getMultiplier("betaCoef_multiplier",ft,DATA_NOW);
 
+
         for (uint u=0; u<dClasses.size(); u++){
           string dc = dClasses[u];
+          double pathMortality           = px->getPathMortality(ft,dc,DATA_NOW);
           double tp, beta_real, mort_real;
           if (u==0){
             // tp of first diameter class not making it change across the time dimension, otherwise problems in getting the rigth past
@@ -1285,7 +1290,7 @@ ModelCoreSpatial::cachePixelExogenousData(){
             tp  = gfd("tp",regId,ft,dClasses[u],DATA_NOW)*tp_multiplier_now; // tp is defined also in the first diameter class, as it is the years to reach the NEXT diameter class
           }
           beta_real = u?gfd("betaCoef",regId,ft,dClasses[u],DATA_NOW)*betaCoef_multiplier_now:0;
-          mort_real = u?gfd("mortCoef",regId,ft,dClasses[u],DATA_NOW)*mortCoef_multiplier_now:0;
+          mort_real = u?gfd("mortCoef",regId,ft,dClasses[u],DATA_NOW)*mortCoef_multiplier_now+pathMortality :0;
           tp_byu.push_back(tp);
           beta_byu.push_back(beta_real);
           mort_byu.push_back(mort_real);

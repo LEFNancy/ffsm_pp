@@ -54,7 +54,8 @@ public:
   double              getDoubleValue (const string& layerName_h, const  bool& returnZeroForNoValue = false) const;
   double              getDoubleValue (const string& parName, const string& forName, const string& dClass, const int& year, const  bool& returnZeroForNoValue = false);
   double              getMultiplier (const string& multiplierName, const string& forName, int year=DATA_NOW);
-  void                correctInputMultiplier (const string& multiplierName, const string& forName, double coefficient=1); //< It apply a given coefficient to all the multipliers layers of a given ft
+  double              getPathMortality(const string& forType, const string& dC, int year=DATA_NOW);                ///< Return the INCREASED mortality due to pathogen presence for a given ft and dc in a certain year (default the running year)
+  void                correctInputMultiplier (const string& multiplierName, const string& forName, double coefficient=1); ///< It apply a given coefficient to all the multipliers layers of a given ft
   void                newYear();
   double              getPastRegArea(const int& ft_idx, const int& year);
   void                setPastRegArea(const double& value, const int& ft_idx, const int& year);

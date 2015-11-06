@@ -223,7 +223,42 @@ Pixel::getMultiplier (const string& multiplierName, const string& forName, int y
       }
 
     }
+}
 
+/**
+The mortality returned is the increased yearly mortality due to any affecting pathogenes.
+The function load the relevant pathogen mortality rule(s), for each of them check for how many years the phatogen is present with concentrations
+above the threshold and returns the relavant increase in mortality (summing them in case of multiple pathogens).
+
+*/
+double
+Pixel::getPathMortality(const string& forType, const string& dC, int year){
+  if(!MTHREAD->MD->getBoolSetting("usePathogenModule")) return 0.0;
+
+  string debug=forType;
+
+  vector<pathRule*> pathRules = MTHREAD->MD->getPathMortalityRule(forType,dC);
+
+  double pathMort = 0.0;
+  if(year==DATA_NOW){year = MTHREAD->SCD->getYear();}
+
+  for(uint r=0;r<pathRules.size();r++){
+    string pathId=pathRules[r]->pathId;
+    double pres_min=pathRules[r]->pres_min;
+    vector<double> mortCoefficients=pathRules[r]->mortCoefficents;
+    double pathMort_thispath = 0.0;
+    for(uint y=year;y>(year-mortCoefficients.size());y--){
+      int i =year-y;
+      string layerName="pathogen_pp#"+pathId+"#"+i2s(y);
+      if(MTHREAD->GIS->layerExist(layerName)){
+        if (this->getDoubleValue(layerName,true)>= pres_min){
+          pathMort_thispath = mortCoefficients[i];
+        }
+      }
+    }
+    pathMort += pathMort_thispath;
+  }
+  return pathMort;
 
 }
 

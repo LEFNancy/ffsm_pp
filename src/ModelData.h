@@ -53,6 +53,7 @@ struct forData;
 struct prodData;
 struct forToProd;
 struct reclRule;
+struct pathRule;
 struct forType;
 
 /// Regional data, including macros and settings
@@ -86,6 +87,7 @@ public:
   void                setProductResourceMatrixLink();
   void                setForestTypes();
   void                setReclassificationRules();
+  void                loadPathogenRules();
   void                applyOverrides(); ///< Cancel all reg1 level data and trasform them in reg2 level if not already existing
   void                applyDebugMode(); ///< Works only a specified subset of regions and products
   void                setSpace();
@@ -136,15 +138,15 @@ public:
   void                setProdData(const double& value_h, const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const bool& allowCreate=false, const string &freeDim_h=""); // Remember default arguments must be at the end
   void                setForData(const double& value_h, const string &type_h, const int& regId_h, const string &forType_h, const string &freeDim_h, const int& year=DATA_NOW, const bool& allowCreate=false); // Remember default arguments must be at the end
 
-  string                makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="") const {return parName+"#"+regId+"#"+prod+"#"+freeDim+"#";}
-  string                makeKeyForData(const string& parName, const string& regId, const string& forType, const string& diamClass) const {return parName+"#"+regId+"#"+forType+"#"+diamClass+"#";}
-  void                  unpackKeyProdData(const string& key, string& parName, int &regId, string& prod, string& freeDim) const;
-  void                  unpackKeyForData(const string& key, string& parName, int &regId, string& forType, string& diamClass) const;
+  string              makeKeyProdData(const string& parName, const string& regId, const string& prod, const string& freeDim="") const {return parName+"#"+regId+"#"+prod+"#"+freeDim+"#";}
+  string              makeKeyForData(const string& parName, const string& regId, const string& forType, const string& diamClass) const {return parName+"#"+regId+"#"+forType+"#"+diamClass+"#";}
+  void                unpackKeyProdData(const string& key, string& parName, int &regId, string& prod, string& freeDim) const;
+  void                unpackKeyForData(const string& key, string& parName, int &regId, string& forType, string& diamClass) const;
 
-  double                calculateAnnualisedEquivalent(double amount_h, int years_h); ///< Calculate the annual equivalent flow
-  double                calculateAnnualisedEquivalent(double amount_h, double years_h); ///< Transform the double to the highest integer and call calculateAnnualisedEquivalent(double amount_h, int years_h)
+  vector<pathRule*>   getPathMortalityRule(const string& forType, const string& dC); ///< Return the pathogen mortality rule(s) associated with a given ft and dc (plural as more than a single pathogen could be found)
 
-  /// Retrieve the list of objects type that can be placed on the specified soil type
+  double              calculateAnnualisedEquivalent(double amount_h, int years_h); ///< Calculate the annual equivalent flow
+  double              calculateAnnualisedEquivalent(double amount_h, double years_h); ///< Transform the double to the highest integer and call calculateAnnualisedEquivalent(double amount_h, int years_h)
 
   void                setOutputDirectory(const char* output_dirname_h);
   void                setBaseDiretory(string baseDirectory_h){baseDirectory=baseDirectory_h;}
@@ -184,6 +186,7 @@ private:
 
   vector <forType>                              forTypes; ///< Vector of forest types
   vector <reclRule>                            reclRules; ///< Vector of reclassification rules
+  vector <pathRule>                            pathRules; ///< Vector of pathogen rules
   vector < vector <int> >                            l2r; ///< Region2 ids
 
   // cahced setting data..
@@ -264,6 +267,21 @@ struct reclRule {
   string                                      forTypeOut;
   double                                           coeff;
 };
+
+/// Pathogen rule (how pathogen presense influence mortality) for a given forest type and diameter class (struct)
+/**
+Struct containing the rule that affect the mortality of a given ft and dc by a given pathogen: depending on the number of year of presence
+of the pathogen over a given tollerance level the mortality increase more and more.
+*/
+struct pathRule {
+  string                                       forType;
+  string                                        dClass;
+  string                                        pathId;  ///< Pathogen id (name)
+  double                                      pres_min;  ///< Minimum level of presence of the pathogen to be counted as present (tolerance threshold)
+  vector<double>                       mortCoefficents;  ///< Mortality coefficients ordered by number of presence of the pathogen, e.g. first value is the mortality increase in the first year of pathogen appareance.
+};
+
+
 
 
 /// Low level data. XML input is reversed here after unzipping oocalc file and parsing content.xml

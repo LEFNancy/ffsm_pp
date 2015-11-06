@@ -131,6 +131,7 @@ Init::setInitLevel1(){
   MTHREAD->MD->setForestTypes();
   MTHREAD->MD->setReclassificationRules();
   MTHREAD->MD->applyOverrides();
+  MTHREAD->MD->loadPathogenRules(); // after applyOverrides as I am not loading anything if usePathogenModule option is false
   MTHREAD->MD->setProductResourceMatrixLink();
   MTHREAD->MD->applyDebugMode();
   MTHREAD->GIS->setSpace();
