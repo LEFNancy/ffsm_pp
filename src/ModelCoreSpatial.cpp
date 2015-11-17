@@ -1166,12 +1166,12 @@ ModelCoreSpatial::computeCumulativeData(){
                 double mortCoef_multiplier_dynamic = px->getMultiplier("mortCoef_multiplier",ft,thisYear+ceil(cumTp_exp_temp[u-1]));
                 double pathMort_dynamic = px->getPathMortality(ft,dc,thisYear+ceil(cumTp_exp_temp[u-1]));
                 mort_fullExp = 1-pow(1-min(1.0,gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic+pathMort_dynamic),tp_fullExp); // mortality of the previous diameter class
-                double debug1 = gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]));
-                double debug2 = debug1*mortCoef_multiplier_dynamic+pathMort_dynamic;
-                double debug3 = min(1.0,debug2);
-                double debug4 = 1.0-debug3;
-                double debug5 = pow(debug4,tp_fullExp);
-                double debug6 = 1.0-debug5;
+                //double debug1 = gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]));
+                //double debug2 = debug1*mortCoef_multiplier_dynamic+pathMort_dynamic;
+                //double debug3 = min(1.0,debug2);
+                //double debug4 = 1.0-debug3;
+                //double debug5 = pow(debug4,tp_fullExp);
+                //double debug6 = 1.0-debug5;
 
 
                 beta_noExp   = gfd("betaCoef",regId,ft,dc, DATA_NOW)*betaCoef_multiplier_now;

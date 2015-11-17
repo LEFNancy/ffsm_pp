@@ -236,6 +236,10 @@ Pixel::getPathMortality(const string& forType, const string& dC, int year){
   if(!MTHREAD->MD->getBoolSetting("usePathogenModule")) return 0.0;
 
   string debug=forType;
+  int initialOptYear = MTHREAD->MD->getIntSetting("initialOptYear");
+  int simulationYears = MTHREAD->MD->getIntSetting("simulationYears");
+
+  int maxYear = initialOptYear + simulationYears;
 
   vector<pathRule*> pathRules = MTHREAD->MD->getPathMortalityRule(forType,dC);
 
@@ -249,7 +253,12 @@ Pixel::getPathMortality(const string& forType, const string& dC, int year){
     double pathMort_thispath = 0.0;
     for(uint y=year;y>(year-mortCoefficients.size());y--){
       int i =year-y;
-      string layerName="pathogen_pp#"+pathId+"#"+i2s(y);
+      int y2 = y;
+      if(y>=maxYear){
+        y2=maxYear-1;
+      }
+
+      string layerName="pathogen_pp#"+pathId+"#"+i2s(y2);
       if(MTHREAD->GIS->layerExist(layerName)){
         if (this->getDoubleValue(layerName,true)>= pres_min){
           pathMort_thispath = mortCoefficients[i];
