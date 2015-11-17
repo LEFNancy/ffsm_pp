@@ -1162,10 +1162,18 @@ ModelCoreSpatial::computeCumulativeData(){
                 vHa_u_exp = vHa_u_fullExp*expType+vHa_u_noExp*(1-expType);
                 mort_exp = 0.; // not info about mortality first diameter class ("00")
               } else {
-                mort_noExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW)*mortCoef_multiplier_now+pathMort_now, tp_noExp); // mortCoef is a yearly value. Mort coeff between class is 1-(1-mortCoeff)^tp
+                mort_noExp = 1-pow(1-min(1.0,gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW)*mortCoef_multiplier_now+pathMort_now), tp_noExp); // mortCoef is a yearly value. Mort coeff between class is 1-(1-mortCoeff)^tp
                 double mortCoef_multiplier_dynamic = px->getMultiplier("mortCoef_multiplier",ft,thisYear+ceil(cumTp_exp_temp[u-1]));
                 double pathMort_dynamic = px->getPathMortality(ft,dc,thisYear+ceil(cumTp_exp_temp[u-1]));
-                mort_fullExp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic+pathMort_dynamic,tp_fullExp); // mortality of the previous diameter class
+                mort_fullExp = 1-pow(1-min(1.0,gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic+pathMort_dynamic),tp_fullExp); // mortality of the previous diameter class
+                double debug1 = gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]));
+                double debug2 = debug1*mortCoef_multiplier_dynamic+pathMort_dynamic;
+                double debug3 = min(1.0,debug2);
+                double debug4 = 1.0-debug3;
+                double debug5 = pow(debug4,tp_fullExp);
+                double debug6 = 1.0-debug5;
+
+
                 beta_noExp   = gfd("betaCoef",regId,ft,dc, DATA_NOW)*betaCoef_multiplier_now;
                 double betaCoef_multiplier_dynamic = px->getMultiplier("betaCoef_multiplier",ft,thisYear+ceil(cumTp_u));
                 beta_fullExp = gfd("betaCoef",regId,ft,dc, thisYear+ceil(cumTp_u))*betaCoef_multiplier_dynamic;
