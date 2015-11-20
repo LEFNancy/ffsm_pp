@@ -315,6 +315,13 @@ public:
   template <typename K>  int getMin (const vector <K> & v){
     return *minmax_element(v.begin(), v.end()).first;
   }
+  template <typename K>  int getPos (const K & element, const vector <K> & v, const int& msgCode_h=MSG_CRITICAL_ERROR){
+    for(unsigned int i=0; i<v.size(); i++){
+      if(v[i]== element) return i;
+    }
+    msgOut(msgCode_h, "Element not found in vector in getPos()");
+    return -1;
+  }
 
   /// Sample from a normal distribution with bounds. Slower (double time, but still you see the diff only after milion of loops).
 

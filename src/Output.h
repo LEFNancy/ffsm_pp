@@ -56,6 +56,7 @@ public:
     void                initOutputProductData();
     void                initOptimisationLog();
     void                initDebugOutput();
+    void                initDebugPixelValues();
     void                initCarbonBalance();
   void                print();
     void                printMaps();
@@ -64,6 +65,7 @@ public:
     void                printCarbonBalance();
   void                printFinalOutput();
   void                printDebugOutput();
+  void                printDebugPixelValues();
   void                printOptLog(bool optimal, int &nIterations, double &obj);
   char                getOutputFieldDelimiter();
   void                cleanScenario(string fileName, string scenarioName, char d);
@@ -96,14 +98,15 @@ private:
   vector<int>                           l1regIds;
   vector < vector <int> >                    l2r;
   vector <string>                         fTypes;
-    vector <string>                       dClasses; /// includes an empty string for variables without diameter attribute
-    vector <string>                      pDClasses; ///< production diameter classes: exclude the fist diameter class below 15 cm
+  vector <string>                       dClasses; /// includes an empty string for variables without diameter attribute
+  vector <string>                      pDClasses; ///< production diameter classes: exclude the fist diameter class below 15 cm
   int                                     nPriPr;
   int                                     nSecPr;
   int                                     nAllPr;
   int                                       nL2r;
   string                             logFilename;
-    string                           debugFilename;
-    bool                                    spMode; // spatial mode ?
+  string                           debugFilename;
+  string                   debugPxValuesFilename;
+  bool                                    spMode; // spatial mode
 };
 #endif

@@ -110,6 +110,7 @@ public:
   int                 getForTypeCounter(string& forTypeId_h, bool all=false); ///< By default it doesn't return forTypes used only as input
   vector <string>     getForTypeIds(bool all=false); ///< By default it doesn't return forTypes used only as input
   string              getForTypeParentId(const string& forTypeId_h);
+  vector<string>      getForTypeChilds(const string &forTypeId_h);
   int                 getNForTypesChilds(const string& forTypeId_h);
   reclRule*           getReclRule(int position){return &reclRules[position];}
   vector <string>     getDiameterClasses(bool productionOnly=false);

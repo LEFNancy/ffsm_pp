@@ -47,6 +47,7 @@ Output::initOutput(){
   commonInit();
   initOutputMaps();
   initDebugOutput();
+  initDebugPixelValues();
   initOutputForestData();
   initOutputProductData();
   initOptimisationLog();
@@ -194,6 +195,87 @@ Output::initDebugOutput(){
     }
 }
 
+
+void
+Output::initDebugPixelValues(){
+    if(oLevel<OUTVL_ALL) return;
+
+    // init debugging the expected returns...
+    if(!spMode) return;
+
+    if (oSingleFile){
+         debugPxValuesFilename = baseDir+oDir+"debugs/debugPxValues.csv";
+    } else {
+         debugPxValuesFilename = baseDir+oDir+"debugs/debugPxValues_"+scenarioName+".csv";
+    }
+
+    ifstream in(debugPxValuesFilename.c_str(), ios::in);
+    if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
+        in.close();
+        cleanScenario(debugPxValuesFilename, scenarioName, d);
+        return;
+    } else { // file doesn't exist
+        in.close();
+        ofstream out(debugPxValuesFilename.c_str(), ios::out);
+        if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+debugPxValuesFilename+" for writing.");}
+        out << "scenario" << d << "year" << d << "region" << d << "pxId" << d << "pxX" << d << "pxY" << d ;
+        for(uint f=0;f<fTypes.size();f++){
+          string ft = fTypes[f];
+          string header = "tp_multiplier_"+ft;
+          out << header <<d;
+        }
+        for(uint f=0;f<fTypes.size();f++){
+          string ft = fTypes[f];
+          string header = "mortCoef_multiplier_"+ft;
+          out << header <<d;
+        }
+        out << "var" << d ;
+
+        for(uint f=0;f<fTypes.size();f++){
+          string ft = fTypes[f];
+          for (uint u=0;u<dClasses.size();u++){
+            string dc=dClasses[u];
+            string header = ft+"_"+dc;
+            out << header <<d;
+          }
+        }
+        out << "\n";
+
+
+        out.close();
+    }
+
+
+
+
+    /*
+    if(oSingleFile){
+      outFileName = baseDir+oDir+"results/forestData"+oFileExt;
+      ifstream in(outFileName.c_str(), ios::in);
+      if(in.is_open()) { // file exist, no need to initializate it, but we are gonna clean it of previous data of the same scenario if present...
+        in.close();
+        cleanScenario(outFileName, scenarioName, d);
+        return;
+      } else {
+        in.close();
+      }
+    } else {
+      outFileName = baseDir+oDir+"results/forestData_"+scenarioName+oFileExt;
+    }
+
+    ofstream out(outFileName.c_str(), ios::out);
+    if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
+      out << "scen" << d << "parName" << d << "country" << d << "region" << d << "forType" << d << "freeDim" << d;
+    */
+
+
+
+
+
+
+
+
+}
 
 void
 Output::initOutputForestData(){
@@ -764,6 +846,89 @@ Output::printDebugOutput(){
   } // end initial condition checks
 }
 
+void
+Output::printDebugPixelValues(){
+
+  if(oLevel<OUTVL_ALL) return;
+
+  bool filter;
+  filter = true; //use this to  filter output
+  if(filter && spMode){
+    ofstream out (debugPxValuesFilename.c_str(), ios::app);
+    if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+debugPxValuesFilename+" for writing.");}
+    int currentYear = MTHREAD->SCD->getYear();
+    vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
+    for (uint r=0;r<regIds2.size();r++){
+      int rId = regIds2[r];
+      //if(rId != 11061) continue;
+      ModelRegion* REG = MTHREAD->MD->getRegion(rId);
+      vector<Pixel*> regPx = REG->getMyPixels();
+      for (uint p=0;p<regPx.size();p++){
+        Pixel* px = regPx[p];
+        int pxID = px->getID();
+        int pxX = px->getX();
+        int pxY = px->getY();
+        string common = scenarioName + d + i2s(currentYear) + d + i2s(rId) + d+ i2s(pxID) +d +i2s(pxX)+d+i2s(pxY)+d;
+
+        for(uint f=0;f<fTypes.size();f++){
+          double tp_m = px->getMultiplier("tp_multiplier",fTypes[f]);
+          common += d2s(tp_m)+d;
+        }
+        for(uint f=0;f<fTypes.size();f++){
+          double m_m = px->getMultiplier("mortCoef_multiplier",fTypes[f]);
+          common += d2s(m_m)+d;
+        }
+
+        // First vars by only ft...
+        // expectedReturns
+        out << common << "expectedReturns" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << d;
+          }
+          out << px->expectedReturns[f] << d;
+        }
+        out << "\n";
+        //----
+        out << common <<"vol" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << px->vol[f][u]<< d;
+          }
+          out << vSum(px->vol[f]) << d;
+        }
+        out << "\n";
+        //----
+        out << common <<"area" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << px->area[f][u]<< d;
+          }
+          out << vSum(px->area[f]) << d;
+        }
+        out << "\n";
+        //----
+        out << common <<"cumTp_exp" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << px->cumTp_exp[f][u]<< d;
+          }
+          out << vSum(px->cumTp_exp[f]) << d;
+        }
+        out << "\n";
+        //----
+        out << common <<"vHa_exp" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << px->vHa_exp[f][u]<< d;
+          }
+          out << vSum(px->vHa_exp[f]) << d;
+        }
+        out << "\n";
+      } // end for each pixel
+    } // end for each region
+  } // end filter
+} // end function printDebugPixelValues
 
 
 /**

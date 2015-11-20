@@ -58,6 +58,7 @@ ModelCoreSpatial::runInitPeriod(){
   initializePixelArea();       ///< compute px->area for each ft and dc (including exogenous loaded areas)
   runBiologicalModule();       //
   runManagementModule();
+  //MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
   updateMapAreas();            ///< update the forArea_{ft} layer on each pixel as old value-hArea+regArea
   sumRegionalForData();        ///< only for printing stats as forest data is never used at regional level
   initialiseCarbonModule();
@@ -75,6 +76,7 @@ ModelCoreSpatial::runSimulationYear(){
   cachePixelExogenousData();
   runBiologicalModule();
   runManagementModule();
+  MTHREAD->DO->printDebugPixelValues();
   updateMapAreas();
   sumRegionalForData();      // only for printing stats as forest data is never used at regional level
   registerCarbonEvents();
@@ -757,6 +759,7 @@ ModelCoreSpatial::runManagementModule(){
 
       for(uint j=0;j<fTypes.size();j++){
         string ft = fTypes[j];
+        forType* thisFt = MTHREAD->MD->getForType(ft);
 
         double harvestedAreaForThisFT = vSum(px->hArea.at(j))*(1-fArea_decr_rel); // gfd("harvestedArea",regId,ft,DIAM_ALL);
         vector<double> corrExpectedReturns(fTypes.size(),0.0); //  corrected expected returns (considering transaction costs). These are in form of  NPV
@@ -815,7 +818,51 @@ ModelCoreSpatial::runManagementModule(){
             thisYearRegAreas[j] +=  fArea_incr*(1-mr)*freq*hRatio; // non-managed quota of new forest area assigning proportionally on pp at sp group level
             //thisYearRegAreas[j2] +=  harvestedAreaForThisFT*(1-mr)*freq*hRatio;
           } else { // prob presence not used..
-            thisYearRegAreas[j] += harvestedAreaForThisFT*(1-mr);
+
+            // Accounting for mortality arising from pathogens. Assigning the area to siblings according to area..
+
+
+            double mortRatePath = px->getPathMortality(ft, "0");
+            if(mortRatePath > 0){
+
+              string parentFt = MTHREAD->MD->getForTypeParentId(ft);
+              vector <string> siblings = MTHREAD->MD->getForTypeChilds(parentFt);
+              vector <double> siblingAreas;
+              for(uint j2=0;j2<siblings.size();j2++){
+                if(siblings[j2]==ft){
+                  siblingAreas.push_back(0.0);
+                } else {
+                  string debug_sibling_ft = siblings[j2];
+                  int debug_positin = getPos(debug_sibling_ft,fTypes);
+                  double thisSiblingArea = vSum(px->area.at(getPos(siblings[j2],fTypes)));
+                  siblingAreas.push_back(thisSiblingArea);
+                }
+              }
+              double areaAllSiblings = vSum(siblingAreas);
+              thisYearRegAreas[j] += harvestedAreaForThisFT*(1-mr)*(1-mortRatePath);
+
+              if(areaAllSiblings>0.0){ // area of siblings is >0: we attribute the area from the pathogen induced mortality to the siblings proportionally to area..
+                for(uint j2=0;j2<siblings.size();j2++){
+//                  int debug1 =  getPos(siblings[j2],fTypes);
+//                  double debug2= harvestedAreaForThisFT;
+//                  double debug3 = 1.0-mr;
+//                  double debug4 = mortRatePath;
+//                  double debug5 = siblingAreas[j2];
+//                  double debug6 = areaAllSiblings;
+//                  double debug7 = harvestedAreaForThisFT*(1.0-mr)*(mortRatePath)*(siblingAreas[j2]/areaAllSiblings);
+                  thisYearRegAreas[getPos(siblings[j2],fTypes)] += harvestedAreaForThisFT*(1.0-mr)*(mortRatePath)*(siblingAreas[j2]/areaAllSiblings);
+                }
+              } else if (siblings.size()>1) { // area of all siblings is 0, we just give them the mortality area in equal parts..
+                for(uint j2=0;j2<siblings.size();j2++){
+                  if (siblings[j2] != ft){
+                    thisYearRegAreas[getPos(siblings[j2],fTypes)] += harvestedAreaForThisFT*(1.0-mr)*(mortRatePath)* 1.0 / (( (float) siblings.size())-1.0);
+                  }
+                }
+              }
+            } else { // mortRatePath == 0
+               thisYearRegAreas[j] += harvestedAreaForThisFT*(1.0-mr);
+            }
+
             // Allocating non-managed quota of new forest area to ft proportionally to the current area share by ft
             double newAreaThisFt = vSum(px->area) ? fArea_incr*(1-mr)*vSum(px->area.at(j))/vSum(px->area): 0.0;
             thisYearRegAreas[j] +=  newAreaThisFt;
@@ -831,9 +878,6 @@ ModelCoreSpatial::runManagementModule(){
       for(uint j=0;j<fTypes.size();j++){
         px->area.at(j).at(0) += thisYearRegAreas.at(j);
       }
-
-
-
 
       #ifdef QT_DEBUG
       double totalRegArea = vSum(thisYearRegAreas);
@@ -1213,6 +1257,7 @@ ModelCoreSpatial::computeCumulativeData(){
 
 
       } // end of each ft
+      double debug = 0.0;
     } // end of each pixel
   } // end of each region
   MD->setErrorLevel(MSG_ERROR);
@@ -1510,6 +1555,7 @@ ModelCoreSpatial::sumRegionalForData(){
         vReg += px->vReg.at(j);
         regArea += findMap(px->regArea,currentYear).at(j);
         pxForArea = (px->getDoubleValue("forArea_"+ft,true)/10000);
+        double pxForArea_debug = vSum(px->area.at(j));
         sumExpReturns += (px->expectedReturns.at(j)* pxForArea);
         sumArea += pxForArea;
         double debug1 = sumArea;
@@ -1519,6 +1565,7 @@ ModelCoreSpatial::sumRegionalForData(){
       }
       sfd(vReg,"vReg",regId,ft,"",DATA_NOW, true);
       sfd(regArea,"regArea",regId,ft,"",DATA_NOW, true);
+      double expReturns_debug = sumExpReturns/sumArea;
       sfd(sumExpReturns/sumArea,"expReturns",regId,ft,"",DATA_NOW, true);
       sfd(sumExpReturns,"sumExpReturns",regId,ft,"",DATA_NOW, true);
       sfd(sumArea,"forArea",regId,ft,"",DATA_NOW, true);
@@ -1819,4 +1866,5 @@ ModelCoreSpatial::loadExogenousForestLayers(const string & what){
     }
   } // end if what is area
 }
+
 

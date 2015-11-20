@@ -91,6 +91,17 @@ ModelData::getForTypeParentId(const string &forTypeId_h){
     msgOut(MSG_CRITICAL_ERROR,"forTypeId "+forTypeId_h+" not found. Aborting.");
 }
 
+vector<string>
+ModelData::getForTypeChilds(const string &forTypeId_h){
+  vector<string> childs;
+  for(int i=0;i<forTypes.size();i++){
+      if(forTypes[i].ereditatedFrom==forTypeId_h) {
+          childs.push_back(forTypes[i].forTypeId);
+      }
+  }
+  return childs;
+}
+
 int
 ModelData::getNForTypesChilds(const string& forTypeId_h){
     int nChilds = 0;
