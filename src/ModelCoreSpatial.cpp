@@ -44,23 +44,24 @@ ModelCoreSpatial::~ModelCoreSpatial(){
 
 void
 ModelCoreSpatial::runInitPeriod(){
-
-  cacheSettings();             ///< cashe things like first year, second year, dClasses...
-  initializePixelVolumes();    ///< compute px volumes vol for 2005 (including exogenous loaded volumes)
-  initMarketModule();          ///< inside it uses first year, second year
+  Pixel* debug = MTHREAD->GIS->getPixel(20798);
+  cacheSettings();                ///< cashe things like first year, second year, dClasses...
+  initializePixelVolumes();       ///< compute px volumes vol for 2005 (including exogenous loaded volumes)
+  assignSpMultiplierPropToVols(); // assign the spatial multiplier (used in the time of return) based no more on a Normal distribution but on the volumes present in the pixel: more volume, more the pixel is fit for the ft
+  initMarketModule();             ///< inside it uses first year, second year
   MTHREAD->DO->print();
-  MTHREAD->SCD->advanceYear(); ///< 2005->2006
+  MTHREAD->SCD->advanceYear();    ///< 2005->2006
   int thisYear = MTHREAD->SCD->getYear(); // for debugging
-  resetPixelValues();          ///< swap volumes->lagged_volumes and reset the other pixel vectors
-  cachePixelExogenousData();   ///< compute pixel tp, meta and mort
-  computeInventary();          ///< in=f(vol_t-1)
-  computeCumulativeData();     ///< compute cumTp_exp, vHa_exp, vHa
-  initializePixelArea();       ///< compute px->area for each ft and dc (including exogenous loaded areas)
-  runBiologicalModule();       //
+  resetPixelValues();             ///< swap volumes->lagged_volumes and reset the other pixel vectors
+  cachePixelExogenousData();      ///< compute pixel tp, meta and mort
+  computeInventary();             ///< in=f(vol_t-1)
+  computeCumulativeData();        ///< compute cumTp_exp, vHa_exp, vHa
+  initializePixelArea();          ///< compute px->area for each ft and dc (including exogenous loaded areas)
+  runBiologicalModule();
   runManagementModule();
-  //MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
-  updateMapAreas();            ///< update the forArea_{ft} layer on each pixel as old value-hArea+regArea
-  sumRegionalForData();        ///< only for printing stats as forest data is never used at regional level
+  MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
+  updateMapAreas();               ///< update the forArea_{ft} layer on each pixel as old value-hArea+regArea
+  sumRegionalForData();           ///< only for printing stats as forest data is never used at regional level
   initialiseCarbonModule();
   MTHREAD->DO->print();
 }
@@ -767,8 +768,6 @@ ModelCoreSpatial::runManagementModule(){
         // C - Computing the corrected expected returns including transaction costs
         for(uint j2=0;j2<fTypes.size();j2++){
           string ft2 = fTypes[j2];
-          //double invTransConstCoeff = gfd("invTransConstCoeff",regId,ft,ft2,DATA_NOW);
-          //corrExpectedReturns[j2] = expectedReturns[j2]*invTransConstCoeff;
           double invTransConst = gfd("invTransConst",regId,ft,ft2,DATA_NOW);
           corrExpectedReturns[j2] = (expectedReturns[j2]/ir)+invTransConst; // changed 20150718: npv = eai/ir + tr. cost
         }
@@ -960,6 +959,109 @@ ModelCoreSpatial::initializePixelVolumes(){
   }
   loadExogenousForestLayers("vol");
 }
+
+/**
+ * @brief ModelCoreSpatial::assignSpMultiplierPropToVols assigns the spatial multiplier (used in the time of return) based no more on a Normal distribution but on the volumes present in the pixel: more volume, more the pixel is fit for the ft
+ *
+ * This function apply to the pixel a multiplier of time of passage that is inversely proportional to the volumes of that forest type present in the pixel.
+ * The idea is that in the spots where we observe more of a given forest type are probabily the most suited ones to it.
+ *
+ * The overall multipliers **of time of passage** (that is, the one returned by Pixel::getMultiplier("tp_multiplier") ) will then be the product of this multiplier that account for spatial heterogeneity and of an eventual exogenous
+ * multiplier that accounts for different scenarios among the spatio-temporal dimensions.
+ *
+ * Given that (forest type index omitted):
+ * - \f$V_{p}\f$ = volume of a given ft in each pixel (p)
+ * - \f$\bar{g}\f$ and \f$\sigma_{g}\f$ = regional average and standard deviation of the growth rate
+ * - \f$m_{p}\f$ = multiplier of time of passage
+ *
+ * This multiplier is computed as:
+ * - \f$ v_{p}    = max(V) - V_{p}~~ \f$                   A diff from the max volume is computed in each pixel
+ * - \f$ vr_{p}   = v_{p} * \bar{g}/\bar{v}~~ \f$          The volume diff is rescaled to match the regional growth rate
+ * - \f$ vrd_{p}  = vr_{p} - \bar{vr}~~ \f$                Deviation of the rescaled volumes are computed
+ * - \f$ vrdr_{p} = vrd_{p} * \sigma_{g}/\sigma_{vr}~~ \f$ The deviations are then rescaled to match the standard deviations of the regional growth rate
+ * - \f$ m_{p}    = (vrdr_{p} + \bar{vr}) / \bar{g}~~ \f$  The multiplier is computed from the ratio of the average rescaled volumes plus rescaled deviation over the average growth rate.
+ *
+ * And it has the following properties:
+ * - \f$\bar{m} = 1\f$
+ * - \f$\sigma_{m} = cv_{g}\f$
+ * - \f$m_{p} = V_{p}*\alpha+\beta\f$
+ * - \f$m_{\bar{V}} = 1\f$
+ *
+ * For spreadsheet "proof" see the file computation_of_growth_multipliers_from_know_avg_sd_and_proportional_to_share_of_area_in_each_pixel.ods
+ */
+void
+ModelCoreSpatial::assignSpMultiplierPropToVols(){
+
+  if(!MTHREAD->MD->getBoolSetting("useSpatialVarPropToVol")){return;}
+  for(uint r=0;r<regIds2.size();r++){
+    int rId = regIds2[r];
+    ModelRegion* reg = MD->getRegion(regIds2[r]);
+    vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[r]);
+    for(uint f=0;f<fTypes.size();f++){
+      string ft = fTypes[f];
+      double agr = gfd("agr",regIds2[r],ft,"");
+      double sStDev = gfd("sStDev",regIds2[r],ft,"");
+      vector<double> vols;
+      vector<double> diffVols;
+      vector<double> diffVols_rescaled;
+      double diffVols_rescaled_deviation;
+      double diffVols_rescaled_deviation_rescaled;
+      double final_value;
+      double multiplier;
+      vector<double> multipliers; // for tests
+
+      double vol_max, rescale_ratio_avg, rescale_ratio_sd;
+      double diffVols_avg, diffVols_rescaled_avg;
+      double diffVols_rescaled_sd;
+
+      for (uint p=0;p<rpx.size();p++){
+        Pixel* px = rpx[p];
+        vols.push_back(vSum(px->vol[f]));
+      } // end for each pixel
+      vol_max=getMax(vols);
+
+      for(uint p=0;p<vols.size();p++){
+        diffVols.push_back(vol_max-vols[p]);
+      }
+
+      diffVols_avg = getAvg(diffVols);
+      rescale_ratio_avg = (diffVols_avg != 0.0) ? agr/diffVols_avg : 1.0;
+      for(uint p=0;p<diffVols.size();p++){
+        diffVols_rescaled.push_back(diffVols[p]*rescale_ratio_avg);
+      }
+      diffVols_rescaled_avg = getAvg(diffVols_rescaled);
+      diffVols_rescaled_sd  = getSd(diffVols_rescaled,false);
+
+      rescale_ratio_sd = (diffVols_rescaled_sd != 0.0) ? sStDev/diffVols_rescaled_sd : 1.0;
+      for(uint p=0;p<diffVols_rescaled.size();p++){
+        diffVols_rescaled_deviation          = diffVols_rescaled[p]    - diffVols_rescaled_avg;
+        diffVols_rescaled_deviation_rescaled = diffVols_rescaled_deviation * rescale_ratio_sd;
+        final_value                      = diffVols_rescaled_avg   + diffVols_rescaled_deviation_rescaled;
+        multiplier = (agr != 0.0) ? min(1.6, max(0.4,final_value/agr)) : 1.0; //20151130: added bounds for extreme cases. Same bonds as in Gis::applySpatialStochasticValues()
+       // multiplier = 1.0;
+
+        Pixel* px = rpx[p];
+        px->setSpModifier(multiplier,f);
+        multipliers.push_back(multiplier);
+      }
+
+      #ifdef QT_DEBUG
+      // Check relaxed as we introduced bounds that may change slighly the avg and sd...
+      double avgMultipliers = getAvg(multipliers);
+      double sdMultipliers  = getSd(multipliers,false);
+      if ( avgMultipliers < 0.9 || avgMultipliers > 1.1){
+        msgOut(MSG_CRITICAL_ERROR, "The average of multipliers of ft "+ ft +" for the region " + i2s(rId) + " is not 1!");
+      }
+      if ( ( sdMultipliers -  (sStDev/agr) ) < -0.5 ||  ( sdMultipliers -  (sStDev/agr) ) > 0.5 ){
+        double cv = sStDev/agr;
+        msgOut(MSG_CRITICAL_ERROR, "The sd of multipliers of ft "+ ft +" for the region " + i2s(rId) + " is not equal to the spatial cv for the region!");
+      }
+      #endif
+    } // end for each ft
+  } // end for each region
+}
+
+
 
 void
 ModelCoreSpatial::initialiseCarbonModule(){
@@ -1834,8 +1936,8 @@ ModelCoreSpatial::loadExogenousForestLayers(const string & what){
             double area_transfer_u0 = area_i_orig?original_areas[pxC_loc][i][0]*(transferred_areas[pxC_loc][i][o]/area_i_orig):0.0;
             px->area_l[i][0] -= area_transfer_u0 ;
             px->area[i][0] = px->area_l[i][0];
-            px->area_l[0][0] += area_transfer_u0 ;
-            px->area[0][0] = px->area_l[0][0];
+            px->area_l[o][0] += area_transfer_u0 ; // bug corrected 20151130: it was 0 instead of o (output) !!
+            px->area[o][0] = px->area_l[0][0];     // bug corrected 20151130: it was 0 instead of o (output) !!
           }
         }
         pxC_loc++;
@@ -1848,9 +1950,9 @@ ModelCoreSpatial::loadExogenousForestLayers(const string & what){
       forType* fti  = MTHREAD->MD->getForType(fti_id);
       int ft_memType = fti->memType;
       string ft_layerName = fti->forLayer;
-      if(ft_memType==3){
-        MTHREAD->GIS->addLayer(ft_layerName,ft_layerName,false,true);
-      }
+      //if(ft_memType==3){
+      //  MTHREAD->GIS->addLayer(ft_layerName,ft_layerName,false,true); //20151130: no needed as we already added it in applyForestReclassification (yes, odd, as memory type 3 layerrs do not have any reclassification rule associated, but if I don't add the layer at that time I got other errors)
+      // }
       if(ft_memType==3 ||ft_memType==2){
         for(uint ir=0;ir<regIds2.size();ir++){
           int r2 = regIds2[ir];

@@ -887,6 +887,7 @@ Output::printDebugPixelValues(){
             out << d;
           }
           out << px->expectedReturns[f] << d;
+          //out << 0.0 << d;
         }
         out << "\n";
         //----

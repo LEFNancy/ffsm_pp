@@ -115,7 +115,7 @@ Gis::setSpace(){
 
 /**
  * Apply all stochastic modifications required by the model at init time.
- * Currently used tu change time of passage devending on regional variance
+ * Currently used to change time of passage devending on regional variance
  **/
 
 void
@@ -306,7 +306,7 @@ Gis::initLayers(){
   //initLayersModelData(DATA_INIT); // only the layers relative to the initial years are inserted now. All the simulation year layers will be added each year before mainSimulationyear()
 }
 
-/** Init the layers of exogenous data at pixel level (e.g. time of passage, multipliers)
+/** Init the layers of exogenous data at pixel level (e.g. time of passage, multipliers, volumes of sp. espl. ft, spread models)
     These layers will then be read from datafile
 */
 void
@@ -497,7 +497,9 @@ Called at init time from initLayers, or during model run-time, this function wil
 */
 void
 Gis::addLayer(string name_h, string label_h, bool isInteger_h, bool dynamicContent_h, string fullFileName_h, bool display_h){
-
+  if(name_h == "forArea_ash"){
+    bool debug = true;
+  }
   for(uint i=0; i<layerVector.size(); i++){
     if (layerVector.at(i).getName() == name_h){
       msgOut(MSG_ERROR, "Layer already exist with that name");

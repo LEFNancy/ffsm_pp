@@ -131,6 +131,28 @@ void
 Sandbox::basicTest(){
 
   /*
+  // Testing standard deviation algorithm, as from http://stackoverflow.com/questions/7616511/calculate-mean-and-standard-deviation-from-a-vector-of-samples-in-c-using-boos
+  vector<double> v;
+  v.push_back(3.0);
+  v.push_back(2.0);
+  v.push_back(5.0);
+  v.push_back(4.0);
+  double sum = std::accumulate(std::begin(v), std::end(v), 0.0);
+  double m =  sum / v.size();
+  double accum = 0.0;
+  std::for_each (std::begin(v), std::end(v), [&](const double d) {
+      accum += (d - m) * (d - m);
+  });
+  double stdev = sqrt(accum / (v.size()-1));
+  cout << stdev << endl;
+  double sd2 = getSd(v);
+  double sd3 = getSd(v,false);
+  cout << sd2 << endl;
+  cout << sd3 << endl;
+  exit(0);
+  */
+
+  /*
   // Testing tokenize, untokenize functions
   vector<string> istrings;
   istrings.push_back("Questo");

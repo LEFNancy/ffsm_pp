@@ -308,13 +308,36 @@ public:
     return (minmax_element(v.begin(), v.end()).first - v.begin());
   }
   /// Returns the value of the maximum element in the vector (the last one in case of multiple equivalent maxima)
-  template <typename K>  int getMax(const vector <K> & v){
+  template <typename K>  K getMax(const vector <K> & v){
     return *minmax_element(v.begin(), v.end()).second;
   }
   /// Returns the value of the minimum element in the vector (the first one in case of multiple equivalent minima)
-  template <typename K>  int getMin (const vector <K> & v){
+  template <typename K>  K getMin (const vector <K> & v){
     return *minmax_element(v.begin(), v.end()).first;
   }
+  /// Returns the average of the elements in the vector
+  template <typename K>  double getAvg (const vector <K> & v){
+    return v.size()==0 ? 0.0 : vSum(v)/ ( (double) v.size() );
+  }
+
+  /** Returns the sd of the elements of a vector. Default to sample sd.
+  *
+  * See http://stackoverflow.com/questions/7616511/calculate-mean-and-standard-deviation-from-a-vector-of-samples-in-c-using-boos
+  * where there is also an example for covariance
+  */
+  template <typename K>  double getSd (const vector <K> & v, bool sample=true){
+    if (v.size()==0) return 0.0;
+    int sampleCorrection = sample==true?1:0;
+    double sum = std::accumulate(std::begin(v), std::end(v), 0.0);
+    double m =  sum / v.size();
+    double accum = 0.0;
+    std::for_each (std::begin(v), std::end(v), [&](const double d) {
+      accum += (d - m) * (d - m);
+    });
+    double stdev = sqrt(accum / ( (double) (v.size()-sampleCorrection)));
+    return stdev;
+  }
+
   template <typename K>  int getPos (const K & element, const vector <K> & v, const int& msgCode_h=MSG_CRITICAL_ERROR){
     for(unsigned int i=0; i<v.size(); i++){
       if(v[i]== element) return i;
