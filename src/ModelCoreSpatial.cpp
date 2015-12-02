@@ -768,8 +768,8 @@ ModelCoreSpatial::runManagementModule(){
         // C - Computing the corrected expected returns including transaction costs
         for(uint j2=0;j2<fTypes.size();j2++){
           string ft2 = fTypes[j2];
-          double invTransConst = gfd("invTransConst",regId,ft,ft2,DATA_NOW);
-          corrExpectedReturns[j2] = (expectedReturns[j2]/ir)+invTransConst; // changed 20150718: npv = eai/ir + tr. cost
+          double invTransCost = gfd("invTransCost",regId,ft,ft2,DATA_NOW);
+          corrExpectedReturns[j2] = (expectedReturns[j2]/ir)-invTransCost; // changed 20150718: npv = eai/ir + tr. cost // HUGE BUG 20151202: transaction costs should be REDUCED, not added to the npv...
         }
 
         //int highestReturnFtIndex = getMaxPos(corrExpectedReturns);
