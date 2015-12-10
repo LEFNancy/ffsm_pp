@@ -137,6 +137,26 @@ ModelData::getScenarioIndex(){
   return 0;
 }
 
+void
+ModelData::setScenarioData(){
+  LLData table = getTable("scenarios");
+  for(int i=0;i<table.nrecords();i++){
+    string recordScenarioName = table.getData(i,"id");
+    if (recordScenarioName == MTHREAD->getScenarioName()){
+      scenario.id             = recordScenarioName;
+      scenario.shortDesc      = table.getData(i,"shortDesc");
+      scenario.longDesc       = table.getData(i,"longDesc");
+      scenario.settingTable   = table.getData(i,"settingTable");
+      scenario.forDataTable   = table.getData(i,"forDataTable");
+      scenario.prodDataTable  = table.getData(i,"prodDataTable");
+      scenario.forToProdTable = table.getData(i,"forToProdTable");
+      scenario.pathTable      = table.getData(i,"pathTable");
+      return;
+    }
+  }
+
+
+}
 
 void 
 ModelData::setDefaultSettings(){
@@ -201,11 +221,10 @@ ModelData::setDefaultSettings(){
 void
 ModelData::setScenarioSettings(){
 
-  string scenarioName = MTHREAD->getScenarioName();
-  LLData table = getTable(scenarioName+"_settings", MSG_WARNING); //this scenario could not have an associated setting sheet
-  if(table.getTableName() == "") return;
-  int nheaders = table.nheaders();
+  if(scenario.settingTable=="") {return;}
+  LLData table = getTable(scenario.settingTable, MSG_CRITICAL_ERROR); //this scenario could not have an associated setting sheet
 
+  int nheaders = table.nheaders();
   for(int i=0; i< table.nrecords(); i++){
     BasicData SETT;
     string name = table.getData(i,"name");
@@ -424,11 +443,10 @@ ModelData::setDefaultForData(){
 void
 ModelData::setScenarioForData(){
 
-  string scenarioName = MTHREAD->getScenarioName();
-  LLData table = getTable(scenarioName+"_forData", MSG_NO_MSG); //this scenario could not have an associated setting sheet
-  if(table.getTableName() == "") return;
-  int nheaders = table.nheaders();
+  if(scenario.forDataTable==""){return;}
+  LLData table = getTable(scenario.forDataTable, MSG_CRITICAL_ERROR);
 
+  int nheaders = table.nheaders();
   for(int i=0; i< table.nrecords(); i++){
     bool found = false;
         string key = makeKeyForData(table.getData(i,"parName"),table.getData(i,"region"),table.getData(i,"forType"),table.getData(i,"freeDim"));
@@ -486,11 +504,10 @@ ModelData::setDefaultProdData(){
 void
 ModelData::setScenarioProdData(){
 
-  string scenarioName = MTHREAD->getScenarioName();
-  LLData table = getTable(scenarioName+"_prodData", MSG_NO_MSG); //this scenario could not have an associated setting sheet
-  if(table.getTableName() == "") return;
-  int nheaders = table.nheaders();
+  if(scenario.prodDataTable==""){return;}
+  LLData table = getTable(scenario.prodDataTable, MSG_CRITICAL_ERROR); //this scenario could not have an associated setting sheet
 
+  int nheaders = table.nheaders();
   for(int i=0; i< table.nrecords(); i++){
     //prodData PDATA;
     bool found = false;
@@ -541,9 +558,25 @@ ModelData::setScenarioProdData(){
 }
 
 void
-ModelData::setProductResourceMatrixLink(){
+ModelData::setDefaultProductResourceMatrixLink(){
   msgOut(MSG_DEBUG,"Loading forest resource to primary products io matrix..");
   LLData table = getTable("forToProd");
+  for (int i=0; i< table.nrecords();i++){
+    forToProd F2PDATA;
+    F2PDATA.product = table.getData(i,"product");
+    F2PDATA.forType = table.getData(i,"forType");
+    F2PDATA.dClass = table.getData(i,"dClass");
+    forToProdVector.push_back(F2PDATA);
+  }
+}
+
+void
+ModelData::setScenarioProductResourceMatrixLink(){
+  if(scenario.forToProdTable==""){return;}
+  LLData table = getTable(scenario.forToProdTable, MSG_CRITICAL_ERROR); //this scenario could not have an associated setting sheet
+
+  int nheaders = table.nheaders();
+  forToProdVector.clear();
   for (int i=0; i< table.nrecords();i++){
     forToProd F2PDATA;
     F2PDATA.product = table.getData(i,"product");
@@ -584,7 +617,7 @@ ModelData::setReclassificationRules(){
 }
 
 void
-ModelData::loadPathogenRules(){
+ModelData::setDefaultPathogenRules(){
 
   if(!getBoolSetting("usePathogenModule")) return;
   msgOut(MSG_DEBUG,"Loading pathogen rules..");
@@ -611,6 +644,47 @@ ModelData::loadPathogenRules(){
   }
 }
 
+void
+ModelData::setScenarioPathogenRules(){
+
+  if(scenario.pathTable==""){return;}
+  LLData table = getTable(scenario.pathTable, MSG_CRITICAL_ERROR); //this scenario could not have an associated setting sheet
+
+  int nheaders = table.nheaders();
+  for (int i=0; i< table.nrecords();i++){
+    pathRule PR;
+    PR.forType = table.getData(i,"forType");
+    PR.dClass = table.getData(i,"dClass");
+    PR.pathId = table.getData(i,"path_name");
+    PR.pres_min = s2d(table.getData(i,"pres_min"));
+
+    vector <double> values;
+    for (int z=0;z<nheaders-4;z++){ // don't consider forType, dClass, path_name and pres_min  headers
+      string toSearch = "year_"+i2s(z);
+      string value = table.getData(i,toSearch);
+      if (value != ""){
+        values.push_back(s2d(value));
+      }
+    }
+    PR.mortCoefficents = values;
+
+    bool found = false;
+    for(uint i=0;i<pathRules.size();i++){
+      if(    pathRules[i].forType == PR.forType
+          && pathRules[i].dClass == PR.dClass
+          && pathRules[i].pathId == PR.pathId
+         ){
+        pathRules[i].pres_min = PR.pres_min;
+        pathRules[i].mortCoefficents = PR.mortCoefficents;
+        found = true;
+        break;
+      }
+    }
+    if(!found){
+      pathRules.push_back(PR);
+    }
+  } // end for each table record
+}
 
 /// Cancel all reg1 level data and trasform them in reg2 level if not already existing
 void

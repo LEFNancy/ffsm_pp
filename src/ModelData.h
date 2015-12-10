@@ -56,6 +56,17 @@ struct reclRule;
 struct pathRule;
 struct forType;
 
+struct scenarioData {
+  string                                            id;
+  string                                     shortDesc;
+  string                                      longDesc;
+  string                                  settingTable;
+  string                                  forDataTable;
+  string                                 prodDataTable;
+  string                                forToProdTable;
+  string                                     pathTable;
+};
+
 /// Regional data, including macros and settings
 
 /**
@@ -77,6 +88,7 @@ public:
   vector<string>      getScenarios();
   int                 getScenarioIndex();
   bool                delDir(QString dirname); ///< Recursivelly delete a directory 
+  void                setScenarioData(); ///< Set the infos about this scenario (long description and overriding tables)
   void                setDefaultSettings();
   void                setScenarioSettings();
   void                createRegions();
@@ -84,10 +96,12 @@ public:
   void                setScenarioForData();
   void                setDefaultProdData();
   void                setScenarioProdData();
-  void                setProductResourceMatrixLink();
+  void                setDefaultProductResourceMatrixLink();
+  void                setScenarioProductResourceMatrixLink();
   void                setForestTypes();
   void                setReclassificationRules();
-  void                loadPathogenRules();
+  void                setDefaultPathogenRules();
+  void                setScenarioPathogenRules();
   void                applyOverrides(); ///< Cancel all reg1 level data and trasform them in reg2 level if not already existing
   void                applyDebugMode(); ///< Works only a specified subset of regions and products
   void                setSpace();
@@ -162,6 +176,7 @@ public:
   void                setBasicData(const string &name_h, bool value, int position=0);
   friend void         Output::printForestData(bool finalFlush=false);
   friend void         Output::printProductData(bool finalFlush=false);
+  scenarioData        scenario;
 
 private:
   string              getBaseData (const string &name_h, int type_h, int position=0);
@@ -281,7 +296,6 @@ struct pathRule {
   double                                      pres_min;  ///< Minimum level of presence of the pathogen to be counted as present (tolerance threshold)
   vector<double>                       mortCoefficents;  ///< Mortality coefficients ordered by number of presence of the pathogen, e.g. first value is the mortality increase in the first year of pathogen appareance.
 };
-
 
 
 

@@ -98,6 +98,8 @@ Init::setInitLevel1(){
   current = localtime(&now);
   string timemessage = "Local time is "+i2s(current->tm_hour)+":"+i2s(current->tm_min)+":"+ i2s(current->tm_sec);
   msgOut(MSG_INFO, timemessage);
+  string scenarioName = MTHREAD->getScenarioName();
+  MTHREAD->MD->setScenarioData(); // set the characteristics (including overriding tables of the scneario)
   MTHREAD->MD->setDefaultSettings();
   MTHREAD->MD->setScenarioSettings();
   if(MTHREAD->MD->getBoolSetting("newRandomSeed")){
@@ -114,8 +116,8 @@ Init::setInitLevel1(){
     //TO.DO change scenarioname to scenarioname_random number
     uniform_int_distribution<> ud(1, 1000000);
     int randomscenario = ud(*MTHREAD->gen);
-    string oldScenarioName = MTHREAD->getScenarioName();
-    MTHREAD->setScenarioName(oldScenarioName+"_"+i2s(randomscenario));
+
+    MTHREAD->setScenarioName(scenarioName+"_"+i2s(randomscenario));
 
   } else {
     MTHREAD->gen = new std::mt19937(NULL);
@@ -130,9 +132,11 @@ Init::setInitLevel1(){
   MTHREAD->MD->setScenarioProdData();
   MTHREAD->MD->setForestTypes();
   MTHREAD->MD->setReclassificationRules();
-  MTHREAD->MD->applyOverrides();
-  MTHREAD->MD->loadPathogenRules(); // after applyOverrides as I am not loading anything if usePathogenModule option is false
-  MTHREAD->MD->setProductResourceMatrixLink();
+  MTHREAD->MD->applyOverrides(); // Cancel all reg1 level data and trasform them in reg2 level if not already existing. Acts on forDataMap, prodDataMap and reclRules vectors
+  MTHREAD->MD->setDefaultPathogenRules();
+  MTHREAD->MD->setScenarioPathogenRules();
+  MTHREAD->MD->setDefaultProductResourceMatrixLink();
+  MTHREAD->MD->setScenarioProductResourceMatrixLink();
   MTHREAD->MD->applyDebugMode();
   MTHREAD->GIS->setSpace();
   MTHREAD->GIS->applyForestReclassification();
