@@ -55,6 +55,7 @@ ModelCoreSpatial::runInitPeriod(){
   resetPixelValues();             ///< swap volumes->lagged_volumes and reset the other pixel vectors
   cachePixelExogenousData();      ///< compute pixel tp, meta and mort
   computeInventary();             ///< in=f(vol_t-1)
+  //printDebugInitRegionalValues();
   computeCumulativeData();        ///< compute cumTp_exp, vHa_exp, vHa
   initializePixelArea();          ///< compute px->area for each ft and dc (including exogenous loaded areas)
   runBiologicalModule();
@@ -202,7 +203,6 @@ ModelCoreSpatial::initMarketModule(){
       }
     }
   } // end of r1 region
-
 }
 
 void
@@ -866,7 +866,8 @@ ModelCoreSpatial::runManagementModule(){
             double newAreaThisFt = vSum(px->area) ? fArea_incr*(1-mr)*vSum(px->area.at(j))/vSum(px->area): 0.0;
             thisYearRegAreas[j] +=  newAreaThisFt;
             if(! (thisYearRegAreas[j] >= 0.0) ){
-              msgOut(MSG_ERROR,"thisYearRegAreas[j] is not non negative.");
+              msgOut(MSG_DEBUG,i2s(j));
+              msgOut(MSG_ERROR,"thisYearRegAreas[j] is not non negative .");
             }
             //thisYearRegAreas[j2] += harvestedAreaForThisFT*(1-mr);
           }
@@ -1970,3 +1971,22 @@ ModelCoreSpatial::loadExogenousForestLayers(const string & what){
 }
 
 
+void
+ModelCoreSpatial::printDebugInitRegionalValues(){
+  // Print debug stats on inventory and supplies in each region..
+  cout << "Printing debug information on initial regional inventories and supplies.." << endl;
+  cout << "Reg\tProduct\tInv\St\Sa\tSl" << endl;
+  for(uint r1=0;r1<l2r.size();r1++){
+    for(uint r2c=0;r2c<l2r[r1].size();r2c++){
+      for(uint p=0;p<priProducts.size();p++){
+        int r2 = l2r[r1][r2c];
+        double inv = gpd("in",r2,priProducts[p],secondYear);
+        double st = gpd("st",r2,priProducts[p],secondYear);
+        double sl = gpd("sl",r2,priProducts[p],secondYear);
+        double sa = gpd("sa",r2,priProducts[p],secondYear);
+        cout << r2 << "\t" << priProducts[p] << "\t" << inv << "\t" << st << "\t" << sl << "\t" << sa << endl;
+      }
+    }
+  } // end of r1 region
+
+}

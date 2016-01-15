@@ -279,7 +279,7 @@ Output::initDebugPixelValues(){
 
 void
 Output::initOutputForestData(){
-  if(oLevel<OUTVL_AGGREGATED) return;
+  if(oLevel<OUTVL_DETAILED) return;
 
   if(oSingleFile){
     outFileName = baseDir+oDir+"results/forestData"+oFileExt;
@@ -311,7 +311,7 @@ Output::initOutputForestData(){
 
 void
 Output::initOutputProductData(){
-  if(oLevel<OUTVL_AGGREGATED) return;
+  if(oLevel<OUTVL_DETAILED) return;
 
   if(oSingleFile){
     outFileName = baseDir+oDir+"results/productData"+oFileExt;

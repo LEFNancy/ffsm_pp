@@ -8,10 +8,16 @@
 # It can be run in parallel using GNU parallel:
 # parallel --jobs <n of jobs> -a this_file.sh 
 
-# 2015 workshop du lef paper scenarios
-./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'withAshPath'
-./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'withoutAshPath'
-
+./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P0-Mh-Ei'
+./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P1-Mh-Ei'
+./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P0-Mi-Ei'
+./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P1-Mi-Ei'
+./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P0-Me-Ei'
+./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P1-Me-Ei'
+./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P0-Mi-E0'
+./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P1-Mi-E0'
+./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P0-Mi-E1'
+./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P1-Mi-E1'
 
 
 

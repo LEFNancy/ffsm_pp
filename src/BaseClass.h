@@ -79,9 +79,9 @@ enum dataRequest {
 /// Verbosity level of the output
 enum outputVerbosity {
   OUTVL_NONE             =0,             ///< Output verbosity level none
-  OUTVL_MAPS             =5,             ///< Output verbosity level print the maps
-  OUTVL_AGGREGATED       =10,            ///< Output verbosity level print (also) aggregated output
+  OUTVL_AGGREGATED       =10,            ///< Output verbosity level print aggregated output (e.g. optimisation log)
   OUTVL_DETAILED         =15,            ///< Output verbosity level print (also) detailed output
+  OUTVL_MAPS             =18,            ///< Output verbosity level print (also) the maps in ascii grid format
   OUTVL_BINMAPS          =20,            ///< Output verbosity level print (also) binary (png) maps
   OUTVL_ALL              =25,            ///< Output verbosity level print everything
 };

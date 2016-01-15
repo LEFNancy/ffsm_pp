@@ -90,7 +90,7 @@ public:
   void                  computeCumulativeData();  ///< computes cumTp_exp, vHa_exp, vHa
   void                  updateMapAreas();         ///< computes forArea_{ft}
   double                computeExpectedPrice(const double & curLocPrice, const double & worldCurPrice, const double & worldFutPrice, const double & sl, const double & sa, const double & expCoef); ///< Compute weighted expected price for a given product.
-
+  void                  printDebugInitRegionalValues(); ///< print initial inv, st, sl and sa in each region
 
   void                  loadExogenousForestLayers(const string & what); ///< Set pixel volumes (what="vol") OR areas (what="area") by specific forest types as defined in gis layers for volumes and proportionally to volumes for areas.
 
