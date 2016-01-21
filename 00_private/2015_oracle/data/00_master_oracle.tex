@@ -1,6 +1,7 @@
 %paper also and it is very nice !
 \documentclass[a4paper,11pt]{paper}
 
+\usepackage[a4paper,margin=1in,landscape]{geometry}
 \usepackage{graphicx}
 %\usepackage{float}% If comment this, figure moves
 \usepackage{mwe}    % loads »blindtext« and »graphicx«
@@ -22,6 +23,9 @@
 \usepackage{html,htmllist} % don't think will be needed
 \usepackage{hyperref}
 \usepackage{mhchem} % for \ce{CO2}
+
+\setlength{\pdfpagewidth}{\paperwidth}
+\setlength{\pdfpageheight}{\paperheight}
 
 \bibliographystyle{agsmurl}  % bibliographic style
 
@@ -55,11 +59,11 @@ This document is generated automatically trough a script directly from the model
 \thispagestyle{empty}
 \newpage
 \part[Tables]{Output tables}
-\input{output_oracle/tables/00_master_tables}
+\input{output/tables/00_master_tables}
 \clearpage
 \newpage
 \part[Charts]{Output charts}
-\input{output_oracle/charts/00_master_charts}
+\input{output/charts/00_master_charts}
 
 
 %\newpage

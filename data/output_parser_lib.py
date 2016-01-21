@@ -350,6 +350,48 @@ def plotLegend(scenarios_h, title, filename):
 #plt.show() 
 
 # =============================================================================
+def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename):
+ a=plt.figure()
+ ax = plt.gca()
+ fig = plt.gcf()
+ flag_2d = True
+ if(origin[0] == end1[0] == endt[0]):
+   flag_2d = False;
+   fig.set_size_inches(6,10)
+ else:
+   fig.set_size_inches(10,10)
+ end2 = (endt[0]-end1[0]+origin[0],endt[1]-end1[1]+origin[1])
+ minx = min(origin[0],end1[0],end2[0],endt[0])
+ maxx = max(origin[0],end1[0],end2[0],endt[0])
+ miny = min(origin[1],end1[1],end2[1],endt[1])
+ maxy = max(origin[1],end1[1],end2[1],endt[1])
+ centre = (((maxx-minx)/2)+minx,((maxy-miny)/2)+miny)
+ X  = (origin[0], origin[0], origin[0])
+ Y  = (origin[1], origin[1], origin[1])
+ X2 = (end1[0]-origin[0], endt[0]-origin[0], end2[0]-origin[0]) 
+ Y2 = (end1[1]-origin[1], endt[1]-origin[1], end2[1]-origin[1])
+ C  = (255,010,150) # ? colour codes, but didn't got it
+
+ ax.quiver(X,Y,X2,Y2,C,angles='xy',scale_units='xy',scale=1, width=0.008)
+ x  = (end1[0],end2[0])
+ y  = (end1[1],end2[1])
+ x2 = (endt[0]-end1[0], endt[0]-end2[0])
+ y2 = (endt[1]-end1[1], endt[1]-end2[1])
+ 
+ if(flag_2d):
+   ax.quiver(x,y,x2,y2,angles='xy',scale_units='xy',scale=1, width=0.005, color='gray')
+   ax.set_xlim([minx- (centre[0]-minx)*0.4, maxx + (maxx-centre[0])*0.4])
+
+ ax.set_ylim([miny- (centre[1]-miny)*0.4, maxy + (maxy-centre[1])*0.4])
+
+ plt.xlabel(unicode(xlabel, 'utf_8'))
+ plt.ylabel(unicode(ylabel, 'utf_8'))
+ # Uncomment the following lines if you want to display instead of save the figure..
+ #plt.draw()
+ #plt.show()
+ plt.savefig(filename, dpi=300)
+ 
+# =============================================================================
 def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename, singleComparation=True, refYear=0):
   d = " & "
   el = " \\\\"
@@ -523,6 +565,11 @@ def printAATable(ref_scenarios, comparing_scenarios, regions_h, years_h, title, 
 # =============================================================================
 def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year_end, title, filename, avg=False, singleComparation=True ) :
   #Print carbon balance
+  # @params:
+  # avg:               true  => output is the yearly average in the period,
+  #                    false => output is the difference between year_start and year_end
+  # singleComparation: true  => comparing scenarios are seens as repetition of a unique scenario, hence stats on their variance is performed,
+  #                    false => each comparing scenarios is presented indipendently 
   d = " & "
   el = " \\\\"
   
@@ -553,7 +600,7 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
     label_comparing_scenario = labels_comparing_scenarios[0]
     
   if (singleComparation):
-    if nscen > 5:
+    if nscen > 2:
       ncol = 5
   else:
     ncol = nscen+2 
@@ -571,7 +618,7 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
   oString += "\\hline\n"
   
   if (singleComparation):
-    if nscen > 5:
+    if nscen > 2:
       oString += d+"\\texttt{"+label_ref_scenario+"}"+d+"\\texttt{"+label_comparing_scenario+"}"+d+"difference"+d+"cv"+el+"\n"  
     else:
       oString += d+"\\texttt{"+label_ref_scenario+"}"+d+"\\texttt{"+label_comparing_scenario+"}"+d+"difference"+el+"\n"
@@ -615,7 +662,7 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
   oString += "\\end{tabularx}\n"
   oString += "\\end{footnotesize}\n"
   oString += "\\label{tab:"+filename+"}\n"
-  if (singleComparation and nscen > 5):
+  if (singleComparation and nscen > 2):
     oString += "\\begin{tablenotes}\n"
     oString += "\\begin{footnotesize}\n"
     oString += "\\item [a] Significantly different from 0 at $\\alpha=0.01$\n"
@@ -646,7 +693,7 @@ def printTableRecord(cvar_label, d, el, nscen, valRScenario, valCScenarios, sing
     avgCScenarios = sum(valCScenarios) / float(nscen)
     scenarioDiff = avgCScenarios-valRScenario
     scenarioRelativeDiff = 100 * scenarioDiff/valRScenario if valRScenario else 0.0
-    if nscen > 5:
+    if nscen > 2:
       significance = ""
       qdiffCScenarios = [0] * nscen
       sumqdiffCScenarios = 0
@@ -672,6 +719,8 @@ def printTableRecord(cvar_label, d, el, nscen, valRScenario, valCScenarios, sing
     oString += el + '\n'
   return oString
 
+
+ 
 # =============================================================================
 def title (cat, level, title):
   filename = ""
