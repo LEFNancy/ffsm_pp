@@ -63,12 +63,12 @@ public:
   void                swap(const int& swap_what);
 
   // "get" methods..
-  int                 getRegId() {return regId;};
-  string              getRegSName() {return regSName;};
-  string              getRegLName() {return regLName;};
-  int                 getRegLevel() {return regLevel;};
-  int                 getParRegId() {return parRegId;};
-  bool                getIsResidual() {return isResidual;};
+  int                 getRegId()      const {return regId;};
+  string              getRegSName()   const {return regSName;};
+  string              getRegLName()   const {return regLName;};
+  int                 getRegLevel()   const {return regLevel;};
+  int                 getParRegId()   const {return parRegId;};
+  bool                getIsResidual() const {return isResidual;};
   ModelRegion*        getParent(){return parRegion;}; ///< Returns a pointer to the parent regions
   vector<ModelRegion*>getChildren(bool excludeResidual = true); ///< Return a vector of pointers to the direct child regions
   double              getVolumes();

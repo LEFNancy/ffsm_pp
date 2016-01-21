@@ -114,6 +114,7 @@ public:
   vector <IFiles>     getIFilesVector() const {return iFilesVector;}
   string              getBaseDirectory() const {return baseDirectory;}
   ModelRegion*        getRegion(int regId_h);
+  bool                regionExist (const int & regId_h) const ;
   vector <ModelRegion*> getAllRegions(bool excludeResidual=true);
   vector<int>         getRegionIds(int level_h, bool excludeResidual=true);
   vector < vector <int> > getRegionIds( bool excludeResidual=true);

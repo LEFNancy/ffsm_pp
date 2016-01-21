@@ -354,6 +354,16 @@ ModelData::getRegion(int regId_h){
   msgOut(MSG_CRITICAL_ERROR, "Region id "+i2s(regId_h)+" not found, check your input data. Aborting simulation.");
 }
 
+bool
+ModelData::regionExist (const int & regId_h) const {
+  for (int i=0; i< regionsVector.size();i++){
+    if(regionsVector[i].getRegId()==regId_h){
+      return true;
+    }
+  }
+  return false;
+}
+
 vector <int>
 ModelData::getRegionIds(int level_h, bool excludeResidual){
   vector <int> toReturn;
@@ -705,6 +715,7 @@ ModelData::applyOverrides(){
   keysToRemove.clear();
   for(p=forDataMap.begin();p!=forDataMap.end();p++){
     unpackKeyForData(p->first,parName,regId,forType,diamClass);
+    if(!regionExist(regId)) continue;
     if(getRegion(regId)->getRegLevel() == 0){
       vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
       for(uint j=0;j<childs.size();j++){
@@ -733,6 +744,7 @@ ModelData::applyOverrides(){
   keysToRemove.clear();
   for(p=forDataMap.begin();p!=forDataMap.end();p++){
     unpackKeyForData(p->first,parName,regId,forType,diamClass);
+    if(!regionExist(regId)) continue;
     if(getRegion(regId)->getRegLevel() == 1){
       vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
       for(uint j=0;j<childs.size();j++){
@@ -758,6 +770,7 @@ ModelData::applyOverrides(){
   keysToRemove.clear();
   for(p=prodDataMap.begin();p!=prodDataMap.end();p++){
     unpackKeyProdData(p->first,parName,regId,prod,freeDim);
+    if(!regionExist(regId)) continue;
     if(getRegion(regId)->getRegLevel() == 0){
       vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
       for(uint j=0;j<childs.size();j++){
@@ -787,6 +800,7 @@ ModelData::applyOverrides(){
   for(p=prodDataMap.begin();p!=prodDataMap.end();p++){
     string debug = p->first;
     unpackKeyProdData(p->first,parName,regId,prod,freeDim);
+    if(!regionExist(regId)) continue;
     if(getRegion(regId)->getRegLevel() == 1){
       vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
       for(uint j=0;j<childs.size();j++){
@@ -840,6 +854,7 @@ ModelData::applyOverrides(){
 
   //apply override from level 1 to level 2 for reclassification rules
   for(uint i=0;i<reclRules.size();i++){
+    if(!regionExist(reclRules[i].regId)) continue;
     if(getRegion(reclRules[i].regId)->getRegLevel() == 1){
       for(uint j=0;j<getRegion(reclRules[i].regId)->getNChildren(false);j++){
         vector<ModelRegion*> childs = getRegion(reclRules[i].regId)->getChildren(false);
