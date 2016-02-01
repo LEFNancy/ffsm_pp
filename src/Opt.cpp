@@ -66,16 +66,16 @@ Opt::declareVariables(){
     // syntax: declareVariable("name", domainType, lbound[default=0], ubound[default= +inf], variable defining lower bounds[default=""], variable defining upper bound[default=""])
 
     // all variables have upper or equal than zero bound:
-    declareVariable("da", DOM_SEC_PR);
-    declareVariable("dc", DOM_SEC_PR);
-    declareVariable("dl", DOM_ALL_PR);
-    declareVariable("pc", DOM_ALL_PR);
-    declareVariable("pl", DOM_ALL_PR);
-    declareVariable("rt", DOM_R2_ALL_PR); // regional trade, it was exp in gams
-    declareVariable("sa", DOM_PRI_PR);
-    declareVariable("sc", DOM_PRI_PR);
-    declareVariable("sl", DOM_ALL_PR);
-    //declareVariable("st", DOM_PRI_PR,0.0,UBOUND_MAX,"","in");
+    declareVariable("da", DOM_SEC_PR,    "Demand from abroad (imports)");
+    declareVariable("dc", DOM_SEC_PR,    "Demand, composite");
+    declareVariable("dl", DOM_ALL_PR,    "Demand from local");
+    declareVariable("pc", DOM_ALL_PR,    "Price, composite");
+    declareVariable("pl", DOM_ALL_PR,    "Price, local") ;
+    declareVariable("rt", DOM_R2_ALL_PR, "Regional trade"); //it was exp in gams
+    declareVariable("sa", DOM_PRI_PR,    "Supply to abroad (exports)");
+    declareVariable("sc", DOM_PRI_PR,    "Supply, composite");
+    declareVariable("sl", DOM_ALL_PR,    "Supply to locals");
+    //declareVariable("st", DOM_PRI_PR, "Supply, total", 0.0,UBOUND_MAX,"","in");
 }
 /**
 Declare the constrains and their properties. For the domain type @see BaseClass
@@ -368,7 +368,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
   CONSTRAIN_START_LOOP(priPr,7)
     ff = gpd("ff",l2r[r1][r2],priPr[p]);
     sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p]);
-    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma);
+    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma)-20.0;
   CONSTRAIN_END_LOOP
 
 
@@ -1702,7 +1702,7 @@ Opt::mymax ( const T& a, const T& b ){
  */
 
 void
-Opt::declareVariable(const string &name, const int & domain, const double & l_bound, const double & u_bound, const string & l_bound_var, const string & u_bound_var){
+Opt::declareVariable(const string &name, const int & domain, const string &desc, const double & l_bound, const double & u_bound, const string & l_bound_var, const string & u_bound_var){
    endvar end_var;
    end_var.name = name;
    end_var.domain = domain;
@@ -1710,6 +1710,7 @@ Opt::declareVariable(const string &name, const int & domain, const double & l_bo
    end_var.u_bound = u_bound;
    end_var.l_bound_var = l_bound_var;
    end_var.u_bound_var = u_bound_var;
+   end_var.desc= desc;
    vars.insert(std::pair<std::string, endvar >(name, end_var));
 }
 /**

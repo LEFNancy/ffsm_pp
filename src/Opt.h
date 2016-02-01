@@ -141,7 +141,7 @@ public:
 
   // **************   start FFSM part ************************************
   void                declareVariables(); ///< declare the variables, their domains and their bounds
-  void                declareVariable(const string &name, const int & domain, const double & l_bound=0.0, const double & u_bound=UBOUND_MAX, const string & l_bound_var="", const string & u_bound_var="");  ///< Declare a single variable, its domain and its bounds
+  void                declareVariable(const string &name, const int & domain, const string &desc= "", const double & l_bound=0.0, const double & u_bound=UBOUND_MAX, const string & l_bound_var="", const string & u_bound_var="");  ///< Declare a single variable, its domain and its bounds
   void                declareConstrains(); ///< declare the constrains, their domain, their direction and their associated evaluation function
   void                cacheInitialPosition(); ///< cache the initial positions of the variables and the constrains
   void                calculateNumberVariablesConstrains(); ///< calculate the number of variables and constrains
@@ -276,6 +276,7 @@ struct constrain{
 struct endvar{
   string                                    name;
   int                                     domain;
+  string                                    desc; ///< Description of the variable
   double                                 l_bound; ///< A fixed numerical lower bound for all the domain
   double                                 u_bound; ///< A fixed numerical upper bound for all the domain
   string                             l_bound_var; ///< A variable giving the lower bound. If present, the value defined in the variable overrides l_bound.
