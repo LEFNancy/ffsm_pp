@@ -368,7 +368,8 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
   CONSTRAIN_START_LOOP(priPr,7)
     ff = gpd("ff",l2r[r1][r2],priPr[p]);
     sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p]);
-    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma)-20.0;
+ //   g[cix] = x[gix("sc",r1,r2,p)]-mymax(ff*pow(x[gix("pc",r1,r2,p)],sigma),3.0);
+    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma);
   CONSTRAIN_END_LOOP
 
 
@@ -445,6 +446,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     for(uint i=0;i<priPrCombs[p].size();i++){
       g[cix] += x[gix("sa",r1,r2,priPrCombs[p][i])]+x[gix("sl",r1,r2,priPrCombs[p][i])];
     }
+   // g[cix] -= 200.0;
   CONSTRAIN_END_LOOP
 
   return true;

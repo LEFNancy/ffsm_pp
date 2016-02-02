@@ -55,7 +55,7 @@ ModelCoreSpatial::runInitPeriod(){
   resetPixelValues();             ///< swap volumes->lagged_volumes and reset the other pixel vectors
   cachePixelExogenousData();      ///< compute pixel tp, meta and mort
   computeInventary();             ///< in=f(vol_t-1)
-  //printDebugInitRegionalValues();
+//printDebugInitRegionalValues();
   computeCumulativeData();        ///< compute cumTp_exp, vHa_exp, vHa
   initializePixelArea();          ///< compute px->area for each ft and dc (including exogenous loaded areas)
   runBiologicalModule();
@@ -210,6 +210,7 @@ ModelCoreSpatial::runMarketModule(){
   msgOut(MSG_INFO, "Starting market module");
   int thisYear     =  MTHREAD->SCD->getYear();
   int previousYear = MTHREAD->SCD->getYear()-1;
+
   // *** PRE-OPTIMISATION YEARLY OPERATIONS..
   for(uint i=0;i<regIds2.size();i++){
     int r2 = regIds2[i];
@@ -512,7 +513,7 @@ ModelCoreSpatial::runBiologicalModule(){
           for(uint pp=0;pp<priProducts.size();pp++){
             double st = gpd("st",r2,priProducts[pp]);
             double in = gpd("in",r2,priProducts[pp]);
-            double hr_pr = app(priProducts[pp],ft,dc)*st/ in;
+            double hr_pr = in ? app(priProducts[pp],ft,dc)*st/in : 0.0;
             hr += hr_pr;
             hV_byPrd.push_back( hr_pr*pastYearVol*px->avalCoef);
           }
@@ -1975,7 +1976,7 @@ void
 ModelCoreSpatial::printDebugInitRegionalValues(){
   // Print debug stats on inventory and supplies in each region..
   cout << "Printing debug information on initial regional inventories and supplies.." << endl;
-  cout << "Reg\tProduct\tInv\St\Sa\tSl" << endl;
+  cout << "Reg\tProduct\t\tInv\tSt\tSa\tSl" << endl;
   for(uint r1=0;r1<l2r.size();r1++){
     for(uint r2c=0;r2c<l2r[r1].size();r2c++){
       for(uint p=0;p<priProducts.size();p++){
@@ -1984,9 +1985,10 @@ ModelCoreSpatial::printDebugInitRegionalValues(){
         double st = gpd("st",r2,priProducts[p],secondYear);
         double sl = gpd("sl",r2,priProducts[p],secondYear);
         double sa = gpd("sa",r2,priProducts[p],secondYear);
-        cout << r2 << "\t" << priProducts[p] << "\t" << inv << "\t" << st << "\t" << sl << "\t" << sa << endl;
+        cout << r2 << "\t" << priProducts[p] << "\t\t" << inv << "\t" << st << "\t" << sl << "\t" << sa << endl;
       }
     }
   } // end of r1 region
+  exit(0);
 
 }
