@@ -368,8 +368,9 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
   CONSTRAIN_START_LOOP(priPr,7)
     ff = gpd("ff",l2r[r1][r2],priPr[p]);
     sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p]);
- //   g[cix] = x[gix("sc",r1,r2,p)]-mymax(ff*pow(x[gix("pc",r1,r2,p)],sigma),3.0);
+    //g[cix] = x[gix("sc",r1,r2,p)]-mymax(ff*pow(x[gix("pc",r1,r2,p)],sigma),0.001);
     g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma);
+    //g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma-0.0001);
   CONSTRAIN_END_LOOP
 
 
@@ -446,7 +447,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     for(uint i=0;i<priPrCombs[p].size();i++){
       g[cix] += x[gix("sa",r1,r2,priPrCombs[p][i])]+x[gix("sl",r1,r2,priPrCombs[p][i])];
     }
-   // g[cix] -= 200.0;
+//    g[cix] -= 0.01;
   CONSTRAIN_END_LOOP
 
   return true;
@@ -1727,7 +1728,7 @@ Opt::declareVariable(const string &name, const int & domain, const string &desc,
  */
 vector < vector <int> >
 Opt::createCombinationsVector(const int& nItems) {
-  // Not confound combination with permutation where order matter. Here it doesn't matter, as much as the algorithm is the same and returns
+  // Not confuse combination with permutation where order matter. Here it doesn't matter, as much as the algorithm is the same and returns
   // to as each position always the same subset
   vector < vector <int> > toReturn;
   int nCombs = pow(2,nItems);

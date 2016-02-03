@@ -548,7 +548,7 @@ ModelCoreSpatial::runBiologicalModule(){
           if(u==0){
             vol = 0.0;
           }else if(u==1){
-            vol = (1-1/tp-mort)*pastYearVol+vReg;
+            vol = max(0.0,(1-1/tp-mort))*pastYearVol+vReg; //Antonello, "bug" fixed 20160203: In case of very strong mortality this quantity (that doesn't include harvesting) could be negative!
             double debug = vol;
             #ifdef QT_DEBUG
             if (vol<0.0){
@@ -561,10 +561,11 @@ ModelCoreSpatial::runBiologicalModule(){
             double tp_1 = px->tp.at(j).at(u-1); //gfd("tp",regId,ft,dClasses[u-1]);
             double pastYearVol_1 = px->vol_l.at(j).at(u-1); //gfd("vol",regId,ft,dClasses[u-1],thisYear-1);
             //vol = max(0.0,(1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1);
-            vol = max(0.0,(1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1); // I can't use any more hr as it it the harvesting rate over the available volumes, not the whole ones
+            vol = max(0.0,(1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1); // I can't use any more hr as it is the harvesting rate over the available volumes, not the whole ones
             #ifdef QT_DEBUG
             if ((1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1 < -0.00001){
-              msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
+              double realVolumes = (1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1;
+              msgOut(MSG_DEBUG,"Negative real volumes ("+d2s(realVolumes)+"), possibly because of little bit larger bounds in the market module to avoid zeros. Volumes in the resource module set back to zero, so it should be ok.");
             }
             #endif
           }
@@ -1447,7 +1448,7 @@ ModelCoreSpatial::cachePixelExogenousData(){
             tp  = gfd("tp",regId,ft,dClasses[u],DATA_NOW)*tp_multiplier_now; // tp is defined also in the first diameter class, as it is the years to reach the NEXT diameter class
           }
           beta_real = u?gfd("betaCoef",regId,ft,dClasses[u],DATA_NOW)*betaCoef_multiplier_now:0;
-          mort_real = u?gfd("mortCoef",regId,ft,dClasses[u],DATA_NOW)*mortCoef_multiplier_now+pathMortality :0;
+          mort_real = min(u?gfd("mortCoef",regId,ft,dClasses[u],DATA_NOW)*mortCoef_multiplier_now+pathMortality :0,1.0);  //Antonello, bug fixed 20160203: In any case, natural plus pathogen mortality can not be larger than 1!
           tp_byu.push_back(tp);
           beta_byu.push_back(beta_real);
           mort_byu.push_back(mort_real);
