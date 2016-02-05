@@ -75,7 +75,7 @@ Opt::declareVariables(){
     declareVariable("sa", DOM_PRI_PR,    "Supply to abroad (exports)");
     declareVariable("sc", DOM_PRI_PR,    "Supply, composite");
     declareVariable("sl", DOM_ALL_PR,    "Supply to locals");
-    //declareVariable("st", DOM_PRI_PR, "Supply, total", 0.0,UBOUND_MAX,"","in");
+    //declareVariable("st", DOM_PRI_PR,    "Supply, total", 0.0,UBOUND_MAX,"","in");
 }
 /**
 Declare the constrains and their properties. For the domain type @see BaseClass
@@ -183,6 +183,12 @@ Opt::declareConstrains (){
   resbounds.domain=DOM_PRI_PR_ALLCOMBS;
   resbounds.direction = CONSTR_LE0;
 
+  //constrain steq;
+  //steq.name="steq";
+  //steq.comment="computation of total supply";
+  //steq.domain=DOM_PRI_PR;
+  //steq.direction = CONSTR_EQ;
+
   cons.push_back(mkeq2);
   cons.push_back(mkeq6);
   cons.push_back(mkeq7);
@@ -199,6 +205,7 @@ Opt::declareConstrains (){
   cons.push_back(mkeq25);
   //cons.push_back(mkeq18);
   cons.push_back(resbounds);
+  //cons.push_back(steq);
 ;
 
 
@@ -447,8 +454,13 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     for(uint i=0;i<priPrCombs[p].size();i++){
       g[cix] += x[gix("sa",r1,r2,priPrCombs[p][i])]+x[gix("sl",r1,r2,priPrCombs[p][i])];
     }
-//    g[cix] -= 0.01;
+    //g[cix] -= 0.05; //0.02 don't work always, expecially intermediate scnearios, 0.1 seems to work but produce a large artefact
+
   CONSTRAIN_END_LOOP
+
+  //CONSTRAIN_START_LOOP(priPr,15)
+  //    g[cix] = x[gix("st",r1,r2,p)]-(x[gix("sl",r1,r2,p)]+x[gix("sa",r1,r2,p)]);
+  //CONSTRAIN_END_LOOP
 
   return true;
 }
@@ -502,7 +514,7 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
     }
 
     // Create a vector with all possible combinations of primary products
-    priPrCombs = createCombinationsVector(nPriPr);
+    priPrCombs = MTHREAD->MD->createCombinationsVector(nPriPr);
     nPriPrCombs = priPrCombs.size();
 
     // put the variables and their domain in the vars map
@@ -1726,6 +1738,7 @@ Opt::declareVariable(const string &name, const int & domain, const string &desc,
  * @param nItems number of items to create p
  * @return A vector with in each slot the items present in that specific combination subset.
  */
+/*
 vector < vector <int> >
 Opt::createCombinationsVector(const int& nItems) {
   // Not confuse combination with permutation where order matter. Here it doesn't matter, as much as the algorithm is the same and returns
@@ -1755,6 +1768,7 @@ Opt::createCombinationsVector(const int& nItems) {
 //    exit(0);
   return toReturn;
 }
+*/
 
 void
 Opt::copyInventoryResourses(){

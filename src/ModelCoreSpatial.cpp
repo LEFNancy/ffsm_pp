@@ -341,6 +341,7 @@ ModelCoreSpatial::runMarketModule(){
 
   for(uint r2= 0; r2<regIds2.size();r2++){  // you can use r2<=regIds2.size() to try an out-of range memory error that is not detected other than by valgrind (with a message "Invalid read of size 4 in ModelCore::runSimulationYear() in src/ModelCore.cpp:351")
     int regId = regIds2[r2];
+    ModelRegion* REG = MTHREAD->MD->getRegion(regId);
 
     //  // total supply and total demand..
     //  RPAR('st',i,prd,t)   =  RPAR('sl',i,prd,t)+RPAR('sa',i,prd,t);
@@ -360,7 +361,7 @@ ModelCoreSpatial::runMarketModule(){
       double da = gpd("da",regId,secProducts[p]); // bug corrected 20120913
       double pworld = gpd("pl", WL2,secProducts[p]);
       double dt = gpd("dt",regId,secProducts[p]);
-      double pw = (dl*pl+da*pworld)/dt;
+      double pw = dt?(dl*pl+da*pworld)/dt:0.0;
       spd(pw,"pw",regId,secProducts[p]);
     }
     for (uint p=0;p<priProducts.size();p++){
@@ -369,9 +370,46 @@ ModelCoreSpatial::runMarketModule(){
       double sa = gpd("sa",regId,priProducts[p]);  // bug corrected 20120913
       double pworld = gpd("pl", WL2,priProducts[p]);
       double st = gpd("st",regId,priProducts[p]);
-      double pw = (sl*pl+sa*pworld)/st;
+      double pw = st?(sl*pl+sa*pworld)/st:0.0;
       spd(pw,"pw",regId,priProducts[p]);
     }
+
+    // Correcting st if this is over the in
+
+    // Create a vector with all possible combinations of primary products
+    vector<vector<int>> priPrCombs = MTHREAD->MD->createCombinationsVector(priProducts.size());
+    int nPriPrCombs = priPrCombs.size();
+
+    for (uint i=0;i<priPrCombs.size();i++){
+      double stMkMod = 0.0;
+      double sumIn = REG->inResByAnyCombination[i];
+      for (uint p=0;p<priPrCombs[i].size();p++){
+        stMkMod += gpd("st",regId,priProducts[p]);
+      }
+
+      if(sumIn<=0.00001){
+        for (uint p=0;p<priPrCombs[i].size();p++){
+          spd(0.0,"st",regId,priProducts[p]);
+        }
+      } else {
+        if(stMkMod>sumIn){ // if we harvested more than available
+          double inV_over_hV_ratio = sumIn/stMkMod;
+          for (uint p=0;p<priPrCombs[i].size();p++){
+            double st_orig = gpd("st",regId,priProducts[p]);
+            spd(st_orig*inV_over_hV_ratio,"st",regId,priProducts[p]);
+          }
+        }
+
+      }
+
+      //cout << regId << '\t' << stMkMod << '\t' << sumIn << endl;
+    }
+
+
+
+
+
+
   } // end of each region
 }
 
@@ -504,6 +542,7 @@ ModelCoreSpatial::runBiologicalModule(){
           //double pastYearVol_reg = u ? gfd("vol",r2,ft,dc,thisYear-1): 0;
           double pastYearVol = px->vol_l.at(j).at(u);
           vector <double> hV_byPrd;
+          vector <double> hr_byPrd;
 
           // harvesting rate & volumes...
           // hr is by region.. no reasons in one pixel the RATE of harvesting will be different than in an other pixel
@@ -514,10 +553,22 @@ ModelCoreSpatial::runBiologicalModule(){
             double st = gpd("st",r2,priProducts[pp]);
             double in = gpd("in",r2,priProducts[pp]);
             double hr_pr = in ? app(priProducts[pp],ft,dc)*st/in : 0.0;
+            hr_byPrd.push_back( hr_pr);
             hr += hr_pr;
+          }
+
+          // adjusting for overharvesting..
+          // 20160204: inserted to account that we let supply to be marginally higher than in in the mamarket module, to let the solver solving
+          double origHr = hr;
+          hr = min(1.0,hr);
+          for(uint pp=0;pp<priProducts.size();pp++){
+            double hr_pr = origHr ? hr_byPrd[pp] * min(1.0,1.0/origHr) : 0.0;
             hV_byPrd.push_back( hr_pr*pastYearVol*px->avalCoef);
           }
+
           double hV = hr*pastYearVol*px->avalCoef;
+
+
           hV_byDiam.push_back(hV);
           hV_byDiamAndPrd.push_back(hV_byPrd);
 
@@ -551,8 +602,8 @@ ModelCoreSpatial::runBiologicalModule(){
             vol = max(0.0,(1-1/tp-mort))*pastYearVol+vReg; //Antonello, "bug" fixed 20160203: In case of very strong mortality this quantity (that doesn't include harvesting) could be negative!
             double debug = vol;
             #ifdef QT_DEBUG
-            if (vol<0.0){
-              msgOut(MSG_CRITICAL_ERROR,"Negative volumes!");
+            if ((1-1/tp-mort)<0.0){
+              msgOut(MSG_DEBUG,"The sum of leaving trres and mortality would have lead to nevative volume if we didn't put a max. 1/tp: "+d2s(1/tp)+",  mort: "+d2s(mort)+", total coeff: "+d2s((1-1/tp-mort))+" ");
             }
             #endif
           } else {
@@ -563,7 +614,7 @@ ModelCoreSpatial::runBiologicalModule(){
             //vol = max(0.0,(1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1);
             vol = max(0.0,(1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1); // I can't use any more hr as it is the harvesting rate over the available volumes, not the whole ones
             #ifdef QT_DEBUG
-            if ((1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1 < -0.00001){
+            if ((1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1 < 0){
               double realVolumes = (1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1;
               msgOut(MSG_DEBUG,"Negative real volumes ("+d2s(realVolumes)+"), possibly because of little bit larger bounds in the market module to avoid zeros. Volumes in the resource module set back to zero, so it should be ok.");
             }
@@ -573,6 +624,7 @@ ModelCoreSpatial::runBiologicalModule(){
             double inc = (u==dClasses.size()-1)?0:1.0/tp; // we exclude the possibility for trees in the last diameter class to move to an upper class
             double volumesMovingUp = inc*pastYearVol;
             double pastArea = px->area_l.at(j).at(u);
+
             areasMovingUp.at(u) = inc*pastArea;
 
             if(oldVol2AreaMethod) {
@@ -580,9 +632,19 @@ ModelCoreSpatial::runBiologicalModule(){
             } else {
               double finalHarvestedVolumes = finalHarvestFlag* hV;
               double finalHarvestedRate = pastYearVol?finalHarvestedVolumes/pastYearVol:0.0; // Here we want the harvested rate over the whole volumes, not just the available ones, so we don't need to multiply to px->avalCoef
+              #ifdef QT_DEBUG
+              if (finalHarvestedRate > 1.0){
+                msgOut(MSG_CRITICAL_ERROR,"Negative final harvested rate.");
+              }
+              #endif
               hArea_byDc.push_back(finalHarvestedRate*pastArea); // volumes are in Mm^3, area in ha, vHa in m^3/ha
             }
-            px->area.at(j).at(u) = px->area_l.at(j).at(u) - areasMovingUp.at(u) + areasMovingUp.at(u-1) - hArea_byDc.at(u);
+            px->area.at(j).at(u) = max(0.0, px->area_l.at(j).at(u) - areasMovingUp.at(u) + areasMovingUp.at(u-1) - hArea_byDc.at(u));
+            #ifdef QT_DEBUG
+            if ((px->area_l.at(j).at(u) - areasMovingUp.at(u) + areasMovingUp.at(u-1) - hArea_byDc.at(u))< 0.0){
+              msgOut(MSG_DEBUG,"If not for a max, we would have had a negative area ("+d2s(px->area_l.at(j).at(u) - areasMovingUp.at(u) + areasMovingUp.at(u-1) - hArea_byDc.at(u))+" ha).");
+            }
+            #endif
           } else {
             areasMovingUp.at(u) = areaFirstProdClass;
             hArea_byDc.push_back(0.);
@@ -594,7 +656,7 @@ ModelCoreSpatial::runBiologicalModule(){
           newVol_byDiam.push_back(vol);
           #ifdef QT_DEBUG
           if(px->area.at(j).at(u)< 0.0 || areasMovingUp.at(u) < 0.0 || hArea_byDc.at(u) < 0.0 ){
-            // msgOut(MSG_CRITICAL_ERROR, "Negative values in runBiologicalModel");
+            msgOut(MSG_CRITICAL_ERROR, "Negative values in runBiologicalModel");
           }
           #endif
 
@@ -646,7 +708,7 @@ ModelCoreSpatial::runBiologicalModule(){
       }
     }
     if(abs(sumSt-sumHv) > 0.000001){
-      msgOut(MSG_CRITICAL_ERROR, "St and harvested volumes diverge in region "+REG->getRegSName());
+      msgOut(MSG_DEBUG, "St and harvested volumes diverge in region "+REG->getRegSName()+". St: "+d2s(sumSt)+" hV: "+d2s(sumHv));
     }
     #endif
   } // end of each region
@@ -868,8 +930,7 @@ ModelCoreSpatial::runManagementModule(){
             double newAreaThisFt = vSum(px->area) ? fArea_incr*(1-mr)*vSum(px->area.at(j))/vSum(px->area): 0.0;
             thisYearRegAreas[j] +=  newAreaThisFt;
             if(! (thisYearRegAreas[j] >= 0.0) ){
-              msgOut(MSG_DEBUG,i2s(j));
-              msgOut(MSG_ERROR,"thisYearRegAreas[j] is not non negative .");
+              msgOut(MSG_ERROR,"thisYearRegAreas[j] is not non negative (j: "+i2s(j)+", thisYearRegAreas[j]: "+i2s( thisYearRegAreas[j])+").");
             }
             //thisYearRegAreas[j2] += harvestedAreaForThisFT*(1-mr);
           }

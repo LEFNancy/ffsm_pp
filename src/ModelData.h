@@ -133,6 +133,7 @@ public:
   const bool          assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
   int                 setErrorLevel(int errorLevel_h){errorLevel=errorLevel_h;}
   bool                getTempBool(){return tempBool;}
+  vector < vector <int> > createCombinationsVector(const int& nItems); ///< Return a vector containing any possible combination of nItems items (including any possible subset). The returned vector has in each slot the items present in that specific combination.
 
   double              getTimedData(const vector <double> &dated_vector, const int& year_h) const; ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
   void                setTimedData(const double& value_h, vector<double> &dated_vector, const int& year_h, const int& MSG_LEVEL=MSG_WARNING);

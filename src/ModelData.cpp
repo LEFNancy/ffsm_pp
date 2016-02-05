@@ -1878,6 +1878,35 @@ ModelData::getPathMortalityRule(const string& forType, const string& dC){
   return toReturn;
 }
 
+/**
+ * @brief ModelData::createCombinationsVector
+ * Return a vector containing any possible combination of nItems items (including all subsets).
+ *
+ * For example with nItems = 3:
+ * 0: []; 1: [0]; 2: [1]; 3: [0,1]; 4: [2]; 5: [0,2]; 6: [1,2]; 7: [0,1,2]
+
+ * @param nItems number of items to create p
+ * @return A vector with in each slot the items present in that specific combination subset.
+ */
+vector < vector <int> >
+ModelData::createCombinationsVector(const int& nItems) {
+  // Not confuse combination with permutation where order matter. Here it doesn't matter, as much as the algorithm is the same and returns
+  // to as each position always the same subset
+  vector < vector <int> > toReturn;
+  int nCombs = pow(2,nItems);
+  //int nCombs = nItems;
+  for (uint i=0; i<nCombs; i++){
+    vector<int> thisCombItems; //concernedPriProducts;
+    for(uint j=0;j<nItems;j++){
+      uint j2 = pow(2,j);
+      if(i & j2){ // bit a bit operator, p217 C++ book
+        thisCombItems.push_back(j);
+      }
+    }
+    toReturn.push_back(thisCombItems);
+  }
+  return toReturn;
+}
 
 // ========================== LLData =======================================
 

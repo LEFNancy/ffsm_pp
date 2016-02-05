@@ -183,7 +183,7 @@ protected:
   constrain*          getConstrainByIndex(int idx);
   void                unpack(int ix_h, int domain, int initial, int &r1_h, int &r2_h, int&p_h, int&r2to_h, bool fullp=false); ///< Return the dimensions given a certain index, domain type and initial position
   int                 getConNumber(constrain* con); ///< Return the position in the cons vector
-  vector < vector <int> > createCombinationsVector(const int& nItems); ///< Return a vector containing any possible combination of nItems items (including any possible subset). The returned vector has in each slot the items present in that specific combination.
+  //vector < vector <int> > createCombinationsVector(const int& nItems); ///< Return a vector containing any possible combination of nItems items (including any possible subset). The returned vector has in each slot the items present in that specific combination.
   void                copyInventoryResourses(); ///< Copy the inventoried resources in the in vector for better performances
 
   void tempDebug();
