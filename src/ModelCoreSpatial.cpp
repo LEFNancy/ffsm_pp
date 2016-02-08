@@ -393,7 +393,12 @@ ModelCoreSpatial::runMarketModule(){
         }
       } else {
         if(stMkMod>sumIn){ // if we harvested more than available
+          string pProductsInvolved = "";
+          for (uint p=0;p<priPrCombs[i].size();p++){
+            pProductsInvolved += (priProducts[p]+"; ");
+          }
           double inV_over_hV_ratio = sumIn/stMkMod;
+          msgOut(MSG_DEBUG, "Overharvesting has happened. Year: "+i2s(thisYear)+ "Region: "+i2s(regId)+"Involved products:  "+pProductsInvolved+". sumIn: "+d2s(sumIn)+" stMkMod:" +d2s(stMkMod));
           for (uint p=0;p<priPrCombs[i].size();p++){
             double st_orig = gpd("st",regId,priProducts[p]);
             spd(st_orig*inV_over_hV_ratio,"st",regId,priProducts[p]);
@@ -401,15 +406,8 @@ ModelCoreSpatial::runMarketModule(){
         }
 
       }
-
       //cout << regId << '\t' << stMkMod << '\t' << sumIn << endl;
     }
-
-
-
-
-
-
   } // end of each region
 }
 
