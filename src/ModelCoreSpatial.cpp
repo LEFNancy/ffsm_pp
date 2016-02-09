@@ -208,6 +208,7 @@ ModelCoreSpatial::initMarketModule(){
 void
 ModelCoreSpatial::runMarketModule(){
   msgOut(MSG_INFO, "Starting market module");
+  static double cumOverHarvesting = 0.0;
   int thisYear     =  MTHREAD->SCD->getYear();
   int previousYear = MTHREAD->SCD->getYear()-1;
 
@@ -353,6 +354,7 @@ ModelCoreSpatial::runMarketModule(){
       double st = gpd("sl",regId,allProducts[p])+gpd("sa",regId,allProducts[p]);
       double dt = gpd("dl",regId,allProducts[p])+gpd("da",regId,allProducts[p]);
       spd(st,"st",regId,allProducts[p]);
+      spd(st,"st_or",regId,allProducts[p],DATA_NOW,true); // original total supply, not corrected by resetting it to min(st, inv).
       spd(dt,"dt",regId,allProducts[p]);
     }
     for (uint p=0;p<secProducts.size();p++){
@@ -383,32 +385,38 @@ ModelCoreSpatial::runMarketModule(){
     for (uint i=0;i<priPrCombs.size();i++){
       double stMkMod = 0.0;
       double sumIn = REG->inResByAnyCombination[i];
+     // double sumIn2 = 0.0;
       for (uint p=0;p<priPrCombs[i].size();p++){
-        stMkMod += gpd("st",regId,priProducts[p]);
+        stMkMod += gpd("st",regId,priProducts[priPrCombs[i][p]]);
+        //sumIn2 += gpd("in",regId,priProducts[priPrCombs[i][p]]);
       }
 
-      if(sumIn<=0.00001){
+      //if(sumIn<=0.00001){
+     //   for (uint p=0;p<priPrCombs[i].size();p++){
+     //     spd(0.0,"st",regId,priProducts[priPrCombs[i][p]]);
+     //   }
+     // } else {
+      if(stMkMod>sumIn){ // if we harvested more than available
+        string pProductsInvolved = "";
         for (uint p=0;p<priPrCombs[i].size();p++){
-          spd(0.0,"st",regId,priProducts[p]);
+          pProductsInvolved += (priProducts[priPrCombs[i][p]]+"; ");
         }
-      } else {
-        if(stMkMod>sumIn){ // if we harvested more than available
-          string pProductsInvolved = "";
-          for (uint p=0;p<priPrCombs[i].size();p++){
-            pProductsInvolved += (priProducts[p]+"; ");
-          }
-          double inV_over_hV_ratio = sumIn/stMkMod;
-          msgOut(MSG_DEBUG, "Overharvesting has happened. Year: "+i2s(thisYear)+ "Region: "+i2s(regId)+"Involved products:  "+pProductsInvolved+". sumIn: "+d2s(sumIn)+" stMkMod:" +d2s(stMkMod));
-          for (uint p=0;p<priPrCombs[i].size();p++){
-            double st_orig = gpd("st",regId,priProducts[p]);
-            spd(st_orig*inV_over_hV_ratio,"st",regId,priProducts[p]);
-          }
+        double inV_over_hV_ratio = stMkMod ? sumIn/stMkMod : 0.0;
+        cumOverHarvesting += (stMkMod-sumIn);
+        msgOut(MSG_DEBUG, "Overharvesting has happened. Year: "+i2s(thisYear)+ "Region: "+i2s(regId)+"Involved products:  "+pProductsInvolved+". sumIn: "+d2s(sumIn)+" stMkMod:" +d2s(stMkMod) + " cumOverHarvesting: "+d2s(cumOverHarvesting));
+        for (uint p=0;p<priPrCombs[i].size();p++){
+          double st_orig = gpd("st",regId,priProducts[priPrCombs[i][p]]);
+          spd(st_orig*inV_over_hV_ratio,"st",regId,priProducts[priPrCombs[i][p]]);
         }
-
       }
-      //cout << regId << '\t' << stMkMod << '\t' << sumIn << endl;
+
+      //}
+
     }
   } // end of each region
+  if (cumOverHarvesting>0.0){
+    msgOut(MSG_DEBUG, "Overharvesting is present. Year: "+i2s(thisYear)+" cumOverHarvesting: "+d2s(cumOverHarvesting));
+  }
 }
 
 
@@ -1523,6 +1531,9 @@ ModelCoreSpatial::cachePixelExogenousData(){
 void
 ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
   msgOut(MSG_INFO, "Starting computing inventary available for this year..");
+  int nbounds = pow(2,priProducts.size());
+  vector<vector<int>> concernedPriProductsTotal = MTHREAD->MD->createCombinationsVector(priProducts.size());
+
   for(uint i=0;i<regIds2.size();i++){
     int r2 = regIds2[i];
     ModelRegion* REG = MTHREAD->MD->getRegion(r2);
@@ -1564,19 +1575,15 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
     // 20150116: As the same (ft,dc) can be used in more than one product knowing -and bounding the supply in the optimisation- each single
     // in(pp) is NOT enought.
     // We need to bound the supply for each possible combination, that is for 2^(number of prim.pr)
-    // Here we compute the detailed inventory. TODO: Create the pounds in Opt.
-
-    int nbounds = pow(2,priProducts.size());
-
+    // Here we compute the detailed inventory. TO.DO: Create the pounds in Opt. done
+    // 20160209: Rewritten and corrected a bug that was not giving enought inv to multiproduct combinations
     for (uint i=0; i<nbounds; i++){
-      vector<int> concernedPriProducts;
+      vector<int> concernedPriProducts = concernedPriProductsTotal[i];
       double bound = 0.0;
-      for(uint j=0;j<priProducts.size();j++){
-        uint j2 = pow(2,j);
-        if(i & j2){ // bit a bit operator, p217 C++ book
-          concernedPriProducts.push_back(j);
-        }
+      for(uint z=0;z<concernedPriProducts.size();z++){
+        bound += gpd("in",r2,priProducts[concernedPriProducts[z]]);
       }
+      /*
       //concernedPriProducts.push_back(i);
       // for each ft and dc if at least one app with concerning product is 1 we add the volumes
       for(uint ft=0;ft<fTypes.size();ft++){
@@ -1595,10 +1602,21 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
             }
           }
         }
-      }
+      }*/
       REG->inResByAnyCombination[i] = bound;
     }
   } // end each region
+
+
+  // debugging..
+ /* int r2 = 11042;
+  ModelRegion* REG = MTHREAD->MD->getRegion(r2);
+  double in0 = gpd("in",r2,priProducts[0]);
+  double in1 = gpd("in",r2,priProducts[1]);
+  double in2 = gpd("in",r2,priProducts[2]);
+  double debug = in0+in1;*/
+
+
 }
 
 void

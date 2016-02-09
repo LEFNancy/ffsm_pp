@@ -456,7 +456,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     for(uint i=0;i<priPrCombs[p].size();i++){
       g[cix] += x[gix("sa",r1,r2,priPrCombs[p][i])]+x[gix("sl",r1,r2,priPrCombs[p][i])];
     }
-    g[cix] -= 0.2; //0.02 don't work always, expecially intermediate scnearios, 0.1 seems to work but produce a large artefact
+    g[cix] -= 1; //0.02 don't work always, expecially intermediate scnearios, 0.1 seems to work but produce a large artefact
 
   CONSTRAIN_END_LOOP
 
