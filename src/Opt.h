@@ -217,6 +217,7 @@ protected:
   int                                 secondYear;
   int                              worldCodeLev2;
   bool                              debugRunOnce;
+  double                 overharvestingAllowance; ///< Allows to harvest more than the resources available. Useful when resources got completelly exausted and the model refuses to solve.
   void                    debugPrintParameters();
   bool                                   initOpt;
   vector <constrain>                        cons;

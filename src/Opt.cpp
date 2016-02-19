@@ -316,7 +316,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     }
   CONSTRAIN_END_LOOP
 
-  // mkteq6(i,p_tr)..  RVAR('dc',i,p_tr)  =e=  GG(i,p_tr)*(RVAR('pc',i,p_tr)**sigma(p_tr)); // eq. 20
+  // mkteq6(i,p_tr)..  RVAR('dc',i,p_tr)  =e=  GG(i,p_tr)*(RVAR('pc',i,p_tr)**sigma(p_tr)); // eq. 20 20160216: added sustitution elasticity in the demand
   CONSTRAIN_START_LOOP(secPr,1)
     gg    = gpd("gg",l2r[r1][r2],secPr[p]);
     sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
@@ -333,9 +333,8 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
                ), es_d
              );
     }
-    //g[cix] = x[gix("dc",r1,r2,p)]-gg*pow(x[gix("pc",r1,r2,psec)],sigma);
+    //g[cix] = x[gix("dc",r1,r2,p)]-gg*pow(x[gix("pc",r1,r2,psec)],sigma); // original without substitution elasticity
     g[cix] += x[gix("dc",r1,r2,p)];
-
   CONSTRAIN_END_LOOP
 
   // mkteq7(i,p_tr)..  RVAR('da',i,p_tr)/RVAR('dl',i,p_tr)  =e=  ((q1(i,p_tr)*RVAR('pl',i,p_tr))/(p1(i,p_tr)*PT_t(p_tr)))**psi(i,p_tr); // h7 and h3 ?
@@ -471,7 +470,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     for(uint i=0;i<priPrCombs[p].size();i++){
       g[cix] += x[gix("sa",r1,r2,priPrCombs[p][i])]+x[gix("sl",r1,r2,priPrCombs[p][i])];
     }
-    g[cix] -= 1; //0.02 don't work always, expecially intermediate scnearios, 0.1 seems to work but produce a large artefact
+    g[cix] -= overharvestingAllowance; //0.02 don't work always, expecially intermediate scnearios, 0.1 seems to work but produce a large artefact 20160219: made it a parameter
 
   CONSTRAIN_END_LOOP
 
@@ -559,6 +558,8 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 
   n = nVar; // 300; // nVar;
   m = nCons; // 70; // nCons;
+
+  overharvestingAllowance = MTHREAD->MD->getDoubleSetting("overharvestingAllowance",DATA_NOW);
 
   copyInventoryResourses();
 
