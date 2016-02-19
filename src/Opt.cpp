@@ -303,7 +303,7 @@ It could be possible to change this in a map and uses name, but then we would lo
 template<class T> bool
 Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
-  double a_pr, a, sigma, ff, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1, supCorr;
+  double a_pr, a, sigma, ff, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1, supCorr, es_d, pc_1, pc_1_sub;
   Index cix = 0;
   Index debug = 0;
 
@@ -318,9 +318,24 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
   // mkteq6(i,p_tr)..  RVAR('dc',i,p_tr)  =e=  GG(i,p_tr)*(RVAR('pc',i,p_tr)**sigma(p_tr)); // eq. 20
   CONSTRAIN_START_LOOP(secPr,1)
-    gg = gpd("gg",l2r[r1][r2],secPr[p]);
+    gg    = gpd("gg",l2r[r1][r2],secPr[p]);
     sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
-    g[cix] = x[gix("dc",r1,r2,p)]-gg*pow(x[gix("pc",r1,r2,psec)],sigma);
+    pc_1  = gpd("pc",l2r[r1][r2],secPr[p],previousYear);
+    g[cix] = - gg*pow(x[gix("pc",r1,r2,psec)],sigma);
+    for (uint p2=0;p2<secPr.size();p2++){
+      es_d     = gpd("es_d",l2r[r1][r2],secPr[p],DATA_NOW,secPr[p2]);
+      pc_1_sub = gpd("pc",l2r[r1][r2],secPr[p2],previousYear);
+      g[cix] *= pow(
+               (
+                 (x[gix("pc",r1,r2,psec)]/x[gix("pc",r1,r2,priPr.size()+p2)])
+                    /
+                 (pc_1 / pc_1_sub )
+               ), es_d
+             );
+    }
+    //g[cix] = x[gix("dc",r1,r2,p)]-gg*pow(x[gix("pc",r1,r2,psec)],sigma);
+    g[cix] += x[gix("dc",r1,r2,p)];
+
   CONSTRAIN_END_LOOP
 
   // mkteq7(i,p_tr)..  RVAR('da',i,p_tr)/RVAR('dl',i,p_tr)  =e=  ((q1(i,p_tr)*RVAR('pl',i,p_tr))/(p1(i,p_tr)*PT_t(p_tr)))**psi(i,p_tr); // h7 and h3 ?
