@@ -393,6 +393,13 @@ def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename):
  
 # =============================================================================
 def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename, singleComparation=True, refYear=0):
+  """Print a LaTeX Table for variables variable_h comparing ref_scenario scenario vs coparing_scenarios.
+  @param singleComparation: if True multiple comparing scenarios are treated as multiple replications of the same scenario and
+  some basic stats are computed; if False they are all represented as diff from the ref_scenario.
+  @param refYear: if 0 reference vs comparing scenarios are compared on the same year (or average of years if years_h has length > 1.).
+  Otherwise the comparing scneario at year(s) years_h is compared with reference scenario at year refYear (useful to see the dynamic
+  effects within a single scenario)  
+  """
   d = " & "
   el = " \\\\"
   label_comparing_scenario = "comparing scenarios"
