@@ -38,20 +38,20 @@ def prepare_data():
   for region in g.regions.keys():
     for variable in variablesWithAggregates:
       for scenario in g.scenarios.keys():
-	for spGroup in tempSpecieswithAggregates:
-	  for year in g.years:
+        for spGroup in tempSpecieswithAggregates:
+          for year in g.years:
             key = region, variable, scenario, spGroup, year
-	    g.idata[key] = 0.0
+            g.idata[key] = 0.0
   for region in g.regions.keys():
     for variable in variablesWithAggregates:
       for scenario in g.scenarios.keys():
-	for spGroup in tempSpecieswithAggregates:
+        for spGroup in tempSpecieswithAggregates:
           key = region, variable, scenario, spGroup
-	  g.odata[key] = []	    
+          g.odata[key] = []	    
   for year in g.years:
     g.x.append(int(year))
     
-	    
+
   # B - loading data..	    
   for ifile in g.forIFiles:	    
     idata_raw = csv.DictReader(open(ifile, 'rb'), delimiter=g.sep)
@@ -61,8 +61,16 @@ def prepare_data():
       if key in g.idata:
         g.idata[key] += float (rec['value'])
         
-  for ifile in g.carbonIFile:   
-    #print (g.carbonIFile)  
+  for ifile in g.prodIFiles:     
+    idata_raw = csv.DictReader(open(ifile, 'rb'), delimiter=g.sep)
+    for rec in idata_raw:
+      # scen;parName;country;region;prod;freeDim;year;value;
+      key = rec['region'],rec['parName'],rec['scen'],rec['prod'],rec['year']
+      if key in g.idata:
+        g.idata[key] += float (rec['value'])      
+        
+  for ifile in g.carbonIFiles:   
+    #print (g.carbonIFiles)  
     idata_raw = csv.DictReader(open(ifile, 'rb'), delimiter=g.sep)
     for rec in idata_raw:
       # scen;parName;country;region;forType;diamClass;year;value;
@@ -83,12 +91,12 @@ def prepare_data():
       totalVariable = g.variables[variable][3]
       for region in g.regions.keys():
         for scenario in g.scenarios.keys():
-	  for spGroup in specieswithAggregates:
-	    for year in g.years:
+          for spGroup in specieswithAggregates:
+            for year in g.years:
               key = region, variable, scenario, spGroup, year
               key_pvar = region, pondVariable, scenario, spGroup, year
               key_tvar = region, totalVariable, scenario, spGroup, year
-	      g.idata[key_tvar] = g.idata[key] * g.idata[key_pvar]
+              g.idata[key_tvar] = g.idata[key] * g.idata[key_pvar]
   
   # D - performing various summing up..
    

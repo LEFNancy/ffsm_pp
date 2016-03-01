@@ -7,8 +7,10 @@
 # input data expected format
 # - scen;parName;country;region;forType;diamClass;year;value;
 
-forIFiles = []
-carbonIFile = []
+forIFiles    = []
+prodIFiles   = []
+carbonIFiles = []
+
 scenarios = {}
 years = []
 printChartsFlag = False
