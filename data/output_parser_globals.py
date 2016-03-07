@@ -35,7 +35,7 @@ regions = {'11042': 'Alsace', '11061': 'Aquitaine', '11072': 'Auvergne', '11025'
     '11022': 'Picardie', '11053': 'Poitou-Charentes', '11082': 'Provence-Alpes-Côte d\'Azur', '11071': 'Rhône-Alpes',} 
 
 # key: var short name
-# value: turple with long name, unit and optionally variable to act for ponderation and name of aggregated variable
+# value: list with long name, unit and optionally variable to act for ponderation and name of aggregated variable
 variables = {'hV': ['Harvested Volumes', r"$Mm^3$"],
        'vReg': ['Regeneration Volumes', r"$Mm^3$"],
        'vol': ['Forest Volumes', r"$Mm^3$"],
@@ -44,9 +44,20 @@ variables = {'hV': ['Harvested Volumes', r"$Mm^3$"],
        'harvestedArea': ['Harvested area','ha'],
        'regArea': ['Regeneration area','ha'],
        }
+# key: var short name
+# value: list with long name, unit, domain (either pp, tp or p) and optionally a variable to act for ponderation
+prodVars = {'st': ['Total supply', r"$Mm^3$", 'p'],
+            'pl': ['Local price', r"$Mm^3$", 'p', 'st'],
+           }
+            
 
 
 spGroups = ['broadL_highF','broadL_mixedF','broadL_copp','con_highF']
+pProd = ['hardWRoundW','softWRoundW','pulpWFuelW','ashRoundW']
+tProd=['fuelW','hardWSawnW','softWSawnW','plyW','pulpW','pannels','ashSawnW','ashPlyW']
+
+
+
 
 #key: human name
 #value[0]: list of sp groups
@@ -69,3 +80,4 @@ idata = {}
 odata = {}
 x = []
 sortedregions = []
+products= pProd+tProd

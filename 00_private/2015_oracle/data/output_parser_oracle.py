@@ -34,7 +34,7 @@ def override_globals():
   g.forIFiles = [  
     'output/results/forestData_constant.csv',
     'output/results/forestData_constant_nomgm.csv',
-    'output/results/forestData_constant_noexp.csv',
+    'output/results/forestData_constant_nora.csv',
     'output/results/forestData_constant_carea.csv',
     'output/results/forestData_arpege_a1b.csv',
     'output/results/forestData_arpege_a1b_carea.csv',
@@ -63,7 +63,7 @@ def override_globals():
   g.prodIFiles = [  
     'output/results/productData_constant.csv',
     'output/results/productData_constant_nomgm.csv',
-    'output/results/productData_constant_noexp.csv',
+    'output/results/productData_constant_nora.csv',
     'output/results/productData_constant_carea.csv',
     'output/results/productData_arpege_a1b.csv',
     'output/results/productData_arpege_a1b_carea.csv',
@@ -92,7 +92,7 @@ def override_globals():
   g.carbonIFiles = [
     'output/results/carbonBalance_constant.csv',
     'output/results/carbonBalance_constant_nomgm.csv',
-    'output/results/carbonBalance_constant_noexp.csv',
+    'output/results/carbonBalance_constant_nora.csv',
     'output/results/carbonBalance_constant_carea.csv',
     'output/results/carbonBalance_arpege_a1b.csv',
     'output/results/carbonBalance_arpege_a1b_carea.csv',
@@ -116,14 +116,12 @@ def override_globals():
     'output/results/carbonBalance_MPEH5C_1.csv',
     'output/results/carbonBalance_MPEH5C_2.csv',
     'output/results/carbonBalance_MPEH5C_3.csv',    
-    'output/results/carbonBalance_arpege_a1b_priceEffectOnly.csv',
-    'output/results/carbonBalance_arpege_a1b_phImpactOnly.csv',
   ]
 
   g.scenarios = {
     'constant':            '#610e0e',
     'constant_nomgm':      '#610e0e',
-    'constant_noexp':      '#610e0e',
+    'constant_nora':      '#610e0e',
     'constant_carea':      '#610e0e',   
     'arpege_a1b':          '#6dcaf1',
     'arpege_a1b_carea':    '#6dcaf1',
@@ -210,9 +208,10 @@ def printTables():
   
   #text('t',"Automatically generated result tables.")
   
+  """
   selectedregions=['11000', '11041']
   
-  for region in g.sortedregions: #selectedregions:#g.sortedregions:
+  for region in g.selectedregions: #selectedregions:#g.sortedregions:
     title('t','subsection',g.regions[region])
 
     title('t','subsubsection',"IPCC scenario a1b")
@@ -254,10 +253,39 @@ def printTables():
     #printTable('arpege_a1b_noExpectations',['arpege_a1b_fullExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears_exp,'noExp vs fullExp [avg. 2015-2085]','noVsfullExp_2015-2085_'+region)
     #printTable('arpege_a1b_noExpectations',['arpege_a1b_fullExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'noExp vs fullExp [2085]','noVsfullExp_2085_'+region)   
     
-
+    title('t','subsubsection',"Arpege scenarios")  
     printTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'Variations from constant [2100]','vars_2100_11000',False,)
     printTable('constant',['constant','arpege_a1b','arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'Variations from actual values [2100 vs 2007]','vars_2100-2007_11000',False, 2007)
+    
+    title('t','subsubsection',"sa")
+    """
+  selectedregions=['11000', '11041']
   
+  for region in selectedregions: #selectedregions:#g.sortedregions:
+    title('t','subsection',g.regions[region])
+
+    title('t','subsubsection',"Components of the change")
+    printTable('constant',['arpege_a1b_nopr','arpege_a1b_noph', 'arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'CC effects by components [avg. 2015-2100]','cc_2015-2100_'+region)
+    printTable('constant',['arpege_a1b_nopr','arpege_a1b_noph', 'arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'CC effects by components  [2100]','a1b_all_2100_'+region)
+    printTable('constant',['constant', 'arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Future forest relavie to current forest [2100 vs 2015]','vars_2100_2015'+region, False, 2015)
+
+    title('t','subsubsection',"Characteristics of the system that interact with the change")
+    printTable('arpege_a1b',['arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Elements that interact with the change [avg. 2015-2100]','sa_2015-2100_'+region,False)
+    printTable('arpege_a1b',['arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Elements that interact with the change [2100]','sa_2100_'+region,False)
+  
+    title('t','subsubsection',"Uncertainly relative to the IPCC scenario")
+    printTable('arpege_a1b',['arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Uncertainly from IPCC scenario [avg. 2015-2100]','sa_ipcc_scenarios_2015-2100_'+region,False)
+    printTable('arpege_a1b',['arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Uncertainly from IPCC scenario [2100]','sa_ipcc_scenarios_2100_'+region,False)
+    printTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Uncertainly from IPCC scenario [avg. 2015-2100]','sa_ipcc_scenarios_cv_2015-2100_'+region,True)
+    printTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Uncertainly from IPCC scenario [2100]','sa_ipcc_scenarios_cv_2100_'+region,True)
+    
+    title('t','subsubsection',"Uncertainly relative to the climatic model")
+    printTable('arpege_a1b',['CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Uncertainly from climatic model [avg. 2015-2100]','sa_climatic_model_2015-2100_'+region,False)
+    printTable('arpege_a1b',['CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Uncertainly from climatic model [2100]','sa_climatic_model_2100_'+region,False)
+    printTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Uncertainly from climatic model [avg. 2015-2100]','sa_climatic_model_cv_2015-2100_'+region,True)
+    printTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Uncertainly from climatic model [2100]','sa_climatic_model_cv_2100_'+region,True)
+   
+
   text('t',"\clearpage")
   
   title('t','subsection',"Carbon table")  
@@ -281,12 +309,12 @@ def printTables():
   #printTable('arpege_a1b', ['arpege_a1b_rneutral','arpege_a1b_strongra'], ['vol','forArea'], ['11000'], ['2100'], 'Risk effect, stock vars [2100]', 'risk_2100_11000', False)
   #printCarbonTable('arpege_a1b',['arpege_a1b_rneutral','arpege_a1b_strongra'],'11000', '2015', '2100', "Risk effects, \\ce{CO2} balance [yearly avg. 2015-2100]",'risk_cbalance_2015-2100_11000', True, False)
 
-  title('t','section', "Sa on price and physical effects")
-  printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],g.years,'SA [avg. 2007-2100]','sa_vars_2007-2100_11000',False)
-  printCarbonTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],'11000', '2007', '2100', "Sensitivity analisys \\ce{CO2} balance [avg. 2007-2100]",'sa_cbalance_2007-2100_11000', True, False)
-  printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],oyears,'SA [avg. 2015-2100]','sa_vars_2015-2100_11000',False)
-  printCarbonTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],'11000', '2015', '2100', "Sensitivity analisys \\ce{CO2} balance [yearly avg. 2015-2100]",'sa_cbalance_2015-2100_11000', True, False)
-  printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'SA [2100]','sa_vars_2100_11000',False)
+  #title('t','section', "Sa on price and physical effects")
+  #printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],g.years,'SA [avg. 2007-2100]','sa_vars_2007-2100_11000',False)
+  #printCarbonTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],'11000', '2007', '2100', "Sensitivity analisys \\ce{CO2} balance [avg. 2007-2100]",'sa_cbalance_2007-2100_11000', True, False)
+  #printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],oyears,'SA [avg. 2015-2100]','sa_vars_2015-2100_11000',False)
+  #printCarbonTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],'11000', '2015', '2100', "Sensitivity analisys \\ce{CO2} balance [yearly avg. 2015-2100]",'sa_cbalance_2015-2100_11000', True, False)
+  #printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'SA [2100]','sa_vars_2100_11000',False)
 
   
 # =============================================================================  

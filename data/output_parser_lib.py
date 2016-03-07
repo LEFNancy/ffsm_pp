@@ -13,13 +13,13 @@ import output_parser_globals as g
 
 # =============================================================================
 def prepare_data():  
-  print "Loading and preparing the data.."
+  print ("Loading and preparing the data..")
   
   # A - creating empty dictionaries with just the keys..   
-  for country, data in g.countries.iteritems():
+  for country, data in g.countries.items():
     g.regions[country] = data[1] # add 11000: 'France' to regions
-  g.sortedregions = g.regions.keys()
-  g.sortedregions.sort()
+  g.sortedregions = sorted(g.regions)
+  #k = d.keys(); k.sort(). Use k = sorted(d) 
    
   specieswithAggregates = g.spGroups
   specieswithAggregates.extend(g.spAggregates.keys())
@@ -29,7 +29,7 @@ def prepare_data():
   tempSpGroups.append("")
 
   
-  variablesWithAggregates = g.variables.keys()
+  variablesWithAggregates = list(g.variables.keys())
   for variable in g.variables.keys():
     #'expReturns': ['Expected returns','€/ha','forArea','totalExpReturns'],
     if len(g.variables[variable]) == 4:
@@ -47,14 +47,14 @@ def prepare_data():
       for scenario in g.scenarios.keys():
         for spGroup in tempSpecieswithAggregates:
           key = region, variable, scenario, spGroup
-          g.odata[key] = []	    
+          g.odata[key] = []      
   for year in g.years:
     g.x.append(int(year))
     
 
-  # B - loading data..	    
-  for ifile in g.forIFiles:	    
-    idata_raw = csv.DictReader(open(ifile, 'rb'), delimiter=g.sep)
+  # B - loading data..      
+  for ifile in g.forIFiles:      
+    idata_raw = csv.DictReader(open(ifile, 'r'), delimiter=g.sep)
     for rec in idata_raw:
       # scen;parName;country;region;forType;diamClass;year;value;
       key = rec['region'],rec['parName'],rec['scen'],rec['forType'],rec['year']
@@ -62,7 +62,7 @@ def prepare_data():
         g.idata[key] += float (rec['value'])
         
   for ifile in g.prodIFiles:     
-    idata_raw = csv.DictReader(open(ifile, 'rb'), delimiter=g.sep)
+    idata_raw = csv.DictReader(open(ifile, 'r'), delimiter=g.sep)
     for rec in idata_raw:
       # scen;parName;country;region;prod;freeDim;year;value;
       key = rec['region'],rec['parName'],rec['scen'],rec['prod'],rec['year']
@@ -71,7 +71,7 @@ def prepare_data():
         
   for ifile in g.carbonIFiles:   
     #print (g.carbonIFiles)  
-    idata_raw = csv.DictReader(open(ifile, 'rb'), delimiter=g.sep)
+    idata_raw = csv.DictReader(open(ifile, 'r'), delimiter=g.sep)
     for rec in idata_raw:
       # scen;parName;country;region;forType;diamClass;year;value;
       key = rec['region'],rec['balItem'],rec['scen'],"",rec['year']
@@ -101,7 +101,7 @@ def prepare_data():
   # D - performing various summing up..
    
   # summing up to the country level..
-  for country, regionsInTheCountry in g.countries.iteritems():
+  for country, regionsInTheCountry in g.countries.items():
     for variable in variablesWithAggregates:
       for scenario in g.scenarios.keys():
         for spGroup in tempSpGroups:
@@ -111,7 +111,7 @@ def prepare_data():
             for regionInTheCountry in regionsInTheCountry[0]:
               varToBeSumKey = regionInTheCountry, variable, scenario, spGroup, year
               g.idata[destKey] +=  g.idata[varToBeSumKey]
-	
+  
   # checking country aggregation, ok
   #for country, regionsInTheCountry in countries.iteritems():
     #print "country: " + country + " " + str(idata[country,'vol', 'vRegFixed', 'broadL_highF', '2006'])
@@ -119,7 +119,7 @@ def prepare_data():
       #print "region: " + regionInTheCountry + " " + str(idata[regionInTheCountry,'vol', 'vRegFixed', 'broadL_highF', '2006'])
  
  # summing up the specie aggregation
-  for spAggregate, species in g.spAggregates.iteritems():
+  for spAggregate, species in g.spAggregates.items():
     for region in g.regions.keys():
       for variable in variablesWithAggregates:
         for scenario in g.scenarios.keys():
@@ -144,13 +144,13 @@ def prepare_data():
       totalVariable = g.variables[variable][3]
       for region in g.regions.keys():
         for scenario in g.scenarios.keys():
-	  for spGroup in specieswithAggregates:
-	    for year in g.years:
+          for spGroup in specieswithAggregates:
+            for year in g.years:
               key = region, variable, scenario, spGroup, year
               key_pvar = region, pondVariable, scenario, spGroup, year
               key_tvar = region, totalVariable, scenario, spGroup, year
-	      g.idata[key] =  (g.idata[key_tvar] / g.idata[key_pvar]) if  g.idata[key_pvar] != 0 else 0
-	      
+              g.idata[key] =  (g.idata[key_tvar] / g.idata[key_pvar]) if  g.idata[key_pvar] != 0 else 0
+        
   # testing ponderation variables
   #for variable in variables.keys():
     #'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
@@ -194,20 +194,20 @@ def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLe
   #plt.figure(1)
   fig = plt.gcf()
   fig.set_size_inches(10,15)
-  maintitle = unicode(title, 'utf_8')
+  maintitle = myunicode(title)
   handles =[]
   labels = []
   #plt.suptitle(maintitle, fontsize=16, ha='center')
   for i in range(nvar):    
     #plt.subplot(nvar,1,i+1)
     ax =fig.add_subplot(nvar,1,i+1)
-    subplotTitle = unicode(g.variables[variables_h[i]][0], 'utf_8')
-    ylabel = unicode(g.variables[variables_h[i]][1], 'utf_8')
+    subplotTitle = myunicode(g.variables[variables_h[i]][0])
+    ylabel = myunicode(g.variables[variables_h[i]][1])
     plt.title(subplotTitle)
     plt.ylabel(ylabel)
     for spGroup in sorted(g.spAggregates.keys()):
       for scenario in scenarios_h:
-        serieName = unicode(spGroup + " - " + scenario, 'utf_8')
+        serieName = myunicode(spGroup + " - " + scenario)
         serieColor = g.scenarios[scenario]
         serieLineType = g.spAggregates[spGroup][1]
         serieWidth = g.spAggregates[spGroup][2]
@@ -231,7 +231,7 @@ def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLe
   omfile.write("\\begin{figure}[htbp]\n")
   omfile.write("  \\centering\n")
   omfile.write("  \\caption{"+title+"}\n")
-  omfile.write("  \\includegraphics[width=0.8\\textwidth]{"+g.chartoutdir+"/"+filename+"_"+region+"}\n")
+  omfile.write("  \\includegraphics[width=0.8\  extwidth]{"+g.chartoutdir+"/"+filename+"_"+region+"}\n")
   omfile.write("  \\label{fig:"+filename+"}\n")
   omfile.write("\\end{figure}\n")
   omfile.close()
@@ -255,8 +255,8 @@ def plotCarbonChart(scenarios_h,region,title, filename):
 
   fig = plt.gcf()
   fig.set_size_inches(12,10)
-  ylabel = unicode("Gt CO2 eq", 'utf_8')
-  plt.title(unicode(title, 'utf_8'))
+  ylabel = myunicode("Gt CO2 eq")
+  plt.title(myunicode(title))
   plt.ylabel(ylabel)
   
   totals = [[0]*len(g.x)]* nscen
@@ -264,10 +264,10 @@ def plotCarbonChart(scenarios_h,region,title, filename):
   for idg, cGroup in enumerate(cVariables): 
     for ids, scenario in enumerate(scenarios_h):    
       grTotals =  [0]*len(g.x)
-      #serieName = unicode(cGroup[0] + " - " + scenario, 'utf_8')
-      serieName = "_"+unicode(scenario, 'utf_8') # not shown in legend    
+      #serieName = myunicode(cGroup[0] + " - " + scenario)
+      serieName = "_"+myunicode(scenario) # not shown in legend    
       if idg==2:
-         serieName = unicode(scenario, 'utf_8')         
+         serieName = myunicode(scenario)         
       serieColor = g.scenarios[scenario]
       serieLineType = cGroup[2]
       serieWidth = cGroup[3]
@@ -336,7 +336,7 @@ def plotLegend(scenarios_h, title, filename):
   
   for spGroup in sorted(g.spAggregates.keys()):
     for scenario in scenarios_h:
-      serieName = unicode(spGroup + " - " + scenario, 'utf_8')
+      serieName = myunicode(spGroup + " - " + scenario)
       serieColor = g.scenarios[scenario]
       serieLineType = g.spAggregates[spGroup][1]
       serieWidth = g.spAggregates[spGroup][2]
@@ -378,7 +378,7 @@ def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename):
  Y  = (origin[1], origin[1], origin[1])
  X2 = (end1[0]-origin[0], endt[0]-origin[0], end2[0]-origin[0]) 
  Y2 = (end1[1]-origin[1], endt[1]-origin[1], end2[1]-origin[1])
- C  = (255,010,150) # ? colour codes, but didn't got it
+ C  = (255,10,150) # ? colour codes, but didn't got it
 
  ax.quiver(X,Y,X2,Y2,C,angles='xy',scale_units='xy',scale=1, width=0.008)
  x  = (end1[0],end2[0])
@@ -392,15 +392,15 @@ def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename):
 
  ax.set_ylim([miny- (centre[1]-miny)*0.4, maxy + (maxy-centre[1])*0.4])
 
- plt.xlabel(unicode(xlabel, 'utf_8'))
- plt.ylabel(unicode(ylabel, 'utf_8'))
+ plt.xlabel(myunicode(xlabel))
+ plt.ylabel(myunicode(ylabel))
  # Uncomment the following lines if you want to display instead of save the figure..
  #plt.draw()
  #plt.show()
  plt.savefig(filename, dpi=300)
  
 # =============================================================================
-def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename, singleComparation=True, refYear=0):
+def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename, singleComparation=False, refYear=0):
   """Print a LaTeX Table for variables variable_h comparing ref_scenario scenario vs coparing_scenarios.
   @param singleComparation: if True multiple comparing scenarios are treated as multiple replications of the same scenario and
   some basic stats are computed; if False they are all represented as diff from the ref_scenario.
@@ -426,7 +426,7 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
     label_comparing_scenario = labels_comparing_scenarios[0]
   
   if (singleComparation):
-    if nscen > 5:
+    if nscen > 2:
       ncol = 5
   else:
     ncol = nscen+2 #+1 for the val label and +1 for the ref scenario
@@ -444,7 +444,7 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
   oString += "}\n"
   oString += "\\hline\n"
   if (singleComparation):
-    if nscen > 5:
+    if nscen > 2:
       oString += d+label_ref_scenario+d+label_comparing_scenario+d+"difference"+d+"cv"+el+"\n"  
     else:
       oString += d+label_ref_scenario+d+label_comparing_scenario+d+"difference"+el+"\n"
@@ -483,7 +483,7 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
   oString += "\\end{tabularx}\n"
   oString += "\\end{footnotesize}\n"
   oString += "\\label{tab:"+filename+"}\n"
-  if (singleComparation and nscen > 5):
+  if (singleComparation and nscen > 2):
     oString += "\\begin{tablenotes}\n"
     oString += "\\begin{footnotesize}\n"
     oString += "\\item [a] Significantly different from 0 at $\\alpha=0.01$\n"
@@ -514,8 +514,8 @@ def printAATable(ref_scenarios, comparing_scenarios, regions_h, years_h, title, 
   scenario_labels = []
   nscen = len(ref_scenarios)
   nscen_comp = len(comparing_scenarios)
-  if nscen <> nscen_comp:
-    print "Error in printAATable: number of comparing vs reference scenarios must be the same !"
+  if nscen != nscen_comp:
+    print ("Error in printAATable: number of comparing vs reference scenarios must be the same !")
     exit(1)
   nyears = len(years_h)
   nregions = len(regions_h)
@@ -744,7 +744,7 @@ def title (cat, level, title):
   elif cat == 'c': 
     filename = g.chartoutdir+'/'+g.chartsmaster+'.tex'
   else:
-    print "Error in printTable: not know where to print the title !"
+    print ("Error in printTable: not know where to print the title !")
     exit(1)
   file = open(filename,'a')
   
@@ -760,8 +760,16 @@ def text(cat, text_h):
   elif cat == 'c': 
     filename = g.chartoutdir+'/'+g.chartsmaster+'.tex'
   else:
-    print "Error in text: not know where to print the title !"
+    print ("Error in text: not know where to print the title !")
     exit(1)
   file = open(filename,'a')
   file.write(text_h+"\n")
   file.close()
+
+# =============================================================================
+def myunicode(astring):
+  if sys.version_info < (3, 0):
+    return unicode(astring, 'utf_8')
+  else:
+    return astring
+     

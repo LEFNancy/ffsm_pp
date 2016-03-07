@@ -26,48 +26,62 @@ def main():
   if g.printAATablesFlag:
     printAATables()
   
-  print "Done!"
+  print ("Done!")
 
 # =============================================================================
 def override_globals():
 
   g.forIFiles = [  
     #'output/results/forestData_P0-Mh-Ei.csv',
-    'output/results/forestData_P1-Mh-Ei.csv',
+    #'output/results/forestData_P1-Mh-Ei.csv',
     'output/results/forestData_P0-Mi-Ei.csv',
     'output/results/forestData_P1-Mi-Ei.csv',
-    'output/results/forestData_P0-Me-Ei.csv',
-    'output/results/forestData_P1-Me-Ei.csv',
-    'output/results/forestData_P0-Mi-E0.csv',
-    'output/results/forestData_P1-Mi-E0.csv',
-    'output/results/forestData_P0-Mi-E1.csv', 
-    'output/results/forestData_P1-Mi-E1.csv',
+    #'output/results/forestData_P0-Me-Ei.csv',
+    #'output/results/forestData_P1-Me-Ei.csv',
+    #'output/results/forestData_P0-Mi-E0.csv',
+    #'output/results/forestData_P1-Mi-E0.csv',
+    #'output/results/forestData_P0-Mi-E1.csv', 
+    #'output/results/forestData_P1-Mi-E1.csv',
   ]
   
-  g.carbonIFile = [
+  
+  g.prodIFiles = [
+    #'output/results/productData_P0-Mh-Ei.csv',
+    #'output/results/productData_P1-Mh-Ei.csv',
+    'output/results/productData_P0-Mi-Ei.csv',
+    'output/results/productData_P1-Mi-Ei.csv',
+    #'output/results/productData_P0-Me-Ei.csv',
+    #'output/results/productData_P1-Me-Ei.csv',
+    #'output/results/productData_P0-Mi-E0.csv',
+    #'output/results/productData_P1-Mi-E0.csv',
+    #'output/results/productData_P0-Mi-E1.csv',
+    #'output/results/productData_P1-Mi-E1.csv',
+    
+  ]
+  g.carbonIFiles = [
     #'output/results/carbonBalance_P0-Mh-Ei.csv',
-    'output/results/carbonBalance_P1-Mh-Ei.csv',
+    #'output/results/carbonBalance_P1-Mh-Ei.csv',
     'output/results/carbonBalance_P0-Mi-Ei.csv',
     'output/results/carbonBalance_P1-Mi-Ei.csv',
-    'output/results/carbonBalance_P0-Me-Ei.csv',
-    'output/results/carbonBalance_P1-Me-Ei.csv',
-    'output/results/carbonBalance_P0-Mi-E0.csv',
-    'output/results/carbonBalance_P1-Mi-E0.csv',
-    'output/results/carbonBalance_P0-Mi-E1.csv',
-    'output/results/carbonBalance_P1-Mi-E1.csv',
+    #'output/results/carbonBalance_P0-Me-Ei.csv',
+    #'output/results/carbonBalance_P1-Me-Ei.csv',
+    #'output/results/carbonBalance_P0-Mi-E0.csv',
+    #'output/results/carbonBalance_P1-Mi-E0.csv',
+    #'output/results/carbonBalance_P0-Mi-E1.csv',
+    #'output/results/carbonBalance_P1-Mi-E1.csv',
   ]
 
   g.scenarios = {
     #'P0-Mh-Ei':             '#000000',  # Black
-    'P1-Mh-Ei':             '#cccccc',  # Grey
+    #'P1-Mh-Ei':             '#cccccc',  # Grey
     'P0-Mi-Ei':             '#b5ff95',  # Light green
     'P1-Mi-Ei':             '#f40303',  # Red
-    'P0-Me-Ei':             '#b5ff95',  # Light green
-    'P1-Me-Ei':             '#f40303',  # Red
-    'P0-Mi-E0':             '#b5ff95',  # Light green 
-    'P1-Mi-E0':             '#f40303',  # Red
-    'P0-Mi-E1':             '#011bb7',  # Ink blue
-    'P1-Mi-E1':             '#011bb7',  # Ink blue
+    #'P0-Me-Ei':             '#b5ff95',  # Light green
+    #'P1-Me-Ei':             '#f40303',  # Red
+    #'P0-Mi-E0':             '#b5ff95',  # Light green 
+    #'P1-Mi-E0':             '#f40303',  # Red
+    #'P0-Mi-E1':             '#011bb7',  # Ink blue
+    #'P1-Mi-E1':             '#011bb7',  # Ink blue
   }
   
   
@@ -93,6 +107,7 @@ def override_globals():
        'EM_ENSUB': ['Cumulative emissions from energy substitution', r"$Mt CO_2$"],
        'EM_MATSUB': ['Cumulative emissions from material substitution', r"$Mt CO_2$"],
        'EM_FOROP': ['Cumulative emissions from forest operations', r"$Mt CO_2$"],
+       
   }
   g.spGroups = ['ash','broadL_highF','broadL_mixedF','broadL_copp','con_highF']
 
@@ -107,7 +122,7 @@ def override_globals():
 
 # =============================================================================   
 def printCharts():
-  print "Printing charts.."
+  print ("Printing charts..")
 
   plotMultivariable(['P0-Mi-Ei', 'P1-Mi-Ei'],['expReturns','vReg','vol','hV','forArea'],'11000','Effect of tyhe pathogen [France]','pathogen_effect')
   
@@ -119,7 +134,7 @@ def printCharts():
   
 # =============================================================================  
 def printTables():
-  print "Printing tables.."
+  print ("Printing tables..")
 
   #y2015_2100 =  [str(y) for y in range(2015,2101)] # if we want to focus on a subperiod..
  
@@ -133,18 +148,18 @@ def printTables():
   #  printTable('P1-Mi-Ei',['P1-Mi-Ei'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'\\texttt{P1-Mi-Ei} evolution [2100 vs 2015]','path_time_dynamic_for_2100_vs_2015'+region,False,'2015')
   
   printTable('P0-Mi-Ei',['P1-Mi-Ei'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],g.years,'\\texttt{P0-Mi-Ei} vs \\texttt{P1-Mi-Ei} [avg. 2007-2100]','path_overall_effect_for_2007-2100_11000')
-  printTable('P0-Mi-Ei',['P1-Mi-Ei'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'\\texttt{P0-Mi-Ei} vs \\texttt{P1-Mi-Ei} [2100]','path_overall_effect_for_2100_11000')
-  printTable('P1-Mi-Ei',['P1-Mi-Ei'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'\\texttt{P1-Mi-Ei} evolution [2100 vs 2015]','path_time_dynamic_for_2100_vs_2015_11000',True,'2015')
+  #printTable('P0-Mi-Ei',['P1-Mi-Ei'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'\\texttt{P0-Mi-Ei} vs \\texttt{P1-Mi-Ei} [2100]','path_overall_effect_for_2100_11000')
+  #printTable('P1-Mi-Ei',['P1-Mi-Ei'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'\\texttt{P1-Mi-Ei} evolution [2100 vs 2015]','path_time_dynamic_for_2100_vs_2015_11000',True,'2015')
   
 
-  title('t','section', "Sa on expectations and degree of substitutability")
-  printTable('P1-Mi-Ei',['P1-Mi-E0','P1-Mi-E1','P1-Mh-Ei','P1-Me-Ei'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],g.years,'SA [avg. 2007-2100]','sa_for_2007-2100_11000',False)
-  printTable('P1-Mi-Ei',['P1-Mi-E0','P1-Mi-E1','P1-Mh-Ei','P1-Me-Ei'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'SA [2100]','sa_for_2100_11000',False)
+  #title('t','section', "Sa on expectations and degree of substitutability")
+  #printTable('P1-Mi-Ei',['P1-Mi-E0','P1-Mi-E1','P1-Mh-Ei','P1-Me-Ei'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],g.years,'SA [avg. 2007-2100]','sa_for_2007-2100_11000',False)
+  #printTable('P1-Mi-Ei',['P1-Mi-E0','P1-Mi-E1','P1-Mh-Ei','P1-Me-Ei'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'SA [2100]','sa_for_2100_11000',False)
 
   
 # =============================================================================  
 def printAATables():
-  print "Printing area allocation tables.."
+  print ("Printing area allocation tables..")
 
 # =============================================================================
 # EXECUTION ACTUALLY STARTS HERE.....
