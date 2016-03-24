@@ -73,8 +73,6 @@ public:
   QColor              getColor(double ID_h);
   /// Evaluates all the legend items to find the one that match the input code, and return its label
   string              getCategory(double ID_h);
-  /// Add a reclassification filter rule. @see ReclassRules
-  void                addReclassificationRule(int inCode_h, int outCode_h, double p_h);
   /// Used to reclassify the land use map for "generic" categories
   double              filterExogenousDataset(double code_h);
   /// Count the pixels going to each legend item and print them if debug==true

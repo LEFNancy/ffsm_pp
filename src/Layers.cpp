@@ -89,17 +89,6 @@ Layers::addLegendItems(vector<LegendItems> legendItems_h){
 }
 
 
-
-void
-Layers::addReclassificationRule(int inCode_h, int outCode_h, double p_h){
-
-  ReclassRules RULE;
-  RULE.inCode=inCode_h;
-  RULE.outCode = outCode_h;
-  RULE.p = p_h;
-  reclassRulesVector.push_back(RULE);
-}
-
 /**
 Used in the init stage, this function take as input the real map code as just read from the map file, and filter it according to the reclassification rules.
 @see ReclassRules

@@ -36,7 +36,8 @@ regions = {'11042': 'Alsace', '11061': 'Aquitaine', '11072': 'Auvergne', '11025'
 
 # key: var short name
 # value: list with long name, unit and optionally variable to act for ponderation and name of aggregated variable
-variables = {'hV': ['Harvested Volumes', r"$Mm^3$"],
+# These should be called forVars
+forVars = {'hV': ['Harvested Volumes', r"$Mm^3$"],
        'vReg': ['Regeneration Volumes', r"$Mm^3$"],
        'vol': ['Forest Volumes', r"$Mm^3$"],
        'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],

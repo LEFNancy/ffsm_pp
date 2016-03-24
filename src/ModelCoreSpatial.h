@@ -89,6 +89,7 @@ public:
   void                  computeInventary();       ///< in=f(vol_t-1)
   void                  computeCumulativeData();  ///< computes cumTp_exp, vHa_exp, vHa
   void                  updateMapAreas();         ///< computes forArea_{ft}
+  void                  updateOtherMapData();     ///< update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   double                computeExpectedPrice(const double & curLocPrice, const double & worldCurPrice, const double & worldFutPrice, const double & sl, const double & sa, const double & expCoef); ///< Compute weighted expected price for a given product.
   void                  printDebugInitRegionalValues(); ///< print initial inv, st, sl and sa in each region
 

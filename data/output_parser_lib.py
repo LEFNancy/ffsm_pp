@@ -29,11 +29,11 @@ def prepare_data():
   tempSpGroups.append("")
 
   
-  variablesWithAggregates = list(g.variables.keys())
-  for variable in g.variables.keys():
+  variablesWithAggregates = list(g.forVars.keys())
+  for variable in g.forVars.keys():
     #'expReturns': ['Expected returns','€/ha','forArea','totalExpReturns'],
-    if len(g.variables[variable]) == 4:
-      variablesWithAggregates.append(g.variables[variable][3])
+    if len(g.forVars[variable]) == 4:
+      variablesWithAggregates.append(g.forVars[variable][3])
   
   for region in g.regions.keys():
     for variable in variablesWithAggregates:
@@ -84,11 +84,11 @@ def prepare_data():
   #exit(1)
   
   # C - creating aggregated data for variables that need to be pondered
-  for variable in g.variables.keys():
+  for variable in g.forVars.keys():
     #'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
-    if len(g.variables[variable]) == 4:
-      pondVariable = g.variables[variable][2]
-      totalVariable = g.variables[variable][3]
+    if len(g.forVars[variable]) == 4:
+      pondVariable = g.forVars[variable][2]
+      totalVariable = g.forVars[variable][3]
       for region in g.regions.keys():
         for scenario in g.scenarios.keys():
           for spGroup in specieswithAggregates:
@@ -137,11 +137,11 @@ def prepare_data():
       #print "specieGroup: " + specie + " " + str(idata['11042','vol', 'vRegFixed', specie, '2006'])
    
   # E - after all the summing up let's compute the poundered value  
-  for variable in g.variables.keys():
+  for variable in g.forVars.keys():
     #'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
-    if len(g.variables[variable]) == 4:
-      pondVariable = g.variables[variable][2]
-      totalVariable = g.variables[variable][3]
+    if len(g.forVars[variable]) == 4:
+      pondVariable = g.forVars[variable][2]
+      totalVariable = g.forVars[variable][3]
       for region in g.regions.keys():
         for scenario in g.scenarios.keys():
           for spGroup in specieswithAggregates:
@@ -201,8 +201,8 @@ def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLe
   for i in range(nvar):    
     #plt.subplot(nvar,1,i+1)
     ax =fig.add_subplot(nvar,1,i+1)
-    subplotTitle = myunicode(g.variables[variables_h[i]][0])
-    ylabel = myunicode(g.variables[variables_h[i]][1])
+    subplotTitle = myunicode(g.forVars[variables_h[i]][0])
+    ylabel = myunicode(g.forVars[variables_h[i]][1])
     plt.title(subplotTitle)
     plt.ylabel(ylabel)
     for spGroup in sorted(g.spAggregates.keys()):
@@ -460,7 +460,7 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
       oString += "\\multicolumn{"+str(ncol)+"}{l}{"+regions[region]+"}"+el+'\n'
   
     for variable in variables_h:
-      oString += "\\multicolumn{"+str(ncol)+"}{l}{"+g.variables[variable][0]+" (\\textit{"+g.variables[variable][1]+"})}"+el+'\n'
+      oString += "\\multicolumn{"+str(ncol)+"}{l}{"+g.forVars[variable][0]+" (\\textit{"+g.forVars[variable][1]+"})}"+el+'\n'
       for spGroup in sorted(g.spAggregates.keys()):
         outSpGroup = spGroup.replace("_", "\\_")
         sumRScenario =   0

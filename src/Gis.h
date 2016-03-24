@@ -99,8 +99,6 @@ public:
                           int        bColor_h,
                           double   minValue_h,
                           double   maxValue_h   );
-  /// Add a reclassification rule to an existing layer
-  void                addReclassificationRule(string name_h, int inCode_h, int outCode_h, double p_h);
   /// Count the pixels within each legend item for the selected layer
   void                countItems(const string& layerName_h, const bool& debug=false);
   /// Return a pointer to a plot with a specific value for the specified layer

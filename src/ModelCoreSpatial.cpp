@@ -62,6 +62,7 @@ ModelCoreSpatial::runInitPeriod(){
   runManagementModule();
   MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
   updateMapAreas();               ///< update the forArea_{ft} layer on each pixel as old value-hArea+regArea
+  updateOtherMapData();           ///< update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   sumRegionalForData();           ///< only for printing stats as forest data is never used at regional level
   initialiseCarbonModule();
   MTHREAD->DO->print();
@@ -80,6 +81,7 @@ ModelCoreSpatial::runSimulationYear(){
   runManagementModule();
   MTHREAD->DO->printDebugPixelValues();
   updateMapAreas();
+  updateOtherMapData();        // update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   sumRegionalForData();      // only for printing stats as forest data is never used at regional level
   registerCarbonEvents();
   MTHREAD->DO->print();
@@ -1684,6 +1686,43 @@ ModelCoreSpatial::updateMapAreas(){
     }
   }
 }
+
+void
+ModelCoreSpatial::updateOtherMapData(){
+
+vector<int> l2Regions =  MTHREAD->MD->getRegionIds(2, true);
+vector <string> fTypes =  MTHREAD->MD->getForTypeIds();
+int nFTypes = fTypes.size();
+int nL2Regions = l2Regions.size();
+for(int i=0;i<nL2Regions;i++){
+  int regId = l2Regions[i];
+  vector<Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regId);
+  for(int j=0;j<nFTypes;j++){
+    string ft = fTypes[j];
+    for(uint z=0;z<rpx.size();z++){
+      Pixel* px = rpx[z];
+      double vol = vSum(px->vol.at(j));
+      double expectedReturns = px->expectedReturns.at(j);
+      if(MTHREAD->GIS->layerExist("vol_"+ft)){
+        rpx[z]->changeValue("vol_"+ft, vol);
+      }
+      if(MTHREAD->GIS->layerExist("expectedReturns_"+ft)){
+        rpx[z]->changeValue("expectedReturns_"+ft, expectedReturns);
+      }
+    }
+  }
+}
+
+// update GUI image..
+for(int j=0;j<nFTypes;j++){
+  string ft = fTypes[j];
+  MTHREAD->GIS->updateImage("vol_"+ft);
+  MTHREAD->GIS->updateImage("expectedReturns_"+ft);
+}
+
+
+}
+
 
 void
 ModelCoreSpatial::sumRegionalForData(){

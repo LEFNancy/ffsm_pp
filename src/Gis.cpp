@@ -247,7 +247,7 @@ Called from setSpace(), initLayers() is responsable of:
  - add the layer to the system @see addLayer
 <p>If the layer is to be read at start-up:
  - adding to the layer each legend item (ID, label, min-max values..) @see addLegendItem
- - eventually adding to the layer each reclassification rules @see addReclassificationRule
+ - [REMOVED, as reclassification rules are in the input ods file now, not in the gis input file] eventually adding to the layer each reclassification rules @see addReclassificationRule
 **/
 void
 Gis::initLayers(){
@@ -259,47 +259,48 @@ Gis::initLayers(){
   bool test=gisDocument.setWorkingFile(filename_complete);
   if (!test){msgOut(MSG_CRITICAL_ERROR, "Error opening the gis file "+filename_complete+".");}
   vector<InputNode> layerNodes = gisDocument.getNodesByName("layer");
+  vector<string> ftIds = MTHREAD->MD->getForTypeIds();
   for (uint i=0; i<layerNodes.size();i++){
     
-    string name = layerNodes.at(i).getNodeByName("name").getStringContent();
-    string label = layerNodes.at(i).getNodeByName("label").getStringContent();
+    string nameOrig = layerNodes.at(i).getNodeByName("name").getStringContent();
+    string labelOrig = layerNodes.at(i).getNodeByName("label").getStringContent();
     bool isInteger = layerNodes.at(i).getNodeByName("isInteger").getBoolContent();
     bool dynamicContent = layerNodes.at(i).getNodeByName("dynamicContent").getBoolContent();
+    bool expandByFt = layerNodes.at(i).getNodeByName("expandByFt").getBoolContent();
     string readAtStart = layerNodes.at(i).getNodeByName("readAtStart").getStringContent();
     if (readAtStart != "true") continue;
     string dirName = layerNodes.at(i).getNodeByName("dirName").getStringContent();
     string fileName = layerNodes.at(i).getNodeByName("fileName").getStringContent();
-    //cout <<"getBaseDirectory(): " << MTHREAD->MD->getBaseDirectory() << endl;
-    
-    string fullFileName = MTHREAD->MD->getBaseDirectory()+dirName+fileName;
-    //cout <<"fullFileName: " << fullFileName << endl;
-    addLayer(name,label,isInteger,dynamicContent,fullFileName);
-    //legend..
-    vector<InputNode> legendItemsNodes = layerNodes.at(i).getNodesByName("legendItem");
-    for (uint j=0; j<legendItemsNodes.size();j++){
-      int lID = legendItemsNodes.at(j).getIntContent();
-      string llabel = legendItemsNodes.at(j).getStringAttributeByName("label");
-      int rColor = legendItemsNodes.at(j).getIntAttributeByName("rColor");
-      int gColor = legendItemsNodes.at(j).getIntAttributeByName("gColor");
-      int bColor = legendItemsNodes.at(j).getIntAttributeByName("bColor");
-      double minValue, maxValue;
-      if (isInteger){
-        minValue = ((double)lID);
-        maxValue = ((double)lID);
+
+    // Eventually expanding this input layern in as many layer as forest types exists..
+    uint endingLoop = expandByFt ? ftIds.size(): 1;
+    for(uint z=0;z<endingLoop;z++){
+      string ftExtension= expandByFt ? "_"+ftIds[z]:"";
+      string labelFtExtension= expandByFt ? " ("+ftIds[z]+")":"";
+      string name = nameOrig+ftExtension;
+      string label = labelOrig + labelFtExtension;
+
+      string fullFileName = ((dirName == "") || (fileName==""))?"":MTHREAD->MD->getBaseDirectory()+dirName+fileName+ftExtension; // TODO: ugly: one would have to put mmyfile.grd_broadL_highF
+      addLayer(name,label,isInteger,dynamicContent,fullFileName);
+      //legend..
+      vector<InputNode> legendItemsNodes = layerNodes.at(i).getNodesByName("legendItem");
+      for (uint j=0; j<legendItemsNodes.size();j++){
+        int lID = legendItemsNodes.at(j).getIntContent();
+        string llabel = legendItemsNodes.at(j).getStringAttributeByName("label");
+        int rColor = legendItemsNodes.at(j).getIntAttributeByName("rColor");
+        int gColor = legendItemsNodes.at(j).getIntAttributeByName("gColor");
+        int bColor = legendItemsNodes.at(j).getIntAttributeByName("bColor");
+        double minValue, maxValue;
+        if (isInteger){
+          minValue = ((double)lID);
+          maxValue = ((double)lID);
+        }
+        else {
+          minValue = legendItemsNodes.at(j).getDoubleAttributeByName("minValue");
+          maxValue = legendItemsNodes.at(j).getDoubleAttributeByName("maxValue");
+        }
+        addLegendItem(name, lID, llabel, rColor, gColor, bColor, minValue, maxValue);
       }
-      else {
-        minValue = legendItemsNodes.at(j).getDoubleAttributeByName("minValue");
-        maxValue = legendItemsNodes.at(j).getDoubleAttributeByName("maxValue");
-      }
-      addLegendItem(name, lID, llabel, rColor, gColor, bColor, minValue, maxValue);
-    }
-    //reclassification rule..
-    vector<InputNode> reclassificationRulesNodes = layerNodes.at(i).getNodesByName("reclassRule");
-    for (uint z=0; z<reclassificationRulesNodes.size();z++){
-      int inCode = reclassificationRulesNodes.at(z).getIntContent();
-      int outCode = reclassificationRulesNodes.at(z).getIntAttributeByName("outCode");
-      double p = reclassificationRulesNodes.at(z).getDoubleAttributeByName("p");
-      addReclassificationRule(name, inCode, outCode, p);
     }
   }
   initLayersPixelData();
@@ -592,23 +593,6 @@ Gis::countItems(const string &layerName_h, const bool &debug){
   return;
 }
 
-/**
-Search within the layerVector and call addReclassificationRule(...) to the appropriate one.
-
-Called at init time from initLayers, or during model run-time.
-@see Layers::addReclassificationRule
-*/
-void
-Gis::addReclassificationRule(string name_h, int inCode_h, int outCode_h, double p_h){
-  for(uint i=0; i<layerVector.size(); i++){
-    if (layerVector.at(i).getName() == name_h){
-      layerVector.at(i).addReclassificationRule(inCode_h, outCode_h, p_h);
-      return;
-    }
-  }
-  msgOut(MSG_ERROR, "Trying to add a reclassification rule to a layer that doesn't exist.");
-  return; 
-}
 
 /**
 Called at init time from initLayers, this function load the associated datafile to the existing layers (that if exists at this stage are all of type to be loaded at start-up). 
