@@ -50,10 +50,10 @@
 *    In (inventary) -> at the beginning of the year
 *    Area           -> at the end of the year
 *    Harvesting     -> at the beginning of the year
-*    Volumes are in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2, vHa in m^3/ha
+*    Volumes are in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2, vHa in m^3/ha. Prices are in €/m^3.
 *
 *    BALANCE:
-*    PROD_forLocal (sl) + PROD_forExp (sa) + IMP (da) = CONS_fromLocal (dl) + CONS_fromImp (da) + EXP (sa)
+*    PROD_forLocal (sl) + PROD_forExp (sa) + IMP (da) + sum_reg(reg_trade_in) = CONS_fromLocal (dl) + CONS_fromImp (da) + EXP (sa) + sum_reg(reg_trade_out)
 *
 * Where are volumes information ?
 * - ip px->vol                                                         - by px, ft and dc
