@@ -84,7 +84,8 @@ private:
   string                                 oFileExt;
   bool                                 oHRedeable;
   bool                                oSingleFile;
-  vector<int>                              oYears;
+  vector<int>                              oYears; // list of output years for data
+  vector<int>                          mapsOYears; // list of output years for maps
   int                                   wRegId_l1;
   int                                   wRegId_l2;
   string                              outFileName;

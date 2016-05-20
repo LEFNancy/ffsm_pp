@@ -21,6 +21,8 @@
  ***************************************************************************/
 #include <fstream>
  
+#include <algorithm>
+
 #include "Output.h"
 #include "ThreadManager.h"
 #include "Scheduler.h"
@@ -80,6 +82,7 @@ Output::commonInit(){
   oHRedeable   = MTHREAD->MD->getBoolSetting("outputHumanReadable");
   oSingleFile  = MTHREAD->MD->getBoolSetting("outputSingleFile");
   oYears       = MTHREAD->MD->getIntVectorSetting("outYears");
+  mapsOYears   = MTHREAD->MD->getIntVectorSetting("mapsOutYears");
   wRegId_l1    = MTHREAD->MD->getIntSetting("worldCodeLev1");
   wRegId_l2    = MTHREAD->MD->getIntSetting("worldCodeLev2");
   outForVariables          = MTHREAD->MD->getStringVectorSetting("outForVariables");
@@ -426,9 +429,12 @@ Output::print(){
 void
 Output::printMaps(){
   if(oLevel<OUTVL_MAPS) return;
-  MTHREAD->GIS->printLayers();
-  if(oLevel<OUTVL_BINMAPS) return;
-  MTHREAD->GIS->printBinMaps();
+  int cYear = MTHREAD->SCD->getYear();
+  if ( find(mapsOYears.begin(), mapsOYears.end(), cYear) != mapsOYears.end() ){
+    MTHREAD->GIS->printLayers();
+    if(oLevel<OUTVL_BINMAPS) return;
+    MTHREAD->GIS->printBinMaps();
+  }
 }
 
 void

@@ -696,7 +696,9 @@ Gis::updateImage(string layerName_h){
       break;
     }
   }
-  if (layerIndex <0) msgOut(MSG_CRITICAL_ERROR, "Layer not found in Gis::updateImage()");
+  if (layerIndex <0) {
+    msgOut(MSG_CRITICAL_ERROR, "Layer not found in Gis::updateImage()");
+  }
 
   for (int countRow=subYT;countRow<subYB;countRow++){
     for (int countColumn=subXL;countColumn<subXR;countColumn++){      

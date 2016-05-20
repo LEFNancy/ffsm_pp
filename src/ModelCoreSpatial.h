@@ -54,6 +54,7 @@
 *
 *    BALANCE:
 *    PROD_forLocal (sl) + PROD_forExp (sa) + IMP (da) + sum_reg(reg_trade_in) = CONS_fromLocal (dl) + CONS_fromImp (da) + EXP (sa) + sum_reg(reg_trade_out)
+*    note that this means that sl includes alread reg_trade_out, and dl includes already reg_trade_in
 *
 * Where are volumes information ?
 * - ip px->vol                                                         - by px, ft and dc

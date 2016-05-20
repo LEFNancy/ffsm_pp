@@ -61,7 +61,7 @@ def prepare_data():
       if key in g.idata:
         g.idata[key] += float (rec['value'])
         
-  for ifile in g.prodIFiles:     
+  for ifile in g.prodIFiles:  
     idata_raw = csv.DictReader(open(ifile, 'r'), delimiter=g.sep)
     for rec in idata_raw:
       # scen;parName;country;region;prod;freeDim;year;value;
