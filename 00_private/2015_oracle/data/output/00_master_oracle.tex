@@ -1,11 +1,13 @@
 %paper also and it is very nice !
 \documentclass[a4paper,11pt]{paper}
 
+%\usepackage[a4paper,margin=1in]{geometry}
 \usepackage[a4paper,margin=1in,landscape]{geometry}
 \usepackage{graphicx}
 %\usepackage{float}% If comment this, figure moves
 \usepackage{mwe}    % loads »blindtext« and »graphicx«
-\usepackage{subfig} % error
+%\usepackage{subfig} % error
+\usepackage{subcaption} % sub figure placement
 \usepackage[english]{babel}
 \usepackage{ucs}               % require separate debian package 
 \usepackage[utf8x]{inputenc}   % require ucs. Allows both Italian and English letters.
@@ -59,12 +61,15 @@ This document is generated automatically trough a script directly from the model
 \thispagestyle{empty}
 \newpage
 \part[Tables]{Output tables}
-\input{output/tables/00_master_tables}
+\input{tables/00_master_tables}
 \clearpage
 \newpage
 \part[Charts]{Output charts}
-\input{output/charts/00_master_charts}
-
+\input{charts/00_master_charts}
+\clearpage
+\newpage
+\part[Maps]{Output maps}
+\input{maps/bitmaps/00_master_maps}
 
 %\newpage
 %\bibliography{biblio}

@@ -32,27 +32,27 @@ def main():
 def override_globals():
 
   g.forIFiles = [  
-    'output/results/forestData_baseline.csv',
-    'output/results/forestData_constant.csv',
-    'output/results/forestData_Ph_L.csv',
-    'output/results/forestData_Ph_U.csv',
-    'output/results/forestData_Pr_C.csv',
-    'output/results/forestData_Pr_U.csv',
-    'output/results/forestData_Exp_0.csv',
-    'output/results/forestData_Exp_1.csv',
-    'output/results/forestData_EOL_en_U.csv', 
+    'results/forestData_baseline.csv',
+    'results/forestData_constant.csv',
+    'results/forestData_Ph_L.csv',
+    'results/forestData_Ph_U.csv',
+    'results/forestData_Pr_C.csv',
+    'results/forestData_Pr_U.csv',
+    'results/forestData_Exp_0.csv',
+    'results/forestData_Exp_1.csv',
+    'results/forestData_EOL_en_U.csv', 
   ]
   
-  g.carbonIFile = [
-    'output/results/carbonBalance_baseline.csv',
-    'output/results/carbonBalance_constant.csv',
-    'output/results/carbonBalance_Ph_L.csv',
-    'output/results/carbonBalance_Ph_U.csv',
-    'output/results/carbonBalance_Pr_C.csv',
-    'output/results/carbonBalance_Pr_U.csv',
-    'output/results/carbonBalance_Exp_0.csv',
-    'output/results/carbonBalance_Exp_1.csv',
-    'output/results/carbonBalance_EOL_en_U.csv',
+  g.carbonIFiles = [
+    'results/carbonBalance_baseline.csv',
+    'results/carbonBalance_constant.csv',
+    'results/carbonBalance_Ph_L.csv',
+    'results/carbonBalance_Ph_U.csv',
+    'results/carbonBalance_Pr_C.csv',
+    'results/carbonBalance_Pr_U.csv',
+    'results/carbonBalance_Exp_0.csv',
+    'results/carbonBalance_Exp_1.csv',
+    'results/carbonBalance_EOL_en_U.csv',
   ]
 
   g.scenarios = {
@@ -71,11 +71,11 @@ def override_globals():
   g.printChartsFlag = True
   g.printTablesFlag = True
   g.printAATablesFlag = False
-  g.chartoutdir = 'output/charts'
-  g.tableoutdir = 'output/tables'
+  g.chartoutdir = 'charts'
+  g.tableoutdir = 'tables'
   # key: var short name
   # value: turple with long name, unit and optionally variable to act for ponderation and name of aggregated variable
-  g.variables = {'hV': ['Harvested Volumes', r"$Mm^3$"],
+  g.forVars = {'hV': ['Harvested Volumes', r"$Mm^3$"],
        'vReg': ['Regeneration Volumes', r"$Mm^3$"],
        'vol': ['Forest Volumes', r"$Mm^3$"],
        'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],

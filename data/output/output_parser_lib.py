@@ -231,7 +231,7 @@ def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLe
   omfile.write("\\begin{figure}[htbp]\n")
   omfile.write("  \\centering\n")
   omfile.write("  \\caption{"+title+"}\n")
-  omfile.write("  \\includegraphics[width=0.8\  extwidth]{"+g.chartoutdir+"/"+filename+"_"+region+"}\n")
+  omfile.write("  \\includegraphics[width=0.8\\textwidth]{"+g.chartoutdir+"/"+filename+"_"+region+"}\n")
   omfile.write("  \\label{fig:"+filename+"}\n")
   omfile.write("\\end{figure}\n")
   omfile.close()

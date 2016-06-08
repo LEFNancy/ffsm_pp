@@ -1,1 +1,0 @@
-../../../data/output_parser_globals.py

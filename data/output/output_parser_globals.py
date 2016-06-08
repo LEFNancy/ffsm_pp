@@ -44,7 +44,13 @@ forVars = {'hV': ['Harvested Volumes', r"$Mm^3$"],
        'forArea': ['Forest area','ha'],
        'harvestedArea': ['Harvested area','ha'],
        'regArea': ['Regeneration area','ha'],
-       }
+       'STOCK_INV': ['Carbon pool in inventoried forest resources', r"$Mt CO_2$"],
+       'STOCK_EXTRA': ['Carbon pool in non-inventoried forest resources (branches, roots)', r"$Mt CO_2$"],
+       'STOCK_PRODUCTS': ['Carbon pool in forest products', r"$Mt CO_2$"],
+       'EM_ENSUB': ['Cumulative emissions from energy substitution', r"$Mt CO_2$"],
+       'EM_MATSUB': ['Cumulative emissions from material substitution', r"$Mt CO_2$"],
+       'EM_FOROP': ['Cumulative emissions from forest operations', r"$Mt CO_2$"],
+           }  
 # key: var short name
 # value: list with long name, unit, domain (either pp, tp or p) and optionally a variable to act for ponderation
 prodVars = {'st': ['Total supply', r"$Mm^3$", 'p'],
