@@ -217,70 +217,20 @@ def printCharts():
 
 # =============================================================================  
 def printTables():
-  print ("Printing tables..")
+  print ("Printing tables blaa..")
 
-  #oyears = ['2030','2031','2032','2033','2034','2035','2036','2037','2038','2039','2040','2041','2042','2043','2044','2045','2046','2047','2048','2049','2050','2051','2052','2053','2054','2055','2056','2057','2058','2059','2060','2061','2062','2063','2064','2065','2066','2067','2068','2069','2070','2071','2072','2073','2074','2075','2076','2077','2078','2079','2080','2081','2082','2083','2084','2085','2086','2087','2088','2089','2090','2091','2092','2093','2094','2095','2096','2097','2098','2099','2100']
   oyears = [str(y) for y in range(2015,2101)]     # [2015-2100]
    
-  #text('t',"Automatically generated result tables.")
-  
-  """
-  selectedregions=['11000', '11041']
-  
-  for region in g.selectedregions: #selectedregions:#g.sortedregions:
-    title('t','subsection',g.regions[region])
 
-    title('t','subsubsection',"IPCC scenario a1b")
-    printTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'IPCC scenario a1b (average of all models) [avg. 2015-2100]','a1b_all_2015-2100_'+region)
-    printTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'IPCC scenario a1b (average of all models) [2100]','a1b_all_2100_'+region)
-    printTable('constant',['arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege\_a1b [avg. 2015-2100]','arpege_a1b_2015-2100_'+region)
-    printTable('constant',['arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'arpege\_a1b [2100]','arpege_a1b_2100_'+region)
-    
-    #printTable('constant',['CNCM33_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'CNCM33 [avg. 2030-2085]','cncm33_2030-2085_'+region)
-    #printTable('constant',['CNCM33_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'CNCM33 [2085]','cncm33_2085_'+region)
-    #printTable('constant',['DMIEH5C_1','DMIEH5C_2','DMIEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'DMIEH5C [avg. 2030-2085]','dmieh5c_2030-2085_'+region)
-    #printTable('constant',['DMIEH5C_1','DMIEH5C_2','DMIEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'DMIEH5C [2085]','dmieh5c_2085_'+region)
-    #printTable('constant',['EGMAM2_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'EGMAM2 [avg. 2030-2085]','egmam2_2030-2085_'+region)
-    #printTable('constant',['EGMAM2_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'EGMAM2 [2085]','egmam2_2085_'+region)
-    #printTable('constant',['HADGEM2_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'HADGEM2 [avg. 2030-2085]','hadgem2_2030-2085_'+region)
-    #printTable('constant',['HADGEM2_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'HADGEM2 [2085]','hadgem2_2085_'+region)
-    #printTable('constant',['IPCM4_1','IPCM4_2','IPCM4_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'IPCM4 [avg. 2030-2085]','ipcm4_2030-2085_'+region)
-    #printTable('constant',['IPCM4_1','IPCM4_2','IPCM4_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'IPCM4 [2085]','ipcm4_2085_'+region)
-    #printTable('constant',['MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'MPEH5C [avg. 2030-2085]','mpeh5c_2030-2085_'+region)
-    #printTable('constant',['MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'MPEH5C [2085]','mpeh5c_2085_'+region)
-    
-    text('t',"\clearpage")
-    
-    title('t','subsubsection',"IPCC scenario a2")
-    #printTable('constant',['arpege_a2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege\_a2 [avg. 2015-2100]','arpege_a2_2015-2100_'+region)
-    #printTable('constant',['arpege_a2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'arpege\_a2 [2100]','arpege_a2_2100_'+region)
-    printTable('arpege_a1b',['arpege_a2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege a1b vs a2 [avg. 2015-2100]','arpege_a1b_a2_2015-2100_'+region)
-    printTable('arpege_a1b',['arpege_a2'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'arpege a1b vs a2 [2100]','arpege_a1b_a2_2100_'+region)
-    title('t','subsubsection',"IPCC scenario b1")    
-    #printTable('constant',['arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege\_b1 [avg. 2015-2100]','arpege_b1_2015-2100_'+region)
-    #printTable('constant',['arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'arpege\_b1 [2100]','arpege_b1_2100_'+region)
-    printTable('arpege_a1b',['arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'arpege a1b vs b1 [avg. 2015-2100]','arpege_a1b_b1_2015-2100_'+region)
-    printTable('arpege_a1b',['arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'arpege a1b vs b1 [2100]','arpege_a1b_b1_2100_'+region)   
-    #title('t','subsubsection',"Expectations")    
-    #printTable('arpege_a1b',['arpege_a1b_noExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears_exp,'noExp [avg. 2015-2085]','noExp_2015-2085_'+region)
-    #printTable('arpege_a1b',['arpege_a1b_noExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'noExp [2100]','noExp_2085_'+region)
-    #printTable('arpege_a1b',['arpege_a1b_fullExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears_exp,'fullExp [avg. 2015-2085]','fullExp_2015-2085_'+region)
-    #printTable('arpege_a1b',['arpege_a1b_fullExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'fullExp [2085]','fullExp_2085_'+region)   
-    #printTable('arpege_a1b_noExpectations',['arpege_a1b_fullExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears_exp,'noExp vs fullExp [avg. 2015-2085]','noVsfullExp_2015-2085_'+region)
-    #printTable('arpege_a1b_noExpectations',['arpege_a1b_fullExpectations'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2085'],'noExp vs fullExp [2085]','noVsfullExp_2085_'+region)   
-    
-    title('t','subsubsection',"Arpege scenarios")  
-    printTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'Variations from constant [2100]','vars_2100_11000',False,)
-    printTable('constant',['constant','arpege_a1b','arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'Variations from actual values [2100 vs 2007]','vars_2100-2007_11000',False, 2007)
-    
-    title('t','subsubsection',"sa")
-    """
   selectedregions=['11000', '11041']
   
   for region in g.sortedregions: #selectedregions:#g.sortedregions:
     title('t','subsection',g.regions[region])
+
+
     
     title('t','subsubsection',"Variation from today")
+    printTable('constant',['arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2015'],'Effects of CC (a1b) already visible today (2015)','cc_effect_2015_'+region,False)
     printTable('arpege_a1b',['constant', 'arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Overall evolution of the forest [2015-2100] (2105 is a1b)','vars2_2100_2015'+region, False, 2015)
     printTable('constant',['constant', 'arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Future forest relavie to current forest [2100 vs 2015] (2015 is constant)','vars_2100_2015'+region, False, 2015)
     printTable('arpege_a1b',['arpege_a1b', 'CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Future forest relavie to current forest [2100 vs 2015] (2100 is all a1b scenarios, 2015 is arpege\_a1b)','vars_all_a1b_2100_2015'+region, True, 2015)
@@ -344,8 +294,11 @@ def printTables():
 
   title('t', 'subsection', "Expectations problem")
   oyears_exp = [str(y) for y in range(2015,2101)]
-  printTable('arpege_a1b',['arpege_a1b_fullexp'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],oyears_exp,'Fullexp effect [avg 2030-2085]','fullexp_2030-2085_11000',True)
-  printTable('arpege_a1b', ['arpege_a1b_noexp'],['expReturns', 'vReg', 'vol', 'hV', 'forArea', 'regArea', 'harvestedArea'], ['11000'], oyears_exp, 'Noexp effect [avg 2030-2085]', 'noexp_2030-2085_11000', True)
+  startyears = [str(y) for y in range(2015,2025)]
+  printTable('arpege_a1b', ['arpege_a1b_noexp'], ['expReturns', 'vReg', 'vol', 'hV', 'forArea', 'regArea', 'harvestedArea'], ['11000'], oyears_exp, 'Noexp effect [avg 2015-2100]', 'noexp_2015-2100_11000', True)
+  printTable('arpege_a1b',['arpege_a1b_fullexp'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],oyears_exp,'Fullexp effect [avg 2015-2100]','fullexp_2015-2100_11000',True)
+  printTable('arpege_a1b', ['arpege_a1b_noexp'],['expReturns', 'vReg', 'vol', 'hV', 'forArea', 'regArea', 'harvestedArea'], ['11000'], startyears, 'Noexp effect [avg 2015-2025]', 'noexp_2015-2025_11000', True)
+  printTable('arpege_a1b',['arpege_a1b_fullexp'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],startyears,'Fullexp effect [avg 2015-2025]','fullexp_2015-2025_11000',True)
 
 
 # =============================================================================
