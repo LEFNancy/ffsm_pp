@@ -37,10 +37,10 @@ regions = {'11042': 'Alsace', '11061': 'Aquitaine', '11072': 'Auvergne', '11025'
 # key: var short name
 # value: list with long name, unit and optionally variable to act for ponderation and name of aggregated variable
 # These should be called forVars
-forVars = {'hV': ['Harvested Volumes', r"$Mm^3$"],
-       'vReg': ['Regeneration Volumes', r"$Mm^3$"],
-       'vol': ['Forest Volumes', r"$Mm^3$"],
-       'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
+forVars = {'hV': ['Harvested volumes', r"$Mm^3$"],
+       'vReg': ['Regeneration volumes', r"$Mm^3$"],
+       'vol': ['Forest volumes', r"$Mm^3$"],
+       'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'], # the script doesn't use sumExpReturns, it computes itself the value using the pounderation variable and put the value in this temporary variable . Then it does compute the total aggregate using this intermediate variable (as it should be).
        'forArea': ['Forest area','ha'],
        'harvestedArea': ['Harvested area','ha'],
        'regArea': ['Regeneration area','ha'],

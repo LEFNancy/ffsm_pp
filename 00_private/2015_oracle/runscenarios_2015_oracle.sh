@@ -38,6 +38,7 @@
 
    
 #last run:
+# 20160825, changed reported expected returns by ft: expRet{ft,r} are now sum{px}{expRet{ft,px}*fArea_{px}}/fArea{r} and no longer sum{px}{expRet{ft,px}*fArea_{px,ft}}/fArea{r,ft}  
 # 20150602, rerun as I accidently deleted the output :-( 
 # 20150520, git commit xxx Included maps in the oputput but also added option to limit the year when to print the map
 # 20150302, git commit xxx Added sa scenarios

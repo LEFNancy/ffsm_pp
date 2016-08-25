@@ -123,11 +123,11 @@ def override_globals():
   ]
 
   g.scenarios = {
-    'constant':            '#494949', # gray
+    'constant':            '#8c0000', # red-brown
     'constant_nomgm':      '#610e0e',
     'constant_nora':       '#610e0e',
     'constant_carea':      '#610e0e',   
-    'arpege_a1b':          '#8E3030', # red-brown
+    'arpege_a1b':          '#000080', #blue 
     'arpege_a1b_carea':    '#CF0E0E',
     'arpege_a1b_noexp':    '#D67044',
     'arpege_a1b_fullexp':  '#894A4A',
@@ -159,9 +159,9 @@ def override_globals():
   g.tableoutdir = 'tables'
   # key: var short name
   # value: turple with long name, unit and optionally variable to act for ponderation and name of aggregated variable
-  g.forVars = {'hV': ['Harvested Volumes', r"$Mm^3$"],
-       'vReg': ['Regeneration Volumes', r"$Mm^3$"],
-       'vol': ['Forest Volumes', r"$Mm^3$"],
+  g.forVars = {'hV': ['Harvested volumes', r"$Mm^3$"],
+       'vReg': ['Regeneration volumes', r"$Mm^3$"],
+       'vol': ['Forest volumes', r"$Mm^3$"],
        'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
        'forArea': ['Forest area','ha'],
        'harvestedArea': ['Harvested area','ha'],
@@ -183,7 +183,7 @@ def printCharts():
   
   selectedregions=['11000', '11041']
   
-  for region in g.sortedregions: #selectedregions:#g.sortedregions:
+  for region in selectedregions: #selectedregions:#g.sortedregions:
     title('c','subsection',g.regions[region])
 
     title('c', 'subsubsection', "a1b vs constant")
@@ -198,6 +198,14 @@ def printCharts():
     title('c', 'subsubsection', "Characteristics of the system that interact with climate change")
     plotMultivariable(['arpege_a1b', 'arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'], ['expReturns', 'vol', 'hV', 'forArea'], region, 'Characteristics of the system', 'components')
 
+    title('c', 'subsubsection', "Just volume and area")
+    plotMultivariable(['arpege_a1b'], ['vol', 'forArea'], region, 'arpege\_a1b', 'vol_area1', True, fwidth=10, fheight=8)
+    plotMultivariable(['arpege_a1b'], ['vol'], region, 'arpege\_a1b', 'vol1', True, fwidth=10, fheight=6)
+    plotMultivariable(['arpege_a1b'], ['vol'], region, 'arpege\_a1b', 'vol1_nolegend', False, fwidth=10, fheight=4)
+    plotLegend(['arpege_a1b'], 'vol1_legend')
+    plotMultivariable(['constant', 'arpege_a1b'], ['vol', 'forArea'], region, 'constant vs arpege\_a1b', 'vol_area2', True, fwidth=10, fheight=8)
+    plotMultivariable(['constant', 'arpege_a1b'], ['vol'], region, 'constant vs arpege\_a1b', 'vol2', True, fwidth=10, fheight=8)
+    
     #title('c','subsubsection',"IPCC scenario a1b")
     #plotMultivariable(['constant','arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea'],region,'All a1b scenarios','a1b',False)
     #plotMultivariable(['constant','arpege_a1b'],['expReturns','vReg','vol','hV','forArea'],region,'Arpege a1b','arpege')
@@ -210,7 +218,8 @@ def printCharts():
   
   title('c','subsection', "Carbon charts")
 
-  plotCarbonChart(['constant', 'arpege_a1b'],'11000','','carb_arpege_a1b')
+  plotCarbonChart(['arpege_a1b'],'11000','','carb_arpege_a1b')
+  plotCarbonChart(['constant', 'arpege_a1b'],'11000','','carb_constant_and_arpege_a1b')
   plotCarbonChart(['constant', 'arpege_a1b', 'arpege_a2', 'arpege_b1'], '11000', '', 'carb_balance')
   plotCarbonChart(['arpege_a1b','arpege_a1b_nopr','arpege_a1b_noph'], '11000', '', 'carb_cc_components')
   plotCarbonChart(['arpege_a1b', 'arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'], '11000', '', 'carb_system_components')
@@ -224,36 +233,41 @@ def printTables():
 
   selectedregions=['11000', '11041']
   
-  for region in g.sortedregions: #selectedregions:#g.sortedregions:
+  outvars = ['expReturns','harvestedArea','hV','regArea','vReg','forArea','vol']
+  
+  for region in selectedregions: #selectedregions:#g.sortedregions:
     title('t','subsection',g.regions[region])
 
 
     
     title('t','subsubsection',"Variation from today")
-    printTable('constant',['arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2015'],'Effects of CC (a1b) already visible today (2015)','cc_effect_2015_'+region,False)
-    printTable('arpege_a1b',['constant', 'arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Overall evolution of the forest [2015-2100] (2105 is a1b)','vars2_2100_2015'+region, False, 2015)
-    printTable('constant',['constant', 'arpege_a1b'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Future forest relavie to current forest [2100 vs 2015] (2015 is constant)','vars_2100_2015'+region, False, 2015)
-    printTable('arpege_a1b',['arpege_a1b', 'CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Future forest relavie to current forest [2100 vs 2015] (2100 is all a1b scenarios, 2015 is arpege\_a1b)','vars_all_a1b_2100_2015'+region, True, 2015)
+    printTable('constant',['arpege_a1b'],outvars,[region],['2015'],'Effects of CC (a1b) already visible today (2015)','cc_effect_2015_'+region,False)
+    printTable('arpege_a1b',['constant', 'arpege_a1b'],outvars,[region],['2100'],'Overall evolution of the forest [2015-2100] (2105 is a1b)','vars2_2100_2015_'+region, False, 2015)
+    printTable('constant',['constant', 'arpege_a1b'],outvars,[region],['2100'],'Future forest relavie to current forest [2100 vs 2015] (2015 is constant)','vars_2100_2015_'+region, False, 2015)
+    printTable('arpege_a1b',['arpege_a1b', 'CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],outvars,[region],['2100'],'Future forest relavie to current forest [2100 vs 2015] (2100 is all a1b scenarios, 2015 is arpege\_a1b)','vars_all_a1b_2100_2015'+region, True, 2015)
 
     title('t','subsubsection',"Components of the change")
-    printTable('constant',['arpege_a1b','arpege_a1b_nopr','arpege_a1b_noph'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'CC effects by components [avg. 2015-2100]','cc_2015-2100_'+region)
-    printTable('constant',['arpege_a1b','arpege_a1b_nopr','arpege_a1b_noph'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'CC effects by components  [2100]','a1b_all_2100_'+region)
+    printTable('constant',['arpege_a1b','arpege_a1b_nopr','arpege_a1b_noph'],outvars,[region],oyears,'CC effects by components [avg. 2015-2100]','cc_components_2015-2100_'+region)
+    printTable('constant',['arpege_a1b','arpege_a1b_nopr','arpege_a1b_noph'],outvars,[region],['2100'],'CC effects by components  [2100]','cc_components_2100_'+region)
 
     title('t','subsubsection',"Characteristics of the system that interact with the change")
-    printTable('arpege_a1b',['arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Elements that interact with the change [avg. 2015-2100]','sa_2015-2100_'+region,False)
-    printTable('arpege_a1b',['arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Elements that interact with the change [2100]','sa_2100_'+region,False)
+    printTable('arpege_a1b',['arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'],outvars,[region],oyears,'Elements that interact with the change [avg. 2015-2100]','sa_2015-2100_'+region,False)
+    printTable('arpege_a1b',['arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'],outvars,[region],['2100'],'Elements that interact with the change [2100]','sa_2100_'+region,False)
   
+    title('t','subsubsection',"Expected returns today")
+    printTable('constant',['arpege_a1b','arpege_a1b_nopr','arpege_a1b_noph','arpege_a1b_noexp', 'arpege_a1b_fullexp'],['expReturns'],[region],['2015'],'Effect of different assumptions on today [2015] forest expected returns','expectedReturns_2015_'+region,False)
+    
     title('t','subsubsection',"Uncertainly relative to the IPCC scenario")
-    printTable('arpege_a1b',['arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Uncertainly from IPCC scenario [avg. 2015-2100]','sa_ipcc_scenarios_2015-2100_'+region,False)
-    printTable('arpege_a1b',['arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Uncertainly from IPCC scenario [2100]','sa_ipcc_scenarios_2100_'+region,False)
-    printTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Uncertainly from IPCC scenario [avg. 2015-2100]','sa_ipcc_scenarios_cv_2015-2100_'+region,True)
-    printTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Uncertainly from IPCC scenario [2100]','sa_ipcc_scenarios_cv_2100_'+region,True)
+    printTable('arpege_a1b',['arpege_a2','arpege_b1'],outvars,[region],oyears,'Uncertainly from IPCC scenario [avg. 2015-2100]','sa_ipcc_scenarios_2015-2100_'+region,False)
+    printTable('arpege_a1b',['arpege_a2','arpege_b1'],outvars,[region],['2100'],'Uncertainly from IPCC scenario [2100]','sa_ipcc_scenarios_2100_'+region,False)
+    printTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],outvars,[region],oyears,'Uncertainly from IPCC scenario [avg. 2015-2100]','sa_ipcc_scenarios_cv_2015-2100_'+region,True)
+    printTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],outvars,[region],['2100'],'Uncertainly from IPCC scenario [2100]','sa_ipcc_scenarios_cv_2100_'+region,True)
     
     title('t','subsubsection',"Uncertainly relative to the climatic model")
-    printTable('arpege_a1b',['CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Uncertainly from climatic model [avg. 2015-2100]','sa_climatic_model_2015-2100_'+region,False)
-    printTable('arpege_a1b',['CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Uncertainly from climatic model [2100]','sa_climatic_model_2100_'+region,False)
-    printTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],oyears,'Uncertainly from climatic model [avg. 2015-2100]','sa_climatic_model_cv_2015-2100_'+region,True)
-    printTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2100'],'Uncertainly from climatic model [2100]','sa_climatic_model_cv_2100_'+region,True)
+    printTable('arpege_a1b',['CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],outvars,[region],oyears,'Uncertainly from climatic model [avg. 2015-2100]','sa_climatic_model_2015-2100_'+region,False)
+    printTable('arpege_a1b',['CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],outvars,[region],['2100'],'Uncertainly from climatic model [2100]','sa_climatic_model_2100_'+region,False)
+    printTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],outvars,[region],oyears,'Uncertainly from climatic model [avg. 2015-2100]','sa_climatic_model_cv_2015-2100_'+region,True)
+    printTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],outvars,[region],['2100'],'Uncertainly from climatic model [2100]','sa_climatic_model_cv_2100_'+region,True)
     
 
 
@@ -261,10 +275,11 @@ def printTables():
   
   title('t','subsection',"Carbon tables")
   #printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year_end, title, filename, avg=False, singleComparation=True )
-  printCarbonTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],'11000', '2015', '2100', "\\ce{CO2} balance [yearly avg. 2015-2100]",'cbalance_2015-2100_11000', True, False)
-  printCarbonTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],'11000', '2015', '2100', "\\ce{CO2} balance a1b [yearly avg. 2015-2100]",'cbalance_a1b_2015-2100_11000', True, True)
+  printCarbonTable('constant',['arpege_a1b'],'11000', '2015', '2100', "\\ce{CO2} balance [yearly avg. 2015-2100]",'cbalance_2015-2100_11000', True, False)
   printCarbonTable('constant', ['arpege_a1b','arpege_a1b_nopr','arpege_a1b_noph'], '11000', '2015', '2100', "\\ce{CO2} balance [yearly avg. 2015-2100]",'cbalance_component_changes_2015-2100_11000', True, False)
   printCarbonTable('arpege_a1b', ['arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'], '11000', '2015', '2100', "\\ce{CO2} balance [yearly avg. 2015-2100]",'cbalance_characteristics_system_2015-2100_11000', True, False)
+  printCarbonTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],'11000', '2015', '2100', "\\ce{CO2} balance for different IPCC storylines [yearly avg. 2015-2100]",'cbalance_sa_ipcc_2015-2100_11000', True, True)
+  printCarbonTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],'11000', '2015', '2100', "\\ce{CO2} balance for different climatic models [a1b, yearly avg. 2015-2100]",'cbalance_sa_a1b_models_2015-2100_11000', True, True)
  # printCarbonTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],'11000', '2007', '2100', "\\ce{CO2} balance a1b [yearly avg. 2007-2100]",'cbalance_a1b_2007-2100_11000', True, True)
  # printCarbonTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],'11000', '2015', '2100', "\\ce{CO2} balance arpege \{a1b, a2, b1\} [yearly avg. 2015-2100]",'cbalance_arpege_2015-2100_11000', True, True)
   #def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename, singleComparation=True, refYear=0):

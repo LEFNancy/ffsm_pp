@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os, sys
 import csv, math
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import output_parser_globals as g
@@ -97,6 +98,7 @@ def prepare_data():
               key_pvar = region, pondVariable, scenario, spGroup, year
               key_tvar = region, totalVariable, scenario, spGroup, year
               g.idata[key_tvar] = g.idata[key] * g.idata[key_pvar]
+              
   
   # D - performing various summing up..
    
@@ -187,13 +189,18 @@ def reset_output():
   file_c.close()
 
 # =============================================================================
-def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLegend=True):
+def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLegend=True, fwidth=10, fheight=15):
  
   nvar = len(variables_h)
   nscen = len(scenarios_h)
   #plt.figure(1)
   fig = plt.gcf()
-  fig.set_size_inches(10,15)
+  # suggested: fheight = (15/5)*nvar+0.2
+  #if nvar == 1:
+  #  fheight = 4
+  #if nvar == 2:
+  #  fheight = 8
+  fig.set_size_inches(10,fheight) # 15 inches height is fine with 4 variables
   maintitle = myunicode(title)
   handles =[]
   labels = []
@@ -242,9 +249,9 @@ def plotCarbonChart(scenarios_h,region,title, filename):
   
  
   cVariables = [
-      ['Forest pool', ['STOCK_INV','STOCK_EXTRA'],':',3],
-      ['Wood products pool', ['STOCK_PRODUCTS'],'--',3],
-      ['Net cumulative substitution effect', ['EM_ENSUB','EM_MATSUB','EM_FOROP'],'-',4],
+      ['Forest pool', ['STOCK_INV','STOCK_EXTRA'],':',3,'#314004'],
+      ['Wood products pool', ['STOCK_PRODUCTS'],'--',3,'#7f0021'],
+      ['Net cumulative substitution effect', ['EM_ENSUB','EM_MATSUB','EM_FOROP'],'-',4,'#83caff'],
   ]    
   
   nscen = len(scenarios_h)
@@ -261,26 +268,49 @@ def plotCarbonChart(scenarios_h,region,title, filename):
   
   totals = [[0]*len(g.x)]* nscen
   
-  for idg, cGroup in enumerate(cVariables): 
-    for ids, scenario in enumerate(scenarios_h):    
-      grTotals =  [0]*len(g.x)
-      #serieName = myunicode(cGroup[0] + " - " + scenario)
-      serieName = "_"+myunicode(scenario) # not shown in legend    
-      if idg==2:
-         serieName = myunicode(scenario)         
-      serieColor = g.scenarios[scenario]
-      serieLineType = cGroup[2]
-      serieWidth = cGroup[3]
+  if nscen > 1: #normal line plots
+    for idg, cGroup in enumerate(cVariables): 
+      for ids, scenario in enumerate(scenarios_h):    
+        grTotals =  [0]*len(g.x)
+        #serieName = myunicode(cGroup[0] + " - " + scenario)
+        serieName = "_"+myunicode(scenario) # not shown in legend    
+        if idg==2:
+          serieName = myunicode(scenario)         
+        serieColor = g.scenarios[scenario]
+        serieLineType = cGroup[2]
+        serieWidth = cGroup[3]
+        for var in cGroup[1]: # for idx, var in enumerate(cGroup[1]):
+          key = region, var, scenario, ""
+          varData = g.odata[key]
+          grTotals = [x2+y for x2, y in zip(grTotals, varData)]
+          
+        totals[ids]  = [x3+y2 for x3, y2 in zip(totals[ids],grTotals)]
+        y = [x4 / 1000 for x4 in totals[ids]]
+        plt.plot(g.x, y, serieLineType, label=serieName, linewidth=serieWidth, color=serieColor)
+  else: #area stacked plot
+    fillColours = []
+    y = []
+    for cGroup in cVariables: 
+      y_local =  np.zeros(len(g.x))
+      fillColour = cGroup[4]
       for var in cGroup[1]: # for idx, var in enumerate(cGroup[1]):
-        key = region, var, scenario, ""
-        varData = g.odata[key]
-        grTotals = [x2+y for x2, y in zip(grTotals, varData)]
-        
-      totals[ids]  = [x3+y2 for x3, y2 in zip(totals[ids],grTotals)]
-      y = [x4 / 1000 for x4 in totals[ids]]
-      plt.plot(g.x, y, serieLineType, label=serieName, linewidth=serieWidth, color=serieColor)
+          key = region, var, scenarios_h[0], ""
+          varData = np.array(g.odata[key])
+          #y_local += varData # For some reasons this doesn't work
+          y_local = [t+(a/1000) for t, a in zip(y_local, varData)]
+      y.append(y_local)
+      fillColours.append(fillColour)
+    for cGroup in reversed(cVariables): 
+      serieName = myunicode(cGroup[0]) 
+      fillColour = cGroup[4]
+      plt.plot([], [], color=fillColour, linewidth=4, label=serieName) # plotting emply data hack as stackplot doesn't support the legend
+ 
+    ax = fig.add_subplot(111)
+    ax.stackplot(g.x, y, colors=fillColours, edgecolor = "none")
+    ax.autoscale_view('tight')
+                   
   #plt.legend(loc='lower right', ncol=3, shadow=False, labelspacing=0., prop={'size':12})
-  plt.legend(loc='lower right', ncol=1, shadow=False, labelspacing=0.)
+  plt.legend(loc='lower right', ncol=1, shadow=False, labelspacing=0., prop={'size':14})
   #plt.ylim([0,18]) # This would scale the plot y axis to the desired ranges
   plt.savefig(g.chartoutdir+"/"+filename+"_"+region+"."+g.charttype, dpi=300)
   #plt.show()
@@ -323,10 +353,11 @@ def plotCarbonChart(scenarios_h,region,title, filename):
   """
   
 # =============================================================================
-def plotLegend(scenarios_h, title, filename):
+def plotLegend(scenarios_h, filename, title_h=""):
   nscen = len(scenarios_h)
   fig = plt.gcf()
-  fig.set_size_inches(10,14)
+  fheight = (15/15)*nscen+0.2
+  fig.set_size_inches(10,fheight)
   #ax = plt.axes()
   #ax.set_axis_off()
   
@@ -345,10 +376,20 @@ def plotLegend(scenarios_h, title, filename):
       dummyy = [1]
       plt.plot(dummyx, dummyy, serieLineType, label=serieName, linewidth=serieWidth, color=serieColor)
   handles, labels = ax.get_legend_handles_labels()
-  ax.legend(handles, labels, ncol=3, shadow=False, title="Legend")
+  ax.legend(handles, labels, ncol=3, shadow=False) # removed title=title_h
   plt.savefig(g.chartoutdir+"/"+filename+"."+g.charttype, bbox_inches='tight', pad_inches=0.1, dpi=300) 
   #plt.show()
   plt.close()
+  
+  omasterfilename = g.chartoutdir+'/'+g.chartsmaster+'.tex'
+  omfile = open(omasterfilename,'a')
+  omfile.write("\\begin{figure}[htbp]\n")
+  omfile.write("  \\centering\n")
+  omfile.write("  \\caption{"+title_h+"}\n")
+  omfile.write("  \\includegraphics[width=0.8\\textwidth]{"+g.chartoutdir+"/"+filename+"."+g.charttype+"}\n")
+  omfile.write("  \\label{fig:"+filename+"}\n")
+  omfile.write("\\end{figure}\n")
+  omfile.close()
   
 #import matplotlib.pyplot as plt
 #ax = plt.subplot()  #create the axes
@@ -358,46 +399,69 @@ def plotLegend(scenarios_h, title, filename):
 #plt.show() 
 
 # =============================================================================
-def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename):
- a=plt.figure()
- ax = plt.gca()
- fig = plt.gcf()
- flag_2d = True
- if(origin[0] == end1[0] == endt[0]):
-   flag_2d = False;
-   fig.set_size_inches(6,10)
- else:
-   fig.set_size_inches(10,10)
- end2 = (endt[0]-end1[0]+origin[0],endt[1]-end1[1]+origin[1])
- minx = min(origin[0],end1[0],end2[0],endt[0])
- maxx = max(origin[0],end1[0],end2[0],endt[0])
- miny = min(origin[1],end1[1],end2[1],endt[1])
- maxy = max(origin[1],end1[1],end2[1],endt[1])
- centre = (((maxx-minx)/2)+minx,((maxy-miny)/2)+miny)
- X  = (origin[0], origin[0], origin[0])
- Y  = (origin[1], origin[1], origin[1])
- X2 = (end1[0]-origin[0], endt[0]-origin[0], end2[0]-origin[0]) 
- Y2 = (end1[1]-origin[1], endt[1]-origin[1], end2[1]-origin[1])
- C  = (255,10,150) # ? colour codes, but didn't got it
+def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename, comp1_color='red', totcomp_color='blue', diffcomp_color='green'):
+  '''
+  Plot a 2-d vector difference
+  # @params:
+  # origin: x and y of the origin of the vectors
+  # end1:  (x,y) coordinates of the ending of the first component vector
+  # end2:  (x,y) coordinates of the ending of the total component of the vector
+  # xlabel: xlabel
+  # ylabel: ylabel
+  # filename: filename
+  # totcomp_color: color (English or #HTML_code) of the vector representing the total component
+  # comp1_color: color (English or #HTML_code) of the vector representing the first component
+  # diffcomp_color: color (English or #HTML_code) of the vector representing the difference component
+  '''
 
- ax.quiver(X,Y,X2,Y2,C,angles='xy',scale_units='xy',scale=1, width=0.008)
- x  = (end1[0],end2[0])
- y  = (end1[1],end2[1])
- x2 = (endt[0]-end1[0], endt[0]-end2[0])
- y2 = (endt[1]-end1[1], endt[1]-end2[1])
+  a   = plt.figure()
+  ax  = plt.gca()
+  fig = plt.gcf()
+  flag_2d = True
+  if(origin[0] == end1[0] == endt[0]):
+    flag_2d = False;
+    fig.set_size_inches(6,10)
+  else:
+    fig.set_size_inches(10,10)
+  end2 = (endt[0]-end1[0]+origin[0],endt[1]-end1[1]+origin[1])
+  minx = min(origin[0],end1[0],end2[0],endt[0])
+  maxx = max(origin[0],end1[0],end2[0],endt[0])
+  miny = min(origin[1],end1[1],end2[1],endt[1])
+  maxy = max(origin[1],end1[1],end2[1],endt[1])
+  centre = (((maxx-minx)/2)+minx,((maxy-miny)/2)+miny)
+  
+  # This allows to write a serie of arrows in one go, but didn't got how in this case colours work
+  #X  = (origin[0], origin[0], origin[0])
+  #Y  = (origin[1], origin[1], origin[1])
+  #X2 = (end1[0]-origin[0], endt[0]-origin[0], end2[0]-origin[0]) 
+  #Y2 = (end1[1]-origin[1], endt[1]-origin[1], end2[1]-origin[1])
+  #C  = (255,10,150) # ? colour codes, but didn't got it
+  # ax.quiver(X,Y,X2,Y2,Cangles='xy',scale_units='xy',scale=1, width=0.008)
+
+  # Printing first component..
+  ax.quiver(origin[0],origin[1],end1[0]-origin[0],end1[1]-origin[1],angles='xy',scale_units='xy',scale=1, width=0.008, color=comp1_color)
+  # Printing total component..
+  ax.quiver(origin[0],origin[1],endt[0]-origin[0],endt[1]-origin[1],angles='xy',scale_units='xy',scale=1, width=0.008, color=totcomp_color)
+  # Printing diff component..
+  ax.quiver(origin[0],origin[1],end2[0]-origin[0],end2[1]-origin[1],angles='xy',scale_units='xy',scale=1, width=0.008, color=diffcomp_color)
+
+  x  = (end1[0],end2[0])
+  y  = (end1[1],end2[1])
+  x2 = (endt[0]-end1[0], endt[0]-end2[0])
+  y2 = (endt[1]-end1[1], endt[1]-end2[1])
  
- if(flag_2d):
-   ax.quiver(x,y,x2,y2,angles='xy',scale_units='xy',scale=1, width=0.005, color='gray')
-   ax.set_xlim([minx- (centre[0]-minx)*0.4, maxx + (maxx-centre[0])*0.4])
+  if(flag_2d):
+    ax.quiver(x,y,x2,y2,angles='xy',scale_units='xy',scale=1, width=0.005, color='gray')
+    ax.set_xlim([minx- (centre[0]-minx)*0.4, maxx + (maxx-centre[0])*0.4])
 
- ax.set_ylim([miny- (centre[1]-miny)*0.4, maxy + (maxy-centre[1])*0.4])
+  ax.set_ylim([miny- (centre[1]-miny)*0.4, maxy + (maxy-centre[1])*0.4])
 
- plt.xlabel(myunicode(xlabel))
- plt.ylabel(myunicode(ylabel))
- # Uncomment the following lines if you want to display instead of save the figure..
- #plt.draw()
- #plt.show()
- plt.savefig(filename, dpi=300)
+  plt.xlabel(myunicode(xlabel))
+  plt.ylabel(myunicode(ylabel))
+  # Uncomment the following lines if you want to display instead of save the figure..
+  #plt.draw()
+  #plt.show()
+  plt.savefig(filename, dpi=300)
  
 # =============================================================================
 def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename, singleComparation=False, refYear=0):
@@ -625,6 +689,7 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
   oString += "\\begin{center}\n"
   oString += "\\begin{threeparttable}\n"
   oString += "\\centering\n"
+  oString += "\\caption{"+title+"}\n"
   oString += "\\begin{footnotesize}\n"
   oString += "\\begin{tabularx}{\\textwidth}{l "
   for nc in range(1,ncol):
@@ -685,9 +750,6 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
     oString += "\\end{footnotesize}\n"
     oString += "\\end{tablenotes}\n"
   oString += "\\end{threeparttable}\n"
-  oString += "\\begin{footnotesize}\n"
-  oString += "\\caption{"+title+"}\n"
-  oString += "\\end{footnotesize}\n"  
   oString += "\\end{center}\n"
   oString += "\\end{table*}\n" 
   

@@ -1733,13 +1733,20 @@ ModelCoreSpatial::sumRegionalForData(){
   for(uint r2= 0; r2<regIds2.size();r2++){
     int regId = regIds2[r2];
     regPx = MTHREAD->MD->getRegion(regId)->getMyPixels();
+    double totRegionForArea = 0.;
+    for (uint p=0;p<regPx.size();p++){
+      //Pixel* px = regPx[p];
+      totRegionForArea += vSum(regPx[p]->area);
+    }
+
     for(uint j=0;j<fTypes.size();j++){
       string ft = fTypes[j];
 
       double regArea = 0.;
       double sumExpReturns = 0.;
-      double sumArea = 0.;
-      double pxForArea = 0.;
+      double sumAreaByFt = 0.;
+      double pxForAreaByFt = 0.;
+      double pxTotForArea = 0.;
       double vReg = 0.;
 
       for (uint u=0; u<dClasses.size(); u++){
@@ -1775,49 +1782,49 @@ ModelCoreSpatial::sumRegionalForData(){
         int debug_pxid = px->getID();
         vReg += px->vReg.at(j);
         regArea += findMap(px->regArea,currentYear).at(j);
-        pxForArea = (px->getDoubleValue("forArea_"+ft,true)/10000);
-        double pxForArea_debug = vSum(px->area.at(j));
-        sumExpReturns += (px->expectedReturns.at(j)* pxForArea);
-        sumArea += pxForArea;
-        double debug1 = sumArea;
-        if(! (sumArea >= 0.0) ){
-          msgOut(MSG_CRITICAL_ERROR,"sumArea is not non negative.");
+        pxForAreaByFt = (px->getDoubleValue("forArea_"+ft,true)/10000);
+        pxTotForArea = vSum(px->area);
+        sumExpReturns += (px->expectedReturns.at(j)* pxTotForArea); // CHANGED 25/08/2016: expRet{ft,r} are now sum{px}{expRet{ft,px}*fArea_{px}}/fArea{r} and no longer sum{px}{expRet{ft,px}*fArea_{px,ft}}/fArea{r,ft}
+        sumAreaByFt += pxForAreaByFt;
+        //double debug1 = sumAreaByFt;
+        if(! (sumAreaByFt >= 0.0) ){
+          msgOut(MSG_CRITICAL_ERROR,"sumAreaByFt is not non negative.");
         }
       }
       sfd(vReg,"vReg",regId,ft,"",DATA_NOW, true);
       sfd(regArea,"regArea",regId,ft,"",DATA_NOW, true);
-      double expReturns_debug = sumExpReturns/sumArea;
-      sfd(sumExpReturns/sumArea,"expReturns",regId,ft,"",DATA_NOW, true);
-      sfd(sumExpReturns,"sumExpReturns",regId,ft,"",DATA_NOW, true);
-      sfd(sumArea,"forArea",regId,ft,"",DATA_NOW, true);
+      //double expReturns_debug = sumExpReturns/totRegionForArea;
+      sfd(sumExpReturns/totRegionForArea ,"expReturns",regId,ft,"",DATA_NOW, true); // CHANGED 25/08/2016: expRet{ft,r} are now sum{px}{expRet{ft,px}*fArea_{px}}/fArea{r} and no longer sum{px}{expRet{ft,px}*fArea_{px,ft}}/fArea{r,ft}
+      sfd(sumExpReturns,"sumExpReturns",regId,ft,"",DATA_NOW, true); // Attenction that now 25/08/2016 the sum of expected returns have to be divided by the number of forest types
+      sfd(sumAreaByFt,"forArea",regId,ft,"",DATA_NOW, true);
     } // end of for each ft
 
     double totRegExpReturn = 0.0;
     double totRegForArea = 0.0;
 
     for (uint p=0;p<regPx.size();p++){
-    Pixel* px = regPx[p];
-    double totPxForArea = vSum(px->area);
+      Pixel* px = regPx[p];
+      double totPxForArea = vSum(px->area);
 
 #ifdef QT_DEBUG
-    double totPxForArea_debug = 0.0;
-    for(uint j=0;j<fTypes.size();j++){
-      string ft = fTypes[j];
-      totPxForArea_debug += (px->getDoubleValue("forArea_"+ft,true)/10000);
-    }
+      double totPxForArea_debug = 0.0;
+      for(uint j=0;j<fTypes.size();j++){
+        string ft = fTypes[j];
+        totPxForArea_debug += (px->getDoubleValue("forArea_"+ft,true)/10000);
+      }
 
-    if ( (totPxForArea - totPxForArea_debug) > 0.0001 || (totPxForArea - totPxForArea_debug) < -0.0001 ){
-      cout << "*** ERROR: area discrepance in pixel " << px->getID() << " of " << (totPxForArea - totPxForArea_debug) << " ha!" << endl;
-      msgOut(MSG_CRITICAL_ERROR,"Total forest area in pixel do not coincide if token from layer forArea or (pixel) vector area!");
-    }
+      if ( (totPxForArea - totPxForArea_debug) > 0.0001 || (totPxForArea - totPxForArea_debug) < -0.0001 ){
+        cout << "*** ERROR: area discrepance in pixel " << px->getID() << " of " << (totPxForArea - totPxForArea_debug) << " ha!" << endl;
+        msgOut(MSG_CRITICAL_ERROR,"Total forest area in pixel do not coincide if token from layer forArea or (pixel) vector area!");
+      }
 #endif
 
-      double bestExpectedReturn = *max_element(px-> expectedReturnsNotCorrByRa.begin(), px->expectedReturnsNotCorrByRa.end()); /// Attenction, reported expReturns at "forest" level (compared with those at forest type level) do NOT include ra
+      double bestExpectedReturn = *max_element(px-> expectedReturnsNotCorrByRa.begin(), px->expectedReturnsNotCorrByRa.end()); /// Attenction, reported expReturns at "forest" level (compared with those at forest type level) do NOT include ra. Also, at "forest" level, it is always the best ftype reported, while at ft level is the average of thatspecific forest type on each plot (including those where it is very shit)
       double totPxExpReturn = bestExpectedReturn * totPxForArea;
       totRegExpReturn += totPxExpReturn;
       totRegForArea += totPxForArea;
     } // end of each pixel
-    sfd(totRegExpReturn/totRegForArea,"expReturns",regId,"","",DATA_NOW, true);
+    sfd(totRegExpReturn/totRegForArea,"expReturns",regId,"","",DATA_NOW, true); // For the forest as a whole, we do not change the reported expReturns intended as the "best one"
     sfd(totRegExpReturn,"sumExpReturns",regId,"","",DATA_NOW, true);
   }
 
