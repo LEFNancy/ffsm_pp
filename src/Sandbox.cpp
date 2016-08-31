@@ -523,6 +523,16 @@ void
 Sandbox::fullTest(){
 
   /*
+  // Testing the new getForTypeParents()function
+  vector<string>  parents = MTHREAD->MD->getForTypeParents();
+  for(uint i=0;i<parents.size();i++){
+    vector <string> childIds = MTHREAD->MD->getForTypeChilds(parents[i]);
+    vector <int> childPos = MTHREAD->MD->getForTypeChilds_pos(parents[i]);
+    double debug = 0.0;
+  }
+  */
+
+  /*
   // Testing the reg->getArea() functions
   // Actually this need to be run further later, as pixels doesn't yet have area information
   vector <string> dClasses = MTHREAD->MD->getStringVectorSetting("dClasses");

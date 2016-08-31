@@ -346,6 +346,13 @@ public:
     return -1;
   }
 
+  template <typename K> bool inVector (const K & element, const vector <K> & v){
+     for(unsigned int i=0; i<v.size(); i++){
+       if(v[i]== element) return true;
+     }
+     return false;
+  }
+
   /// Sample from a normal distribution with bounds. Slower (double time, but still you see the diff only after milion of loops).
 
   /// It doesn't require the normal_distribution to be passed to it, but due to including MTHREAD its definition can't be placed

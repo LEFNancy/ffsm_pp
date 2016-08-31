@@ -155,24 +155,7 @@ def override_globals():
   g.printChartsFlag = True
   g.printTablesFlag = True
   g.printAATablesFlag = True
-  g.chartoutdir = 'charts'
-  g.tableoutdir = 'tables'
-  # key: var short name
-  # value: turple with long name, unit and optionally variable to act for ponderation and name of aggregated variable
-  g.forVars = {'hV': ['Harvested volumes', r"$Mm^3$"],
-       'vReg': ['Regeneration volumes', r"$Mm^3$"],
-       'vol': ['Forest volumes', r"$Mm^3$"],
-       'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
-       'forArea': ['Forest area','ha'],
-       'harvestedArea': ['Harvested area','ha'],
-       'regArea': ['Regeneration area','ha'],
-       'STOCK_INV': ['Carbon pool in inventoried forest resources', r"$Mt CO_2$"],
-       'STOCK_EXTRA': ['Carbon pool in non-inventoried forest resources (branches, roots)', r"$Mt CO_2$"],
-       'STOCK_PRODUCTS': ['Carbon pool in forest products', r"$Mt CO_2$"],
-       'EM_ENSUB': ['Cumulative emissions from energy substitution', r"$Mt CO_2$"],
-       'EM_MATSUB': ['Cumulative emissions from material substitution', r"$Mt CO_2$"],
-       'EM_FOROP': ['Cumulative emissions from forest operations', r"$Mt CO_2$"],
-  }
+
 
 # =============================================================================   
 def printCharts():

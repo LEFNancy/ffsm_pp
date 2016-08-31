@@ -63,6 +63,21 @@
 * - in px->area                                                        - by px, ft and dc
 * - in forDataMap (through gft())                                      - by reg, ft and dc
 * - in  px->values map (forArea_* layer, through px->getDoubleValue()) - by px and ft
+*
+* Aggregation of the Expected returns
+*
+* The problem is how to aggregate the expected returns, given at pixel anf ft level, first at the regional level, then at the ft group level (B/C) and
+* total forest level and finally at national level from regional one.
+*
+* A - From pixel to region
+* - weighted by total forest area in the pixel
+* B1 - From ft to ft group
+* - in each pixel we take the highest expRet within the pixel and we weight by farea to get the regional value
+* B2 - From ft group to forest
+* - actually, from ft to group: like b1, but we take the highest value in each px for any ft and we weight by forest area in the px to get the regional value
+* C - From region to country
+* - we weight the individual ft, ft group and forest by the different regional total forest areas.*
+*
 */
 class ModelCoreSpatial : public BaseClass {
 

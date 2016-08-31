@@ -25,15 +25,15 @@ def prepare_data():
   specieswithAggregates = g.spGroups
   specieswithAggregates.extend(g.spAggregates.keys())
   tempSpecieswithAggregates = specieswithAggregates
-  tempSpecieswithAggregates.append("")
+  #tempSpecieswithAggregates.append("") # attenction that python doesn not create a new variable, just alias the two
   tempSpGroups = g.spGroups
   tempSpGroups.append("")
 
   
   variablesWithAggregates = list(g.forVars.keys())
   for variable in g.forVars.keys():
-    #'expReturns': ['Expected returns','€/ha','forArea','totalExpReturns'],
-    if len(g.forVars[variable]) == 4:
+    #'expReturns': ['Expected returns','€/ha','forArea','totalExpReturns','globalft'],
+    if len(g.forVars[variable]) >= 3:
       variablesWithAggregates.append(g.forVars[variable][3])
   
   for region in g.regions.keys():
@@ -58,10 +58,17 @@ def prepare_data():
     idata_raw = csv.DictReader(open(ifile, 'r'), delimiter=g.sep)
     for rec in idata_raw:
       # scen;parName;country;region;forType;diamClass;year;value;
-      key = rec['region'],rec['parName'],rec['scen'],rec['forType'],rec['year']
+      iForType  = rec['forType']
+      if iForType == 'broadL':
+        debug = True
+      for spAggregateKey, spAggregate in g.spAggregates.items():
+        if (len(spAggregate) >= 3 and iForType ==  spAggregate[3]):
+          iForType = spAggregateKey
+          break
+      key = rec['region'],rec['parName'],rec['scen'],iForType,rec['year']
       if key in g.idata:
         g.idata[key] += float (rec['value'])
-        
+  debug = g.idata      
   for ifile in g.prodIFiles:  
     idata_raw = csv.DictReader(open(ifile, 'r'), delimiter=g.sep)
     for rec in idata_raw:
@@ -85,22 +92,44 @@ def prepare_data():
   #exit(1)
   
   # C - creating aggregated data for variables that need to be pondered
-  for variable in g.forVars.keys():
-    #'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
-    if len(g.forVars[variable]) == 4:
-      pondVariable = g.forVars[variable][2]
-      totalVariable = g.forVars[variable][3]
-      for region in g.regions.keys():
-        for scenario in g.scenarios.keys():
-          for spGroup in specieswithAggregates:
-            for year in g.years:
-              key = region, variable, scenario, spGroup, year
-              key_pvar = region, pondVariable, scenario, spGroup, year
-              key_tvar = region, totalVariable, scenario, spGroup, year
-              g.idata[key_tvar] = g.idata[key] * g.idata[key_pvar]
-              
+#  for variable in g.forVars.keys():
+#    #'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
+#    if len(g.forVars[variable]) >= 3:
+#      pondVariable = g.forVars[variable][2]
+#      totalVariable = g.forVars[variable][3]
+#      for region in g.regions.keys():
+#        for scenario in g.scenarios.keys():
+#          for spGroup in specieswithAggregates:
+#            for year in g.years:
+#              key = region, variable, scenario, spGroup, year
+#              key_tvar = region, totalVariable, scenario, spGroup, year
+#              if(g.forVars[variable][4] == 'sameft'):
+#                  key_pvar = region, pondVariable, scenario, spGroup, year
+#                  g.idata[key_tvar] = g.idata[key] * g.idata[key_pvar]
+#              elif(g.forVars[variable][4] == 'globalft'):
+#                  totalPvar = 0.0;
+#                  for spGroup2 in g.spGroups:
+#                      key_pvar = region, pondVariable, scenario, spGroup2, year
+#                      totalPvar +=g.idata[key_pvar]
+#                  g.idata[key_tvar] = g.idata[key] * totalPvar
+#              else:
+#                  print("Error, I don't know how to handle this ponderation method: "+g.forVars[variable][4])
+#                  exit(1)
   
   # D - performing various summing up..
+  
+  # summing up the specie aggregation
+  for spAggregate, species in g.spAggregates.items():
+    for region in g.regions.keys():
+      for variable in variablesWithAggregates:
+        if(variable != 'expReturns' and variable != 'sumExpReturns'): # let's skip these as the sumExpReturns at group/forest levels are already exogenously read as these are not the sums 
+         for scenario in g.scenarios.keys():
+           for year in g.years:
+             destKey = region, variable, scenario, spAggregate, year
+             g.idata[destKey] = 0.0
+             for specie in species[0]:
+               varToBeSumKey = region, variable, scenario, specie, year
+               g.idata[destKey] +=  g.idata[varToBeSumKey]
    
   # summing up to the country level..
   for country, regionsInTheCountry in g.countries.items():
@@ -113,6 +142,15 @@ def prepare_data():
             for regionInTheCountry in regionsInTheCountry[0]:
               varToBeSumKey = regionInTheCountry, variable, scenario, spGroup, year
               g.idata[destKey] +=  g.idata[varToBeSumKey]
+              
+    # Correcting the country aggregation of expected returns
+    for scenario in g.scenarios.keys():
+      for spGroup in tempSpGroups:
+        for year in g.years:
+          countryForArea_key = country,'forArea',scenario,'00_Total',year
+          countrySumExpReturns_key = country, 'sumExpReturns', scenario, spGroup, year
+          target_key = country,'expReturns', scenario, spGroup, year
+          g.idata[target_key] = g.idata[countrySumExpReturns_key]/ g.idata[countryForArea_key]
   
   # checking country aggregation, ok
   #for country, regionsInTheCountry in countries.iteritems():
@@ -120,17 +158,7 @@ def prepare_data():
     #for regionInTheCountry in regionsInTheCountry[0]:
       #print "region: " + regionInTheCountry + " " + str(idata[regionInTheCountry,'vol', 'vRegFixed', 'broadL_highF', '2006'])
  
- # summing up the specie aggregation
-  for spAggregate, species in g.spAggregates.items():
-    for region in g.regions.keys():
-      for variable in variablesWithAggregates:
-        for scenario in g.scenarios.keys():
-          for year in g.years:
-            destKey = region, variable, scenario, spAggregate, year
-            g.idata[destKey] = 0.0
-            for specie in species[0]:
-              varToBeSumKey = region, variable, scenario, specie, year
-              g.idata[destKey] +=  g.idata[varToBeSumKey]
+
           
   # testing specie aggregating
   #for spAggregate, species in spAggregates.iteritems():
@@ -138,25 +166,25 @@ def prepare_data():
     #for specie in species[0]:
       #print "specieGroup: " + specie + " " + str(idata['11042','vol', 'vRegFixed', specie, '2006'])
    
-  # E - after all the summing up let's compute the poundered value  
-  for variable in g.forVars.keys():
-    #'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
-    if len(g.forVars[variable]) == 4:
-      pondVariable = g.forVars[variable][2]
-      totalVariable = g.forVars[variable][3]
-      for region in g.regions.keys():
-        for scenario in g.scenarios.keys():
-          for spGroup in specieswithAggregates:
-            for year in g.years:
-              key = region, variable, scenario, spGroup, year
-              key_pvar = region, pondVariable, scenario, spGroup, year
-              key_tvar = region, totalVariable, scenario, spGroup, year
-              g.idata[key] =  (g.idata[key_tvar] / g.idata[key_pvar]) if  g.idata[key_pvar] != 0 else 0
+#  # E - after all the summing up let's compute the poundered value  
+#  for variable in g.forVars.keys():
+#    #'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
+#    if len(g.forVars[variable]) >= 3:
+#      pondVariable = g.forVars[variable][2]
+#      totalVariable = g.forVars[variable][3]
+#      for region in g.regions.keys():
+#        for scenario in g.scenarios.keys():
+#          for spGroup in specieswithAggregates:
+#            for year in g.years:
+#              key = region, variable, scenario, spGroup, year
+#              key_pvar = region, pondVariable, scenario, spGroup, year
+#              key_tvar = region, totalVariable, scenario, spGroup, year
+#              g.idata[key] =  (g.idata[key_tvar] / g.idata[key_pvar]) if  g.idata[key_pvar] != 0 else 0
         
   # testing ponderation variables
   #for variable in variables.keys():
     #'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
-    #if len(variables[variable]) == 4:
+    #if len(variables[variable]) >= 3:
       #pondVariable = variables[variable][2]
       #totalVariable = variables[variable][3]
       #print "Orig variable: " + variable + " " + str(idata['11000', variable, 'vRegFixed','Total', '2006'])

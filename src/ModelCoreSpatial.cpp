@@ -758,6 +758,7 @@ ModelCoreSpatial::runManagementModule(){
     for (uint p=0;p<regPx.size();p++){
       Pixel* px = regPx[p];
       px->expectedReturns.clear();
+      px->expectedReturnsNotCorrByRa.clear(); // BUG discovered 20160825
       resetMapValues(hAreaByFTypeGroup,0.0);
       double totalHarvestedArea = vSum(px->hArea); // still need to remove the forest decrease areas..
       vector<double> thisYearRegAreas(fTypes.size(),0.0); // initialize a vector of fTypes.size() zeros.
@@ -1730,23 +1731,18 @@ ModelCoreSpatial::sumRegionalForData(){
   msgOut(MSG_INFO, "Summing data pixels->region..");
   //vector <string> outForVariables  = MTHREAD->MD->getStringVectorSetting("outForVariables");
   int currentYear = MTHREAD->SCD->getYear();
+
+  // OLD CODE TO
   for(uint r2= 0; r2<regIds2.size();r2++){
     int regId = regIds2[r2];
     regPx = MTHREAD->MD->getRegion(regId)->getMyPixels();
-    double totRegionForArea = 0.;
-    for (uint p=0;p<regPx.size();p++){
-      //Pixel* px = regPx[p];
-      totRegionForArea += vSum(regPx[p]->area);
-    }
 
     for(uint j=0;j<fTypes.size();j++){
       string ft = fTypes[j];
 
       double regArea = 0.;
-      double sumExpReturns = 0.;
       double sumAreaByFt = 0.;
       double pxForAreaByFt = 0.;
-      double pxTotForArea = 0.;
       double vReg = 0.;
 
       for (uint u=0; u<dClasses.size(); u++){
@@ -1776,15 +1772,12 @@ ModelCoreSpatial::sumRegionalForData(){
 
         }
       }
-
       for (uint p=0;p<regPx.size();p++){
         Pixel* px = regPx[p];
-        int debug_pxid = px->getID();
         vReg += px->vReg.at(j);
         regArea += findMap(px->regArea,currentYear).at(j);
         pxForAreaByFt = (px->getDoubleValue("forArea_"+ft,true)/10000);
-        pxTotForArea = vSum(px->area);
-        sumExpReturns += (px->expectedReturns.at(j)* pxTotForArea); // CHANGED 25/08/2016: expRet{ft,r} are now sum{px}{expRet{ft,px}*fArea_{px}}/fArea{r} and no longer sum{px}{expRet{ft,px}*fArea_{px,ft}}/fArea{r,ft}
+
         sumAreaByFt += pxForAreaByFt;
         //double debug1 = sumAreaByFt;
         if(! (sumAreaByFt >= 0.0) ){
@@ -1793,14 +1786,8 @@ ModelCoreSpatial::sumRegionalForData(){
       }
       sfd(vReg,"vReg",regId,ft,"",DATA_NOW, true);
       sfd(regArea,"regArea",regId,ft,"",DATA_NOW, true);
-      //double expReturns_debug = sumExpReturns/totRegionForArea;
-      sfd(sumExpReturns/totRegionForArea ,"expReturns",regId,ft,"",DATA_NOW, true); // CHANGED 25/08/2016: expRet{ft,r} are now sum{px}{expRet{ft,px}*fArea_{px}}/fArea{r} and no longer sum{px}{expRet{ft,px}*fArea_{px,ft}}/fArea{r,ft}
-      sfd(sumExpReturns,"sumExpReturns",regId,ft,"",DATA_NOW, true); // Attenction that now 25/08/2016 the sum of expected returns have to be divided by the number of forest types
       sfd(sumAreaByFt,"forArea",regId,ft,"",DATA_NOW, true);
     } // end of for each ft
-
-    double totRegExpReturn = 0.0;
-    double totRegForArea = 0.0;
 
     for (uint p=0;p<regPx.size();p++){
       Pixel* px = regPx[p];
@@ -1818,15 +1805,67 @@ ModelCoreSpatial::sumRegionalForData(){
         msgOut(MSG_CRITICAL_ERROR,"Total forest area in pixel do not coincide if token from layer forArea or (pixel) vector area!");
       }
 #endif
-
-      double bestExpectedReturn = *max_element(px-> expectedReturnsNotCorrByRa.begin(), px->expectedReturnsNotCorrByRa.end()); /// Attenction, reported expReturns at "forest" level (compared with those at forest type level) do NOT include ra. Also, at "forest" level, it is always the best ftype reported, while at ft level is the average of thatspecific forest type on each plot (including those where it is very shit)
-      double totPxExpReturn = bestExpectedReturn * totPxForArea;
-      totRegExpReturn += totPxExpReturn;
-      totRegForArea += totPxForArea;
     } // end of each pixel
-    sfd(totRegExpReturn/totRegForArea,"expReturns",regId,"","",DATA_NOW, true); // For the forest as a whole, we do not change the reported expReturns intended as the "best one"
-    sfd(totRegExpReturn,"sumExpReturns",regId,"","",DATA_NOW, true);
-  }
+
+  } // end each region
+
+
+
+  // Taking care of expected returns here..
+  // (Changed 25/08/2016 afternoon: expRet{ft,r} are now sum{px}{expRet{ft,px}*fArea_{px}}/fArea{r} and no longer sum{px}{expRet{ft,px}*fArea_{px,ft}}/fArea{r,ft} )
+  // Also now we report the expReturns by group and by forest, each of which is made only with the best ones within their group
+
+  vector<string>  parentFtypes = MTHREAD->MD->getForTypeParents();
+
+  for(uint r2= 0; r2<regIds2.size();r2++){
+    int regId = regIds2[r2];
+    regPx = MTHREAD->MD->getRegion(regId)->getMyPixels();
+    double totRegionForArea = 0.;
+    double totSumExpRet  = 0.;
+    vector <double> totSumExpRet_byFTParent(parentFtypes.size(),0.0);
+    vector <double> totSumExpRet_byFTypes(fTypes.size(),0.0);
+
+    // First computing the sumExpectedReturns..
+    for (uint p=0;p<regPx.size();p++){
+      Pixel* px = regPx[p];
+      //int debug_pxid = px->getID();
+      double pxForArea = vSum(px->area);
+      totRegionForArea += pxForArea;
+      double bestPxExpectedRet = getMax(px->expectedReturnsNotCorrByRa);
+      for(uint i=0;i<parentFtypes.size();i++){
+        vector <string> childIds = MTHREAD->MD->getForTypeChilds(parentFtypes[i]);
+        vector <int> childPos = MTHREAD->MD->getForTypeChilds_pos(parentFtypes[i]);
+        vector<double> pxExpReturnsByChilds(childPos.size(),0.0);
+        for(uint j=0;j<childPos.size();j++){
+          double pxExpReturn_singleFt = px->expectedReturns.at(childPos[j]);
+          pxExpReturnsByChilds.at(j) = pxExpReturn_singleFt;
+          totSumExpRet_byFTypes.at(childPos[j]) += pxExpReturn_singleFt*pxForArea;
+        } // end of each ft
+        totSumExpRet_byFTParent[i] += getMax(pxExpReturnsByChilds)*pxForArea;
+      } // end for each partentFt
+      totSumExpRet += bestPxExpectedRet * pxForArea;
+    } // end for each px
+
+    // ..and now computing the expReturns and storing them
+    for(uint i=0;i<parentFtypes.size();i++){
+      vector <int> childPos = MTHREAD->MD->getForTypeChilds_pos(parentFtypes[i]);
+      for(uint j=0;j<childPos.size();j++){
+        //double debug1 = totSumExpRet_byFTypes.at(childPos[j])/totRegionForArea;
+        sfd(totSumExpRet_byFTypes.at(childPos[j]),"sumExpReturns",regId,fTypes.at(childPos[j]),"",DATA_NOW, true);
+        sfd(totSumExpRet_byFTypes.at(childPos[j])/totRegionForArea,"expReturns",regId,fTypes.at(childPos[j]),"",DATA_NOW, true);
+      } // end of each ft
+      //double debug2 = totSumExpRet_byFTParent.at(i)/totRegionForArea;
+      sfd(totSumExpRet_byFTParent.at(i),"sumExpReturns",regId,parentFtypes[i],"",DATA_NOW, true);
+      sfd(totSumExpRet_byFTParent.at(i)/totRegionForArea,"expReturns",regId,parentFtypes[i],"",DATA_NOW, true);
+
+    } // end for each partentFt
+    //double debug3 = totSumExpRet/totRegionForArea;
+    sfd(totSumExpRet,"sumExpReturns",regId,"","",DATA_NOW, true);
+    sfd(totSumExpRet/totRegionForArea,"expReturns",regId,"","",DATA_NOW, true);
+
+  } // end for each region
+
+
 
 }
 /**

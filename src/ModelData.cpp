@@ -102,6 +102,32 @@ ModelData::getForTypeChilds(const string &forTypeId_h){
   return childs;
 }
 
+vector<int>
+ModelData::getForTypeChilds_pos(const string &forTypeId_h, bool all){
+  vector <int> childs;
+  vector <string> fTIds = getForTypeIds(all);
+  for(int i=0;i<fTIds.size();i++){
+      forType* ft = getForType(fTIds[i]);
+      if(ft->ereditatedFrom==forTypeId_h) {
+          childs.push_back(i);
+      }
+  }
+  return childs;
+}
+
+vector<string>
+ModelData::getForTypeParents(){
+  vector<string> parents;
+  for(int i=0;i<forTypes.size();i++){
+    string parent = forTypes[i].ereditatedFrom;
+    if(!inVector(parent,parents) && parent != ""){
+      parents.push_back(parent);
+    }
+  }
+  return parents;
+}
+
+
 int
 ModelData::getNForTypesChilds(const string& forTypeId_h){
     int nChilds = 0;
