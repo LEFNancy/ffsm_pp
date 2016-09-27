@@ -49,7 +49,7 @@ ModelCoreSpatial::runInitPeriod(){
   initializePixelVolumes();       ///< compute px volumes vol for 2005 (including exogenous loaded volumes)
   assignSpMultiplierPropToVols(); // assign the spatial multiplier (used in the time of return) based no more on a Normal distribution but on the volumes present in the pixel: more volume, more the pixel is fit for the ft
   initMarketModule();             ///< inside it uses first year, second year
-  initialiseDeathTimber();
+  //initialiseDeathTimber();
   MTHREAD->DO->print();
   MTHREAD->SCD->advanceYear();    ///< 2005->2006
   int thisYear = MTHREAD->SCD->getYear(); // for debugging
@@ -123,6 +123,7 @@ ModelCoreSpatial::initMarketModule(){
       double dtvalue =   gpd("dl",r2,allProducts[ap],secondYear)
                        + gpd("da",r2,allProducts[ap],secondYear);
       spd(stvalue,"st",r2,allProducts[ap],secondYear,true);
+      spd(stvalue,"stFromHarvesting",r2,allProducts[ap],secondYear,true);
       spd(dtvalue,"dt",r2,allProducts[ap],secondYear,true);
     }
 
@@ -189,7 +190,7 @@ ModelCoreSpatial::initMarketModule(){
 
       spd(t1,"t1",r2,priProducts[pp],firstYear,true);
       spd(r1,"r1",r2,priProducts[pp],firstYear,true);
-      spd(sc,"sc",r2,priProducts[pp],secondYear,true);
+      spd(sc,"sc",r2,priProducts[pp],secondYear,true); 
       spd(pc,"pc",r2,priProducts[pp],secondYear,true);
       spd(pw,"pw",r2,priProducts[pp],secondYear,true);
     }
@@ -430,6 +431,8 @@ ModelCoreSpatial::runMarketModule(){
       in_aliveForest[i] = gpd("in",regId,priProducts[i]);
     }
     //TODO
+    map<iisskey, double > *  deathTimberInventory= MD->getDeathTimberInventory();
+    debugMap(*deathTimberInventory);
     double debug = 2.0;
 
     for (uint i=0;i<priProducts.size();i++){
@@ -587,7 +590,7 @@ ModelCoreSpatial::runBiologicalModule(){
           //hV(u,i,essence,lambda,t) = hr(u,i,essence,lambda,t) * V(u,i,lambda,essence,t-1);
           //hV_byPrd(u,i,essence,lambda,p_pr,t) =  prov(u,essence,lambda,p_pr)*(RPAR('st',i,p_pr,t)/In(i,p_pr,t))*V(u,i,lambda,essence,t-1);
           for(uint pp=0;pp<priProducts.size();pp++){
-            double st = gpd("stFromHarvesting",r2,priProducts[pp]);
+            double st = gpd("stFromHarvesting",r2,priProducts[pp]); // TODO: say that if 2007 (startY+1) it should use st, as stFromHarvesting does not yet exist. Or even better create stFromHarvesting=st in initMarketModule
             double in = gpd("in",r2,priProducts[pp]);
             double hr_pr = in ? app(priProducts[pp],ft,dc)*st/in : 0.0;
             hr_byPrd.push_back( hr_pr);
@@ -1607,13 +1610,16 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
             in += app(priProducts[pp],fTypes[ft],dClasses[dc])*px->vol_l.at(ft).at(dc)*px->avalCoef;
           }
         }
-        double in_deathMortality = MD->getAvailableDeathTimber(priProducts[pp],r2,currentYear-1);
         //px->in.push_back(in);
         in_reg.at(pp) += in;
-        in_deathTimber_reg.at(pp) += in_deathMortality;
       } // end of each priProduct
     } // end each pixel
+
+
     for(uint pp=0;pp<priProducts.size();pp++){
+      double in_deathMortality = MD->getAvailableDeathTimber(priProducts[pp],r2,currentYear-1);
+      in_deathTimber_reg.at(pp) += in_deathMortality;
+
       // Even if I fixed all the lower bounds to zero in Opt::get_bounds_info still the model
       // doesn't solve with no-forest in a region.
       // Even with 0.0001 doesn't solve !!

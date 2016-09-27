@@ -1989,6 +1989,7 @@ ModelData::getAvailableDeathTimber(const string &primProd_h, int regId_h, int ye
       }
     }
   }
+  return toReturn;
 }
 
 // ========================== LLData =======================================

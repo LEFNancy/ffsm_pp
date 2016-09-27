@@ -172,6 +172,59 @@ enum boundType {
 #endif
 
 
+/// Class to provide a simple integer-string key to be used in std maps
+class iskey {
+public:
+                      iskey();
+                      iskey(int i_h, string s_h);
+                     ~iskey();
+  bool                operator == (const iskey &op2) const;
+  bool                operator != (const iskey &op2) const;
+  bool                operator <  (const iskey &op2) const;
+  bool                operator >  (const iskey &op2) const;
+  bool                operator <= (const iskey &op2) const;
+  bool                operator >= (const iskey &op2) const;
+  int                                          i;
+  string                                       s;
+};
+
+/// Class to provide a simple integer-integer-string key in std maps
+class iiskey {
+public:
+                      iiskey();
+                      iiskey(int i_h, int i2_h, string s_h);
+                     ~iiskey();
+  bool                operator == (const iiskey &op2) const;
+  bool                operator != (const iiskey &op2) const;
+  bool                operator <  (const iiskey &op2) const;
+  bool                operator >  (const iiskey &op2) const;
+  bool                operator <= (const iiskey &op2) const;
+  bool                operator >= (const iiskey &op2) const;
+  int                                          i;
+  int                                          i2;
+  string                                       s;
+
+};
+
+/// Class to provide a simple integer-integer-string-string key in std maps
+class iisskey {
+public:
+                      iisskey();
+                      iisskey(int i_h, int i2_h, string s_h, string s2_h);
+                     ~iisskey();
+  bool                filter(const iisskey & key_h)    const;
+  string              print()                          const;
+  bool                operator == (const iisskey &op2) const;
+  bool                operator != (const iisskey &op2) const;
+  bool                operator <  (const iisskey &op2) const;
+  bool                operator >  (const iisskey &op2) const;
+  bool                operator <= (const iisskey &op2) const;
+  bool                operator >= (const iisskey &op2) const;
+  int                                          i;
+  int                                          i2;
+  string                                       s;
+  string                                       s2;
+};
 
 /// Base class for the regmas application.
 /**
@@ -299,6 +352,21 @@ public:
       return returnMap;
   }
 
+  /// Debug a map
+  template <typename V> void debugMap(const map <iisskey, V> &mymap){
+    iisskey mykey(NULL,NULL,"","");
+    debugMap(mymap, mykey);
+  }
+  template <typename K, typename V> void debugMap(const map <K, V> &mymap, const K& key){
+    cout<<"Debugging a map" << endl;
+    for (auto const &themap: mymap) {
+      if(themap.first.filter(key)){
+       cout << themap.first.print() <<  '\t' << themap.second << endl;
+      }
+    }
+  }
+
+
   /// Returns the position of the maximum element in the vector (the last one in case of multiple equivalent maxima)
   template <typename K>  int getMaxPos (const vector <K> & v){
     return (minmax_element(v.begin(), v.end()).second - v.begin());
@@ -393,57 +461,7 @@ private:
 
 };
 
-/// Class to provide a simple integer-string key to be used in std maps
-class iskey {
-public:
-                      iskey();
-                      iskey(int i_h, string s_h);
-                     ~iskey();
-  bool                operator == (const iskey &op2) const;
-  bool                operator != (const iskey &op2) const;
-  bool                operator <  (const iskey &op2) const;
-  bool                operator >  (const iskey &op2) const;
-  bool                operator <= (const iskey &op2) const;
-  bool                operator >= (const iskey &op2) const;
-  int                                          i;
-  string                                       s;
-};
 
-/// Class to provide a simple integer-integer-string key in std maps
-class iiskey {
-public:
-                      iiskey();
-                      iiskey(int i_h, int i2_h, string s_h);
-                     ~iiskey();
-  bool                operator == (const iiskey &op2) const;
-  bool                operator != (const iiskey &op2) const;
-  bool                operator <  (const iiskey &op2) const;
-  bool                operator >  (const iiskey &op2) const;
-  bool                operator <= (const iiskey &op2) const;
-  bool                operator >= (const iiskey &op2) const;
-  int                                          i;
-  int                                          i2;
-  string                                       s;
-
-};
-
-/// Class to provide a simple integer-integer-string-string key in std maps
-class iisskey {
-public:
-                      iisskey();
-                      iisskey(int i_h, int i2_h, string s_h, string s2_h);
-                     ~iisskey();
-  bool                operator == (const iisskey &op2) const;
-  bool                operator != (const iisskey &op2) const;
-  bool                operator <  (const iisskey &op2) const;
-  bool                operator >  (const iisskey &op2) const;
-  bool                operator <= (const iisskey &op2) const;
-  bool                operator >= (const iisskey &op2) const;
-  int                                          i;
-  int                                          i2;
-  string                                       s;
-  string                                       s2;
-};
 
 
 #endif

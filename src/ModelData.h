@@ -187,6 +187,7 @@ public:
   void                deathTimberInventory_incrOrAdd(const iisskey &thekey, double value_h){incrOrAddMapValue(deathTimberInventory,thekey, value_h);}
   void                deathTimberInventory_incr(const iisskey &thekey, double value_h){incrMapValue(deathTimberInventory,thekey, value_h);}
   double              deathTimberInventory_get(const iisskey &thekey){return findMap(deathTimberInventory, thekey);}
+  map<iisskey, double > *  getDeathTimberInventory() {return &deathTimberInventory;};
   double              getAvailableDeathTimber(const string &primProd_h, int regID_h, int year_h);
   scenarioData        scenario;
 

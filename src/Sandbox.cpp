@@ -130,6 +130,34 @@ struct GccTest
 void
 Sandbox::basicTest(){
 
+    /*
+    // Testing debugging a map
+    iisskey k1(2007,11021,"broadL_HighF","15");
+    iisskey k2(2007,11021,"broadL_HighF","30");
+    iisskey k3(2007,11021,"con_HighF","15");
+    iisskey k4(2007,11022,"broadL_HighF","15");
+    iisskey k5(2008,11021,"broadL_HighF","15");
+
+    // Testing the new changeMapValue(), incrMapValue(), resetMapValues(), incrOrAddMapValue(map, key, value) and vectorToMap() funcions
+    map<iisskey,double> testMap;
+    pair<iisskey,double> pair1(k1,1.1);
+    pair<iisskey,double> pair2(k2,1.2);
+    pair<iisskey,double> pair3(k3,1.3);
+    pair<iisskey,double> pair4(k4,1.4);
+    pair<iisskey,double> pair5(k5,1.5);
+    testMap.insert(pair1);
+    testMap.insert(pair2);
+    testMap.insert(pair3);
+    testMap.insert(pair4);
+    testMap.insert(pair5);
+    debugMap(testMap,iisskey(NULL,NULL,"",""));
+    debugMap(testMap,iisskey(2007,NULL,"con_HighF",""));
+    exit(0);
+    */
+
+
+
+
   /*
   // Testing standard deviation algorithm, as from http://stackoverflow.com/questions/7616511/calculate-mean-and-standard-deviation-from-a-vector-of-samples-in-c-using-boos
   vector<double> v;

@@ -639,3 +639,21 @@ iisskey::operator >= (const iisskey & op2) const{
   return false;
 }
 
+bool
+iisskey::filter(const iisskey & key_h) const{
+  if( (key_h.i == NULL  || key_h.i==i)    &&
+      (key_h.i2 == NULL || key_h.i2==i2)  &&
+      (key_h.s == ""  || key_h.s==s)    &&
+      (key_h.s2 == "" || key_h.s2==s2)     ) return true;
+  return false;
+}
+
+string
+iisskey::print() const{
+    char  outChar1[24];
+    char  outChar2[24];
+    snprintf ( outChar1, sizeof(outChar1), "%d", i);
+    snprintf ( outChar2, sizeof(outChar2), "%d", i2);
+    return string(outChar1)+'\t'+string(outChar2)+'\t'+s+'\t'+s2;
+
+}
