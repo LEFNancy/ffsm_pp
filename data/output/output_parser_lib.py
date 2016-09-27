@@ -425,7 +425,7 @@ def plotLegend(scenarios_h, filename, title_h=""):
 #....  #do patches and labels
 #ax.legend(patches, labels, ...)  #legend alone in the figure
 #plt.show() 
-
+  
 # =============================================================================
 def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename, comp1_color='red', totcomp_color='blue', diffcomp_color='green'):
   '''
@@ -489,7 +489,7 @@ def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename, comp1_color='
   # Uncomment the following lines if you want to display instead of save the figure..
   #plt.draw()
   #plt.show()
-  plt.savefig(filename, dpi=300)
+  plt.savefig(filename, dpi=300, transparent=False, bbox_inches='tight', pad_inches=0.1)
  
 # =============================================================================
 def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename, singleComparation=False, refYear=0):

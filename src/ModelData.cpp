@@ -432,6 +432,28 @@ ModelData::getRegionIds( bool excludeResidual){
   return toReturn;
 }
 
+string
+ModelData::regId2RegSName (const int & regId_h) const {
+  ModelRegion* reg = MTHREAD->MD->getRegion(regId_h);
+  return reg->getRegSName();
+}
+
+int
+ModelData::regSName2RegId (const string & regSName_h) const{
+  ModelRegion* reg;
+  for(uint i=0; i<3; i++){
+    vector <int> regIds =  MTHREAD->MD->getRegionIds(i, false);
+    for(uint j=0;j<regIds.size();j++){
+      reg = MTHREAD->MD->getRegion(regIds[j]);
+      if(reg->getRegSName()==regSName_h) {return regIds[j];}
+    }
+  }
+  msgOut(MSG_CRITICAL_ERROR,"Regional short name not found.");
+}
+
+
+
+
 vector <string>
 ModelData::getForTypeIds(bool all){
   vector <string> toReturn;
@@ -455,6 +477,19 @@ ModelData::assessProdPossibility(const string &prod_h, const string &forType_h, 
     }
   }
   return false;
+}
+
+const int
+ModelData::getMaxYearUsableDeathTimber(const string &prod_h, const string &forType_h, const string &dClass_h){
+  for(uint i=0;i<forToProdVector.size();i++){
+    if(    forToProdVector[i].product == prod_h
+      && forToProdVector[i].forType == forType_h
+      && forToProdVector[i].dClass  == dClass_h
+    ){
+      return forToProdVector[i].maxYears;
+    }
+  }
+  msgOut(MSG_CRITICAL_ERROR,"In getMaxYearUsableDeathTimber() I has been asked of a combination that I don't know how to handle.");
 }
 
 void
@@ -602,6 +637,7 @@ ModelData::setDefaultProductResourceMatrixLink(){
     F2PDATA.product = table.getData(i,"product");
     F2PDATA.forType = table.getData(i,"forType");
     F2PDATA.dClass = table.getData(i,"dClass");
+    F2PDATA.maxYears = s2i(table.getData(i,"maxYears"));
     forToProdVector.push_back(F2PDATA);
   }
 }
@@ -1932,6 +1968,27 @@ ModelData::createCombinationsVector(const int& nItems) {
     toReturn.push_back(thisCombItems);
   }
   return toReturn;
+}
+
+
+double
+ModelData::getAvailableDeathTimber(const string &primProd_h, int regId_h, int year_h){
+  if (!getBoolSetting("useDeathTimber")) return 0;
+  double toReturn = 0.0;
+  vector <string> forTypesIds = getForTypeIds();
+  for (uint i=0;i<forTypesIds.size();i++){
+    string ft = forTypesIds[i];
+    for(uint u=0;u<diamClasses.size();u++){
+      string dc = diamClasses[u];
+      if(assessProdPossibility(primProd_h,ft, dc)){
+        int maxYears = getMaxYearUsableDeathTimber(primProd_h, ft, dc);
+        for(int y=year_h;y>year_h-maxYears;y--){
+          iisskey key(y,regId_h,ft,dc);
+          toReturn += findMap(deathTimberInventory,key,MSG_DEBUG,0.0);
+        }
+      }
+    }
+  }
 }
 
 // ========================== LLData =======================================

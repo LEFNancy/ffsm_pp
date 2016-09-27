@@ -522,6 +522,28 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+ /*
+  // Getting forest area by each forest type
+  vector<int> regIds2 = MTHREAD->MD->getRegionIds(2);
+  for(uint r=0;r<regIds2.size();r++){
+    int rId = regIds2[r];
+    ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[r]);
+    vector <string> fTypes= MTHREAD->MD->getForTypeIds();
+    for(uint f=0;f<fTypes.size();f++){
+      string ft = fTypes[f];
+      forType* FT = MTHREAD->MD->getForType(ft);
+      double totalArea = 0.0;
+      vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[r]);
+      for (uint p=0;p<rpx.size();p++){
+        Pixel* px = rpx[p];
+        totalArea +=  px->getDoubleValue (FT->forLayer, true);
+      }
+      cout << rId << "\t" << ft << "\t" << totalArea << endl;
+    }
+  }
+  exit(1);
+ */
+
   /*
   // Testing the new getForTypeParents()function
   vector<string>  parents = MTHREAD->MD->getForTypeParents();

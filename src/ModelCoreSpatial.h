@@ -94,6 +94,7 @@ public:
   void                  runManagementModule();    ///< computes regArea and expectedReturns
   void                  sumRegionalForData();     ///< computes vol, hV, harvestedArea, regArea and expReturns at reg level from the pixel level
   void                  initialiseCarbonModule(); ///< call initialiseDeathBiomassStocks(), initialiseProductsStocks() and initialiseEmissionCounters()
+  void                  initialiseDeathTimber();  ///< Set deathTimberInventory to zero for the previous years (under the hipotesis that we don't have advanced stock of death biomass usable as timber at the beginning of the simulation)
 
   void                  registerCarbonEvents();   ///< call registerHarvesting(), registerDeathBiomass(), registerProducts() and registerTransports()
   void                  cacheSettings();          ///< just cache exogenous settings from ModelData

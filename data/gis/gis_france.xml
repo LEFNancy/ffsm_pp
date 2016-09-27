@@ -8,7 +8,7 @@
 		<comment>Derived from clc06, theme311. The area of Broad-leaved forest areas within each cell.</comment>
 		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
 		<readAtStart>true</readAtStart><!-- bool -->
-		<dynamicContent>true</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->		
+		<dynamicContent>true</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->
     <expandByFt>false</expandByFt><!-- bool. If true this ft expand for each forest type -->
 		<dirName>gis/france/</dirName>
 		<fileName>clc_311.grd</fileName>
@@ -31,7 +31,7 @@
 		<comment>Derived from clc06, theme312. The area of Broad-leaved forest areas within each cell.</comment>
 		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
 		<readAtStart>true</readAtStart><!-- bool -->
-		<dynamicContent>true</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->		
+		<dynamicContent>true</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->
     <expandByFt>false</expandByFt><!-- bool. If true this ft expand for each forest type -->
 		<dirName>gis/france/</dirName>
 		<fileName>clc_312.grd</fileName>
@@ -55,7 +55,7 @@
 		<comment>Derived from clc06, theme313. The area of Mixed Broad-leaved/Coniferous forest areas within each cell.</comment>
 		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
 		<readAtStart>true</readAtStart><!-- bool -->
-		<dynamicContent>true</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->		
+		<dynamicContent>true</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->
     <expandByFt>false</expandByFt><!-- bool. If true this ft expand for each forest type -->
 		<dirName>gis/france/</dirName>
 		<fileName>clc_313.grd</fileName>
@@ -78,7 +78,7 @@
 		<comment>Derived from clc06. The area of NON forest areas within each cell.</comment>
 		<isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
 		<readAtStart>false</readAtStart><!-- bool -->
-		<dynamicContent>false</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->		
+		<dynamicContent>false</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->
     <expandByFt>false</expandByFt><!-- bool. If true this ft expand for each forest type -->
 		<dirName>gis/france/</dirName>
 		<fileName>clc_999.grd</fileName>
@@ -94,6 +94,7 @@
 			<legendItem label="80-90%" rColor="075" gColor="075" bColor="075" minValue="64000000" maxValue="72000000">80</legendItem>
 			<legendItem label="90-100" rColor="050" gColor="050" bColor="050" minValue="72000000" maxValue="80000000">90</legendItem>
 		</legendItems>
+		<reclassRules/>
 	</layer>	
 	<layer>
 		<!-- Keeps the names as regLev_LEVELNUMBER -->
@@ -130,7 +131,7 @@
 			<legendItem label="RA - Rhône-Alpes" rColor="230" gColor="220" bColor="077">11071</legendItem>
 		</legendItems>	
 	</layer>
-	<layer>
+		<layer>
 		<name>regLev_1</name>
 		<label>Regions (counties, nuts1)</label>
 		<isInteger>true</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
@@ -190,7 +191,7 @@
       <legendItem label="over 2 Mmc"        rColor="025" gColor="025" bColor="025" minValue="2"     maxValue="10000">11</legendItem>
     </legendItems>
   </layer>
-    <layer>
+  <layer>
     <name>expectedReturns</name>
     <label>Expected returns</label>
     <isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
@@ -212,7 +213,7 @@
       <legendItem label="5000 - 10000 e/ha" rColor="050" gColor="050" bColor="050" minValue="5000" maxValue="10000">5000</legendItem>
       <legendItem label="over 10000 e/ha" rColor="025" gColor="025" bColor="025" minValue="10000" maxValue="100000000">10000</legendItem>
     </legendItems>
-  </layer>  
+  </layer>
   <layer>
     <name>avalCoef</name>
     <label>Availability coefficient</label>
@@ -228,7 +229,8 @@
       <legendItem label="0.4 - 0-6" rColor="100" gColor="100" bColor="100" minValue="0.4" maxValue="0.6">40</legendItem>    
       <legendItem label="0.8 - 1" rColor="40" gColor="40" bColor="40" minValue="0.8" maxValue="1.001">80</legendItem>
     </legendItems>
-  </layer>
+  </layer>	
+	
 	
 </gis>
 

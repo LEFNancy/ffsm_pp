@@ -545,3 +545,97 @@ iiskey::operator >= (const iiskey & op2) const{
   return false;
 }
 
+/// iisskey class (note the double ii and double ss) ///
+iisskey::iisskey(){
+ i = 0;
+ i2 = 0;
+ s = "";
+ s2= "";
+}
+iisskey::iisskey(int i_h, int i2_h, string s_h, string s2_h){
+ i  = i_h;
+ i2 = i2_h;
+ s  = s_h;
+ s2 = s2_h;
+}
+
+iisskey::~iisskey(){
+
+}
+
+bool
+iisskey::operator == (const iisskey & op2) const{
+  if(op2.i == i && op2.i2 == i2 && op2.s == s && op2.s2 == s2){
+    return true;
+  }
+  return false;
+}
+
+bool
+iisskey::operator != (const iisskey & op2) const{
+  if(op2.i == i && op2.i2 == i2 && op2.s == s && op2.s2 == s2){
+    return false;
+  }
+  return true;
+}
+
+bool
+iisskey::operator < (const iisskey & op2) const{
+  if (i < op2.i ) {return true;}
+  if (i == op2.i) {
+    if (i2 < op2.i2 ) {return true;}
+    if (i2 == op2.i2){
+      if (s < op2.s) {return true;}
+      if (s == op2.s){
+        if (s2 < op2.s2) {return true;}
+      }
+    }
+  }
+  return false;
+}
+
+bool
+iisskey::operator > (const iisskey & op2) const{
+  if (i > op2.i ) {return true;}
+  if (i == op2.i) {
+    if (i2 > op2.i2 ) {return true;}
+    if (i2 == op2.i2){
+      if (s > op2.s) {return true;}
+      if (s == op2.s){
+        if (s2 > op2.s2) {return true;}
+      }
+    }
+  }
+  return false;
+}
+
+bool
+iisskey::operator <= (const iisskey & op2) const{
+  if (i < op2.i ) {return true;}
+  if (i == op2.i) {
+    if (i2 < op2.i2 ) {return true;}
+    if (i2 == op2.i2){
+      if (s < op2.s) {return true;}
+      if (s == op2.s){
+        if (s2 <= op2.s2) {return true;}
+      }
+    }
+  }
+  return false;
+}
+
+bool
+iisskey::operator >= (const iisskey & op2) const{
+  if (i > op2.i ) {return true;}
+  if (i == op2.i) {
+    if (i2 > op2.i2 ) {return true;}
+    if (i2 == op2.i2){
+      if (s > op2.s) {return true;}
+      if (s == op2.s){
+        if (s2 >= op2.s2) {return true;}
+      }
+    }
+  }
+  return false;
+}
+

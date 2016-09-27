@@ -427,4 +427,23 @@ public:
 
 };
 
+/// Class to provide a simple integer-integer-string-string key in std maps
+class iisskey {
+public:
+                      iisskey();
+                      iisskey(int i_h, int i2_h, string s_h, string s2_h);
+                     ~iisskey();
+  bool                operator == (const iisskey &op2) const;
+  bool                operator != (const iisskey &op2) const;
+  bool                operator <  (const iisskey &op2) const;
+  bool                operator >  (const iisskey &op2) const;
+  bool                operator <= (const iisskey &op2) const;
+  bool                operator >= (const iisskey &op2) const;
+  int                                          i;
+  int                                          i2;
+  string                                       s;
+  string                                       s2;
+};
+
+
 #endif

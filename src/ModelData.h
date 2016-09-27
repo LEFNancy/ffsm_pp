@@ -56,6 +56,7 @@ struct reclRule;
 struct pathRule;
 struct forType;
 
+
 struct scenarioData {
   string                                            id;
   string                                     shortDesc;
@@ -118,6 +119,8 @@ public:
   vector <ModelRegion*> getAllRegions(bool excludeResidual=true);
   vector<int>         getRegionIds(int level_h, bool excludeResidual=true);
   vector < vector <int> > getRegionIds( bool excludeResidual=true);
+  string              regId2RegSName (const int & regId_h) const ;
+  int                 regSName2RegId (const string & regSName_h) const ;
   int                 getNForTypes(){return forTypes.size();}
   int                 getNReclRules(){return reclRules.size();}
   forType*            getForType(int position){return &forTypes[position];}
@@ -133,6 +136,7 @@ public:
   vector <string>     getDiameterClasses(bool productionOnly=false);
   /// A simple function to assess if a specified product can be made by a certain forest type and diameter class
   const bool          assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
+  const int           getMaxYearUsableDeathTimber(const string &prod_h, const string &forType_h, const string &dClass_h);
   int                 setErrorLevel(int errorLevel_h){errorLevel=errorLevel_h;}
   bool                getTempBool(){return tempBool;}
   vector < vector <int> > createCombinationsVector(const int& nItems); ///< Return a vector containing any possible combination of nItems items (including any possible subset). The returned vector has in each slot the items present in that specific combination.
@@ -180,6 +184,10 @@ public:
   void                setBasicData(const string &name_h, bool value, int position=0);
   friend void         Output::printForestData(bool finalFlush=false);
   friend void         Output::printProductData(bool finalFlush=false);
+  void                deathTimberInventory_incrOrAdd(const iisskey &thekey, double value_h){incrOrAddMapValue(deathTimberInventory,thekey, value_h);}
+  void                deathTimberInventory_incr(const iisskey &thekey, double value_h){incrMapValue(deathTimberInventory,thekey, value_h);}
+  double              deathTimberInventory_get(const iisskey &thekey){return findMap(deathTimberInventory, thekey);}
+  double              getAvailableDeathTimber(const string &primProd_h, int regID_h, int year_h);
   scenarioData        scenario;
 
 private:
@@ -208,6 +216,7 @@ private:
   vector <reclRule>                            reclRules; ///< Vector of reclassification rules
   vector <pathRule>                            pathRules; ///< Vector of pathogen rules
   vector < vector <int> >                            l2r; ///< Region2 ids
+  map<iisskey, double >             deathTimberInventory; ///< Map that register the death of biomass still usable as timber by year, l2_region, forest type and diameter class [Mm^3 wood]
 
   // cahced setting data..
   vector <string>                            diamClasses; ///< Diameter classes
@@ -260,7 +269,7 @@ struct forToProd {
   string                                         forType;
   string                                          dClass;
  /// The maximum year for a tree collapse that this product can be harvested from. E.g. a 0 value means it can be obtained only from live trees, a 5 years value mean it can be obtained from trees death no longer than 5 years ago.
-  string                                        maxYears;
+  int                                           maxYears;
 };
 
 /// Forest types (struct)

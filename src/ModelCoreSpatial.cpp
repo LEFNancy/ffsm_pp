@@ -49,6 +49,7 @@ ModelCoreSpatial::runInitPeriod(){
   initializePixelVolumes();       ///< compute px volumes vol for 2005 (including exogenous loaded volumes)
   assignSpMultiplierPropToVols(); // assign the spatial multiplier (used in the time of return) based no more on a Normal distribution but on the volumes present in the pixel: more volume, more the pixel is fit for the ft
   initMarketModule();             ///< inside it uses first year, second year
+  initialiseDeathTimber();
   MTHREAD->DO->print();
   MTHREAD->SCD->advanceYear();    ///< 2005->2006
   int thisYear = MTHREAD->SCD->getYear(); // for debugging
@@ -65,6 +66,8 @@ ModelCoreSpatial::runInitPeriod(){
   updateOtherMapData();           ///< update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   sumRegionalForData();           ///< only for printing stats as forest data is never used at regional level
   initialiseCarbonModule();
+
+
   MTHREAD->DO->print();
 }
 
@@ -82,7 +85,7 @@ ModelCoreSpatial::runSimulationYear(){
   MTHREAD->DO->printDebugPixelValues();
   updateMapAreas();
   updateOtherMapData();        // update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
-  sumRegionalForData();      // only for printing stats as forest data is never used at regional level
+  sumRegionalForData();        // only for printing stats as forest data is never used at regional level
   registerCarbonEvents();
   MTHREAD->DO->print();
 }
@@ -241,8 +244,8 @@ ModelCoreSpatial::runMarketModule(){
       double sigmaCorr = sigma;
       double pc_1  = gpd("pc",r2,priProducts[pp],previousYear);
       double sc_1  = gpd("sc",r2,priProducts[pp],previousYear);
-      double in    = gpd("in",r2,priProducts[pp]);
-      double in_1  = gpd("in",r2,priProducts[pp],previousYear);
+      double in    = gpd("in",r2,priProducts[pp])+gpd("in_deathTimber",r2,priProducts[pp]);
+      double in_1  = gpd("in",r2,priProducts[pp],previousYear)+gpd("in_deathTimber",r2,priProducts[pp],previousYear);
       double supCorr = 1.0; // Coefficient to reduce supply function when inventory is small
 
 
@@ -414,7 +417,25 @@ ModelCoreSpatial::runMarketModule(){
 
       //}
 
+
     }
+
+    // here we create stFromHarvesting as st - st_from_deathbiomass
+    vector <double> total_st(priProducts.size(),0.);
+    vector <double> in_deathTimber(priProducts.size(),0.);
+    vector <double> in_aliveForest (priProducts.size(),0.);
+    for (uint i=0;i<priProducts.size();i++){
+      total_st[i] = gpd("st",regId,priProducts[i]);
+      in_deathTimber[i] = gpd("in_deathTimber",regId,priProducts[i]);
+      in_aliveForest[i] = gpd("in",regId,priProducts[i]);
+    }
+    //TODO
+    double debug = 2.0;
+
+    for (uint i=0;i<priProducts.size();i++){
+      spd(gpd("st",regId,priProducts[i]),"stFromHarvesting",regId,priProducts[i],DATA_NOW,true);
+    }
+
   } // end of each region
   if (cumOverHarvesting>0.0){
     msgOut(MSG_DEBUG, "Overharvesting is present. Year: "+i2s(thisYear)+" cumOverHarvesting: "+d2s(cumOverHarvesting));
@@ -442,6 +463,7 @@ ModelCoreSpatial::runBiologicalModule(){
 
   msgOut(MSG_INFO, "Starting resource module..");
   int thisYear = MTHREAD->SCD->getYear();
+  bool useDeathTimber = MD->getBoolSetting("useDeathTimber");
 
   for(uint i=0;i<regIds2.size();i++){
     int r2 = regIds2[i];
@@ -449,6 +471,13 @@ ModelCoreSpatial::runBiologicalModule(){
     ModelRegion* REG = MTHREAD->MD->getRegion(r2);
     //Gis* GIS = MTHREAD->GIS;
     regPx = REG->getMyPixels();
+    double shareMortalityUsableTimber;
+    if(useDeathTimber){
+        shareMortalityUsableTimber = gfd("shareMortalityUsableTimber",r2,"","");
+    } else {
+        shareMortalityUsableTimber = 0.0;
+    }
+
     for (uint p=0;p<regPx.size();p++){
       Pixel* px = regPx[p];
 
@@ -558,7 +587,7 @@ ModelCoreSpatial::runBiologicalModule(){
           //hV(u,i,essence,lambda,t) = hr(u,i,essence,lambda,t) * V(u,i,lambda,essence,t-1);
           //hV_byPrd(u,i,essence,lambda,p_pr,t) =  prov(u,essence,lambda,p_pr)*(RPAR('st',i,p_pr,t)/In(i,p_pr,t))*V(u,i,lambda,essence,t-1);
           for(uint pp=0;pp<priProducts.size();pp++){
-            double st = gpd("st",r2,priProducts[pp]);
+            double st = gpd("stFromHarvesting",r2,priProducts[pp]);
             double in = gpd("in",r2,priProducts[pp]);
             double hr_pr = in ? app(priProducts[pp],ft,dc)*st/in : 0.0;
             hr_byPrd.push_back( hr_pr);
@@ -603,6 +632,11 @@ ModelCoreSpatial::runBiologicalModule(){
           double vMort       = mort*pastYearVol;
 
           vMort_byDc.push_back(vMort);
+
+          if(useDeathTimber){
+            iisskey key(thisYear,r2,ft,dc);
+            MD->deathTimberInventory_incrOrAdd(key,vMort*shareMortalityUsableTimber);
+          }
 
           if(u==0){
             vol = 0.0;
@@ -683,6 +717,7 @@ ModelCoreSpatial::runBiologicalModule(){
         px->vol.push_back(newVol_byDiam);
         px->vMort.push_back(vMort_byDc);
 
+
         #ifdef QT_DEBUG
         for (uint u=1; u<dClasses.size(); u++){
           double volMort = vMort_byDc[u];
@@ -703,7 +738,7 @@ ModelCoreSpatial::runBiologicalModule(){
     double sumSt = 0.0;
     double sumHv = 0.0;
     for(uint pp=0;pp<priProducts.size();pp++){
-      sumSt += gpd("st",r2,priProducts[pp]);
+      sumSt += gpd("stFromHarvesting",r2,priProducts[pp]);
     }
     for (uint p=0;p<regPx.size();p++){
       for(uint j=0;j<fTypes.size();j++){
@@ -1165,6 +1200,21 @@ ModelCoreSpatial::initialiseCarbonModule(){
   }
 }
 
+void
+ModelCoreSpatial::initialiseDeathTimber(){
+  int currentYear = MTHREAD->SCD->getYear();
+  for(int y=currentYear;y>currentYear-30;y--){
+    for(uint i=0;i<regIds2.size();i++){
+      for(uint j=0;j<fTypes.size();j++){
+        for (uint u=0;u<dClasses.size();u++){
+          iisskey key(y,regIds2[i],fTypes[j],dClasses[u]);
+          MD->deathTimberInventory_incrOrAdd(key,0.0);
+        }
+      }
+    }
+  }
+}
+
 /**
  * @brief ModelCoreSpatial::initializePixelArea
  *
@@ -1536,13 +1586,15 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
   msgOut(MSG_INFO, "Starting computing inventary available for this year..");
   int nbounds = pow(2,priProducts.size());
   vector<vector<int>> concernedPriProductsTotal = MTHREAD->MD->createCombinationsVector(priProducts.size());
+  int currentYear = MTHREAD->SCD->getYear();
 
   for(uint i=0;i<regIds2.size();i++){
     int r2 = regIds2[i];
     ModelRegion* REG = MTHREAD->MD->getRegion(r2);
     //Gis* GIS = MTHREAD->GIS;
     regPx = REG->getMyPixels();
-    vector <double> in_reg(priProducts.size(),0.); // should have ceated a vector of size priProducts.size(), all filled with zeros
+    vector <double> in_reg(priProducts.size(),0.);             // should have ceated a vector of size priProducts.size(), all filled with zeros
+    vector <double> in_deathTimber_reg(priProducts.size(),0.); // should have ceated a vector of size priProducts.size(), all filled with zeros
     for (uint p=0;p<regPx.size();p++){
       Pixel* px = regPx[p];
       //int debugPx = px->getID();
@@ -1555,8 +1607,10 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
             in += app(priProducts[pp],fTypes[ft],dClasses[dc])*px->vol_l.at(ft).at(dc)*px->avalCoef;
           }
         }
+        double in_deathMortality = MD->getAvailableDeathTimber(priProducts[pp],r2,currentYear-1);
         //px->in.push_back(in);
         in_reg.at(pp) += in;
+        in_deathTimber_reg.at(pp) += in_deathMortality;
       } // end of each priProduct
     } // end each pixel
     for(uint pp=0;pp<priProducts.size();pp++){
@@ -1568,6 +1622,7 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
       // Tried with 0.2 but no changes, so put it back on 0.003
       //spd(max(0.001,in_reg.at(pp)),"in",r2,priProducts[pp],DATA_NOW,true);
       spd(in_reg.at(pp),"in",r2,priProducts[pp],DATA_NOW,true);
+      spd(in_deathTimber_reg.at(pp),"in_deathTimber",r2,priProducts[pp],DATA_NOW,true);
       #ifdef QT_DEBUG
       if (in_reg.at(pp) < -0.0){
         msgOut(MSG_CRITICAL_ERROR,"Negative inventory");
@@ -1585,6 +1640,7 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
       double bound = 0.0;
       for(uint z=0;z<concernedPriProducts.size();z++){
         bound += gpd("in",r2,priProducts[concernedPriProducts[z]]);
+        bound += gpd("in_deathTimber",r2,priProducts[concernedPriProducts[z]]);
       }
       /*
       //concernedPriProducts.push_back(i);
@@ -1865,8 +1921,29 @@ ModelCoreSpatial::sumRegionalForData(){
 
   } // end for each region
 
-
-
+  // Computing pathogens share of forest invasion
+  if(MD->getBoolSetting("usePathogenModule")){
+      for(uint r2= 0; r2<regIds2.size();r2++){
+        int regId = regIds2[r2];
+        regPx = MTHREAD->MD->getRegion(regId)->getMyPixels();
+        double totalForArea = 0.0;
+        double invadedArea  = 0.0;
+        for (uint p=0;p<regPx.size();p++){
+          Pixel* px = regPx[p];
+          int invaded = 0.0;
+          for(uint j=0;j<fTypes.size();j++){
+            for (uint u=0; u<dClasses.size(); u++){
+              if(px->getPathMortality(fTypes[j],dClasses[u]) > 0){
+                invaded = 1.0;
+              }
+            }
+          }
+          totalForArea += vSum(px->area);
+          invadedArea  += vSum(px->area)*invaded;
+        }
+        sfd(invadedArea/totalForArea,"totalShareInvadedArea",regId,"","",DATA_NOW, true);
+      }
+  } // end we are using path model
 }
 /**
  * This function call registerHarvesting() (accounts for emissions from for. operations), registerDeathBiomass() (registers new stocks of death biomass),

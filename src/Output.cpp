@@ -467,7 +467,7 @@ Output::printForestData(bool finalFlush){
   double outvalue;
   for(uint v=0;v<outForVariables.size();v++){
     vector<string>fTypes_temp = fTypes;
-    if( outForVariables[v]=="expReturns" || outForVariables[v]=="sumExpReturns") {
+    if( outForVariables[v]=="expReturns" || outForVariables[v]=="sumExpReturns" ||  outForVariables[v]=="totalShareInvadedArea") {
       fTypes_temp.push_back(""); // adding an empty forest type to report for variables that doesn't have a forestType dimension
       vector<string> ftParents = MTHREAD->MD->getForTypeParents();
       fTypes_temp.insert(fTypes_temp.end(),ftParents.begin(),ftParents.end()); // also inserting forest type "parents" for expected returns
@@ -479,8 +479,8 @@ Output::printForestData(bool finalFlush){
             for(uint dc=0;dc<dClasses.size();dc++){ // an empty "" dc has been already added to the vector
               out << scenarioName << d;
               out << outForVariables[v] << d;
-              out << l1regIds.at(r1) << d;
-              out << l2r[r1][r2] << d;
+              out << MTHREAD->MD->regId2RegSName(l1regIds.at(r1)) << d;
+              out << MTHREAD->MD->regId2RegSName(l2r[r1][r2]) << d;
               out << fTypes_temp[ft] << d;
               out << dClasses[dc] << d;
               if (oHRedeable){
@@ -499,8 +499,8 @@ Output::printForestData(bool finalFlush){
           } else {
             out << scenarioName << d;
             out << outForVariables[v] << d;
-            out << l1regIds.at(r1) << d;
-            out << l2r[r1][r2] << d;
+            out << MTHREAD->MD->regId2RegSName(l1regIds.at(r1)) << d;
+            out << MTHREAD->MD->regId2RegSName(l2r[r1][r2]) << d;
             out << fTypes_temp[ft] << d;
             out << d;
             if (oHRedeable){
@@ -603,8 +603,8 @@ Output::printProductData(bool finalFlush){
             for(uint r2b=0;r2b<l2r[r1].size();r2b++){
               out << scenarioName << d;
               out << outProdVariables[v] << d;
-              out << l1regIds.at(r1) << d;
-              out << l2r[r1][r2] << d;
+              out << MTHREAD->MD->regId2RegSName(l1regIds.at(r1)) << d;
+              out << MTHREAD->MD->regId2RegSName(l2r[r1][r2]) << d;
               out << allPr[p] << d;
               out << l2r[r1][r2b] << d;
               if (oHRedeable){
@@ -627,8 +627,8 @@ Output::printProductData(bool finalFlush){
           } else {
             out << scenarioName << d;
             out << outProdVariables[v] << d;
-            out << l1regIds.at(r1) << d;
-            out << l2r[r1][r2] << d;
+            out << MTHREAD->MD->regId2RegSName(l1regIds.at(r1)) << d;
+            out << MTHREAD->MD->regId2RegSName(l2r[r1][r2]) << d;
             out << allPr[p] << d;
             out << d;
             if (oHRedeable){
@@ -726,8 +726,8 @@ Output::printCarbonBalance(){
       int regId = l2r[r1][r2];
       for (uint b=0;b<balItems.size();b++){
         out << scenarioName << d;
-        out << l1regIds.at(r1) << d;
-        out << l2r[r1][r2] << d;
+        out << MTHREAD->MD->regId2RegSName(l1regIds.at(r1)) << d;
+        out << MTHREAD->MD->regId2RegSName(l2r[r1][r2]) << d;
         string balItemString;
         switch(balItems[b]){
           case STOCK_INV: {
@@ -838,7 +838,7 @@ Output::printDebugOutput(){
                           double outputValue = expReturnsDebug.at(r2).at(ft).at(dc).at(pp).at(dv);
                           out << scenarioName << d;
                           out << currentYear << d;
-                          out << regIds2[r2] << d;
+                          out << MTHREAD->MD->regId2RegSName(regIds2[r2]) << d;
                           out << fTypes[ft] << d;
                           out << dClasses[dc] << d;
                           out << priPr[pp] << d;

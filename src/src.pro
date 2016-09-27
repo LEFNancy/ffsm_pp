@@ -138,7 +138,7 @@ HEADERS += Adolc_debugtest.h \
            ScenarioSelectionWidget.h \
            ModelCore.h \
            ModelCoreSpatial.h \
-           Carbon.h
+           Carbon.h 
 
 FORMS   += MainWindow.ui
 SOURCES += Adolc_debugtest.cpp \
@@ -168,7 +168,7 @@ SOURCES += Adolc_debugtest.cpp \
            ScenarioSelectionWidget.cpp \
            ModelCore.cpp \
            ModelCoreSpatial.cpp \
-           Carbon.cpp
+           Carbon.cpp 
 
 RESOURCES += resources.qrc
 
