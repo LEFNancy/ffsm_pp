@@ -1792,6 +1792,7 @@ void
 Opt::copyInventoryResourses(){
   // This function is not really needed, as actually the solver works also picking the region and the in dynamically
   // Caching the inventories in a vector should however be faster.
+  // We now need it, as the vector inResByAnyCombination() account for the union between the inv set of the various pp. Also it now include the total mortality (alive plus death, if modelled)
   vector < vector < vector <double> > >  in_temp;
   for (uint r1=0;r1<l2r.size();r1++){
      vector < vector <double> > dim1;

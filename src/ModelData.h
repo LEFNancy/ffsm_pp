@@ -188,7 +188,9 @@ public:
   void                deathTimberInventory_incr(const iisskey &thekey, double value_h){incrMapValue(deathTimberInventory,thekey, value_h);}
   double              deathTimberInventory_get(const iisskey &thekey){return findMap(deathTimberInventory, thekey);}
   map<iisskey, double > *  getDeathTimberInventory() {return &deathTimberInventory;};
-  double              getAvailableDeathTimber(const string &primProd_h, int regID_h, int year_h);
+  double              getAvailableDeathTimber(const vector<string> &primProd_h, int regID_h, int year_h); ///< Returns the timber available for a given set of primary products as stored in the deathTimberInventory map
+  double              getAvailableAliveTimber(const vector<string> &primProd_h, int regId_h); ///< Returns the timber available for a given set of primary products as stored in the px->vol_l vector
+
   scenarioData        scenario;
 
 private:

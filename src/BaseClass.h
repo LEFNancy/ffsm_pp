@@ -352,6 +352,15 @@ public:
       return returnMap;
   }
 
+  /// Return a vector of content from a vector and a vector of positions (int)
+  template <typename T> vector <T> positionsToContent(const vector <T> & vector_h, const vector<int> &positions){
+      vector <T> toReturn;
+      for(uint i=0; i<positions.size(); i++){
+          toReturn.push_back(vector_h.at(positions[i]));
+      }
+      return toReturn;
+  }
+
   /// Debug a map
   template <typename V> void debugMap(const map <iisskey, V> &mymap){
     iisskey mykey(NULL,NULL,"","");

@@ -433,6 +433,9 @@ ModelCoreSpatial::runMarketModule(){
     //TODO
     map<iisskey, double > *  deathTimberInventory= MD->getDeathTimberInventory();
     debugMap(*deathTimberInventory);
+    vector <double> debugReg = REG->inResByAnyCombination_deathTimber;
+
+
     double debug = 2.0;
 
     for (uint i=0;i<priProducts.size();i++){
@@ -1617,7 +1620,10 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
 
 
     for(uint pp=0;pp<priProducts.size();pp++){
-      double in_deathMortality = MD->getAvailableDeathTimber(priProducts[pp],r2,currentYear-1);
+      vector<string> priProducts_vector;
+      priProducts_vector.push_back(priProducts[pp]);
+
+      double in_deathMortality = MD->getAvailableDeathTimber(priProducts_vector,r2,currentYear-1);
       in_deathTimber_reg.at(pp) += in_deathMortality;
 
       // Even if I fixed all the lower bounds to zero in Opt::get_bounds_info still the model
@@ -1636,6 +1642,10 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
       #endif
     }
 
+    // ##### Now creating a set of bonds for the optimisation that account of the fact that the same ft,dc can be used for multiple products:
+
+    // 20160928: Solved a big bug: for each combination instead of taking the UNION of the various priProduct inventory sets I was taking the sum
+    // Now both the alive and the death timber are made from the union
     // 20150116: As the same (ft,dc) can be used in more than one product knowing -and bounding the supply in the optimisation- each single
     // in(pp) is NOT enought.
     // We need to bound the supply for each possible combination, that is for 2^(number of prim.pr)
@@ -1643,45 +1653,19 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
     // 20160209: Rewritten and corrected a bug that was not giving enought inv to multiproduct combinations
     for (uint i=0; i<nbounds; i++){
       vector<int> concernedPriProducts = concernedPriProductsTotal[i];
-      double bound = 0.0;
-      for(uint z=0;z<concernedPriProducts.size();z++){
-        bound += gpd("in",r2,priProducts[concernedPriProducts[z]]);
-        bound += gpd("in_deathTimber",r2,priProducts[concernedPriProducts[z]]);
-      }
-      /*
-      //concernedPriProducts.push_back(i);
-      // for each ft and dc if at least one app with concerning product is 1 we add the volumes
-      for(uint ft=0;ft<fTypes.size();ft++){
-        for(uint dc=0;dc<dClasses.size();dc++){
-          bool addIt = false;
-          for(uint z=0;z<concernedPriProducts.size();z++){
-            if (app(priProducts[concernedPriProducts[z]],fTypes[ft],dClasses[dc])){
-              addIt = true;
-              break;
-            }
-          }
-          if (addIt){
-            for (uint p=0;p<regPx.size();p++){
-              Pixel* px = regPx[p];
-              bound += px->vol_l.at(ft).at(dc)*px->avalCoef;
-            }
-          }
-        }
-      }*/
-      REG->inResByAnyCombination[i] = bound;
-    }
+      vector<string> concernedPriProducts_ids = positionsToContent(priProducts,concernedPriProducts);
+      //double debug       = 0.0;
+      //for(uint z=0;z<concernedPriProducts.size();z++){
+      //  debug      += gpd("in",r2,priProducts[concernedPriProducts[z]]); // to.do: this will need to be rewritten checked!
+      //}
+      double bound_alive       = MD->getAvailableAliveTimber(concernedPriProducts_ids,r2); // From px->vol_l, as in "in"
+      double bound_deathTimber = MD->getAvailableDeathTimber(concernedPriProducts_ids,r2,currentYear-1); // From deathTimberInventory map
+      double bound_total       = bound_alive + bound_deathTimber;
+
+      REG->inResByAnyCombination[i]             = bound_total;
+      REG->inResByAnyCombination_deathTimber[i] = bound_deathTimber;
+    } // end for each bond
   } // end each region
-
-
-  // debugging..
- /* int r2 = 11042;
-  ModelRegion* REG = MTHREAD->MD->getRegion(r2);
-  double in0 = gpd("in",r2,priProducts[0]);
-  double in1 = gpd("in",r2,priProducts[1]);
-  double in2 = gpd("in",r2,priProducts[2]);
-  double debug = in0+in1;*/
-
-
 }
 
 void

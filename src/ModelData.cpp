@@ -51,6 +51,7 @@
 #include "MainWindow.h"
 #include "Scheduler.h"
 #include "ModelRegion.h"
+#include "Pixel.h"
 
 typedef map<string, vector <double> > DataMap;
 typedef pair<string, vector <double> > DataPair;
@@ -1972,7 +1973,7 @@ ModelData::createCombinationsVector(const int& nItems) {
 
 
 double
-ModelData::getAvailableDeathTimber(const string &primProd_h, int regId_h, int year_h){
+ModelData::getAvailableDeathTimber(const vector<string> &primProd_h, int regId_h, int year_h){
   if (!getBoolSetting("useDeathTimber")) return 0;
   double toReturn = 0.0;
   vector <string> forTypesIds = getForTypeIds();
@@ -1980,11 +1981,47 @@ ModelData::getAvailableDeathTimber(const string &primProd_h, int regId_h, int ye
     string ft = forTypesIds[i];
     for(uint u=0;u<diamClasses.size();u++){
       string dc = diamClasses[u];
-      if(assessProdPossibility(primProd_h,ft, dc)){
-        int maxYears = getMaxYearUsableDeathTimber(primProd_h, ft, dc);
+      bool possible = false;
+      int maxYears = 0;
+      for (int p=0; p<primProd_h.size();p++){
+          string primProd = primProd_h[p];
+          if(assessProdPossibility(primProd,ft, dc)){
+              possible = true;
+              maxYears=max(maxYears,getMaxYearUsableDeathTimber(primProd, ft, dc));
+          }
+      }
+      if(possible){
         for(int y=year_h;y>year_h-maxYears;y--){
           iisskey key(y,regId_h,ft,dc);
           toReturn += findMap(deathTimberInventory,key,MSG_DEBUG,0.0);
+        }
+      }
+    }
+  }
+  return toReturn;
+}
+
+double
+ModelData::getAvailableAliveTimber(const vector<string> &primProd_h, int regId_h){
+  double toReturn = 0.0;
+  ModelRegion* REG = MTHREAD->MD->getRegion(regId_h);
+  vector <Pixel*> regPx = REG->getMyPixels();
+  vector <string> forTypesIds = getForTypeIds();
+  for (uint i=0;i<forTypesIds.size();i++){
+    string ft = forTypesIds[i];
+    for(uint u=0;u<diamClasses.size();u++){
+      string dc = diamClasses[u];
+      bool possible = false;
+      for (int p=0; p<primProd_h.size();p++){
+          string primProd = primProd_h[p];
+          if(assessProdPossibility(primProd,ft, dc)){
+              possible = true;
+          }
+      }
+      if(possible){
+        for (uint p=0;p<regPx.size();p++){
+          Pixel* px = regPx[p];
+          toReturn += px->vol_l.at(i).at(u)*px->avalCoef;
         }
       }
     }
