@@ -172,7 +172,7 @@ private:
   int                                    subXR; ///< sub region right X
   int                                    subYT; ///< sub region top Y
   int                                    subYB; ///< sub region bottom Y
-  bool                           subRegionMode;
+
 
 
 };

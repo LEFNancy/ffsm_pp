@@ -599,7 +599,7 @@ MainWindow::showDocumentation(){
        "<p>Tips:"
        "<br> - right click on a pixel to get its value across the layers;"
        "<br> - use the mouse and its wheel over the map to zoom/scroll it;"
-       "<!--<br> - use the <i>subRegionMode</i> setting within the model to select a simulation sub-area;</p>-->"
+       "</p>"
     ));
 }
 

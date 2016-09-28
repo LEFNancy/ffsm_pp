@@ -39,7 +39,6 @@ The constructor of the GIS (unique) instance want:
 */
 Gis::Gis(ThreadManager* MTHREAD_h){
   MTHREAD=MTHREAD_h;
-  subRegionMode = false;
 }
 
 Gis::~Gis(){
@@ -885,34 +884,13 @@ Gis::printDebugValues (string layerName_h, int min_h, int max_h){
 /**
 This function filter the region, placing noValue on the selected informative layer on pixels that are outside the subregion.
 <br>It was thinked for speedup the development without have to run the whole model for testing each new implementation, but it can used to see what happen in the model when only a subset of the region is analysed.
-
-When the subRegionMode is actived also agents mouldCoefficients are rescaled to match the new subregion, however this is just approximated, as the upscaling process was performed on the whole region.
 */
 void
 Gis::filterSubRegion(string layerName_h){
-  if (MTHREAD->MD->getBoolSetting("subRegionMode")){
-    subRegionMode = true;
-    subXL  = MTHREAD->MD->getIntSetting("subRegionXLeft");
-    subXR   = MTHREAD->MD->getIntSetting("subRegionXRight");
-    subYT = MTHREAD->MD->getIntSetting("subRegionYTop");
-    subYB = MTHREAD->MD->getIntSetting("subRegionYBottom");
-    for (int y=0;y<yNPixels;y++){
-      for (int x=0;x<xNPixels;x++){
-        if (x>=subXL && x<= subXR && y>=subYT && y<=subYB){
-        }
-        else {
-          this->getPixel(x,y)->changeValue(layerName_h, noValue);
-        }
-      }
-    }
-    updateImage(layerName_h);
-  }
-  else {
-    subXL = 0;
-    subYT = 0;
-    subXR = xNPixels-1;
-    subYB = yNPixels-1;  
-  }
+ subXL = 0;
+ subYT = 0;
+ subXR = xNPixels-1;
+ subYB = yNPixels-1;
 }
 
 double
@@ -968,20 +946,7 @@ Gis::printBinMaps(string layerName_h){
 int
 Gis::sub2realID(int id_h){
   // IMPORTANT: this function is called at refreshGUI() times, so if there are output messages, call them with the option to NOT refresh the gui, otherwise we go to an infinite loop...
-  if (!MTHREAD->MD->getBoolSetting("subRegionMode")) {return id_h;}
-  int subX, subY, realX, realY;
-  subX = id_h%((subXR-subXL)+1);
-  subY = id_h/((subXR-subXL)+1);
-
-  realX = subX+subXL;
-  realY = subY+subYT;
-
-  if ( (realX<subXL) || (realX>subXR) || (realY < subYT) || (realY>subYB)  ){
-    msgOut(MSG_ERROR, "Calling sub2realID() function with an ID that is out of subregion range!!", false);
-    return -1;
-  }
-  return realX+realY*xNPixels;
-
+  return id_h;
 }
 
 void

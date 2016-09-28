@@ -208,38 +208,6 @@ ModelData::setDefaultSettings(){
     programSettingsVector.push_back(SETT);
   }  
 
-  /*
-  // rescaling if we are in the region mode...
-  if(MTHREAD->MD->getBoolSetting("subRegionMode")){
-    int XL  = MTHREAD->MD->getIntSetting("subRegionXLeft");
-    int XR   = MTHREAD->MD->getIntSetting("subRegionXRight");
-    int YT = MTHREAD->MD->getIntSetting("subRegionYTop");
-    int YB = MTHREAD->MD->getIntSetting("subRegionYBottom");
-    double scaleCoeff =
-            ( (double)  ((XR-XL)*(YB-YT)) )
-                      /
-      ( MTHREAD->MD->getIntSetting("nCols") * MTHREAD->MD->getIntSetting("nRows")) ; // ratio between npixel in the subRegion and npixels in the original region
-    vector <string> value;
-    value.push_back(d2s(scaleCoeff));
-    MTHREAD->MD->addSetting("scaleCoeff",value, TYPE_DOUBLE, "Scale coefficient used as this simulation is ran on a sub-region trial");
-  }
-  else {
-    double scaleCoeff = 1;
-    vector <string> value;
-    value.push_back(d2s(scaleCoeff));
-    MTHREAD->MD->addSetting("scaleCoeff",value, TYPE_DOUBLE, "Scale coefficient equal to 1 as this simulation is ran on the whole region");
-  }
-
-
-  // post settings hacks & messages...
-  if(getBoolSetting("subRegionMode") ){
-    msgOut(MSG_INFO, "The model is currently running on a sub-region area (mainly for initial model debugging).\nThe Scale coefficient is "+d2s(getDoubleSetting("scaleCoeff"))+".\nYou can enable full-region mode with the setting \"subRegionMode\"");
-  }
-  else {
-    msgOut(MSG_INFO, "The model is currently running on a the whole area (normal mode).\nYou can enable sub-region mode with the setting \"subRegionMode\"\n(useful for initial model debugging/calibration)");
-  }
-  */
-
   msgOut(MSG_INFO,"### USING SCENARIO: "+MTHREAD->getScenarioName()+" ###");
   
   setOutputDirectory(getStringSetting("outputDirname").c_str());
@@ -278,31 +246,6 @@ ModelData::setScenarioSettings(){
 
   }
 
-  /*
-  // scaling to subregionmode again as some parameters may have been changed..
-  if(MTHREAD->MD->getBoolSetting("subRegionMode")){
-    int XL  = MTHREAD->MD->getIntSetting("subRegionXLeft");
-    int XR   = MTHREAD->MD->getIntSetting("subRegionXRight");
-    int YT = MTHREAD->MD->getIntSetting("subRegionYTop");
-    int YB = MTHREAD->MD->getIntSetting("subRegionYBottom");
-    double scaleCoeff =
-            ( (double)  ((XR-XL)*(YB-YT)) )
-                      /
-      ( MTHREAD->MD->getIntSetting("nCols") * MTHREAD->MD->getIntSetting("nRows")) ; // ratio between npixel in the subRegion and npixels in the original region
-    setBasicData("scaleCoeff",scaleCoeff);
-  }
-  else {
-    setBasicData("scaleCoeff",((double)1));
-  }
-
-  // post settings hacks & messages...
-  if(getBoolSetting("subRegionMode") ){
-    msgOut(MSG_INFO, "The model is currently running on a sub-region area (mainly for initial model debugging).\nThe Scale coefficient is "+d2s(getDoubleSetting("scaleCoeff"))+".\nYou can enable full-region mode with the setting \"subRegionMode\"");
-  }
-  else {
-    msgOut(MSG_INFO, "The model is currently running on a the whole area (normal mode).\nYou can enable sub-region mode with the setting \"subRegionMode\"\n(useful for initial model debugging/calibration)");
-  }
-  */
   setOutputDirectory(getStringSetting("outputDirname").c_str());
 }
 
