@@ -49,7 +49,7 @@ ModelCoreSpatial::runInitPeriod(){
   initializePixelVolumes();       ///< compute px volumes vol for 2005 (including exogenous loaded volumes)
   assignSpMultiplierPropToVols(); // assign the spatial multiplier (used in the time of return) based no more on a Normal distribution but on the volumes present in the pixel: more volume, more the pixel is fit for the ft
   initMarketModule();             ///< inside it uses first year, second year
-  //initialiseDeathTimber();
+  initialiseDeathTimber();
   MTHREAD->DO->print();
   MTHREAD->SCD->advanceYear();    ///< 2005->2006
   int thisYear = MTHREAD->SCD->getYear(); // for debugging
@@ -430,16 +430,11 @@ ModelCoreSpatial::runMarketModule(){
       in_deathTimber[i] = gpd("in_deathTimber",regId,priProducts[i]);
       in_aliveForest[i] = gpd("in",regId,priProducts[i]);
     }
-    //TODO
-    map<iisskey, double > *  deathTimberInventory= MD->getDeathTimberInventory();
-    debugMap(*deathTimberInventory);
-    vector <double> debugReg = REG->inResByAnyCombination_deathTimber;
 
-
-    double debug = 2.0;
+    vector <double> stFromHarvesting = allocateHarvesting(total_st, regId);
 
     for (uint i=0;i<priProducts.size();i++){
-      spd(gpd("st",regId,priProducts[i]),"stFromHarvesting",regId,priProducts[i],DATA_NOW,true);
+      spd(stFromHarvesting[i],"stFromHarvesting",regId,priProducts[i],DATA_NOW,true);
     }
 
   } // end of each region
@@ -593,7 +588,7 @@ ModelCoreSpatial::runBiologicalModule(){
           //hV(u,i,essence,lambda,t) = hr(u,i,essence,lambda,t) * V(u,i,lambda,essence,t-1);
           //hV_byPrd(u,i,essence,lambda,p_pr,t) =  prov(u,essence,lambda,p_pr)*(RPAR('st',i,p_pr,t)/In(i,p_pr,t))*V(u,i,lambda,essence,t-1);
           for(uint pp=0;pp<priProducts.size();pp++){
-            double st = gpd("stFromHarvesting",r2,priProducts[pp]); // TODO: say that if 2007 (startY+1) it should use st, as stFromHarvesting does not yet exist. Or even better create stFromHarvesting=st in initMarketModule
+            double st = gpd("stFromHarvesting",r2,priProducts[pp]);
             double in = gpd("in",r2,priProducts[pp]);
             double hr_pr = in ? app(priProducts[pp],ft,dc)*st/in : 0.0;
             hr_byPrd.push_back( hr_pr);
@@ -2201,7 +2196,6 @@ ModelCoreSpatial::loadExogenousForestLayers(const string & what){
   } // end if what is area
 }
 
-
 void
 ModelCoreSpatial::printDebugInitRegionalValues(){
   // Print debug stats on inventory and supplies in each region..
@@ -2221,4 +2215,50 @@ ModelCoreSpatial::printDebugInitRegionalValues(){
   } // end of r1 region
   exit(0);
 
+}
+
+/**
+ * @brief ModelCoreSpatial::allocateHarvesting
+ * @param total_st vector of total supply by primary products
+ * @return a vector of the remaining supply that goes allocated to alive timber (that is, to harvesting)
+ *
+ * The algorithm is such that is loops the deathTimberInventory map for year year (newer to older), dc (higher to smaller) and ft.
+ * It compute the primary products allocable from that combination and allocate the cell amount to decrease the total_st of that products
+ * in a proportional way to what still remain of the allocable products.
+ *
+ * It is called in the runMarketModule() function.
+ *
+ */
+
+vector <double>
+ModelCoreSpatial::allocateHarvesting(vector<double> total_st, const int &regId){
+   if(!MD->getBoolSetting("useDeathTimber")) return total_st;
+   vector <double> stFromHarvesting(priProducts.size(),0.);
+   map<iisskey, double > *  deathTimberInventory= MD->getDeathTimberInventory();
+   int maxYears = MD->getMaxYearUsableDeathTimber();
+   int currentYear = MTHREAD->SCD->getYear();
+   for(uint y = currentYear-1; y>currentYear-1-maxYears; y--){
+     for (int u = dClasses.size()-1; u>=0; u--){  // I need to specify u as an integer !
+       string dc = dClasses.at(u);
+       for (uint f=0; f<fTypes.size(); f++){
+         string ft = fTypes[f];
+         vector<int>allocableProducts =  MD->getAllocableProductIdsFromDeathTimber(regId, ft, dc, y, currentYear-1);
+         iisskey key(y,regId,ft,dc);
+         double deathTimber = MD->deathTimberInventory_get(key);
+         double sum_total_st_allocable = 0;
+         // Compunting shares/weights or remaining st to allcate
+         for(uint ap=0;ap<allocableProducts.size();ap++){
+           sum_total_st_allocable += total_st.at(allocableProducts[ap]);
+         }
+         for(uint ap=0;ap<allocableProducts.size();ap++){
+           double allocableShare = sum_total_st_allocable?total_st.at(allocableProducts[ap])/sum_total_st_allocable:0.0;
+           double allocated = min(total_st[allocableProducts[ap]],deathTimber*allocableShare);
+           MD->deathTimberInventory_incrOrAdd(key,-allocated);
+           total_st[allocableProducts[ap]] -= allocated;
+           double debug = 1;
+         }
+       }
+     }
+   }
+   return total_st;
 }

@@ -137,6 +137,7 @@ public:
   /// A simple function to assess if a specified product can be made by a certain forest type and diameter class
   const bool          assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
   const int           getMaxYearUsableDeathTimber(const string &prod_h, const string &forType_h, const string &dClass_h);
+  const int           getMaxYearUsableDeathTimber();
   int                 setErrorLevel(int errorLevel_h){errorLevel=errorLevel_h;}
   bool                getTempBool(){return tempBool;}
   vector < vector <int> > createCombinationsVector(const int& nItems); ///< Return a vector containing any possible combination of nItems items (including any possible subset). The returned vector has in each slot the items present in that specific combination.
@@ -190,7 +191,7 @@ public:
   map<iisskey, double > *  getDeathTimberInventory() {return &deathTimberInventory;};
   double              getAvailableDeathTimber(const vector<string> &primProd_h, int regID_h, int year_h); ///< Returns the timber available for a given set of primary products as stored in the deathTimberInventory map
   double              getAvailableAliveTimber(const vector<string> &primProd_h, int regId_h); ///< Returns the timber available for a given set of primary products as stored in the px->vol_l vector
-
+  vector <int>        getAllocableProductIdsFromDeathTimber(const int &regId_h, const string &ft, const string &dc, const int &harvesting_year, int request_year=DATA_NOW); ///< Returns the ids of the primary products that is possible to obtain using the timber recorded death in the specific year, ft, dc combination
   scenarioData        scenario;
 
 private:

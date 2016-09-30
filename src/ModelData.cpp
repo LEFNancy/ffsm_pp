@@ -423,6 +423,19 @@ ModelData::assessProdPossibility(const string &prod_h, const string &forType_h, 
   return false;
 }
 
+
+const int
+ModelData::getMaxYearUsableDeathTimber(){
+  int maxMaxYears = 0;
+  for(uint i=0;i<forToProdVector.size();i++){
+    if(forToProdVector[i].maxYears > maxMaxYears){
+      maxMaxYears = forToProdVector[i].maxYears;
+    }
+  }
+  return maxMaxYears;
+}
+
+
 const int
 ModelData::getMaxYearUsableDeathTimber(const string &prod_h, const string &forType_h, const string &dClass_h){
   for(uint i=0;i<forToProdVector.size();i++){
@@ -1943,6 +1956,25 @@ ModelData::getAvailableDeathTimber(const vector<string> &primProd_h, int regId_h
   }
   return toReturn;
 }
+
+vector <int>
+ModelData::getAllocableProductIdsFromDeathTimber(const int &regId_h, const string &ft, const string &dc, const int &harvesting_year, int request_year){
+  vector<int> allocableProductIds;
+  if (!getBoolSetting("useDeathTimber")) return allocableProductIds;
+  if (request_year == DATA_NOW) request_year = MTHREAD->SCD->getYear();
+  for(uint p=0;p<priProducts.size();p++){
+    string primProd = priProducts[p];
+    if(assessProdPossibility(primProd,ft, dc)){
+      int maxYears = getMaxYearUsableDeathTimber(primProd, ft, dc);
+      if (request_year-harvesting_year < maxYears){
+        allocableProductIds.push_back(p);
+      }
+    }
+  }
+  return allocableProductIds;
+}
+
+
 
 double
 ModelData::getAvailableAliveTimber(const vector<string> &primProd_h, int regId_h){

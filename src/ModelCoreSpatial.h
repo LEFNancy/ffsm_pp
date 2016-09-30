@@ -109,7 +109,7 @@ public:
   void                  updateOtherMapData();     ///< update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   double                computeExpectedPrice(const double & curLocPrice, const double & worldCurPrice, const double & worldFutPrice, const double & sl, const double & sa, const double & expCoef); ///< Compute weighted expected price for a given product.
   void                  printDebugInitRegionalValues(); ///< print initial inv, st, sl and sa in each region
-
+  vector <double>       allocateHarvesting(vector<double> total_st, const int & regId); ///< Using the deathTimberInventory map, this function allocate the total st in st from death timber (that goes reduce the deathTimberInventory map) and stFromHarvesting that is what it remains after the allocation to death timber.
   void                  loadExogenousForestLayers(const string & what); ///< Set pixel volumes (what="vol") OR areas (what="area") by specific forest types as defined in gis layers for volumes and proportionally to volumes for areas.
 
   // convenient handles to equivalent ModelData functions..
