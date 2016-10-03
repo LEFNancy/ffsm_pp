@@ -222,15 +222,16 @@ ModelCoreSpatial::runMarketModule(){
   for(uint i=0;i<regIds2.size();i++){
     int r2 = regIds2[i];
     for(uint sp=0;sp<secProducts.size();sp++){
-      double g1    = gpd("g1",r2,secProducts[sp],previousYear);
-      double sigma = gpd("sigma",r2,secProducts[sp]);
-      double pc_1  = gpd("pc",r2,secProducts[sp],previousYear);
-      double dc_1  = gpd("dc",r2,secProducts[sp],previousYear);
-      double k_1   = gpd("k",r2,secProducts[sp],previousYear);
+      double g1      = gpd("g1",r2,secProducts[sp],previousYear);
+      double sigma   = gpd("sigma",r2,secProducts[sp]);
+      double pc_1    = gpd("pc",r2,secProducts[sp],previousYear);
+      double dc_1    = gpd("dc",r2,secProducts[sp],previousYear);
+      double k_1     = gpd("k",r2,secProducts[sp],previousYear);
+      double sub_d_1 = gpd("sub_d",r2,secProducts[sp],previousYear);
 
       double k  = (1+g1)*k_1;
       double aa = (sigma/(sigma+1))*pc_1*pow(dc_1,-1/sigma);
-      double gg = dc_1*pow(pc_1,-sigma); //alpha
+      double gg = dc_1*pow(pc_1+sub_d_1,-sigma); //alpha
 
       spd(k, "k" ,r2,secProducts[sp]);
       spd(aa,"aa",r2,secProducts[sp],DATA_NOW,true);
@@ -248,7 +249,7 @@ ModelCoreSpatial::runMarketModule(){
       double in    = gpd("in",r2,priProducts[pp])+gpd("in_deathTimber",r2,priProducts[pp]);
       double in_1  = gpd("in",r2,priProducts[pp],previousYear)+gpd("in_deathTimber",r2,priProducts[pp],previousYear);
       double supCorr = 1.0; // Coefficient to reduce supply function when inventory is small
-
+      double sub_s_1 = gpd("sub_s",r2,priProducts[pp],previousYear);
 
       // //When inventary for a resource is almost null and further decreasing supply depends less from the price and more from the resource
       // No longer needed, but it could be used again if we face a problem where in go to zero due to too much harvesting/growth
@@ -274,7 +275,7 @@ ModelCoreSpatial::runMarketModule(){
       //double bb = (sigmaCorr/(sigmaCorr+1.0))*pc_1*pow(sc_1,-1.0/sigmaCorr)*pow(in_1/in,gamma/sigmaCorr);
       //double ff = sc_1*pow(pc_1,-sigmaCorr)*pow(in/in_1,gamma); //chi
       double bb = (sigmaCorr/(sigmaCorr+1.0))*pc_1*pow(sc_1,-1.0/sigmaCorr)*pow(in_1/in,gamma/sigmaCorr)*pow(1.0/supCorr,1.0/sigmaCorr);
-      double ff = sc_1*pow(pc_1,-sigmaCorr)*pow(in/in_1,gamma)*supCorr; //chi
+      double ff = sc_1*pow(pc_1+sub_s_1,-sigmaCorr)*pow(in/in_1,gamma)*supCorr; //chi
       //double supCorr2 = pow(1.0/supCorr,1.0/sigmaCorr);
 
       spd(bb,"bb",r2,priProducts[pp],DATA_NOW,true);
@@ -2222,7 +2223,7 @@ ModelCoreSpatial::printDebugInitRegionalValues(){
  * @param total_st vector of total supply by primary products
  * @return a vector of the remaining supply that goes allocated to alive timber (that is, to harvesting)
  *
- * The algorithm is such that is loops the deathTimberInventory map for year year (newer to older), dc (higher to smaller) and ft.
+ * The algorithm is such that is loops the deathTimberInventory map for each year (newer to older), dc (higher to smaller) and ft.
  * It compute the primary products allocable from that combination and allocate the cell amount to decrease the total_st of that products
  * in a proportional way to what still remain of the allocable products.
  *
@@ -2234,7 +2235,7 @@ vector <double>
 ModelCoreSpatial::allocateHarvesting(vector<double> total_st, const int &regId){
    if(!MD->getBoolSetting("useDeathTimber")) return total_st;
    vector <double> stFromHarvesting(priProducts.size(),0.);
-   map<iisskey, double > *  deathTimberInventory= MD->getDeathTimberInventory();
+   //map<iisskey, double > *  deathTimberInventory= MD->getDeathTimberInventory();
    int maxYears = MD->getMaxYearUsableDeathTimber();
    int currentYear = MTHREAD->SCD->getYear();
    for(uint y = currentYear-1; y>currentYear-1-maxYears; y--){
@@ -2246,7 +2247,7 @@ ModelCoreSpatial::allocateHarvesting(vector<double> total_st, const int &regId){
          iisskey key(y,regId,ft,dc);
          double deathTimber = MD->deathTimberInventory_get(key);
          double sum_total_st_allocable = 0;
-         // Compunting shares/weights or remaining st to allcate
+         // Computing shares/weights or remaining st to allcate
          for(uint ap=0;ap<allocableProducts.size();ap++){
            sum_total_st_allocable += total_st.at(allocableProducts[ap]);
          }
@@ -2255,7 +2256,6 @@ ModelCoreSpatial::allocateHarvesting(vector<double> total_st, const int &regId){
            double allocated = min(total_st[allocableProducts[ap]],deathTimber*allocableShare);
            MD->deathTimberInventory_incrOrAdd(key,-allocated);
            total_st[allocableProducts[ap]] -= allocated;
-           double debug = 1;
          }
        }
      }

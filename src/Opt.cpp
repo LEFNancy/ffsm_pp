@@ -231,6 +231,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
     //    - AA(i,p_tr)*((0.5*dc0(i,p_tr))**((sigma(p_tr)+1)/sigma(p_tr)))
     //    - RVAR('pc',i,p_tr)*RVAR('dc',i,p_tr)
     //  )
+    // 20161003: TODO: check if subsidies should enter also the obj function other than the bounds equations. For the moment, as agreed with Sylvain, they are left outside the obj function, but I am not sure of it.
       for (uint p=0;p<secPr.size();p++){
         aa = gpd("aa",l2r[r1][r2],secPr[p]);
         sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
@@ -303,7 +304,7 @@ It could be possible to change this in a map and uses name, but then we would lo
 template<class T> bool
 Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
-  double a_pr, a, sigma, ff, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1, supCorr, es_d, pc_1, pc_1_sub;
+  double a_pr, a, sigma, ff, sub_s, sub_d, sub_d_pSubstituted, sub_d_1, sub_d_1_pSubstituted, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1, supCorr, es_d, pc_1, pc_1_pSubstituted;
   Index cix = 0;
   Index debug = 0;
 
@@ -318,18 +319,23 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
   // mkteq6(i,p_tr)..  RVAR('dc',i,p_tr)  =e=  GG(i,p_tr)*(RVAR('pc',i,p_tr)**sigma(p_tr)); // eq. 20 20160216: added sustitution elasticity in the demand
   CONSTRAIN_START_LOOP(secPr,1)
-    gg    = gpd("gg",l2r[r1][r2],secPr[p]);
-    sigma = gpd("sigma",l2r[r1][r2],secPr[p]);
-    pc_1  = gpd("pc",l2r[r1][r2],secPr[p],previousYear);
-    g[cix] = - gg*pow(x[gix("pc",r1,r2,psec)],sigma);
+    gg      = gpd("gg",l2r[r1][r2],secPr[p]);
+    sigma   = gpd("sigma",l2r[r1][r2],secPr[p]);
+    pc_1    = gpd("pc",l2r[r1][r2],secPr[p],previousYear);
+    sub_d   = gpd("sub_d",l2r[r1][r2],secPr[p]);              // subside this year
+    sub_d_1 = gpd("sub_d",l2r[r1][r2],secPr[p],previousYear); // subside previous year
+    g[cix]  = - gg*pow(x[gix("pc",r1,r2,psec)],sigma);
     for (uint p2=0;p2<secPr.size();p2++){
       es_d     = gpd("es_d",l2r[r1][r2],secPr[p],DATA_NOW,secPr[p2]);
-      pc_1_sub = gpd("pc",l2r[r1][r2],secPr[p2],previousYear);
+      pc_1_pSubstituted    = gpd("pc",l2r[r1][r2],secPr[p2],previousYear);
+      sub_d_pSubstituted   = gpd("pc",l2r[r1][r2],secPr[p2]);               // subside this year for the substitute product
+      sub_d_1_pSubstituted = gpd("pc",l2r[r1][r2],secPr[p2],previousYear);  // subside last year for the substitute product
+
       g[cix] *= pow(
                (
-                 (x[gix("pc",r1,r2,psec)]/x[gix("pc",r1,r2,priPr.size()+p2)])
+                 ((x[gix("pc",r1,r2,psec)]+sub_d) / (x[gix("pc",r1,r2,priPr.size()+p2)]+sub_d_pSubstituted))
                     /
-                 (pc_1 / pc_1_sub )
+                 ((pc_1+sub_d_1) / (pc_1_pSubstituted+sub_d_1_pSubstituted))
                ), es_d
              );
     }
@@ -390,9 +396,10 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
   // mkteq5(i,p_pr)..  RVAR('sc',i,p_pr)  =e=  FF(i,p_pr)*(RVAR('pc',i,p_pr)**sigma(p_pr)); // eq. 21
   CONSTRAIN_START_LOOP(priPr,7)
     ff = gpd("ff",l2r[r1][r2],priPr[p]);
+    sub_s = gpd("sub_s",l2r[r1][r2],priPr[p]);
     sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p]);
     //g[cix] = x[gix("sc",r1,r2,p)]-mymax(ff*pow(x[gix("pc",r1,r2,p)],sigma),0.001);
-    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma);
+    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)]+sub_s,sigma);
     //g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma-0.0001);
   CONSTRAIN_END_LOOP
 
