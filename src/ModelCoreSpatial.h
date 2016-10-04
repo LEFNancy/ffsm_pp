@@ -135,7 +135,7 @@ private:
   vector <vector <int> > l2r;
   string regType;
   string natRegAllocation;
-  double mr;
+  //double mr;
   vector <Pixel*> regPx; // pixels behaving to the current region
   bool rescaleFrequencies;
   bool oldVol2AreaMethod;
