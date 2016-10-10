@@ -118,6 +118,7 @@ ModelCoreSpatial::initMarketModule(){
     // RPAR('st',i,prd,t-1)    =  RPAR('sl',i,prd,t-1)+RPAR('sa',i,prd,t-1);
     // RPAR('dt',i,prd,t-1)    =  RPAR('dl',i,prd,t-1)+RPAR('da',i,prd,t-1);
     for (uint ap=0;ap<allProducts.size();ap++){
+      //double debug = gpd("dl",r2,allProducts[ap],secondYear);
       double stvalue =   gpd("sl",r2,allProducts[ap],secondYear)
                        + gpd("sa",r2,allProducts[ap],secondYear);
       double dtvalue =   gpd("dl",r2,allProducts[ap],secondYear)
