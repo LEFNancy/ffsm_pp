@@ -104,7 +104,7 @@ ModelCoreSpatial::initMarketModule(){
         gpd("a",r2,priProducts[pp],secondYear,secProducts[sp]);
       }
       value += gpd("m",r2,secProducts[sp],secondYear);
-      spd(value,"pl",r2,secProducts[sp],secondYear);
+      spd(value,"pl",r2,secProducts[sp],secondYear,true);
     }
     // RPAR('dl',i,p_pr,t-1)   =  sum(p_tr, a(p_pr,p_tr)*RPAR('sl',i,p_tr,t-1));
     for (uint pp=0;pp<priProducts.size();pp++){
