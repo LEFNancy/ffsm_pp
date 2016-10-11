@@ -201,14 +201,24 @@ ModelCoreSpatial::initMarketModule(){
 
 
   // initializing the exports to zero quantities
+  // initializing  ofthe transport cost for the same region to one and distance to zero
   for(uint r1=0;r1<l2r.size();r1++){
     for(uint r2=0;r2<l2r[r1].size();r2++){
       for(uint p=0;p<allProducts.size();p++){
-       for(uint r2To=0;r2To<l2r[r1].size();r2To++){
+        for(uint r2To=0;r2To<l2r[r1].size();r2To++){
           spd(0,"rt",l2r[r1][r2],allProducts[p],secondYear,true,i2s(l2r[r1][r2To]));  // regional trade, it was exp in gams
+          if(l2r[r1][r2] == l2r[r1][r2To]){
+            spd(1,"ct",l2r[r1][r2],allProducts[p],firstYear,true,i2s(l2r[r1][r2To])); // as long this value is higher than zero, rt within the same region is not choosen by the solver, so the value doesn't really matters. If it is zero, the solver still works and results are the same, but reported rt within the region are crazy high (100000)
+          }
+        }
+      } // end each product
+
+      for(uint r2To=0;r2To<l2r[r1].size();r2To++){
+        if(l2r[r1][r2] == l2r[r1][r2To]){
+          spd(0,"dist",l2r[r1][r2],"",firstYear,true,i2s(l2r[r1][r2To])); // setting distance zero in code, so no need to put it in the data
         }
       }
-    }
+    } // end of r2 regions
   } // end of r1 region
 }
 
