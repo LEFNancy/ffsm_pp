@@ -318,6 +318,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
   CONSTRAIN_END_LOOP
 
   // mkteq6(i,p_tr)..  RVAR('dc',i,p_tr)  =e=  GG(i,p_tr)*(RVAR('pc',i,p_tr)**sigma(p_tr)); // eq. 20 20160216: added sustitution elasticity in the demand
+  // DEMAND EQUATION of transformed products
   CONSTRAIN_START_LOOP(secPr,1)
     gg      = gpd("gg",l2r[r1][r2],secPr[p]);
     sigma   = gpd("sigma",l2r[r1][r2],secPr[p]);
@@ -394,6 +395,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
   CONSTRAIN_END_LOOP
 
   // mkteq5(i,p_pr)..  RVAR('sc',i,p_pr)  =e=  FF(i,p_pr)*(RVAR('pc',i,p_pr)**sigma(p_pr)); // eq. 21
+  // SUPPLY EQUATION OF PRIMARY PRODUCTS
   CONSTRAIN_START_LOOP(priPr,7)
     ff = gpd("ff",l2r[r1][r2],priPr[p]);
     sub_s = gpd("sub_s",l2r[r1][r2],priPr[p]);
