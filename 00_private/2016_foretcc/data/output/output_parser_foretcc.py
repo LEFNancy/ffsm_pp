@@ -26,105 +26,109 @@ def main():
   if g.printAATablesFlag:
     printAATables()
   
-  print "Done!"
+  print ("Done!")
 
 # =============================================================================
 def override_globals():
 
   g.forIFiles = [  
-    'output/results/forestData_baseline.csv',
-    'output/results/forestData_constant.csv',
-    'output/results/forestData_Ph_L.csv',
-    'output/results/forestData_Ph_U.csv',
-    'output/results/forestData_Pr_C.csv',
-    'output/results/forestData_Pr_U.csv',
-    'output/results/forestData_Exp_0.csv',
-    'output/results/forestData_Exp_1.csv',
-    'output/results/forestData_EOL_en_U.csv', 
+    'results/forestData_merged.csv',
   ]
   
   g.carbonIFile = [
-    'output/results/carbonBalance_baseline.csv',
-    'output/results/carbonBalance_constant.csv',
-    'output/results/carbonBalance_Ph_L.csv',
-    'output/results/carbonBalance_Ph_U.csv',
-    'output/results/carbonBalance_Pr_C.csv',
-    'output/results/carbonBalance_Pr_U.csv',
-    'output/results/carbonBalance_Exp_0.csv',
-    'output/results/carbonBalance_Exp_1.csv',
-    'output/results/carbonBalance_EOL_en_U.csv',
+    'results/carbonBalance_merged.csv',
   ]
 
   g.scenarios = {
-    'baseline':             '#000000',  # Black
-    'constant':             '#cccccc',  # Grey
-    'Ph_L':                 '#b5ff95',  # Light green
-    'Ph_U':                 '#f40303',  # Red
-    'Pr_C':                 '#b5ff95',  # Light green
-    'Pr_U':                 '#f40303',  # Red
-    'Exp_0':                '#b5ff95',  # Light green 
-    'Exp_1':                '#f40303',  # Red
-    'EOL_en_U':             '#011bb7',  # Ink blue
+    'baseline_temp':       '#000000',  # Black
 
   }
-  g.years = [str(y) for y in range(2007,2101)]     # [2007-2100]
+  g.years = [str(y) for y in range(2013,2051)]     # [2013-2050]
   g.printChartsFlag = True
   g.printTablesFlag = True
   g.printAATablesFlag = False
-  g.chartoutdir = 'output/charts'
-  g.tableoutdir = 'output/tables'
+  g.chartoutdir = 'charts'
+  g.tableoutdir = 'tables'
   # key: var short name
   # value: turple with long name, unit and optionally variable to act for ponderation and name of aggregated variable
-  g.variables = {'hV': ['Harvested Volumes', r"$Mm^3$"],
-       'vReg': ['Regeneration Volumes', r"$Mm^3$"],
-       'vol': ['Forest Volumes', r"$Mm^3$"],
-       'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
-       'forArea': ['Forest area','ha'],
-       'harvestedArea': ['Harvested area','ha'],
-       'regArea': ['Regeneration area','ha'],
-       'STOCK_INV': ['Carbon pool in inventoried forest resources', r"$Mt CO_2$"],
-       'STOCK_EXTRA': ['Carbon pool in non-inventoried forest resources (branches, roots)', r"$Mt CO_2$"],
+  g.variables = {'hV':   ['Harvested Volumes', r"$Mm^3$"],
+       'vReg':           ['Regeneration Volumes', r"$Mm^3$"],
+       'vol':            ['Forest Volumes', r"$Mm^3$"],
+       'expReturns':     ['Expected returns','€/ha','forArea', 'totalExpReturns'],
+       'forArea':        ['Forest area','ha'],
+       'harvestedArea':  ['Harvested area','ha'],
+       'regArea':        ['Regeneration area','ha'],
+       'STOCK_INV':      ['Carbon pool in inventoried forest resources', r"$Mt CO_2$"],
+       'STOCK_EXTRA':    ['Carbon pool in non-inventoried forest resources (branches, roots)', r"$Mt CO_2$"],
        'STOCK_PRODUCTS': ['Carbon pool in forest products', r"$Mt CO_2$"],
-       'EM_ENSUB': ['Cumulative emissions from energy substitution', r"$Mt CO_2$"],
-       'EM_MATSUB': ['Cumulative emissions from material substitution', r"$Mt CO_2$"],
-       'EM_FOROP': ['Cumulative emissions from forest operations', r"$Mt CO_2$"],
+       'EM_ENSUB':       ['Cumulative emissions from energy substitution', r"$Mt CO_2$"],
+       'EM_MATSUB':      ['Cumulative emissions from material substitution', r"$Mt CO_2$"],
+       'EM_FOROP':       ['Cumulative emissions from forest operations', r"$Mt CO_2$"],
   }
+  
+  
+  g.spGroups = ['Fut_Feu', 'Fut_Mix', 'Fut_Con', 'Mel_Feu', 'Mel_Mix', 'Tail_Feu',]
+  
+  g.countries = {'FRA': [['AlsChaLor','AquPoi','AuvLim','BasHau','BouFra','BrePay','Cen','Cor','IleNorPic','LanPro','Mid','Rho'],'France']}
+
+  g.regions = {'AlsChaLor': 'Alsace ; Champagne Ardenne ; Lorraine',
+               'AquPoi':    'Aquitaine ; Poitou Charentes',
+               'AuvLim':    'Auvergne ; Limousin',
+               'BasHau':    'Basse Normandie ; Haute Normandie',
+               'BouFra':    'Bourgogne : Franche Comté',
+               'BrePay':    'Bretagne ; pays de la Loire',
+               'Cen':       'Centre Val de Loire',
+               'Cor':       'Corse',
+               'IleNorPic': 'Ile de France ; Nord Pas de Calais ; Picardie',
+               'LanPro':    'Languedoc Roussillon ; Provence Alpes Côtes d\'Azur',
+               'Mid':       'Midi Pyrénées',
+               'Rho':       'Rhône Alpes',} 
+
+  
+  
+  
+  g.pProd    = ['hardWRoundW','softWRoundW','pulpWFuelW']
+  g.tProd    = ['fuelW','hardWSawnW','softWSawnW','plyW','pulpW','pannels']
+
+  #key: human name
+  #value[0]: list of sp groups
+  #value[1]: chart line type
+  #value[2]: chart line width
+  #value[3]: (optional) alias in the data. If present, the input data will be converted to the name at input time 
+  g.spAggregates = {'00_Total': [['Fut_Feu', 'Fut_Mix', 'Fut_Con', 'Mel_Feu', 'Mel_Mix', 'Tail_Feu',],'-',4,''],
+                    '01_Broadleaved': [['Fut_Feu', 'Mel_Feu','Tail_Feu'],'--',3,'broadL'],
+                    '02_Coniferous': [['Fut_Con'],':',3,'con'],
+                    '03_Mixed': [['Fut_Mix','Mel_Mix'],'-.',3,'mixedBC']
+                    }
+  
 
 # =============================================================================   
 def printCharts():
-  print "Printing charts.."
+  print ("Printing charts..")
+  
+  
+  for region in g.sortedregions: #selectedregions:#g.sortedregions:
+    title('c','subsection',g.regions[region])
+    plotMultivariable(['baseline_temp'], ['expReturns', 'vol', 'hV', 'forArea'], region, 'baseline\_temp', 'baseline_temp')
 
   title('c','subsection', "Carbon charts")
-  plotCarbonChart(['constant','baseline'],'11000','','cbalance_overall')
-  plotCarbonChart(['baseline','Exp_0','Exp_1'],'11000','','cbalance_expectations')
-  plotCarbonChart(['baseline','Pr_C','Pr_U'],'11000','','cbalance_prices')
-  plotCarbonChart(['baseline','Ph_L','Ph_U'],'11000','','cbalance_ph_impact')
+  plotCarbonChart(['baseline_temp'],'FRA','','cbalance')
+  
   
 # =============================================================================  
 def printTables():
-  print "Printing tables.."
+  print ("Printing tables..")
 
-  y2014_2060 =  [str(y) for y in range(2014,2061)] # [2014-2060]
-  
-  title('t','section', "Overall effect")
-  printTable('constant',['baseline'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],g.years,'\\texttt{Baseline} vs \\texttt{constant} [avg. 2007-2100]','cceffect_overall_vars_2007-2100_11000')
-  printTable('constant',['baseline'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'\\texttt{Baseline} vs \\texttt{constant} [2100]','cceffect_overall_vars_2100_11000')
-  printCarbonTable('constant',['baseline'],'11000', '2007', '2100', "\\ce{CO2} balance of \\texttt{baseline} scenario vs. \\texttt{constant} [yearly avg 2007-2100]",'cceffect_cbalance_2007-2100_11000', True, True)
-  printCarbonTable('constant',['baseline'],'11000', '2013', '2020', "\\ce{CO2} balance of \\texttt{baseline} scenario vs. \\texttt{constant} [yearly avg 2013-2020]",'cceffect_cbalance_2013-2020_11000', True, True)
+  for region in g.sortedregions: #selectedregions:#g.sortedregions:
+    title('c','subsection',g.regions[region])
+    #printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename, singleComparation=False, refYear=0):
+    printTable('baseline_temp',['baseline_temp'],['expReturns', 'vReg','vol','hV','forArea','regArea','harvestedArea'],[region],['2050'],'[2050 vs 2013]','baseline_temp_2013-2050_11000',True,2013)
 
-  title('t','section', "Sa on price, physical and expectation effects")
-  printTable('baseline',['Pr_C','Pr_U','Ph_L','Ph_U','Exp_0','Exp_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],g.years,'SA [avg. 2007-2100]','sa_vars_2007-2100_11000',False)
-  printCarbonTable('baseline',['Pr_C','Pr_U','Ph_L','Ph_U','Exp_0','Exp_1'],'11000', '2007', '2100', "Sensitivity analisys \\ce{CO2} balance [avg. 2007-2100]",'sa_cbalance_2007-2100_11000', True, False)
-  printTable('baseline',['Pr_C','Pr_U','Ph_L','Ph_U','Exp_0','Exp_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],y2014_2060,'SA [avg. 2014-2060]','sa_vars_2014-2060_11000',False)
-  printCarbonTable('baseline',['Pr_C','Pr_U','Ph_L','Ph_U','Exp_0','Exp_1'],'11000', '2014', '2060', "Sensitivity analisys \\ce{CO2} balance [yearly avg. 2014-2060]",'sa_cbalance_2014-2060_11000', True, False)
-  printTable('baseline',['Pr_C','Pr_U','Ph_L','Ph_U','Exp_0','Exp_1'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'SA [2100]','sa_vars_2100_11000',False)
-
-  printCarbonTable('baseline',['EOL_en_U'],'11000', '2007', '2100', "\\ce{CO2} balance of \\texttt{EOL\\_en\\_U} scenario vs. \\texttt{baseline} [yearly avg 2007-2100]",'EOL_en_U_cbalance_2007-2100_11000', True, True)
 
   
 # =============================================================================  
 def printAATables():
-  print "Printing area allocation tables.."
+  print ("Printing area allocation tables..")
 
 # =============================================================================
 # EXECUTION ACTUALLY STARTS HERE.....
