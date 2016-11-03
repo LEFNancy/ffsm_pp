@@ -1893,10 +1893,8 @@ ModelCoreSpatial::sumRegionalForData(){
           double pxExpReturn_singleFt = px->expectedReturns.at(childPos[j]);
           // Manual fix to not have the expected returns of ash within the general "broadL" expected returns.
           // To do: remove it after we work on the ash project.. I don't like manual fixes !!!
-          if(childIds.at(j) == "ash"){
-            pxExpReturn_singleFt = 0.0;
-          }
-          pxExpReturnsByChilds.at(j) = pxExpReturn_singleFt;
+          pxExpReturnsByChilds.at(j) = (childIds.at(j) == "ash") ? 0.0 : pxExpReturn_singleFt;
+          //pxExpReturnsByChilds.at(j) = pxExpReturn_singleFt;
           totSumExpRet_byFTypes.at(childPos[j]) += pxExpReturn_singleFt*pxForArea;
         } // end of each ft
         totSumExpRet_byFTParent[i] += getMax(pxExpReturnsByChilds)*pxForArea;

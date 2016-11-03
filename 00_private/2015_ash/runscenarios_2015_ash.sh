@@ -35,13 +35,14 @@
 # 31/10/2016:
 ./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P0-Me10-Ei'
 ./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P0-Me100-Ei'
-./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P0-Me1000-Ei'
+#./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P0-Me1000-Ei'
 ./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P1-Me10-Ei'
 ./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P1-Me100-Ei'
-./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P1-Me1000-Ei'
+#./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P1-Me1000-Ei'
 ./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P0-Mi-Ei_do'
 ./run_single_scenario.sh 'data/ffsmInput_2015_ash.ods' 'P1-Mi-Ei_do'
 
+# run of 3 Nov 2016: corrected a problem in the previous fix for expectedReturns, where ash ft expectedReturns where not outputed.
 # run of 31 October 2016: new scenarios with sigma 10, 100 and 1000, and with detailed output by dc. Also now manual fix to not consider ash in the expected returns of the bralL aggregated ft expected return
 # runs of 12 September 2016: new scenarios, different expectedReturns for aggregated ft, new totalShareInvadedArea output var.
 # runs of 6 april 2016 are just to print the sigma variable. Previous run: 24 mars
