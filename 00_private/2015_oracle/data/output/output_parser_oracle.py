@@ -164,7 +164,7 @@ def printCharts():
   #text('c',"Automatically generated charts.")  
   #plotLegend(['nonspatial','reference','vRegEnd070','vRegFixed','vRegFromHr','withRisk06','withRisk08','withRisk10','withVariance','withSpVarianceAndRisk'],'Scenarios Legend','legend')
   
-  selectedregions=['11000', '11041']
+  selectedregions=['FRA', 'LO (FR41)']
   
   for region in selectedregions: #selectedregions:#g.sortedregions:
     title('c','subsection',g.regions[region])
@@ -201,11 +201,11 @@ def printCharts():
   
   title('c','subsection', "Carbon charts")
 
-  plotCarbonChart(['arpege_a1b'],'11000','','carb_arpege_a1b')
-  plotCarbonChart(['constant', 'arpege_a1b'],'11000','','carb_constant_and_arpege_a1b')
-  plotCarbonChart(['constant', 'arpege_a1b', 'arpege_a2', 'arpege_b1'], '11000', '', 'carb_balance')
-  plotCarbonChart(['arpege_a1b','arpege_a1b_nopr','arpege_a1b_noph'], '11000', '', 'carb_cc_components')
-  plotCarbonChart(['arpege_a1b', 'arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'], '11000', '', 'carb_system_components')
+  plotCarbonChart(['arpege_a1b'],'FRA','','carb_arpege_a1b')
+  plotCarbonChart(['constant', 'arpege_a1b'],'FRA','','carb_constant_and_arpege_a1b')
+  plotCarbonChart(['constant', 'arpege_a1b', 'arpege_a2', 'arpege_b1'], 'FRA', '', 'carb_balance')
+  plotCarbonChart(['arpege_a1b','arpege_a1b_nopr','arpege_a1b_noph'], 'FRA', '', 'carb_cc_components')
+  plotCarbonChart(['arpege_a1b', 'arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'], 'FRA', '', 'carb_system_components')
 
 # =============================================================================  
 def printTables():
@@ -214,7 +214,7 @@ def printTables():
   oyears = [str(y) for y in range(2015,2101)]     # [2015-2100]
    
 
-  selectedregions=['11000', '11041']
+  selectedregions=['FRA', 'LO (FR41)']
   
   outvars = ['expReturns','harvestedArea','hV','regArea','vReg','forArea','vol']
   
@@ -258,34 +258,34 @@ def printTables():
   
   title('t','subsection',"Carbon tables")
   #printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year_end, title, filename, avg=False, singleComparation=True )
-  printCarbonTable('constant',['arpege_a1b'],'11000', '2015', '2100', "\\ce{CO2} balance [yearly avg. 2015-2100]",'cbalance_2015-2100_11000', True, False)
-  printCarbonTable('constant', ['arpege_a1b','arpege_a1b_nopr','arpege_a1b_noph'], '11000', '2015', '2100', "\\ce{CO2} balance [yearly avg. 2015-2100]",'cbalance_component_changes_2015-2100_11000', True, False)
-  printCarbonTable('arpege_a1b', ['arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'], '11000', '2015', '2100', "\\ce{CO2} balance [yearly avg. 2015-2100]",'cbalance_characteristics_system_2015-2100_11000', True, False)
-  printCarbonTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],'11000', '2015', '2100', "\\ce{CO2} balance for different IPCC storylines [yearly avg. 2015-2100]",'cbalance_sa_ipcc_2015-2100_11000', True, True)
-  printCarbonTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],'11000', '2015', '2100', "\\ce{CO2} balance for different climatic models [a1b, yearly avg. 2015-2100]",'cbalance_sa_a1b_models_2015-2100_11000', True, True)
- # printCarbonTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],'11000', '2007', '2100', "\\ce{CO2} balance a1b [yearly avg. 2007-2100]",'cbalance_a1b_2007-2100_11000', True, True)
- # printCarbonTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],'11000', '2015', '2100', "\\ce{CO2} balance arpege \{a1b, a2, b1\} [yearly avg. 2015-2100]",'cbalance_arpege_2015-2100_11000', True, True)
+  printCarbonTable('constant',['arpege_a1b'],'FRA', '2015', '2100', "\\ce{CO2} balance [yearly avg. 2015-2100]",'cbalance_2015-2100_11000', True, False)
+  printCarbonTable('constant', ['arpege_a1b','arpege_a1b_nopr','arpege_a1b_noph'], 'FRA', '2015', '2100', "\\ce{CO2} balance [yearly avg. 2015-2100]",'cbalance_component_changes_2015-2100_11000', True, False)
+  printCarbonTable('arpege_a1b', ['arpege_a1b_nomgm','arpege_a1b_nora', 'arpege_a1b_noexp', 'arpege_a1b_fullexp', 'arpege_a1b_carea'], 'FRA', '2015', '2100', "\\ce{CO2} balance [yearly avg. 2015-2100]",'cbalance_characteristics_system_2015-2100_11000', True, False)
+  printCarbonTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],'FRA', '2015', '2100', "\\ce{CO2} balance for different IPCC storylines [yearly avg. 2015-2100]",'cbalance_sa_ipcc_2015-2100_11000', True, True)
+  printCarbonTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],'FRA', '2015', '2100', "\\ce{CO2} balance for different climatic models [a1b, yearly avg. 2015-2100]",'cbalance_sa_a1b_models_2015-2100_11000', True, True)
+ # printCarbonTable('constant',['arpege_a1b','CNCM33_1','DMIEH5C_1','DMIEH5C_2','DMIEH5C_3','EGMAM2_3','HADGEM2_1','IPCM4_1','IPCM4_2','IPCM4_3','MPEH5C_1','MPEH5C_2','MPEH5C_3'],'FRA', '2007', '2100', "\\ce{CO2} balance a1b [yearly avg. 2007-2100]",'cbalance_a1b_2007-2100_11000', True, True)
+ # printCarbonTable('constant',['arpege_a1b','arpege_a2','arpege_b1'],'FRA', '2015', '2100', "\\ce{CO2} balance arpege \{a1b, a2, b1\} [yearly avg. 2015-2100]",'cbalance_arpege_2015-2100_11000', True, True)
   #def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename, singleComparation=True, refYear=0):
   #title('t','subsection',"Active management effect")
-  #printTable('arpege_a1b', ['arpege_a1b_natevol','arpege_a1b_active'], ['expReturns','regArea','harvestedArea','vReg'], ['11000'], oyears, 'Active mgm effect, flow vars [avg. 2015-2100]', 'mgm_effect_2015-2100_11000', False)
-  #printTable('arpege_a1b', ['arpege_a1b_natevol','arpege_a1b_active'], ['vol','forArea'], ['11000'], ['2100'], 'Active mgm effect, stock vars [2100]', 'mgm_effect_2100_11000', False)
-  #printCarbonTable('arpege_a1b',['arpege_a1b_natevol','arpege_a1b_active'],'11000', '2015', '2100', "Active management effect, \\ce{CO2} balance [yearly avg. 2015-2100]",'mgm_effect_cbalance_2015-2100_11000', True, False)
+  #printTable('arpege_a1b', ['arpege_a1b_natevol','arpege_a1b_active'], ['expReturns','regArea','harvestedArea','vReg'], ['FRA'], oyears, 'Active mgm effect, flow vars [avg. 2015-2100]', 'mgm_effect_2015-2100_11000', False)
+  #printTable('arpege_a1b', ['arpege_a1b_natevol','arpege_a1b_active'], ['vol','forArea'], ['FRA'], ['2100'], 'Active mgm effect, stock vars [2100]', 'mgm_effect_2100_11000', False)
+  #printCarbonTable('arpege_a1b',['arpege_a1b_natevol','arpege_a1b_active'],'FRA', '2015', '2100', "Active management effect, \\ce{CO2} balance [yearly avg. 2015-2100]",'mgm_effect_cbalance_2015-2100_11000', True, False)
   
   #title('t','subsection',"Expectations effect") 
-  #printTable('arpege_a1b', ['arpege_a1b_noExpectations','arpege_a1b_fullExpectations'], ['expReturns','regArea','harvestedArea','vReg'], ['11000'], oyears, 'Expectations effect, flow vars [avg. 2015-2100]', 'expectations_2015-2100_11000', False)
-  #printTable('arpege_a1b', ['arpege_a1b_noExpectations','arpege_a1b_fullExpectations'], ['vol','forArea'], ['11000'], ['2100'], 'Expectations effect, stock vars [2100]', 'expectations_2100_11000', False)
-  #printCarbonTable('arpege_a1b',['arpege_a1b_noExpectations','arpege_a1b_fullExpectations'],'11000', '2015', '2100', "Expectations effects, \\ce{CO2} balance [yearly avg. 2015-2100]",'expectations_cbalance_2015-2100_11000', True, False)
+  #printTable('arpege_a1b', ['arpege_a1b_noExpectations','arpege_a1b_fullExpectations'], ['expReturns','regArea','harvestedArea','vReg'], ['FRA'], oyears, 'Expectations effect, flow vars [avg. 2015-2100]', 'expectations_2015-2100_11000', False)
+  #printTable('arpege_a1b', ['arpege_a1b_noExpectations','arpege_a1b_fullExpectations'], ['vol','forArea'], ['FRA'], ['2100'], 'Expectations effect, stock vars [2100]', 'expectations_2100_11000', False)
+  #printCarbonTable('arpege_a1b',['arpege_a1b_noExpectations','arpege_a1b_fullExpectations'],'FRA', '2015', '2100', "Expectations effects, \\ce{CO2} balance [yearly avg. 2015-2100]",'expectations_cbalance_2015-2100_11000', True, False)
   #title('t','subsection',"Risk effect") 
-  #printTable('arpege_a1b', ['arpege_a1b_rneutral','arpege_a1b_strongra'], ['expReturns','regArea','harvestedArea','vReg'], ['11000'], oyears, 'Risk effect, flow vars [avg. 2015-2100]', 'risk_2015-2100_11000', False)
-  #printTable('arpege_a1b', ['arpege_a1b_rneutral','arpege_a1b_strongra'], ['vol','forArea'], ['11000'], ['2100'], 'Risk effect, stock vars [2100]', 'risk_2100_11000', False)
-  #printCarbonTable('arpege_a1b',['arpege_a1b_rneutral','arpege_a1b_strongra'],'11000', '2015', '2100', "Risk effects, \\ce{CO2} balance [yearly avg. 2015-2100]",'risk_cbalance_2015-2100_11000', True, False)
+  #printTable('arpege_a1b', ['arpege_a1b_rneutral','arpege_a1b_strongra'], ['expReturns','regArea','harvestedArea','vReg'], ['FRA'], oyears, 'Risk effect, flow vars [avg. 2015-2100]', 'risk_2015-2100_11000', False)
+  #printTable('arpege_a1b', ['arpege_a1b_rneutral','arpege_a1b_strongra'], ['vol','forArea'], ['FRA'], ['2100'], 'Risk effect, stock vars [2100]', 'risk_2100_11000', False)
+  #printCarbonTable('arpege_a1b',['arpege_a1b_rneutral','arpege_a1b_strongra'],'FRA', '2015', '2100', "Risk effects, \\ce{CO2} balance [yearly avg. 2015-2100]",'risk_cbalance_2015-2100_11000', True, False)
 
   #title('t','section', "Sa on price and physical effects")
-  #printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],g.years,'SA [avg. 2007-2100]','sa_vars_2007-2100_11000',False)
-  #printCarbonTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],'11000', '2007', '2100', "Sensitivity analisys \\ce{CO2} balance [avg. 2007-2100]",'sa_cbalance_2007-2100_11000', True, False)
-  #printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],oyears,'SA [avg. 2015-2100]','sa_vars_2015-2100_11000',False)
-  #printCarbonTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],'11000', '2015', '2100', "Sensitivity analisys \\ce{CO2} balance [yearly avg. 2015-2100]",'sa_cbalance_2015-2100_11000', True, False)
-  #printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],['2100'],'SA [2100]','sa_vars_2100_11000',False)
+  #printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['FRA'],g.years,'SA [avg. 2007-2100]','sa_vars_2007-2100_11000',False)
+  #printCarbonTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],'FRA', '2007', '2100', "Sensitivity analisys \\ce{CO2} balance [avg. 2007-2100]",'sa_cbalance_2007-2100_11000', True, False)
+  #printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['FRA'],oyears,'SA [avg. 2015-2100]','sa_vars_2015-2100_11000',False)
+  #printCarbonTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],'FRA', '2015', '2100', "Sensitivity analisys \\ce{CO2} balance [yearly avg. 2015-2100]",'sa_cbalance_2015-2100_11000', True, False)
+  #printTable('constant',['arpege_a1b','arpege_a1b_priceEffectOnly','arpege_a1b_phImpactOnly'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['FRA'],['2100'],'SA [2100]','sa_vars_2100_11000',False)
 
 
   text('t', "\clearpage")
@@ -293,10 +293,10 @@ def printTables():
   title('t', 'subsection', "Expectations problem")
   oyears_exp = [str(y) for y in range(2015,2101)]
   startyears = [str(y) for y in range(2015,2025)]
-  printTable('arpege_a1b', ['arpege_a1b_noexp'], ['expReturns', 'vReg', 'vol', 'hV', 'forArea', 'regArea', 'harvestedArea'], ['11000'], oyears_exp, 'Noexp effect [avg 2015-2100]', 'noexp_2015-2100_11000', True)
-  printTable('arpege_a1b',['arpege_a1b_fullexp'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],oyears_exp,'Fullexp effect [avg 2015-2100]','fullexp_2015-2100_11000',True)
-  printTable('arpege_a1b', ['arpege_a1b_noexp'],['expReturns', 'vReg', 'vol', 'hV', 'forArea', 'regArea', 'harvestedArea'], ['11000'], startyears, 'Noexp effect [avg 2015-2025]', 'noexp_2015-2025_11000', True)
-  printTable('arpege_a1b',['arpege_a1b_fullexp'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['11000'],startyears,'Fullexp effect [avg 2015-2025]','fullexp_2015-2025_11000',True)
+  printTable('arpege_a1b', ['arpege_a1b_noexp'], ['expReturns', 'vReg', 'vol', 'hV', 'forArea', 'regArea', 'harvestedArea'], ['FRA'], oyears_exp, 'Noexp effect [avg 2015-2100]', 'noexp_2015-2100_11000', True)
+  printTable('arpege_a1b',['arpege_a1b_fullexp'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['FRA'],oyears_exp,'Fullexp effect [avg 2015-2100]','fullexp_2015-2100_11000',True)
+  printTable('arpege_a1b', ['arpege_a1b_noexp'],['expReturns', 'vReg', 'vol', 'hV', 'forArea', 'regArea', 'harvestedArea'], ['FRA'], startyears, 'Noexp effect [avg 2015-2025]', 'noexp_2015-2025_11000', True)
+  printTable('arpege_a1b',['arpege_a1b_fullexp'],['expReturns','vReg','vol','hV','forArea','regArea','harvestedArea'],['FRA'],startyears,'Fullexp effect [avg 2015-2025]','fullexp_2015-2025_11000',True)
 
 
 # =============================================================================
@@ -304,8 +304,7 @@ def printAATables():
   print ("Printing area allocation tables..")
 
  
-  #selectedregions=['11000', '11041', '11061', '11062', '11081', '11071', '11082', '11083']
-  selectedregions=['11000', '11024', '11061', '11071','11082','11041']
+  selectedregions=['FRA', 'CE (FR24)', 'AQ (FR61)', 'RA (FR71)','PA (FR82)','LO (FR41)']
   regions = selectedregions #selectedregions:#g.sortedregions:
 
   title('t','section',"Area allocation")

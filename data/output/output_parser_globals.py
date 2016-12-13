@@ -24,15 +24,29 @@ chartsmaster = '00_master_charts'
 charttype = 'pdf'
 sep = ';'
 
-countries = {'11000': [['11042', '11061', '11072', '11025', '11026', '11052', '11024', '11021',
-  '11083', '11043', '11023', '11010', '11081', '11063', '11041', '11062',
-  '11030', '11051', '11022', '11053', '11082', '11071',],'France']}
 
-regions = {'11042': 'Alsace', '11061': 'Aquitaine', '11072': 'Auvergne', '11025': 'Basse-Normandie', '11026': 'Bourgogne',
-    '11052': 'Bretagne', '11024': 'Centre', '11021': 'Champagne-Ardenne', '11083': 'Corse', '11043': 'Franche-Comté',
-    '11023': 'Haute-Normandie', '11010': 'Île de France', '11081': 'Languedoc-Roussillon', '11063': 'Limousin',
-    '11041': 'Lorraine', '11062': 'Midi-Pyrénées', '11030': 'Nord - Pas-de-Calais', '11051': 'Pays de la Loire',
-    '11022': 'Picardie', '11053': 'Poitou-Charentes', '11082': 'Provence-Alpes-Côte d\'Azur', '11071': 'Rhône-Alpes',} 
+# OLD
+#countries = {'11000': [['11042', '11061', '11072', '11025', '11026', '11052', '11024', '11021',
+#  '11083', '11043', '11023', '11010', '11081', '11063', '11041', '11062',
+#  '11030', '11051', '11022', '11053', '11082', '11071',],'France']}
+
+
+#regions = {'11042': 'Alsace', '11061': 'Aquitaine', '11072': 'Auvergne', '11025': 'Basse-Normandie', '11026': 'Bourgogne',
+#    '11052': 'Bretagne', '11024': 'Centre', '11021': 'Champagne-Ardenne', '11083': 'Corse', '11043': 'Franche-Comté',
+#    '11023': 'Haute-Normandie', '11010': 'Île de France', '11081': 'Languedoc-Roussillon', '11063': 'Limousin',
+#    '11041': 'Lorraine', '11062': 'Midi-Pyrénées', '11030': 'Nord - Pas-de-Calais', '11051': 'Pays de la Loire',
+#    '11022': 'Picardie', '11053': 'Poitou-Charentes', '11082': 'Provence-Alpes-Côte d\'Azur', '11071': 'Rhône-Alpes',} 
+
+countries = {'FRA': [['AL (FR42)', 'AQ (FR61)', 'AU (FR72)', 'BN (FR25)', 'BO (FR26)', 'BR (FR52)', 'CE (FR24)', 'CA (FR21)',
+             'CO (FR83)', 'FC (FR43)', 'HN (FR23)', 'IF (FR10)', 'LR (FR81)', 'LI (FR63)', 'LO (FR41)', 'MP (FR62)',
+             'NP (FR30)', 'PL (FR51)', 'PI (FR22)', 'PC (FR53)', 'PA (FR82)', 'RA (FR71)'],'France']}
+    
+regions = {'AL (FR42)': 'Alsace', 'AQ (FR61)': 'Aquitaine', 'AU (FR72)': 'Auvergne', 'BN (FR25)': 'Basse-Normandie',
+           'BO (FR26)': 'Bourgogne', 'BR (FR52)': 'Bretagne', 'CE (FR24)': 'Centre', 'CA (FR21)': 'Champagne-Ardenne',
+           'CO (FR83)': 'Corse', 'FC (FR43)': 'Franche-Comté', 'HN (FR23)': 'Haute-Normandie', 'IF (FR10)': 'Île de France',
+           'LR (FR81)': 'Languedoc-Roussillon', 'LI (FR63)': 'Limousin', 'LO (FR41)': 'Lorraine', 'MP (FR62)': 'Midi-Pyrénées',
+           'NP (FR30)': 'Nord - Pas-de-Calais', 'PL (FR51)': 'Pays de la Loire', 'PI (FR22)': 'Picardie',
+           'PC (FR53)': 'Poitou-Charentes', 'PA (FR82)': 'Provence-Alpes-Côte d\'Azur', 'RA (FR71)': 'Rhône-Alpes'}    
 
 # key: var short name
 # value: turple with long name, unit and optionally variable to act for ponderation and name of aggregated variable. 20160815: added info if the ponderation variable is specific for the same ft (keywork: 'sameft') or global for all the forest types ('globalft')

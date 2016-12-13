@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os, sys
 import csv, math
+from numba import jit
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -13,8 +14,10 @@ import output_parser_globals as g
 
 
 # =============================================================================
+# jit decorator tells Numba to compile this function.
+# The argument types will be inferred by Numba when function is called.
 def prepare_data():  
-  print ("Loading and preparing the data..")
+  #print ("Loading and preparing the data..")
   
   # A - creating empty dictionaries with just the keys..   
   for country, data in g.countries.items():
@@ -266,7 +269,7 @@ def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLe
   omfile.write("\\begin{figure}[htbp]\n")
   omfile.write("  \\centering\n")
   omfile.write("  \\caption{"+title+"}\n")
-  omfile.write("  \\includegraphics[width=0.8\\textwidth]{"+g.chartoutdir+"/"+filename+"_"+region+"}\n")
+  omfile.write("  \\includegraphics[width=0.8\\textwidth]{\""+g.chartoutdir+"/"+filename+"_"+region+"\"}\n")
   omfile.write("  \\label{fig:"+filename+"}\n")
   omfile.write("\\end{figure}\n")
   omfile.close()
@@ -349,7 +352,7 @@ def plotCarbonChart(scenarios_h,region,title, filename):
   omfile.write("\\begin{figure}[htbp]\n")
   omfile.write("  \\centering\n")
   omfile.write("  \\caption{"+title+"}\n")
-  omfile.write("  \\includegraphics[width=0.8\\textwidth]{"+g.chartoutdir+"/"+filename+"_"+region+"}\n")
+  omfile.write("  \\includegraphics[width=0.8\\textwidth]{\""+g.chartoutdir+"/"+filename+"_"+region+"\"}\n")
   omfile.write("  \\label{fig:"+filename+"}\n")
   omfile.write("\\end{figure}\n")
   omfile.close() 
@@ -414,7 +417,7 @@ def plotLegend(scenarios_h, filename, title_h=""):
   omfile.write("\\begin{figure}[htbp]\n")
   omfile.write("  \\centering\n")
   omfile.write("  \\caption{"+title_h+"}\n")
-  omfile.write("  \\includegraphics[width=0.8\\textwidth]{"+g.chartoutdir+"/"+filename+"."+g.charttype+"}\n")
+  omfile.write("  \\includegraphics[width=0.8\\textwidth]{\""+g.chartoutdir+"/"+filename+"\"}\n")
   omfile.write("  \\label{fig:"+filename+"}\n")
   omfile.write("\\end{figure}\n")
   omfile.close()
@@ -593,7 +596,7 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
   
   omasterfilename = g.tableoutdir+'/'+g.tablesmaster+'.tex'
   omfile = open(omasterfilename,'a')
-  omfile.write("\\input{"+g.tableoutdir+'/'+filename+"}\n")
+  omfile.write("\\input{\""+g.tableoutdir+'/'+filename+".tex\"}\n")
   omfile.close()
   
 # =============================================================================
@@ -666,7 +669,7 @@ def printAATable(ref_scenarios, comparing_scenarios, regions_h, years_h, title, 
   
   omasterfilename = g.tableoutdir+'/'+g.tablesmaster+'.tex'
   omfile = open(omasterfilename,'a')
-  omfile.write("\\input{"+g.tableoutdir+'/'+filename+"}\n")
+  omfile.write("\\input{\""+g.tableoutdir+'/'+filename+".tex\"}\n")
   omfile.close()
 
 # =============================================================================
@@ -788,7 +791,7 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
   
   omasterfilename = g.tableoutdir+'/'+g.tablesmaster+'.tex'
   omfile = open(omasterfilename,'a')
-  omfile.write("\\input{"+g.tableoutdir+'/'+filename+"}\n")
+  omfile.write("\\input{\""+g.tableoutdir+'/'+filename+".tex\"}\n")
   omfile.close()
 # =============================================================================
 def printTableRecord(cvar_label, d, el, nscen, valRScenario, valCScenarios, singleComparation):
