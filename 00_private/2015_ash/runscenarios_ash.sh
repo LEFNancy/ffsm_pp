@@ -48,7 +48,18 @@
 # 7/12/2016:
 ./run_single_scenario.sh 'data/ffsmInput_ash.ods' 'P0-Mi-Ei_fxRepl'
 ./run_single_scenario.sh 'data/ffsmInput_ash.ods' 'P1-Mi-Ei_fxRepl'
+# 13/12/2016:
+./run_single_scenario.sh 'data/ffsmInput_ash.ods' 'P0-Mh-Ei_fxRepl'
+./run_single_scenario.sh 'data/ffsmInput_ash.ods' 'P1-Mh-Ei_fxRepl'
+./run_single_scenario.sh 'data/ffsmInput_ash.ods' 'P0-Me0001-Ei_fxRepl'
+./run_single_scenario.sh 'data/ffsmInput_ash.ods' 'P1-Me0001-Ei_fxRepl'
+./run_single_scenario.sh 'data/ffsmInput_ash.ods' 'P0-Mi-E1_fxRepl'
+./run_single_scenario.sh 'data/ffsmInput_ash.ods' 'P1-Mi-E1_fxRepl'
+./run_single_scenario.sh 'data/ffsmInput_ash.ods' 'P0-Mi-E0_fxRepl'
+./run_single_scenario.sh 'data/ffsmInput_ash.ods' 'P1-Mi-E0_fxRepl'
 
+
+# run of 13 Dec 2016: added various "*_fxRepl" scenarios
 # run of 12 Dec 2016: just same of 7 Dec 2016 but for all the scenarios
 # run of 7 Dec 2016: run the two scenarios on fixed replanting to scorporate physical mortality effect from human adatation
 # run of 6 Nov 2016: forgot to run the two scenarios P0-Me500-Ei and P1-Me500-Ei, so I run them today. No variations from 3 Nov. They don't solve, so trying with Me200.
