@@ -102,8 +102,12 @@ void ThreadManager::run(){
     delete myProgram;
     refreshGUI();
     
-  }catch (...) { /// \todo .. perform a better exception handing..
-    emit upgradeLogArea("**INFO: Model has stopped or rised an error (read previous line).");
+  }catch (...) {
+      // Here the model has come to an end...
+      running=false;
+      stopped=true;
+      delete myProgram;
+      emit upgradeLogArea("**INFO: Model has stopped or rised an error (read previous line).");
   }  
   emit upgradeLogArea("**INFO: Model has ended.");
   
@@ -119,6 +123,7 @@ ThreadManager::retrieveScenarioNameFromGUI(const QString &scenarioName_h){
 
 void
 ThreadManager::runFromConsole(QString inputFileName_h, QString scenarioName_h){
+  try{
     GUI = false;
     scenarioName = scenarioName_h;
     inputFileName = inputFileName_h;
@@ -137,6 +142,9 @@ ThreadManager::runFromConsole(QString inputFileName_h, QString scenarioName_h){
 
     //myProgram->setBaseDirectory(baseDirectory);
     myProgram->run();
+  }catch (...) {
+       exit(EXIT_FAILURE);
+  }
 }
 
 void

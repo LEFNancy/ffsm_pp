@@ -122,15 +122,20 @@ BaseClass::msgOut2(const int& msgCode_h, const string& msg_h, const bool& refres
 
   if(refreshGUI_h) {refreshGUI();}
 
-  if(msgCode_h==MSG_CRITICAL_ERROR){
-    if (MTHREAD && MTHREAD->usingGUI()){
-      throw(2);
-    }
-    else {
-      //throw(2);
-      exit(EXIT_FAILURE);
-    }
+  //if(msgCode_h==MSG_CRITICAL_ERROR){
+  //  if (MTHREAD && MTHREAD->usingGUI()){
+  //    throw(2);
+  //  }
+  //  else {
+  //    throw(2);
+  //    exit(EXIT_FAILURE);
+  //  }
+  //}
+
+  if(msgCode_h==MSG_CRITICAL_ERROR){ // I can't throw an exception for any case, as code would resume from where it has been caught, not from here..
+    throw(msgCode_h);
   }
+
 }
 
 void

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os, sys
 import csv, math
-from numba import jit
+#from numba import jit
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt

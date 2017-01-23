@@ -86,7 +86,7 @@ def override_globals():
   
   
   
-  g.years = [str(y) for y in range(2007,2101)]     # [2007-2100]
+  g.years = [str(y) for y in range(2007,2060)]     # [2007-2100]
   g.printChartsFlag = True
   g.printTablesFlag = True
   g.printAATablesFlag = False
@@ -126,7 +126,7 @@ def printCharts():
 
   for region in g.sortedregions:
     title('c','subsection',g.regions[region])
-    plotMultivariable(['P0-Mi-Ei', 'P1-Mi-Ei'],['expReturns','vReg','vol','hV','forArea'],region,'Effect of tyhe pathogen','pathogen_effect')
+    plotMultivariable(['P0-Mi-Ei', 'P1-Mi-Ei'],['expReturns','vReg','vol','hV','forArea'],region,'Effect of the pathogen','pathogen_effect')
   
   # If we want to get carbon balance charts.. I don't think it's significant here..
   #title('c','subsection', "Carbon charts")

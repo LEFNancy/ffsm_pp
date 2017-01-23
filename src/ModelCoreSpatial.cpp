@@ -914,7 +914,17 @@ ModelCoreSpatial::runManagementModule(){
         //}
         // If I Implement this I'll have a minimal diff in total area.. why ?????
 
-        double mr = MD->getForData("mr",regId,"","");
+        // 20170123: if mr is defined at regional level in the forData table, good, otherwise we look at settings table.
+        // If it isn't there as well, we rise a critical error.
+        double mr;
+        MD->setErrorLevel(MSG_CRITICAL_ERROR);
+        try{
+           mr = MD->getForData("mr",regId,"","");
+        } catch (...){
+          mr = MD->getDoubleSetting("mr");
+        }
+        MD->setErrorLevel(MSG_ERROR);
+
         thisYearRegAreas[getMaxPos(corrExpectedReturns)] += harvestedAreaForThisFT*mr;
         thisYearRegAreas[getMaxPos(expectedReturns)] += fArea_incr*mr/((double)fTypes.size()); // mr quota of new forest area assigned to highest expected returns ft (not considering transaction costs). Done for each forest types
 

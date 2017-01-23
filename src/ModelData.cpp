@@ -970,12 +970,20 @@ ModelData::getBaseData (const string &name_h, int type_h, int position){
       else {msgOut(MSG_CRITICAL_ERROR, "Error: "+name_h+" doesn't have any value, even on the first position(year)!"); }
     }
   }
-  if(type_h==TYPE_BOOL){
-    msgOut(MSG_DEBUG, "Possible error calling getBaseData(TYPE_BOOL) for "+ name_h +". No setting option or macro data found with this name. Returning false.");
-    return "0";
-  } else {
-    msgOut(MSG_CRITICAL_ERROR, "Error calling getBaseData() for "+ name_h +". No setting option or macro data found with this name.");
-  }
+  msgOut(MSG_CRITICAL_ERROR, "Error calling getBaseData() for "+ name_h +". No setting option or macro data found with this name.");
+
+//  switch(type_h){
+//    case TYPE_BOOL:
+//      return "0";
+//    case TYPE_INT:
+//      return "0";
+//    case TYPE_DOUBLE:
+//      return "0.0";
+//    case TYPE_STRING:
+//      return "";
+//    default:
+//      msgOut(MSG_CRITICAL_ERROR, "Error calling getBaseData() for "+ i2s(type_h) +". I don't know this type.");
+//  }
   return "";
 }
 
