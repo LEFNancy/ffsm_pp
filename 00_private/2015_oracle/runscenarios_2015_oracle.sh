@@ -9,8 +9,9 @@
 # parallel --jobs <n of jobs> -a runscenarios_2015_oracle.sh 
 
 # Oracle scenarios
-  ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'constant'
+  ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'arpege_a1b_nomgm'
   ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'constant_nomgm'
+  ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'constant'
   ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'constant_nora'
   ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'constant_carea'
   ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'arpege_a1b'
@@ -18,7 +19,6 @@
   ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'arpege_a1b_noexp'
   ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'arpege_a1b_fullexp'
   ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'arpege_a1b_nora'
-  ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'arpege_a1b_nomgm'
   ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'arpege_a1b_nopr'
   ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'arpege_a1b_noph'  
   ./run_single_scenario.sh 'data/ffsmInput_2015_oracle.ods' 'arpege_a2'
@@ -38,6 +38,7 @@
 
    
 #last run:
+# 20170123, nomgm scenarios were actually running with management due to not sync of the data table with new regionalised mr in the code. Running only the nomgm scenarios
 # 20161129, implemented new area changes from Anna v3
 # 20160825, changed reported expected returns by ft: expRet{ft,r} are now sum{px}{expRet{ft,px}*fArea_{px}}/fArea{r} and no longer sum{px}{expRet{ft,px}*fArea_{px,ft}}/fArea{r,ft}  
 # 20150602, rerun as I accidently deleted the output :-( 
