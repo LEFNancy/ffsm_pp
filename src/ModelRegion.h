@@ -85,7 +85,7 @@ public:
   vector<Pixel*>      getMyPixels(){return myPixels;};
 
   vector<double>     inResByAnyCombination;             ///< Vector of inventory resource for each possible combination of primary products. This store both alive timber and death one.
-  vector<double>     inResByAnyCombination_deathTimber; ///< Vector of inventory resource for each possible combination of primary products. This store only death timber.
+  //vector<double>     inResByAnyCombination_deathTimber; ///< Vector of inventory resource for each possible combination of primary products. This store only death timber.
 
 private:
   int                                regId; ///< Regional unique ID

@@ -45,7 +45,7 @@ ModelRegion::ModelRegion(ThreadManager* MTHREAD_h, int regId_h, string regSName_
   //int nInBounds = MTHREAD->MD->getStringVectorSetting("priProducts").size(); // TODO todo !Important
   vector <double> inBounds(nInBounds,0.); // should have ceated a vector of size priProducts.size(), all filled with zeros
   inResByAnyCombination             = inBounds;
-  inResByAnyCombination_deathTimber = inBounds;
+  //inResByAnyCombination_deathTimber = inBounds;
 }
 
 ModelRegion::~ModelRegion(){

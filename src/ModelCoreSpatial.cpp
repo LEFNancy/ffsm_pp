@@ -252,13 +252,19 @@ ModelCoreSpatial::runMarketModule(){
     // BB(i,p_pr)   =   (sigma(p_pr)/(sigma(p_pr)+1))*RPAR('pc',i,p_pr,t-1)*(RPAR('sc',i,p_pr,t-1)**(-1/sigma(p_pr)))*(In(i,p_pr,t-1)/In(i,p_pr,t))**(gamma(p_pr)/sigma(p_pr));
     // FF(i,p_pr)   =   RPAR('sc',i,p_pr,t-1)*((RPAR('pc',i,p_pr,t-1))**(-sigma(p_pr)))*(In(i,p_pr,t)/In(i,p_pr,t-1))**(gamma(p_pr)); //chi
     for(uint pp=0;pp<priProducts.size();pp++){
-      double gamma = gpd("gamma",r2,priProducts[pp]); // elast supply to stock
+      double gamma_incr = gpd("gamma_incr",r2,priProducts[pp]); // elast supply to increasing stocks
+      double gamma_decr = gpd("gamma_decr",r2,priProducts[pp]); // elast supply to decreasing stocks
       double sigma = gpd("sigma",r2,priProducts[pp]); // elast supply to price
       double sigmaCorr = sigma;
       double pc_1  = gpd("pc",r2,priProducts[pp],previousYear);
       double sc_1  = gpd("sc",r2,priProducts[pp],previousYear);
       double in    = gpd("in",r2,priProducts[pp])+gpd("in_deathTimber",r2,priProducts[pp]);
       double in_1  = gpd("in",r2,priProducts[pp],previousYear)+gpd("in_deathTimber",r2,priProducts[pp],previousYear);
+      double eSi_lbase = gpd("eSi_lbase",r2,priProducts[pp]);
+      double eSi_ubase = gpd("eSi_ubase",r2,priProducts[pp]);
+
+      double gamma = in>in_1 ? gamma_incr: gamma_decr; // If inventories resources are decreasing we use a given elasticity, if they are increasing we use an other one
+
       double supCorr = 1.0; // Coefficient to reduce supply function when inventory is small
       double sub_s_1 = gpd("sub_s",r2,priProducts[pp],previousYear);
 
@@ -285,8 +291,11 @@ ModelCoreSpatial::runMarketModule(){
 
       //double bb = (sigmaCorr/(sigmaCorr+1.0))*pc_1*pow(sc_1,-1.0/sigmaCorr)*pow(in_1/in,gamma/sigmaCorr);
       //double ff = sc_1*pow(pc_1,-sigmaCorr)*pow(in/in_1,gamma); //chi
-      double bb = (sigmaCorr/(sigmaCorr+1.0))*pc_1*pow(sc_1,-1.0/sigmaCorr)*pow(in_1/in,gamma/sigmaCorr)*pow(1.0/supCorr,1.0/sigmaCorr);
-      double ff = sc_1*pow(pc_1+sub_s_1,-sigmaCorr)*pow(in/in_1,gamma)*supCorr; //chi
+
+      double in_ratio = min(eSi_ubase,max(eSi_lbase, in/in_1 ) ); // bounding the in(t)/in(t-1) ratio over which the supply function responds
+
+      double bb = (sigmaCorr/(sigmaCorr+1.0))*pc_1*pow(sc_1,-1.0/sigmaCorr)*pow(1/in_ratio,gamma/sigmaCorr)*pow(1.0/supCorr,1.0/sigmaCorr);
+      double ff = sc_1*pow(pc_1+sub_s_1,-sigmaCorr)*pow(in_ratio,gamma)*supCorr; //chi
       //double supCorr2 = pow(1.0/supCorr,1.0/sigmaCorr);
 
       spd(bb,"bb",r2,priProducts[pp],DATA_NOW,true);
@@ -1680,7 +1689,7 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
       double bound_total       = bound_alive + bound_deathTimber;
 
       REG->inResByAnyCombination[i]             = bound_total;
-      REG->inResByAnyCombination_deathTimber[i] = bound_deathTimber;
+      //REG->inResByAnyCombination_deathTimber[i] = bound_deathTimber;
     } // end for each bond
   } // end each region
 }

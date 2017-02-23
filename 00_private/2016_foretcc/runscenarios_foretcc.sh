@@ -6,10 +6,13 @@
 # parallel --jobs <n of jobs> -a runscenarios_foretcc.sh 
 # and put something like this in the script
 
-./run_single_scenario.sh 'data/ffsmInput_2016_foretcc.ods' 'passive_management_nocc'
-./run_single_scenario.sh 'data/ffsmInput_2016_foretcc.ods' 'active_management_nocc'
-
-
+./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_EXT'
+./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_BASE'
+./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM'
+./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_SUBSIDES'
+./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_OPENMARKETS'
+./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_STUCTURALPOLICIES'
+./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT'
 
 
 
