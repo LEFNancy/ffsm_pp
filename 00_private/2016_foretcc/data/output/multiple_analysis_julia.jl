@@ -3,7 +3,7 @@ using DataArrays, DataFrames, DataFramesMeta, Plots, StatPlots
 scenarios = ["RCP00_BAS_EXT",            "RCP00_BAS_ADAPT_BASE",        "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
              "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STUCTURALPOLICIES",
              "RCP00_BAS_ADAPT"]
-
+scenarios = ["RCP00_BAS_EXT", "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_SUBSIDES_GRAD"]
 baseIDir = "results";
 
 fgroup_map = Dict(
@@ -67,7 +67,7 @@ by(forVarsW, [:scen,:region,:forType]) do dd
     dd[:cumHV] = cumsum(dd[:hV])
     dd[:cumRegArea] = cumsum(dd[:regArea])
 end
-forVarsW[9000:9020,:]
+#forVarsW[9000:9020,:]
 
 # Aggregating volumes at national level and for the whole forest
 volHVTotal = by(forVarsW, [:scen,:year]) do df
@@ -100,11 +100,11 @@ plot(volHVTotal, x="year", y="vol", color="scen", Geom.line)
 =#
 
 plotlyjs()
-temp = volHVTotal[ [s in ["RCP00_BAS_EXT","RCP00_BAS_ADAPT","RCP00_BAS_ADAPT_BASE"] for s in volHVTotal[:scen]], :]
+temp = volHVTotal[ [s in ["RCP00_BAS_EXT","RCP00_BAS_ADAPT_SUBSIDES","RCP00_BAS_ADAPT_SUBSIDES_GRAD"] for s in volHVTotal[:scen]], :]
 # :blue, :yellow, :red
-mycolors = [:blue, :yellow, :red]
-volHVTotal_plot = plot(temp, :year, :vol, group=:scen, linestyle = :dot, linewidth=3, linecolor=:match, color_palette = mycolors)
-plot!(temp, :year, :cumHV_stacked, group=:scen, linestyle = :solid, linewidth=3, linecolor=:match, color_palette = mycolors)
+mycolors = [:blue :green :red]
+volHVTotal_plot = plot(temp, :year, :vol, group=:scen, linestyle = :dot, linewidth=3, color = mycolors)
+plot!(temp, :year, :cumHV_stacked, group=:scen, linestyle = :solid, linewidth=3,  color = mycolors)
 
 # volHVTotal_plot = plot([1, 2, 3], [[4, 6, 8] [5, 6, 9]], linestyle = :solid, linewidth=3, linecolor=:red)
 volHVTotal_plot = plot(volHVTotal[ [s in ["RCP00_BAS_EXT","RCP00_BAS_ADAPT","RCP00_BAS_ADAPT_BASE"] for s in volHVTotal[:scen]], :] ,

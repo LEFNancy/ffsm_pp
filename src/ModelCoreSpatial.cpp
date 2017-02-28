@@ -238,15 +238,16 @@ ModelCoreSpatial::runMarketModule(){
       double pc_1    = gpd("pc",r2,secProducts[sp],previousYear);
       double dc_1    = gpd("dc",r2,secProducts[sp],previousYear);
       double k_1     = gpd("k",r2,secProducts[sp],previousYear);
-      double sub_d_1 = gpd("sub_d",r2,secProducts[sp],previousYear);
+      double mktPol_d_1 = gpd("mktPol_d",r2,secProducts[sp],previousYear);
 
       double k  = (1+g1)*k_1;
       double aa = (sigma/(sigma+1))*pc_1*pow(dc_1,-1/sigma);
-      double gg = dc_1*pow(pc_1+sub_d_1,-sigma); //alpha
+      double gg = dc_1*pow(pc_1*mktPol_d_1,-sigma); //alpha
 
       spd(k, "k" ,r2,secProducts[sp]);
       spd(aa,"aa",r2,secProducts[sp],DATA_NOW,true);
       spd(gg,"gg",r2,secProducts[sp],DATA_NOW,true);
+      //cout << gg << '\t' << pc_1 << endl;
     }
 
     // BB(i,p_pr)   =   (sigma(p_pr)/(sigma(p_pr)+1))*RPAR('pc',i,p_pr,t-1)*(RPAR('sc',i,p_pr,t-1)**(-1/sigma(p_pr)))*(In(i,p_pr,t-1)/In(i,p_pr,t))**(gamma(p_pr)/sigma(p_pr));
@@ -260,13 +261,11 @@ ModelCoreSpatial::runMarketModule(){
       double sc_1  = gpd("sc",r2,priProducts[pp],previousYear);
       double in    = gpd("in",r2,priProducts[pp])+gpd("in_deathTimber",r2,priProducts[pp]);
       double in_1  = gpd("in",r2,priProducts[pp],previousYear)+gpd("in_deathTimber",r2,priProducts[pp],previousYear);
-      double eSi_lbase = gpd("eSi_lbase",r2,priProducts[pp]);
-      double eSi_ubase = gpd("eSi_ubase",r2,priProducts[pp]);
 
       double gamma = in>in_1 ? gamma_incr: gamma_decr; // If inventories resources are decreasing we use a given elasticity, if they are increasing we use an other one
 
       double supCorr = 1.0; // Coefficient to reduce supply function when inventory is small
-      double sub_s_1 = gpd("sub_s",r2,priProducts[pp],previousYear);
+      double mktPol_s_1 = gpd("mktPol_s",r2,priProducts[pp],previousYear);
 
       // //When inventary for a resource is almost null and further decreasing supply depends less from the price and more from the resource
       // No longer needed, but it could be used again if we face a problem where in go to zero due to too much harvesting/growth
@@ -292,10 +291,10 @@ ModelCoreSpatial::runMarketModule(){
       //double bb = (sigmaCorr/(sigmaCorr+1.0))*pc_1*pow(sc_1,-1.0/sigmaCorr)*pow(in_1/in,gamma/sigmaCorr);
       //double ff = sc_1*pow(pc_1,-sigmaCorr)*pow(in/in_1,gamma); //chi
 
-      double in_ratio = min(eSi_ubase,max(eSi_lbase, in/in_1 ) ); // bounding the in(t)/in(t-1) ratio over which the supply function responds
+      double in_ratio =  in/in_1; // bounding the in(t)/in(t-1) ratio over which the supply function responds
 
       double bb = (sigmaCorr/(sigmaCorr+1.0))*pc_1*pow(sc_1,-1.0/sigmaCorr)*pow(1/in_ratio,gamma/sigmaCorr)*pow(1.0/supCorr,1.0/sigmaCorr);
-      double ff = sc_1*pow(pc_1+sub_s_1,-sigmaCorr)*pow(in_ratio,gamma)*supCorr; //chi
+      double ff = sc_1*pow(pc_1*mktPol_s_1,-sigmaCorr)*pow(in_ratio,gamma)*supCorr; //chi
       //double supCorr2 = pow(1.0/supCorr,1.0/sigmaCorr);
 
       spd(bb,"bb",r2,priProducts[pp],DATA_NOW,true);
