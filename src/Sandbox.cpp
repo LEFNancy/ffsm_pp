@@ -550,6 +550,16 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+  /*
+  // Testing getSiblings() ok
+  ModelRegion* reg1 = MTHREAD->MD->getRegion(11042);
+  vector <ModelRegion*> siblings = reg1->getSiblings();
+  for(uint i=0;i<siblings.size();i++){
+    cout << siblings[i]->getRegId() << endl;
+  }
+  exit(1);
+  */
+
  /*
  // Testing if after not found gpd(.) or gfd(.) we always have a negative tempBool.. yes
  bool debug = true;

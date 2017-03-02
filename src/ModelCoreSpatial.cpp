@@ -87,6 +87,7 @@ ModelCoreSpatial::runSimulationYear(){
   updateOtherMapData();        // update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   sumRegionalForData();        // only for printing stats as forest data is never used at regional level
   registerCarbonEvents();
+  computeEconomicBalances();   // policy costs and welfare analysis
   MTHREAD->DO->print();
 }
 
@@ -2284,4 +2285,54 @@ ModelCoreSpatial::allocateHarvesting(vector<double> total_st, const int &regId){
      }
    }
    return total_st;
+}
+
+
+/**
+ * This function has two tasks:
+ * 1) compute the policy balances (- -> costs; + -> rev) for pol_mktDirInt_s, pol_mktDirInt_d, pol_trSub, pol_tcSub and pol_fiSub;
+ * 2) compute the producer/consumer surpluses
+ */
+void
+ModelCoreSpatial::computeEconomicBalances(){
+
+  for(uint r2=0; r2<regIds2.size();r2++){
+    int regId = regIds2[r2];
+    ModelRegion* reg = MD->getRegion(regId);
+
+    for(uint p=0;p<priProducts.size();p++){
+      double pol_mktDirInt_s = gpd("pol_mktDirInt_s",regId,priProducts[p]);
+      double pc = gpd("pc",regId,priProducts[p]);
+      double sc = gpd("sc",regId,priProducts[p]);
+      double polBal_mktDirInt_s = pc * (pol_mktDirInt_s - 1) * sc;
+      spd(polBal_mktDirInt_s,"polBal_mktDirInt_s",regId,priProducts[p],DATA_NOW,true);
+
+    }
+    for(uint p=0;p<secProducts.size();p++){
+      double pol_mktDirInt_d = gpd("pol_mktDirInt_d",regId,secProducts[p]);
+      double pol_trSub       = gpd("pol_trSub",regId,secProducts[p]);
+      double pc = gpd("pc",regId,secProducts[p]);
+      double dc = gpd("dc",regId,secProducts[p]);
+      double m  = gpd("m",regId,secProducts[p]);
+      double sl = gpd("sl",regId,secProducts[p]); // sl because dl include also the production from byproduct that has not subsides in the model
+      double polBal_mktDirInt_d = pc * (pol_mktDirInt_d - 1) * dc;
+      double polBal_trSub = m * (pol_trSub-1) * sl;
+      spd(polBal_mktDirInt_d,"polBal_mktDirInt_d",regId,secProducts[p],DATA_NOW,true);
+      spd(polBal_trSub,"polBal_trSub",regId,secProducts[p],DATA_NOW,true);
+    }
+    for(uint p=0;p<allProducts.size();p++){
+      double pol_tcSub = gpd("pol_tcSub",regId,allProducts[p]);
+      double polBal_tcSub = 0;
+      vector<ModelRegion*> siblings = reg->getSiblings();
+      for(uint rTo=0;rTo<siblings.size();rTo++){
+        int regId2 = siblings[rTo]->getRegId();
+        double ct = gpd("ct",regId,allProducts[p],DATA_NOW,i2s(regId2));
+        double rt = gpd("rt",regId,allProducts[p],DATA_NOW,i2s(regId2));
+        polBal_tcSub += ct*(pol_tcSub-1) * rt;
+      }
+      spd(polBal_tcSub,"polBal_tcSub",regId,allProducts[p],DATA_NOW,true);
+    }
+
+  }
+
 }

@@ -65,6 +65,21 @@ ModelRegion::getChildren(bool excludeResidual){
   return chRegions;
 }
 
+vector<ModelRegion*>
+ModelRegion::getSiblings(bool excludeResidual){
+  vector<ModelRegion*> toReturn;
+  vector<ModelRegion*> allRegions = MTHREAD->MD->getAllRegions(excludeResidual);
+  for (uint i=0;i<allRegions.size();i++){
+    if (allRegions[i]->parRegId == parRegId && allRegions[i]->getRegId() != regId){
+      toReturn.push_back(allRegions[i]);
+    }
+  }
+  return toReturn;
+}
+
+
+
+
 int
 ModelRegion::getNChildren(bool excludeResidual){
   if(excludeResidual){

@@ -71,6 +71,7 @@ public:
   bool                getIsResidual() const {return isResidual;};
   ModelRegion*        getParent(){return parRegion;}; ///< Returns a pointer to the parent regions
   vector<ModelRegion*>getChildren(bool excludeResidual = true); ///< Return a vector of pointers to the direct child regions
+  vector<ModelRegion*>getSiblings(bool excludeResidual = true); ///< Return a vector of pointers to the siblings regions
   double              getVolumes();
   vector<double>      getVolumes(int fType_h);
   double              getValue(string layerName, int op=OP_SUM); ///< return the values of its own pixels for the specified layer. Possible operations: OP_SUM or OP_AVG
