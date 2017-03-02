@@ -158,7 +158,7 @@ ModelCoreSpatial::initMarketModule(){
       double k = k1*sl;
 
       spd(q1,"q1",r2,secProducts[sp],firstYear,true);
-      spd(p1,"p1",r2,secProducts[sp],firstYear,true);
+      //spd(p1,"p1",r2,secProducts[sp],firstYear,true);
       spd(dc,"dc",r2,secProducts[sp],secondYear,true);
       spd(pc,"pc",r2,secProducts[sp],secondYear,true);
       spd(pw,"pw",r2,secProducts[sp],secondYear,true);
@@ -190,7 +190,7 @@ ModelCoreSpatial::initMarketModule(){
       double pw = (sl*pl+sa*pWo)/(sl+sa);
 
       spd(t1,"t1",r2,priProducts[pp],firstYear,true);
-      spd(r1,"r1",r2,priProducts[pp],firstYear,true);
+     //spd(r1,"r1",r2,priProducts[pp],firstYear,true);
       spd(sc,"sc",r2,priProducts[pp],secondYear,true); 
       spd(pc,"pc",r2,priProducts[pp],secondYear,true);
       spd(pw,"pw",r2,priProducts[pp],secondYear,true);
@@ -238,70 +238,53 @@ ModelCoreSpatial::runMarketModule(){
       double pc_1    = gpd("pc",r2,secProducts[sp],previousYear);
       double dc_1    = gpd("dc",r2,secProducts[sp],previousYear);
       double k_1     = gpd("k",r2,secProducts[sp],previousYear);
-      double mktPol_d_1 = gpd("mktPol_d",r2,secProducts[sp],previousYear);
+      double pol_mktDirInt_d_1 = gpd("pol_mktDirInt_d",r2,secProducts[sp],previousYear);
+      double q1                = gpd("q1",r2,secProducts[sp]);
+      double pol_mktStr_d      = gpd("pol_mktStr_d",r2,secProducts[sp]);
+
+      double q1_polCorr        = min(1.0, (q1-0.5)*pol_mktStr_d+0.5); // The pol_mktStr_s coefficient makes t1 (the "b" weight in the CES function) converge toward 0.5 as pol_mktStr_s goes to 0. As pol_mktStr_s can be above 1, an upper cap of unity is imposed to t1
+
+
 
       double k  = (1+g1)*k_1;
       double aa = (sigma/(sigma+1))*pc_1*pow(dc_1,-1/sigma);
-      double gg = dc_1*pow(pc_1*mktPol_d_1,-sigma); //alpha
+      double gg = dc_1*pow(pc_1*pol_mktDirInt_d_1,-sigma); //alpha
 
       spd(k, "k" ,r2,secProducts[sp]);
       spd(aa,"aa",r2,secProducts[sp],DATA_NOW,true);
       spd(gg,"gg",r2,secProducts[sp],DATA_NOW,true);
-      //cout << gg << '\t' << pc_1 << endl;
+      spd(q1_polCorr,"q1_polCorr",r2,secProducts[sp],DATA_NOW,true);
+
     }
 
     // BB(i,p_pr)   =   (sigma(p_pr)/(sigma(p_pr)+1))*RPAR('pc',i,p_pr,t-1)*(RPAR('sc',i,p_pr,t-1)**(-1/sigma(p_pr)))*(In(i,p_pr,t-1)/In(i,p_pr,t))**(gamma(p_pr)/sigma(p_pr));
     // FF(i,p_pr)   =   RPAR('sc',i,p_pr,t-1)*((RPAR('pc',i,p_pr,t-1))**(-sigma(p_pr)))*(In(i,p_pr,t)/In(i,p_pr,t-1))**(gamma(p_pr)); //chi
     for(uint pp=0;pp<priProducts.size();pp++){
-      double gamma_incr = gpd("gamma_incr",r2,priProducts[pp]); // elast supply to increasing stocks
-      double gamma_decr = gpd("gamma_decr",r2,priProducts[pp]); // elast supply to decreasing stocks
-      double sigma = gpd("sigma",r2,priProducts[pp]); // elast supply to price
-      double sigmaCorr = sigma;
-      double pc_1  = gpd("pc",r2,priProducts[pp],previousYear);
-      double sc_1  = gpd("sc",r2,priProducts[pp],previousYear);
-      double in    = gpd("in",r2,priProducts[pp])+gpd("in_deathTimber",r2,priProducts[pp]);
-      double in_1  = gpd("in",r2,priProducts[pp],previousYear)+gpd("in_deathTimber",r2,priProducts[pp],previousYear);
+      double gamma_incr        = gpd("gamma_incr",r2,priProducts[pp]); // elast supply to increasing stocks
+      double gamma_decr        = gpd("gamma_decr",r2,priProducts[pp]); // elast supply to decreasing stocks
+      double sigma             = gpd("sigma",r2,priProducts[pp]); // elast supply to price
+      double pc_1              = gpd("pc",r2,priProducts[pp],previousYear);
+      double sc_1              = gpd("sc",r2,priProducts[pp],previousYear);
+      double in                = gpd("in",r2,priProducts[pp])+gpd("in_deathTimber",r2,priProducts[pp]);
+      double in_1              = gpd("in",r2,priProducts[pp],previousYear)+gpd("in_deathTimber",r2,priProducts[pp],previousYear);
+      double pol_mktDirInt_s_1 = gpd("pol_mktDirInt_s",r2,priProducts[pp],previousYear);
+      double t1                = gpd("t1",r2,priProducts[pp]);
+      double pol_mktStr_s      = gpd("pol_mktStr_s",r2,priProducts[pp]);
+
+      double t1_polCorr        = min(1.0, (t1-0.5)*pol_mktStr_s+0.5); // The pol_mktStr_s coefficient makes t1 (the "b" weight in the CES function) converge toward 0.5 as pol_mktStr_s goes to 0. As pol_mktStr_s can be above 1, an upper cap of unity is imposed to t1
+
 
       double gamma = in>in_1 ? gamma_incr: gamma_decr; // If inventories resources are decreasing we use a given elasticity, if they are increasing we use an other one
 
-      double supCorr = 1.0; // Coefficient to reduce supply function when inventory is small
-      double mktPol_s_1 = gpd("mktPol_s",r2,priProducts[pp],previousYear);
+      double in_ratio =  in/in_1;
 
-      // //When inventary for a resource is almost null and further decreasing supply depends less from the price and more from the resource
-      // No longer needed, but it could be used again if we face a problem where in go to zero due to too much harvesting/growth
-      // //cout << "gamma orig: " << gamma << endl;
-      // if (in<=0.1 && in <= in_1) { // 0.3
-      //   gamma = gamma * 1.8; // 1.3: 0.65;
-      //   sigmaCorr = sigma*0.2; // 0.4
-      //   //supCorr = 0.7;
-      //   //cout << "gamma mod: " << gamma << endl;
-      // }  else if(in<=1.0 && in <= in_1){
-      //   gamma = gamma * 1.8; // 1.24: 0.62;
-      //   sigmaCorr = sigma*0.2; // 0.4
-      //   //supCorr = 0.8;
-      //   //cout << "gamma mod: " << gamma << endl;
-      // }
-
-
-       //if(in<=5.0){
-       //  supCorr = 0.8;
-       //}
-
-
-      //double bb = (sigmaCorr/(sigmaCorr+1.0))*pc_1*pow(sc_1,-1.0/sigmaCorr)*pow(in_1/in,gamma/sigmaCorr);
-      //double ff = sc_1*pow(pc_1,-sigmaCorr)*pow(in/in_1,gamma); //chi
-
-      double in_ratio =  in/in_1; // bounding the in(t)/in(t-1) ratio over which the supply function responds
-
-      double bb = (sigmaCorr/(sigmaCorr+1.0))*pc_1*pow(sc_1,-1.0/sigmaCorr)*pow(1/in_ratio,gamma/sigmaCorr)*pow(1.0/supCorr,1.0/sigmaCorr);
-      double ff = sc_1*pow(pc_1*mktPol_s_1,-sigmaCorr)*pow(in_ratio,gamma)*supCorr; //chi
-      //double supCorr2 = pow(1.0/supCorr,1.0/sigmaCorr);
+      double bb = (sigma/(sigma+1.0))*pc_1*pow(sc_1,-1.0/sigma)*pow(1/in_ratio,gamma/sigma)*pow(1.0,1.0/sigma);
+      double ff = sc_1*pow(pc_1*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma); //chi
 
       spd(bb,"bb",r2,priProducts[pp],DATA_NOW,true);
       spd(ff,"ff",r2,priProducts[pp],DATA_NOW,true);
-      spd(sigmaCorr,"sigmaCorr",r2,priProducts[pp],DATA_NOW,true);
-      //spd(supCorr,"supCorr",r2,priProducts[pp],DATA_NOW,true);
-      //spd(supCorr2,"supCorr2",r2,priProducts[pp],DATA_NOW,true);
+      spd(sigma,"sigma",r2,priProducts[pp],DATA_NOW,true);
+      spd(t1_polCorr,"t1_polCorr",r2,priProducts[pp],DATA_NOW,true);
 
     }
 

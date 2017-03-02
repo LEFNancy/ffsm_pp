@@ -245,7 +245,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
       //  )
       for (uint p=0;p<priPr.size();p++){
         bb = gpd("bb",l2r[r1][r2],priPr[p]);
-        sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p]);
+        sigma = gpd("sigma",l2r[r1][r2],priPr[p]);
         //supCorr2 = gpd("supCorr2",l2r[r1][r2],priPr[p]);
         obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - bb*pow(mymax(zeromax,x[gix("sc",r1,r2,p)]),((sigma+1)/sigma));
       }
@@ -259,7 +259,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
         for (uint p2=0;p2<priPr.size();p2++){
           a_pr = gpd("a_pr",l2r[r1][r2],priPr[p1],DATA_NOW,priPr[p2]);
           bb = gpd("bb",l2r[r1][r2],priPr[p2]);
-          sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p2]);
+          sigma = gpd("sigma",l2r[r1][r2],priPr[p2]);
           obj_value += x[gix("pc",r1,r2,p2)]*a_pr*x[gix("sc",r1,r2,p1)]-bb*pow(mymax(zeromax,a_pr*x[gix("sc",r1,r2,p1)]),(sigma+1)/sigma);
         }
       }
@@ -304,7 +304,7 @@ It could be possible to change this in a map and uses name, but then we would lo
 template<class T> bool
 Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
-  double a_pr, a, sigma, ff, mktPol_s, mktPol_d, mktPol_d_pSubstituted, mktPol_d_1, mktPol_d_1_pSubstituted, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1, supCorr, es_d, pc_1, pc_1_pSubstituted;
+  double a_pr, a, sigma, ff, pol_mktDirInt_s, pol_mktDirInt_d, pol_mktDirInt_d_pSubstituted, pol_mktDirInt_d_1, pol_mktDirInt_d_1_pSubstituted, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1, supCorr, es_d, pc_1, pc_1_pSubstituted;
   Index cix = 0;
   Index debug = 0;
 
@@ -323,22 +323,22 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     gg         = gpd("gg",l2r[r1][r2],secPr[p]);
     sigma      = gpd("sigma",l2r[r1][r2],secPr[p]);
     pc_1       = gpd("pc",l2r[r1][r2],secPr[p],previousYear);
-    mktPol_d   = gpd("mktPol_d",l2r[r1][r2],secPr[p]);              // market policies (subs or taxes) this year
-    mktPol_d_1 = gpd("mktPol_d",l2r[r1][r2],secPr[p],previousYear); // market policies previous year
-    g[cix]     = - gg*pow(x[gix("pc",r1,r2,psec)]*mktPol_d,sigma);  // note that putting 0.0 and 0.000 IS NOT the same thing. With 0.000 I have a seg fault in ADOL-C !!
+    pol_mktDirInt_d   = gpd("pol_mktDirInt_d",l2r[r1][r2],secPr[p]);              // market policies (subs or taxes) this year
+    pol_mktDirInt_d_1 = gpd("pol_mktDirInt_d",l2r[r1][r2],secPr[p],previousYear); // market policies previous year
+    g[cix]     = - gg*pow(x[gix("pc",r1,r2,psec)]*pol_mktDirInt_d,sigma);  // note that putting 0.0 and 0.000 IS NOT the same thing. With 0.000 I have a seg fault in ADOL-C !!
     vector<string> debug = secPr;
     for (uint p2=0;p2<secPr.size();p2++){
       es_d     = gpd("es_d",l2r[r1][r2],secPr[p],DATA_NOW,secPr[p2]);
       if(es_d){
         pc_1_pSubstituted    = gpd("pc",l2r[r1][r2],secPr[p2],previousYear);
-        mktPol_d_pSubstituted   = gpd("mktPol_d",l2r[r1][r2],secPr[p2]);               // market policies this year for the substitute product
-        mktPol_d_1_pSubstituted = gpd("mktPol_d",l2r[r1][r2],secPr[p2],previousYear);  // market policies last year for the substitute product
+        pol_mktDirInt_d_pSubstituted   = gpd("pol_mktDirInt_d",l2r[r1][r2],secPr[p2]);               // market policies this year for the substitute product
+        pol_mktDirInt_d_1_pSubstituted = gpd("pol_mktDirInt_d",l2r[r1][r2],secPr[p2],previousYear);  // market policies last year for the substitute product
 
         g[cix] *= pow(
                  (
-                   ((x[gix("pc",r1,r2,psec)]*mktPol_d) / (x[gix("pc",r1,r2,priPr.size()+p2)]*mktPol_d_pSubstituted))
+                   ((x[gix("pc",r1,r2,psec)]*pol_mktDirInt_d) / (x[gix("pc",r1,r2,priPr.size()+p2)]*pol_mktDirInt_d_pSubstituted))
                       /
-                   ((pc_1*mktPol_d_1) / (pc_1_pSubstituted*mktPol_d_1_pSubstituted))
+                   ((pc_1*pol_mktDirInt_d_1) / (pc_1_pSubstituted*pol_mktDirInt_d_1_pSubstituted))
                  ), es_d
                );
       }
@@ -349,7 +349,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
   // mkteq7(i,p_tr)..  RVAR('da',i,p_tr)/RVAR('dl',i,p_tr)  =e=  ((q1(i,p_tr)*RVAR('pl',i,p_tr))/(p1(i,p_tr)*PT_t(p_tr)))**psi(i,p_tr); // h7 and h3 ?
   CONSTRAIN_START_LOOP(secPr,2)
-    q1 = gpd("q1",l2r[r1][r2],secPr[p],secondYear);
+    q1 = gpd("q1_polCorr",l2r[r1][r2],secPr[p]);
     p1v = 1-q1;
     psi = gpd("psi",l2r[r1][r2],secPr[p]);
     pworld = gpd("pl", worldCodeLev2,secPr[p]);
@@ -364,7 +364,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
   // mkteq23(i,p_tr).. RVAR('dc',i,p_tr)  =e=  (q1(i,p_tr)*(RVAR('da',i,p_tr)**((psi(i,p_tr)-1)/psi(i,p_tr)))+ p1(i,p_tr)*(RVAR('dl',i,p_tr)**((psi(i,p_tr)-1)/psi(i,p_tr))))**(psi(i,p_tr)/(psi(i,p_tr)-1)); // h3
   CONSTRAIN_START_LOOP(secPr,4)
-    q1 = gpd("q1",l2r[r1][r2],secPr[p],secondYear);
+    q1 = gpd("q1_polCorr",l2r[r1][r2],secPr[p]);
     psi = gpd("psi",l2r[r1][r2],secPr[p]);
     p1v = 1-q1;
     g[cix] = x[gix("dc",r1,r2,p)] -
@@ -401,17 +401,17 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
   // SUPPLY EQUATION OF PRIMARY PRODUCTS
   CONSTRAIN_START_LOOP(priPr,7)
     ff = gpd("ff",l2r[r1][r2],priPr[p]);
-    mktPol_s = gpd("mktPol_s",l2r[r1][r2],priPr[p]);
-    sigma = gpd("sigmaCorr",l2r[r1][r2],priPr[p]);
+    pol_mktDirInt_s = gpd("pol_mktDirInt_s",l2r[r1][r2],priPr[p]);
+    sigma = gpd("sigma",l2r[r1][r2],priPr[p]);
     //g[cix] = x[gix("sc",r1,r2,p)]-mymax(ff*pow(x[gix("pc",r1,r2,p)],sigma),0.001);
-    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)]*mktPol_s,sigma);
+    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)]*pol_mktDirInt_s,sigma);
     //g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma-0.0001);
   CONSTRAIN_END_LOOP
 
 
  // mkteq8(i,p_pr)..  RVAR('sa',i,p_pr)/RVAR('sl',i,p_pr)  =e=  ((t1(i,p_pr)*RVAR('pl',i,p_pr))/(r1(i,p_pr)*PT_t(p_pr)))**eta(i,p_pr); // h8 and h4 ?
   CONSTRAIN_START_LOOP(priPr,8)
-    t1 = gpd("t1",l2r[r1][r2],priPr[p],secondYear);
+    t1 = gpd("t1_polCorr",l2r[r1][r2],priPr[p]);
     r1v = 1-t1;
     eta = gpd("eta",l2r[r1][r2],priPr[p]);
     pworld = gpd("pl", worldCodeLev2,priPr[p]);
@@ -426,7 +426,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
   //mkteq24(i,p_pr).. RVAR('sc',i,p_pr)  =e=  (t1(i,p_pr)*(RVAR('sa',i,p_pr)**((eta(i,p_pr)-1)/eta(i,p_pr)))+ r1(i,p_pr)*(RVAR('sl',i,p_pr)**((eta(i,p_pr)-1)/eta(i,p_pr))))**(eta(i,p_pr)/(eta(i,p_pr)-1)); // h4
   CONSTRAIN_START_LOOP(priPr,10)
-    t1 = gpd("t1",l2r[r1][r2],priPr[p],secondYear);
+    t1 = gpd("t1_polCorr",l2r[r1][r2],priPr[p]);
     r1v = 1-t1;
     eta = gpd("eta",l2r[r1][r2],priPr[p]);
     g[cix] = x[gix("sc",r1,r2,p)] -
