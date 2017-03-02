@@ -59,8 +59,10 @@ typedef pair<string, vector <double> > DataPair;
 
 
 ModelData::ModelData(ThreadManager* MTHREAD_h){
-  MTHREAD = MTHREAD_h;
-  errorLevel = MSG_ERROR;
+  MTHREAD        = MTHREAD_h;
+  errorLevel     = MSG_ERROR;
+  tempBool       = true;
+  valueFoundBool = true;
 }
 
 ModelData::~ModelData(){
@@ -1159,6 +1161,7 @@ ModelData::getProdData(const string &type_h, const int& regId_h, const string &p
   }
 
   if(!found){
+    valueFoundBool = false;
     msgOut(errorLevel, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
   }
   return value;
@@ -1169,12 +1172,12 @@ ModelData::getProdData(const string &type_h, const int& regId_h, const string &p
 /**
 Basic function to retrieve forest-related data.
 It addmits the following "filters":
-@type_h Name of the specific parameter requested
-@regId_h Look for a level1 or level2 region
+@type_h    Name of the specific parameter requested
+@regId_h   Look for a level1 or level2 region
 @forType_h If specified, look exactly for the specified forest type, otherwise accept the keyword FT_ALL for summing all of them
 @freeDim_h Normally used for diameter class, but occasionally used for other uses (changed 20140514). It accepts three keywords, for summing up all diameters, production-ready diameters or sub-production ones, namelly DIAM_ALL, DIAM_PROD, DIAM_FIRST.\\
 If a diameter-independed variable is required, put it in the data with an empty diameter class and retrieve it here using DIAM_ALL.
-@year Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
+@year      Unless specified, get the value of the current year. If array is smaller (e.g. because it is time-independent), get the last value.
 */
 const double
 ModelData::getForData(const string &type_h, const int& regId_h, const string &forType_h, const string &freeDim_h, const int& year){
@@ -1227,7 +1230,8 @@ ModelData::getForData(const string &type_h, const int& regId_h, const string &fo
   }
 
   if(!found){
-        msgOut(errorLevel, "Error in getForData(): no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
+    valueFoundBool = false;
+    msgOut(errorLevel, "Error in getForData(): no combination found for "+type_h+", "+i2s(regId_h)+", "+forType_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
   }
   return value;
 }

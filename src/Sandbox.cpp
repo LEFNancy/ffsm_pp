@@ -551,6 +551,26 @@ void
 Sandbox::fullTest(){
 
  /*
+ // Testing if after not found gpd(.) or gfd(.) we always have a negative tempBool.. yes
+ bool debug = true;
+ MTHREAD->MD->setTempBool(true);
+ double test1 = MTHREAD->MD->getForData("vol",11042,"broadL_highF","15");
+ debug = MTHREAD->MD->getTempBool();
+ double test2 = MTHREAD->MD->getForData("fgdfgdfhdfhdfhuk",11042,"broadL_highF","");
+ debug = MTHREAD->MD->getTempBool();
+ debug = true;
+ exit(1);
+ */
+
+ /*
+ // Testing if asking a value from freeDim when this is not efined what returns
+ // no, if the freeDim is either null or 11000 I can't ask for e.g. 11042, I didn't developed expansion in the freeDim
+  double debug =   MTHREAD->MD->getProdData("pol_ctSub",11042,"fuelW",DATA_NOW);
+  cout << debug << endl;
+  exit(1);
+  */
+
+ /*
   // Getting forest area by each forest type
   vector<int> regIds2 = MTHREAD->MD->getRegionIds(2);
   for(uint r=0;r<regIds2.size();r++){

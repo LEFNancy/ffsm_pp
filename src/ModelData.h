@@ -138,8 +138,13 @@ public:
   const bool          assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
   const int           getMaxYearUsableDeathTimber(const string &prod_h, const string &forType_h, const string &dClass_h);
   const int           getMaxYearUsableDeathTimber();
-  int                 setErrorLevel(int errorLevel_h){errorLevel=errorLevel_h;}
+  void                setErrorLevel(int errorLevel_h){errorLevel=errorLevel_h;}
+  int                 getErrorLevel(){return errorLevel;}
   bool                getTempBool(){return tempBool;}
+  void                setTempBool(bool tempBool_h){tempBool = tempBool_h;}
+  bool                getValueFoundBool(){return valueFoundBool;}
+  void                setValueFoundBool(bool valueFoundBool_h){valueFoundBool = valueFoundBool_h;}
+
   vector < vector <int> > createCombinationsVector(const int& nItems); ///< Return a vector containing any possible combination of nItems items (including any possible subset). The returned vector has in each slot the items present in that specific combination.
 
   double              getTimedData(const vector <double> &dated_vector, const int& year_h) const; ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
@@ -230,6 +235,7 @@ private:
   vector <string>                            allProducts;
 
   bool                                         tempBool; ///< a temporary bool variable used for various functions
+  bool                                   valueFoundBool; ///< a bool used in getForData() and getProdData() to communicate they didn't found a variable
 
    /// For each agricultural soil type (as defined in the setting "agrLandTypes") this list define the objects that can be placed on that soil type
   InputNode                                 mainDocument;  ///< the main input document, loaded in memory at unzipping stage

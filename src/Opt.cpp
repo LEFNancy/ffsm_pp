@@ -267,7 +267,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
       //  + sum((i,j,prd), (RVAR('pl',j,prd)-RVAR('pl',i,prd)-CT(i,j,prd))*EXP(i,j,prd))
       for (uint p=0;p<allPr.size();p++){
         for (uint r2To=0;r2To<l2r[r1].size();r2To++){
-          ct = gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2To]));
+          ct = (gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2To])) * gpd("pol_tcSub",l2r[r1][r2],allPr[p]));
           obj_value += (x[gix("pl",r1,r2To,p)]-x[gix("pl",r1,r2,p)]-ct)*x[gix("rt",r1,r2,p,r2To)];
         }
       }
@@ -275,7 +275,7 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
       //  // transformers surplus..
       //  + sum((i,p_tr), (RVAR('pl',i,p_tr)-m(i,p_tr))*(RVAR('sl',i,p_tr))) // attenction it's local. if we include w imports or p expports this have to change
       for (uint p=0;p<secPr.size();p++){
-        m = gpd("m",l2r[r1][r2],secPr[p]);
+        m = (gpd("m",l2r[r1][r2],secPr[p]) * gpd("pol_trSub",l2r[r1][r2],secPr[p]));
         obj_value += (x[gix("pl",r1,r2,p+nPriPr)]-m)*x[gix("sl",r1,r2,p+nPriPr)];
       }
       //  - sum((i,p_pr), RVAR('pl',i,p_pr)*RVAR('dl',i,p_pr))               // to total and an other equation total=local+abroad should be added
@@ -447,14 +447,14 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
   CONSTRAIN_START_LOOP(allPr,12)
     for (uint r2To=0;r2To<l2r[r1].size();r2To++){
       cix = gix(12, r1, r2, p,r2To); // attenction we must redefine it, as we are now in a r2to loop
-      ct = gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2To]));
+      ct = (gpd("ct",l2r[r1][r2],allPr[p],DATA_NOW,i2s(l2r[r1][r2To])) *  gpd("pol_tcSub",l2r[r1][r2],allPr[p])) ;
       g[cix] = (x[gix("pl",r1,r2To,p)]-x[gix("pl",r1,r2,p)]-ct);
     }
   CONSTRAIN_END_LOOP
 
   // mkteq25(i,p_tr).. sum(p_pr, a(p_pr,p_tr)*RVAR('pl',i,p_pr))+m(i,p_tr)  =g=  (RVAR('pl',i,p_tr));        // price of raw products + transf cost > trasf product
   CONSTRAIN_START_LOOP(secPr,13)
-    mv = gpd("m",l2r[r1][r2],secPr[p]);
+    mv = (gpd("m",l2r[r1][r2],secPr[p]) * gpd("pol_trSub",l2r[r1][r2],secPr[p]));
     g[cix] = mv - x[gix("pl",r1,r2,p+nPriPr)];
     for (uint p2=0;p2<priPr.size();p2++){
       a = gpd("a",l2r[r1][r2],priPr[p2],DATA_NOW,secPr[p]);

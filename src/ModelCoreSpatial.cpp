@@ -103,7 +103,7 @@ ModelCoreSpatial::initMarketModule(){
         value += gpd("pl",r2,priProducts[pp],secondYear)*
         gpd("a",r2,priProducts[pp],secondYear,secProducts[sp]);
       }
-      value += gpd("m",r2,secProducts[sp],secondYear);
+      value += (gpd("m",r2,secProducts[sp],secondYear)* gpd("pol_trSub",r2,secProducts[sp],secondYear));
       spd(value,"pl",r2,secProducts[sp],secondYear,true);
     }
     // RPAR('dl',i,p_pr,t-1)   =  sum(p_tr, a(p_pr,p_tr)*RPAR('sl',i,p_tr,t-1));
@@ -201,7 +201,7 @@ ModelCoreSpatial::initMarketModule(){
 
 
   // initializing the exports to zero quantities
-  // initializing  ofthe transport cost for the same region to one and distance to zero
+  // initializing of the transport cost for the same region to one and distance to zero
   for(uint r1=0;r1<l2r.size();r1++){
     for(uint r2=0;r2<l2r[r1].size();r2++){
       for(uint p=0;p<allProducts.size();p++){
@@ -791,7 +791,25 @@ ModelCoreSpatial::runManagementModule(){
     }
     double regHArea = 0.0; // for the warning
 
-
+    // Management rate
+    // 20170123: if mr is defined at regional level in the forData table, good, otherwise we look at settings table.
+    // If it isn't there as well, we rise a critical error.
+    // 20170302: removed the (false positive) error message raised if we put mr in setting table
+    double mr;
+    int origErrorLevel = MD->getErrorLevel();
+    MTHREAD->MD->setTempBool(true); // this should not be needed as it is set positive in getForData() map soubroutine..
+    MD->setErrorLevel(MSG_NO_MSG);
+    mr = MD->getForData("mr",regId,"","");
+    if(!MTHREAD->MD->getTempBool()) { // mr not found in the forest data
+      MD->setErrorLevel(MSG_CRITICAL_ERROR);
+      mr = MD->getDoubleSetting("mr");
+    }
+    //try{
+    //  mr = MD->getForData("mr",regId,"","");
+    //} catch (...){
+    //  mr = MD->getDoubleSetting("mr");
+    //}
+    MD->setErrorLevel(origErrorLevel);
 
 
     for (uint p=0;p<regPx.size();p++){
@@ -880,7 +898,7 @@ ModelCoreSpatial::runManagementModule(){
         // C - Computing the corrected expected returns including transaction costs
         for(uint j2=0;j2<fTypes.size();j2++){
           string ft2 = fTypes[j2];
-          double invTransCost = gfd("invTransCost",regId,ft,ft2,DATA_NOW);
+          double invTransCost = (gfd("invTransCost",regId,ft,ft2,DATA_NOW) *  gfd("pol_fiSub",regId,ft,ft2,DATA_NOW) ) ;
           corrExpectedReturns[j2] = (expectedReturns[j2]/ir)-invTransCost; // changed 20150718: npv = eai/ir + tr. cost // HUGE BUG 20151202: transaction costs should be REDUCED, not added to the npv...
         }
 
@@ -905,16 +923,6 @@ ModelCoreSpatial::runManagementModule(){
         //}
         // If I Implement this I'll have a minimal diff in total area.. why ?????
 
-        // 20170123: if mr is defined at regional level in the forData table, good, otherwise we look at settings table.
-        // If it isn't there as well, we rise a critical error.
-        double mr;
-        MD->setErrorLevel(MSG_CRITICAL_ERROR);
-        try{
-           mr = MD->getForData("mr",regId,"","");
-        } catch (...){
-          mr = MD->getDoubleSetting("mr");
-        }
-        MD->setErrorLevel(MSG_ERROR);
 
         thisYearRegAreas[getMaxPos(corrExpectedReturns)] += harvestedAreaForThisFT*mr;
         thisYearRegAreas[getMaxPos(expectedReturns)] += fArea_incr*mr/((double)fTypes.size()); // mr quota of new forest area assigned to highest expected returns ft (not considering transaction costs). Done for each forest types
