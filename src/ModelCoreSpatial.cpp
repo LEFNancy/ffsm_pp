@@ -772,12 +772,14 @@ ModelCoreSpatial::runManagementModule(){
   map<string,double> hAreaByFTypeGroup = vectorToMap(allFTypes,0.0);
   int thisYear = MTHREAD->SCD->getYear();
 
-  // Post optimisation management mobule..
+  // Post optimisation management module..
   for(uint i=0;i<regIds2.size();i++){
     int r2 = regIds2[i];
     int regId = r2;
     ModelRegion* REG = MTHREAD->MD->getRegion(r2);
     regPx = REG->getMyPixels();
+
+    vector<double> polBal_fiSub (fTypes.size(),0.0); // Expenses for forest investment subsides by region and destination ft €
 
     // Dealing with area change..
     double fArea_reg     = REG->getArea();
@@ -895,11 +897,14 @@ ModelCoreSpatial::runManagementModule(){
 
         double harvestedAreaForThisFT = vSum(px->hArea.at(j))*(1-fArea_decr_rel); // gfd("harvestedArea",regId,ft,DIAM_ALL);
         vector<double> corrExpectedReturns(fTypes.size(),0.0); //  corrected expected returns (considering transaction costs). These are in form of  NPV
+        vector<double> polBal_fiSub_unitvalue(fTypes.size(),0.0); // subside (tax) per ha per destination ft €/ha
 
         // C - Computing the corrected expected returns including transaction costs
+
         for(uint j2=0;j2<fTypes.size();j2++){
           string ft2 = fTypes[j2];
           double invTransCost = (gfd("invTransCost",regId,ft,ft2,DATA_NOW) *  gfd("pol_fiSub",regId,ft,ft2,DATA_NOW) ) ;
+          polBal_fiSub_unitvalue[j2] = gfd("invTransCost",regId,ft,ft2,DATA_NOW) * (gfd("pol_fiSub",regId,ft,ft2,DATA_NOW) - 1) ;
           corrExpectedReturns[j2] = (expectedReturns[j2]/ir)-invTransCost; // changed 20150718: npv = eai/ir + tr. cost // HUGE BUG 20151202: transaction costs should be REDUCED, not added to the npv...
         }
 
@@ -928,6 +933,7 @@ ModelCoreSpatial::runManagementModule(){
         thisYearRegAreas[getMaxPos(corrExpectedReturns)] += harvestedAreaForThisFT*mr;
         thisYearRegAreas[getMaxPos(expectedReturns)] += fArea_incr*mr/((double)fTypes.size()); // mr quota of new forest area assigned to highest expected returns ft (not considering transaction costs). Done for each forest types
 
+        polBal_fiSub[getMaxPos(corrExpectedReturns)] += harvestedAreaForThisFT*mr*polBal_fiSub_unitvalue[getMaxPos(corrExpectedReturns)];
 
         // E - Assigning unmanaged area
         //for(uint j2=0;j2<fTypes.size();j2++){
@@ -1024,6 +1030,10 @@ ModelCoreSpatial::runManagementModule(){
       msgOut(MSG_WARNING,"In region "+ i2s(regId) + " the exogenous area decrement ("+ d2s(-fArea_diff) +" ha) is higger than the harvesting ("+ d2s(regHArea) +" ha). Ratio forced to 1.");
     }
 
+    for(uint j=0;j<fTypes.size();j++){
+      sfd((polBal_fiSub[j]/1000000),"polBal_fiSub",regId,fTypes[j],"",DATA_NOW,true); //M€
+
+    }
   } // end of each region
 }
 
@@ -2290,7 +2300,7 @@ ModelCoreSpatial::allocateHarvesting(vector<double> total_st, const int &regId){
 
 /**
  * This function has two tasks:
- * 1) compute the policy balances (- -> costs; + -> rev) for pol_mktDirInt_s, pol_mktDirInt_d, pol_trSub, pol_tcSub and pol_fiSub;
+ * 1) compute the policy balances (- -> public cost,subside; + -> public revenue, tax) for pol_mktDirInt_s, pol_mktDirInt_d, pol_trSub, pol_tcSub and pol_fiSub;
  * 2) compute the producer/consumer surpluses
  */
 void
@@ -2305,7 +2315,7 @@ ModelCoreSpatial::computeEconomicBalances(){
       double pc = gpd("pc",regId,priProducts[p]);
       double sc = gpd("sc",regId,priProducts[p]);
       double polBal_mktDirInt_s = pc * (pol_mktDirInt_s - 1) * sc;
-      spd(polBal_mktDirInt_s,"polBal_mktDirInt_s",regId,priProducts[p],DATA_NOW,true);
+      spd(polBal_mktDirInt_s,"polBal_mktDirInt_s",regId,priProducts[p],DATA_NOW,true); // M€
 
     }
     for(uint p=0;p<secProducts.size();p++){
@@ -2317,8 +2327,8 @@ ModelCoreSpatial::computeEconomicBalances(){
       double sl = gpd("sl",regId,secProducts[p]); // sl because dl include also the production from byproduct that has not subsides in the model
       double polBal_mktDirInt_d = pc * (pol_mktDirInt_d - 1) * dc;
       double polBal_trSub = m * (pol_trSub-1) * sl;
-      spd(polBal_mktDirInt_d,"polBal_mktDirInt_d",regId,secProducts[p],DATA_NOW,true);
-      spd(polBal_trSub,"polBal_trSub",regId,secProducts[p],DATA_NOW,true);
+      spd(polBal_mktDirInt_d,"polBal_mktDirInt_d",regId,secProducts[p],DATA_NOW,true); // M€
+      spd(polBal_trSub,"polBal_trSub",regId,secProducts[p],DATA_NOW,true); // M€
     }
     for(uint p=0;p<allProducts.size();p++){
       double pol_tcSub = gpd("pol_tcSub",regId,allProducts[p]);
@@ -2330,7 +2340,7 @@ ModelCoreSpatial::computeEconomicBalances(){
         double rt = gpd("rt",regId,allProducts[p],DATA_NOW,i2s(regId2));
         polBal_tcSub += ct*(pol_tcSub-1) * rt;
       }
-      spd(polBal_tcSub,"polBal_tcSub",regId,allProducts[p],DATA_NOW,true);
+      spd(polBal_tcSub,"polBal_tcSub",regId,allProducts[p],DATA_NOW,true); // M€
     }
 
   }
