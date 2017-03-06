@@ -239,6 +239,7 @@ ModelCoreSpatial::runMarketModule(){
       double pc_1    = gpd("pc",r2,secProducts[sp],previousYear);
       double dc_1    = gpd("dc",r2,secProducts[sp],previousYear);
       double k_1     = gpd("k",r2,secProducts[sp],previousYear);
+      double pol_mktDirInt_d   = gpd("pol_mktDirInt_d",r2,secProducts[sp]);
       double pol_mktDirInt_d_1 = gpd("pol_mktDirInt_d",r2,secProducts[sp],previousYear);
       double q1                = gpd("q1",r2,secProducts[sp]);
       double pol_mktStr_d      = gpd("pol_mktStr_d",r2,secProducts[sp]);
@@ -248,7 +249,7 @@ ModelCoreSpatial::runMarketModule(){
 
 
       double k  = (1+g1)*k_1;
-      double aa = (sigma/(sigma+1))*pc_1*pow(dc_1,-1/sigma);
+      double aa = (sigma/(sigma+1))*pc_1*pow(dc_1,-1/sigma) * pol_mktDirInt_d_1/pol_mktDirInt_d ;
       double gg = dc_1*pow(pc_1*pol_mktDirInt_d_1,-sigma); //alpha
 
       spd(k, "k" ,r2,secProducts[sp]);
@@ -268,6 +269,7 @@ ModelCoreSpatial::runMarketModule(){
       double sc_1              = gpd("sc",r2,priProducts[pp],previousYear);
       double in                = gpd("in",r2,priProducts[pp])+gpd("in_deathTimber",r2,priProducts[pp]);
       double in_1              = gpd("in",r2,priProducts[pp],previousYear)+gpd("in_deathTimber",r2,priProducts[pp],previousYear);
+      double pol_mktDirInt_s   = gpd("pol_mktDirInt_s",r2,priProducts[pp]);
       double pol_mktDirInt_s_1 = gpd("pol_mktDirInt_s",r2,priProducts[pp],previousYear);
       double t1                = gpd("t1",r2,priProducts[pp]);
       double pol_mktStr_s      = gpd("pol_mktStr_s",r2,priProducts[pp]);
@@ -279,7 +281,7 @@ ModelCoreSpatial::runMarketModule(){
 
       double in_ratio =  in/in_1;
 
-      double bb = (sigma/(sigma+1.0))*pc_1*pow(sc_1,-1.0/sigma)*pow(1/in_ratio,gamma/sigma)*pow(1.0,1.0/sigma);
+      double bb = (sigma/(sigma+1.0))*pc_1*pow(sc_1,-1.0/sigma)*pow(1/in_ratio,gamma/sigma)*pow(1.0,1.0/sigma) * pol_mktDirInt_s_1/pol_mktDirInt_s ;
       double ff = sc_1*pow(pc_1*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma); //chi
 
       spd(bb,"bb",r2,priProducts[pp],DATA_NOW,true);
@@ -2300,7 +2302,8 @@ ModelCoreSpatial::allocateHarvesting(vector<double> total_st, const int &regId){
 
 /**
  * This function has two tasks:
- * 1) compute the policy balances (- -> public cost,subside; + -> public revenue, tax) for pol_mktDirInt_s, pol_mktDirInt_d, pol_trSub, pol_tcSub and pol_fiSub;
+ * 1) compute the policy balances (- -> public cost,subside; + -> public revenue, tax) for pol_mktDirInt_s, pol_mktDirInt_d, pol_trSub and pol_tcSub
+ *    (pol_fiSub are done directly in the runManagementModule() function)
  * 2) compute the producer/consumer surpluses
  */
 void
