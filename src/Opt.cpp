@@ -232,6 +232,10 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
     //    - RVAR('pc',i,p_tr)*RVAR('dc',i,p_tr)
     //  )
     // 20161003: TODO: check if subsidies should enter also the obj function other than the bounds equations. For the moment, as agreed with Sylvain, they are left outside the obj function, but I am not sure of it.
+    // 20170306: Subsides (but not substitute products) added to the aa and bb parameters. They do not change anything.
+    // 20170307: obj_value does not account for the minus 0-5dc0 part anymore. It doesn't chang anything if not that the "reported" surplus is negative.
+    //           The integral of a power function p=q^a with a < -1 (derived from an q=p^b function with b between 0 and -1) is negative ranging from -inf at q=0
+    //           to 0- with q = +inf
       for (uint p=0;p<secPr.size();p++){
         aa = gpd("aa",l2r[r1][r2],secPr[p]);
         sigma = gpd("sigma",l2r[r1][r2],secPr[p]);

@@ -2308,31 +2308,69 @@ ModelCoreSpatial::allocateHarvesting(vector<double> total_st, const int &regId){
  */
 void
 ModelCoreSpatial::computeEconomicBalances(){
+  //int thisYear     =  MTHREAD->SCD->getYear();
+  int previousYear = MTHREAD->SCD->getYear()-1;
 
   for(uint r2=0; r2<regIds2.size();r2++){
     int regId = regIds2[r2];
     ModelRegion* reg = MD->getRegion(regId);
 
     for(uint p=0;p<priProducts.size();p++){
-      double pol_mktDirInt_s = gpd("pol_mktDirInt_s",regId,priProducts[p]);
-      double pc = gpd("pc",regId,priProducts[p]);
-      double sc = gpd("sc",regId,priProducts[p]);
-      double polBal_mktDirInt_s = pc * (pol_mktDirInt_s - 1) * sc;
-      spd(polBal_mktDirInt_s,"polBal_mktDirInt_s",regId,priProducts[p],DATA_NOW,true); // M€
+      double pol_mktDirInt_s   = gpd("pol_mktDirInt_s",regId,priProducts[p]);
+      double pol_mktDirInt_s_1 = gpd("pol_mktDirInt_s",regId,priProducts[p],previousYear);
+      double sigma             = gpd("sigma",regId,priProducts[p]);
+      double in                = gpd("in",regId,priProducts[p]);
+      double in_1              = gpd("in",regId,priProducts[p], previousYear);
+      double pc                = gpd("pc",regId,priProducts[p]);
+      double pc_1              = gpd("pc",regId,priProducts[p], previousYear);
+      double sc                = gpd("sc",regId,priProducts[p]);
+      double sc_1              = gpd("sc",regId,priProducts[p],previousYear);
+      double gamma_incr        = gpd("gamma_incr",regId,priProducts[p]); // elast supply to increasing stocks
+      double gamma_decr        = gpd("gamma_decr",regId,priProducts[p]); // elast supply to decreasing stocks
 
+      double gamma              = in>in_1 ? gamma_incr: gamma_decr;
+      double polBal_mktDirInt_s = pc * (pol_mktDirInt_s - 1) * sc;
+      double surplus_prod       =     pc * sc -
+                                      pc_1
+                                    * pol_mktDirInt_s_1
+                                    * pow(pol_mktDirInt_s,-1)
+                                    * pow(sc_1,-1/sigma)
+                                    * pow(in_1/in,gamma/sigma)
+                                    * (sigma/(sigma+1))
+                                    * pow(sc,(sigma+1)/sigma);
+
+      spd(polBal_mktDirInt_s,"polBal_mktDirInt_s",regId,priProducts[p],DATA_NOW,true); // M€
+      spd(surplus_prod,"surplus_prod",regId,priProducts[p],DATA_NOW,true);
     }
     for(uint p=0;p<secProducts.size();p++){
-      double pol_mktDirInt_d = gpd("pol_mktDirInt_d",regId,secProducts[p]);
-      double pol_trSub       = gpd("pol_trSub",regId,secProducts[p]);
-      double pc = gpd("pc",regId,secProducts[p]);
-      double dc = gpd("dc",regId,secProducts[p]);
-      double m  = gpd("m",regId,secProducts[p]);
-      double sl = gpd("sl",regId,secProducts[p]); // sl because dl include also the production from byproduct that has not subsides in the model
+      double pol_mktDirInt_d   = gpd("pol_mktDirInt_d",regId,secProducts[p]);
+      double pol_mktDirInt_d_1 = gpd("pol_mktDirInt_d",regId,secProducts[p],previousYear);
+      double sigma             = gpd("sigma",regId,secProducts[p]);
+      double pol_trSub         = gpd("pol_trSub",regId,secProducts[p]);
+      double pc                = gpd("pc",regId,secProducts[p]);
+      double pc_1              = gpd("pc",regId,secProducts[p],previousYear);
+      double dc                = gpd("dc",regId,secProducts[p]);
+      double dc_1              = gpd("dc",regId,secProducts[p],previousYear);
+      double dc0               = gpd("dc",regId,secProducts[p],secondYear);
+      double m                 = gpd("m",regId,secProducts[p]);
+      double sl                = gpd("sl",regId,secProducts[p]); // sl because dl include also the production from byproduct that has not subsides in the model
+
       double polBal_mktDirInt_d = pc * (pol_mktDirInt_d - 1) * dc;
-      double polBal_trSub = m * (pol_trSub-1) * sl;
+      double polBal_trSub       = m * (pol_trSub-1) * sl;
+      double trs                = 0.5; // 0.1: we consider 90 percent of the demand integral
+      double surplus_cons       =   pc_1
+                                  * pol_mktDirInt_d_1
+                                  * pow(dc_1,-1/sigma)
+                                  * pow(pol_mktDirInt_d,-1)
+                                  * (sigma/(sigma+1))
+                                  * (pow(dc,(sigma+1)/sigma) - pow(trs*dc0,(sigma+1)/sigma))
+                                  - (dc - trs * dc0) * pc ;
+
       spd(polBal_mktDirInt_d,"polBal_mktDirInt_d",regId,secProducts[p],DATA_NOW,true); // M€
       spd(polBal_trSub,"polBal_trSub",regId,secProducts[p],DATA_NOW,true); // M€
+      spd(surplus_cons,"surplus_cons",regId,secProducts[p],DATA_NOW,true); // M€
     }
+
     for(uint p=0;p<allProducts.size();p++){
       double pol_tcSub = gpd("pol_tcSub",regId,allProducts[p]);
       double polBal_tcSub = 0;

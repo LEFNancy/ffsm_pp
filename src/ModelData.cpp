@@ -169,9 +169,10 @@ ModelData::getScenarioIndex(){
 void
 ModelData::setScenarioData(){
   LLData table = getTable("scenarios");
+  string choosenScenario = MTHREAD->getScenarioName();
   for(int i=0;i<table.nrecords();i++){
     string recordScenarioName = table.getData(i,"id");
-    if (recordScenarioName == MTHREAD->getScenarioName()){
+    if (recordScenarioName == choosenScenario){
       scenario.id             = recordScenarioName;
       scenario.shortDesc      = table.getData(i,"shortDesc");
       scenario.longDesc       = table.getData(i,"longDesc");
@@ -183,6 +184,7 @@ ModelData::setScenarioData(){
       return;
     }
   }
+  msgOut(MSG_CRITICAL_ERROR, "Scenario not found!");
 
 
 }
