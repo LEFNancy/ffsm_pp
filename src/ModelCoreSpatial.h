@@ -112,7 +112,7 @@ public:
   vector <double>       allocateHarvesting(vector<double> total_st, const int & regId); ///< Using the deathTimberInventory map, this function allocate the total st in st from death timber (that goes reduce the deathTimberInventory map) and stFromHarvesting that is what it remains after the allocation to death timber.
   void                  loadExogenousForestLayers(const string & what); ///< Set pixel volumes (what="vol") OR areas (what="area") by specific forest types as defined in gis layers for volumes and proportionally to volumes for areas.
   void                  computeEconomicBalances();///< compute the policy balances (- -> costs; + -> rev) and the producer/consumer surpluses
-
+  double                getAvgAgeByDc(Pixel* px, int ft, int dc); ///< return the average age of a tree at a given diameter class, using the cumTp vector
 
   // convenient handles to equivalent ModelData functions..
   double              gpd(const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const string &freeDim_h="") const {return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};

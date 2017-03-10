@@ -107,6 +107,7 @@ public:
   vector <double>                 initialDc0Area; // by ft
   vector <vector <double> >                hArea; // by ft, dc  // possibly in ha, but to be check for 100% sure
   vector <vector <double> >                 hVol; // by ft.dc
+  vector <vector <double> >        hProductivity; // by ft,dc
   vector < vector <vector <double> > >hVol_byPrd; // by ft, dc, pp
   map <int, vector <double> >            regArea; // by year, ft
   //vector <double>                             in; // by pp
@@ -122,7 +123,7 @@ public:
   vector <vector <double> >                 beta;
   vector <vector <double> >                 mort;
   vector <vector <double> >                   tp;
-  vector <vector <double> >                cumTp; ///< This is time of passage to REACH a diameter class (while the exogenous tp by diameter class is the time of passage to LEAVE to the next d class)
+  vector <vector <double> >                cumTp; ///< This is time of passage to REACH a diameter class (while the exogenous tp by diameter class is the time of passage to LEAVE to the next d class). By ft,dc
   vector <vector <double> >                  vHa; ///< Volume at hectar by each diameter class [m^3/ha]
   vector <vector <double> >             cumAlive; ///< Cumulative prob of remaining alive at beginnin of a given diam class
   vector <vector <double> >            cumTp_exp; ///< This is the **expected** version of cumTp, used for calculating profits

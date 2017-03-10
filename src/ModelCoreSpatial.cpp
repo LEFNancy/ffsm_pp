@@ -497,6 +497,7 @@ ModelCoreSpatial::runBiologicalModule(){
         string ft = fTypes[j];
         double pxArea_debug     = px->getDoubleValue("forArea_"+ft, true);
         vector <double>            hV_byDiam;
+        vector <double>            productivity_byDc; // mc/ha/y
         vector < vector <double> > hV_byDiamAndPrd;
         vector <double> hArea_byDc;
         vector <double> newVol_byDiam;
@@ -581,8 +582,10 @@ ModelCoreSpatial::runBiologicalModule(){
 
 
         for (uint u=0; u<dClasses.size(); u++){
-          string dc = dClasses[u];
-          double hr =0;
+          string dc  = dClasses[u];
+          double hr  = 0;
+          double age = getAvgAgeByDc(px, j, u);
+
           //double pastYearVol_reg = u ? gfd("vol",r2,ft,dc,thisYear-1): 0;
           double pastYearVol = px->vol_l.at(j).at(u);
           vector <double> hV_byPrd;
@@ -717,12 +720,15 @@ ModelCoreSpatial::runBiologicalModule(){
           //sfd(vol,"vol",regId,ft,dc);
 
           //sfd(freeArea_byU,"harvestedArea",regId,ft,dc,DATA_NOW,true);
+          double productivity = hArea_byDc.at(u) ? (1000000.0 *  hV_byDiam.at(u))/(hArea_byDc.at(u)*age) : 0.0;
+          productivity_byDc.push_back(productivity);
         } // end foreach diameter classes
         px->hVol.push_back(hV_byDiam);
         px->hVol_byPrd.push_back(hV_byDiamAndPrd);
         px->hArea.push_back(hArea_byDc);
         px->vol.push_back(newVol_byDiam);
         px->vMort.push_back(vMort_byDc);
+        px->hProductivity.push_back(productivity_byDc);
 
 
         #ifdef QT_DEBUG
@@ -1819,6 +1825,8 @@ ModelCoreSpatial::sumRegionalForData(){
       double sumAreaByFt = 0.;
       double pxForAreaByFt = 0.;
       double vReg = 0.;
+      double sumSumHProductivity = 0.;
+      double sumHArea = 0.;
 
       for (uint u=0; u<dClasses.size(); u++){
         string dc = dClasses[u];
@@ -1826,16 +1834,22 @@ ModelCoreSpatial::sumRegionalForData(){
         double hV = 0.;
         double hArea = 0.;
         double vMort = 0.;
+        double sumHProductivity = 0.; // productivity * area
         for (uint p=0;p<regPx.size();p++){
           Pixel* px = regPx[p];
           vol += px->vol.at(j).at(u);
           hV += px->hVol.at(j).at(u);
           hArea += px->hArea.at(j).at(u);
           vMort += px->vMort.at(j).at(u);
+          sumHProductivity += (px->hProductivity.at(j).at(u) * px->hArea.at(j).at(u));
         }
         if(u){
           sfd(vol,"vol",regId,ft,dc,DATA_NOW);
           sfd(hV,"hV",regId,ft,dc,DATA_NOW,true);
+          double hProductivityByDc = hArea ?  sumHProductivity/hArea : 0.;
+          sumSumHProductivity += (hProductivityByDc*hArea);
+          sumHArea += hArea;
+          sfd(hProductivityByDc,"hProductivityByDc",regId,ft,dc,DATA_NOW,true);
           sfd(hArea,"harvestedArea",regId,ft,dc,DATA_NOW, true);
           sfd(vMort,"vMort",regId,ft,dc,DATA_NOW,true);
           double vol_1 = gfd("vol",regId,ft,dc,currentYear-1);
@@ -1846,7 +1860,10 @@ ModelCoreSpatial::sumRegionalForData(){
           }
 
         }
-      }
+      } // end foreach dc
+      double hProductivity = sumHArea? sumSumHProductivity / sumHArea : 0.;
+      sfd(hProductivity,"hProductivity",regId,ft,"",DATA_NOW,true);
+
       for (uint p=0;p<regPx.size();p++){
         Pixel* px = regPx[p];
         vReg += px->vReg.at(j);
@@ -2386,4 +2403,13 @@ ModelCoreSpatial::computeEconomicBalances(){
 
   }
 
+}
+
+/**
+ * Return the average age using cumTp vector
+ */
+double
+ModelCoreSpatial::getAvgAgeByDc(Pixel* px, int ft, int dc){
+  if(dc ==  dClasses.size()-1) { return px->cumTp[ft][dc] * 1.2;}
+  else {return (px->cumTp[ft][dc]+px->cumTp[ft][dc+1])/2; }
 }
