@@ -285,7 +285,7 @@ struct forToProd {
 /// Forest types (struct)
 /**
 Struct containing the list of the forest types managed in the model.
-@par memType Parameter to define if this type is used only in initial data reading, then is reclassed and no more used (1) or if it is generated from the reclass rule and then used in the model (2). New 20150311: (3) means a layer with spatial data of vol and area added respectiely in layers and proportionally to volumes
+@par memType Parameter to define if this type is used only in initial data reading, then is reclassed and no more used (1) or if it is generated from the reclass rule and then used in the model (2). New 20150311: (3) means a layer with spatial data of vol and area added respectiely in layers and proportionally to volumes. New 20170313: (2) also means a ft layer with no initial area nor volumes, but that can be choosen by forest managers (e.g. a new cc adapted ft). No need to introduce a new code specifically for that
 */
 struct forType {
   string                                        forTypeId;
