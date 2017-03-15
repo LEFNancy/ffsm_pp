@@ -10,8 +10,8 @@
 ./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_BASE'
 ./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM'
 ./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_SUBSIDES'
-./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_OPENMARKETS'
-./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_STUCTURALPOLICIES'
+#./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_OPENMARKETS'
+./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT_STRUCTURALPOLICIES'
 ./run_single_scenario.sh 'data/ffsmInput_foretcc.ods' 'RCP00_BAS_ADAPT'
 
 

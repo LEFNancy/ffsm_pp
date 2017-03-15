@@ -2346,7 +2346,7 @@ ModelCoreSpatial::computeEconomicBalances(){
       double gamma_decr        = gpd("gamma_decr",regId,priProducts[p]); // elast supply to decreasing stocks
 
       double gamma              = in>in_1 ? gamma_incr: gamma_decr;
-      double polBal_mktDirInt_s = pc * (pol_mktDirInt_s - 1) * sc;
+      double polBal_mktDirInt_s = pc * (1-pol_mktDirInt_s) * sc;
       double surplus_prod       =     pc * sc -
                                       pc_1
                                     * pol_mktDirInt_s_1

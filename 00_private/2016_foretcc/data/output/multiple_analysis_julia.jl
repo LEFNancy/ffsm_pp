@@ -1,22 +1,51 @@
 using DataArrays, DataFrames, DataFramesMeta, Plots, StatPlots
+include("pivot.jl")
 
 scenarios = ["RCP00_BAS_EXT",            "RCP00_BAS_ADAPT_BASE",        "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
-             "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STUCTURALPOLICIES",
+             "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STRUCTURALPOLICIES",
              "RCP00_BAS_ADAPT"]
-scenarios = ["RCP00_BAS_EXT", "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_SUBSIDES_GRAD"]
+scenarios = ["RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_SUBSIDES_GRAD"]
+scenarios = ["debug","debug_pol_mktDirInt_s"]
+scenarios = ["debug","debug_pol_mktDirInt_d"]
+scenarios = ["RCP00_BAS_EXT",            "RCP00_BAS_ADAPT_BASE",        "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
+             "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STRUCTURALPOLICIES",
+             "RCP00_BAS_ADAPT"]
+             
 baseIDir = "results";
 
 fgroup_map = Dict(
- "Fut_Feu"  => "Broadleaved",
- "Fut_Mix"  => "Mixed",
- "Fut_Con"  => "Coniferous",
- "Mel_Feu"  => "Broadleaved",
- "Mel_Mix"  => "Mixed",
- "Tail_Feu" => "Broadleaved",
- NA         => "All forests",
- "broadL"   => "Broadleaved",
- "mixedBC"  => "Mixed",
- "con"      => "Coniferous",
+ "Fut_Feu"         => "Broadleaved",
+ "Fut_Mix"         => "Mixed",
+ "Fut_Con"         => "Coniferous",
+ "Mel_Feu"         => "Broadleaved",
+ "Mel_Mix"         => "Mixed",
+ "Tail_Feu"        => "Broadleaved",
+ NA                => "All forests",
+ "broadL"          => "Broadleaved",
+ "mixedBC"         => "Mixed",
+ "con"             => "Coniferous",
+ "Reb_Fut_Con"     => "Coniferous",
+ "Reb_Fut_Feu"     => "Broadleaved",
+ "Reb_conShortRot" => "Coniferous",
+ "Reb_Tail_Feu"    => "Broadleaved",
+)
+
+refor_map = Dict( #reforestation
+ "Fut_Feu"         => "TradFT",
+ "Fut_Mix"         => "TradFT",
+ "Fut_Con"         => "TradFT",
+ "Mel_Feu"         => "TradFT",
+ "Mel_Mix"         => "TradFT",
+ "Tail_Feu"        => "TradFT",
+ NA                => "FT",
+ "broadL"          => "TradFT",
+ "mixedBC"         => "TradFT",
+ "con"             => "TradFT",
+ "Reb_Fut_Con"     => "Refor",
+ "Reb_Fut_Feu"     => "Refor",
+ "Reb_conShortRot" => "Refor",
+ "Reb_Tail_Feu"    => "Refor",
+
 )
 
 pgroup_map = Dict(
@@ -43,6 +72,7 @@ delete!(forVars, [:x,:country,:freeDim]) # delete columns X (empty at the end), 
 [delete!(dfi, [:x,:country,]) for dfi in [cVars, prodVars]] # delete columns X (empty at the end) and country
 print("Data loaded")
 
+head(forVars)
 
 #head(forVars)  # scen	parName	region	forType	year	value
 #head(prodVars) # scen	parName	region	prod	freeDim	year	value
@@ -51,9 +81,23 @@ print("Data loaded")
 
 # Data clean-up
 forVars[:forGroup] = map(k->fgroup_map[k], forVars[:forType])
+forVars[:ref]      = map(k->refor_map[k],  forVars[:forType])
 prodVars[:prodLev] = map(k->pgroup_map[k], prodVars[:prod])
 
 
+forV = pivot(forVars,:value,
+           [(:parName,["hV","polBal_fiSub"]),(:scen,)],
+           [:year,[2011,2012,2013,2014,2015]],
+           :sum)
+
+prodV = pivot(prodVars,:value,
+          [(:parName,["st","polBal_mktDirInt_s", "polBal_mktDirInt_d", "polBal_trSub", "polBal_tcSub",
+                      "surplus_prod", "surplus_cons"]),(:scen,)],
+          [:year,[2011,2012,2013,2014,2015]],
+          :sum)
+
+
+#=
 ## Create winden versions of datasets..
 # Taking ages because of the trade in prodVarsW
 forVarsW = unstack(forVars, :parName, :value)
@@ -177,3 +221,5 @@ forArea_plot = plot(forArea, x="scenYear", y="forArea", color="forType", Geom.ba
 draw(PNG("forArea_plot.png", 30cm, 20cm), forArea_plot)
 draw(SVG("forArea_plot.svg", 30cm, 20cm), forArea_plot)
 writetable("forArea.csv", forArea, separator = ';', header = true)
+
+=#
