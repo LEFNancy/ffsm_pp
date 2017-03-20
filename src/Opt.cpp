@@ -840,6 +840,7 @@ bool
 Opt::eval_h(Index n, const Number* x, bool new_x, Number obj_factor, Index m, const Number* lambda,
             bool new_lambda, Index nele_hess, Index* iRow, Index* jCol, Number* values){
 
+  //return false;
 
   if (values == NULL) {
     // return the structure. This is a symmetric matrix, fill the lower left

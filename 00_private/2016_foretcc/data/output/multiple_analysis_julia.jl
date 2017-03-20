@@ -1,16 +1,18 @@
 using DataArrays, DataFrames, DataFramesMeta, Plots, StatPlots
 include("pivot.jl")
 
-scenarios = ["RCP00_BAS_EXT",            "RCP00_BAS_ADAPT_BASE",        "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
-             "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STRUCTURALPOLICIES",
-             "RCP00_BAS_ADAPT"]
-scenarios = ["RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_SUBSIDES_GRAD"]
-scenarios = ["debug","debug_pol_mktDirInt_s"]
-scenarios = ["debug","debug_pol_mktDirInt_d"]
-scenarios = ["RCP00_BAS_EXT",            "RCP00_BAS_ADAPT_BASE",        "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
-             "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STRUCTURALPOLICIES",
-             "RCP00_BAS_ADAPT"]
-             
+scenarios = ["RCP00_BAS_EXT",            "RCP00_BAS_ADAPT_BASE",               "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
+             "RCP00_BAS_ADAPT_SUBSIDES",       "RCP00_BAS_ADAPT_STRUCTURALPOLICIES", "RCP00_BAS_ADAPT"]
+#scenarios = ["RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_SUBSIDES_GRAD"]
+#scenarios = ["debug","debug_pol_mktDirInt_s"]
+#scenarios = ["debug","debug_pol_mktDirInt_d"]
+#scenarios = ["RCP00_BAS_EXT",            "RCP00_BAS_ADAPT_BASE",               "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
+#             "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_STRUCTURALPOLICIES", "RCP00_BAS_ADAPT"]
+
+
+#scenarios = ["RCP00_BAS_EXT", "RCP00_BAS_EXT_09", "RCP00_BAS_EXT_2007v"]
+
+
 baseIDir = "results";
 
 fgroup_map = Dict(
@@ -84,18 +86,32 @@ forVars[:forGroup] = map(k->fgroup_map[k], forVars[:forType])
 forVars[:ref]      = map(k->refor_map[k],  forVars[:forType])
 prodVars[:prodLev] = map(k->pgroup_map[k], prodVars[:prod])
 
+years = [2012,2013,2014,2015,2019,2020,2030,2035,2040,2050]
 
-forV = pivot(forVars,:value,
-           [(:parName,["hV","polBal_fiSub"]),(:scen,)],
-           [:year,[2011,2012,2013,2014,2015]],
-           :sum)
+forV = pivot(forVars,[:parName,:scen],:year,:value,
+             filter = Dict(:parName=>["hV","vol","polBal_fiSub"], :year=>years)
+            )
+regArea = pivot(forVars,[:parName,:ref,:scen],:year,:value,
+             filter = Dict(:parName=>["hV","regArea"], :year=>years)
+            )
+prodV = pivot(prodVars,[:parName,:prod,:scen],:year,:value,
+             #filter = Dict(:parName=>["st","polBal_mktDirInt_s", "polBal_mktDirInt_d", "polBal_trSub", "polBal_tcSub",
+            #             "surplus_prod", "surplus_cons"],
+             filter = Dict(:parName=>["da","dl","dt","pl"],
+               :prod => ["fuelW","hardWSawnW","softWSawnW", "plyW","pulpW","pannels"],
+               :year=>years)
+            )
+debug = pivot(prodVars,[:parName,:prod],:year,:value,
+             filter = Dict(
+               :scen    => ["RCP00_BAS_EXT_2007V"],
+               :year    => years,
+               :parName => ["da"],
+               #:prod    => ["fuelW"],
+             )
+)
 
-prodV = pivot(prodVars,:value,
-          [(:parName,["st","polBal_mktDirInt_s", "polBal_mktDirInt_d", "polBal_trSub", "polBal_tcSub",
-                      "surplus_prod", "surplus_cons"]),(:scen,)],
-          [:year,[2011,2012,2013,2014,2015]],
-          :sum)
 
+#writetable("debug.csv", debug, separator = ';', header = true)
 
 #=
 ## Create winden versions of datasets..

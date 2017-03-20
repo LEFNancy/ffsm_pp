@@ -310,6 +310,16 @@ Output::initOutputForestData(){
   }
   out << "\n";
   out.close();
+
+  // gonna do the same for detailed hV..
+  if(!MTHREAD->MD->getBoolSetting("outDetailedHv")) return;
+  outFileName = baseDir+oDir+"results/detailedHV_"+scenarioName+oFileExt;
+  ofstream outHV(outFileName.c_str(), ios::out);
+  if (!outHV){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
+  outHV << "scen" << d << "parName" << d << "country" << d << "region" << d << "forType" << d << "freeDim" << d << "prod" << d << "year" << d << "value" << d;
+  outHV << "\n";
+  outHV.close();
+
 }
 
 void
@@ -970,4 +980,48 @@ Output::cleanScenario(string fileName, string scenarioName, char d){
     out << "\n";
   }
 }
+
+ void
+ Output::printDetailedHV(map<tr1::array<string, 4>,double> hVol_byPrd){
+   if(!MTHREAD->MD->getBoolSetting("outDetailedHv")) return;
+   outFileName = baseDir+oDir+"results/detailedHV_"+scenarioName+oFileExt;
+   int currentYear = MTHREAD->SCD->getYear();
+   ofstream outHV(outFileName.c_str(), ios::app);
+   if (!outHV){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
+   //outHV << "scen" << d << "parName" << d << "country" << d << "region" << d << "forType" << d << "freeDim" << d << "prod" << d << "year" << d << "value" << d;
+   for (uint r1=0;r1<l2r.size();r1++){
+     string reg1Id = i2s(l1regIds.at(r1));
+     string reg1Name = MTHREAD->MD->regId2RegSName(l1regIds.at(r1));
+     for (uint r2=0;r2<l2r[r1].size();r2++){
+       string reg2Id = i2s(l2r[r1][r2]);
+       string reg2Name = MTHREAD->MD->regId2RegSName(l2r[r1][r2]);
+       for(uint j=0;j<fTypes.size();j++){
+           string ft = fTypes[j];
+           for(uint u=0;u<dClasses.size();u++){
+              string dc = dClasses[u];
+              if(dc == "") continue;
+              for(uint p=0;p<priPr.size();p++){
+                string prd = priPr[p];
+                tr1::array<string, 4> hVKey = {reg2Id, ft, dc, prd};
+                double value = findMap(hVol_byPrd,hVKey);
+                outHV << scenarioName << d;
+                outHV << "hVbyPrd" << d;
+                outHV << reg1Name << d;
+                outHV << reg2Name << d;
+                outHV << ft << d;
+                outHV << dc << d;
+                outHV << prd << d;
+                outHV << currentYear << d;
+                outHV << value << d;
+                outHV << "\n";
+              }
+           } //end dc
+        } //end ft
+     } // end r2
+   } // end r1
+
+
+   outHV.close();
+
+ }
 

@@ -24,6 +24,7 @@
 #include <cmath>
 #include <algorithm>
 #include <map>
+#include <tr1/array>
 
 #include <Eigen/Dense>
 
@@ -129,6 +130,29 @@ struct GccTest
 // --------------------------------------
 void
 Sandbox::basicTest(){
+
+   /*
+    // Testing map of generic vector of strings
+    //map<vector<string>,double>  testMap;
+    map<tr1::array<string, 3>,double> testMap;
+
+    //vector<string> k1 = {"aa","aa","aa"};
+    tr1::array<string, 3> k1 = {"aa","aa","aa"};
+    double v1 = 1;
+    double v1b = 3;
+    //vector<string> k2 = {"aa","bb","aa"};
+    tr1::array<string, 3> k2 = {"aa","bb","aa"};
+    double v2 = 2;
+    incrOrAddMapValue(testMap, k1, v1);
+    incrOrAddMapValue(testMap, k2, v2);
+    incrOrAddMapValue(testMap, k1, v1b);
+    double debug = findMap(testMap, k1);
+    cout << debug << endl;
+    double debug2 = findMap(testMap, k2);
+    cout << debug2 << endl;
+    exit(1);
+   */
+
 
     /*
     // Testing debugging a map

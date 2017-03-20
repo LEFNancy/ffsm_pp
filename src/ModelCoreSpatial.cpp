@@ -21,6 +21,8 @@
  ***************************************************************************/
 #include <cmath>
 #include <algorithm>
+#include <tr1/array>
+
 
 #include "IpIpoptApplication.hpp"
 #include "IpSolveStatistics.hpp"
@@ -1813,10 +1815,15 @@ ModelCoreSpatial::sumRegionalForData(){
   //vector <string> outForVariables  = MTHREAD->MD->getStringVectorSetting("outForVariables");
   int currentYear = MTHREAD->SCD->getYear();
 
+  //map<vector<string>,double>  hVol_byPrd; // by regid, ft, dc, pp
+  map<tr1::array<string, 4>,double> hVol_byPrd; // by regid, ft, dc, pp
+
   // OLD CODE TO
   for(uint r2= 0; r2<regIds2.size();r2++){
     int regId = regIds2[r2];
-    regPx = MTHREAD->MD->getRegion(regId)->getMyPixels();
+    regPx = MTHREAD->MD->getRegion(regId)->getMyPixels(); // by regId, ft, dc, pp
+
+    // vector < vector <vector <double> > >hVol_byPrd; // by ft, dc, pp
 
     for(uint j=0;j<fTypes.size();j++){
       string ft = fTypes[j];
@@ -1835,13 +1842,23 @@ ModelCoreSpatial::sumRegionalForData(){
         double hArea = 0.;
         double vMort = 0.;
         double sumHProductivity = 0.; // productivity * area
-        for (uint p=0;p<regPx.size();p++){
-          Pixel* px = regPx[p];
+        for (uint pi=0;pi<regPx.size();pi++){
+          Pixel* px = regPx[pi];
           vol += px->vol.at(j).at(u);
           hV += px->hVol.at(j).at(u);
           hArea += px->hArea.at(j).at(u);
           vMort += px->vMort.at(j).at(u);
           sumHProductivity += (px->hProductivity.at(j).at(u) * px->hArea.at(j).at(u));
+          if(MD->getBoolSetting("outDetailedHv")){
+            for(uint pp=0;pp<priProducts.size();pp++){
+              string pr =  priProducts[pp];
+              // vector <string> hVKey = {i2s(regId), ft, dc, pr};
+              tr1::array<string, 4> hVKey = {i2s(regId), ft, dc, pr};
+              //double debug = px->hVol_byPrd.at(j).at(u).at(pp);
+              //cout << px->getID() << '\t' << j << '\t' << u << '\t' << pp << '\t' << debug << endl;
+              incrOrAddMapValue(hVol_byPrd, hVKey, px->hVol_byPrd.at(j).at(u).at(pp));
+            }
+          }
         }
         if(u){
           sfd(vol,"vol",regId,ft,dc,DATA_NOW);
@@ -1899,8 +1916,10 @@ ModelCoreSpatial::sumRegionalForData(){
 #endif
     } // end of each pixel
 
-  } // end each region
 
+  } // end each region
+  //cout << "done" << endl;
+  MTHREAD->DO->printDetailedHV(hVol_byPrd);
 
 
   // Taking care of expected returns here..
@@ -1983,6 +2002,10 @@ ModelCoreSpatial::sumRegionalForData(){
         sfd(invadedArea/totalForArea,"totalShareInvadedArea",regId,"","",DATA_NOW, true);
       }
   } // end we are using path model
+
+
+
+
 }
 /**
  * This function call registerHarvesting() (accounts for emissions from for. operations), registerDeathBiomass() (registers new stocks of death biomass),

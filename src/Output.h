@@ -30,6 +30,7 @@
 #include <iostream>
 #include <sstream>
 #include <time.h>
+#include <tr1/array>
 
 //regmas headers
 #include "BaseClass.h"
@@ -65,6 +66,7 @@ public:
     void                printCarbonBalance();
   void                printFinalOutput();
   void                printDebugOutput();
+  void                printDetailedHV(map<tr1::array<string, 4>,double> hVol_byPrd);
   void                printDebugPixelValues();
   void                printOptLog(bool optimal, int &nIterations, double &obj);
   char                getOutputFieldDelimiter();
