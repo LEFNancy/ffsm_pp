@@ -51,6 +51,7 @@
 *    Area           -> at the end of the year
 *    Harvesting     -> at the beginning of the year
 *    Volumes are in Mm^3, Areas in the model in Ha (10000 m^2), in the layers in m^2, vHa in m^3/ha. Prices are in €/m^3.
+*    Policy balances (- -> public cost,subside; + -> public revenue) and surpluses are in milion €
 *
 *    BALANCE:
 *    PROD_forLocal (sl) + PROD_forExp (sa) + IMP (da) + sum_reg(reg_trade_in) = CONS_fromLocal (dl) + CONS_fromImp (da) + EXP (sa) + sum_reg(reg_trade_out)

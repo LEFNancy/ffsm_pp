@@ -310,6 +310,9 @@ ModelCoreSpatial::runMarketModule(){
   application->Options()->SetNumericValue("obj_scaling_factor", -1); // maximisation
   application->Options()->SetNumericValue("max_cpu_time", 1800); // max 1/2 hour to find the optimus for one single year
   application->Options()->SetStringValue("check_derivatives_for_naninf", "yes");
+  //application->Options()->SetStringValue("halt_on_ampl_error", "yes"); // not a valid option
+
+
 
   // Initialize the IpoptApplication and process the options
   ApplicationReturnStatus status;

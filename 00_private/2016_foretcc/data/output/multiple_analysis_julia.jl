@@ -135,6 +135,27 @@ debug = pivot(prodVars,[:parName,:prod],:year,:value,
              )
 )
 
+pol1 = by(forVars, [:scen,:parName,:region,:year]) do df
+   DataFrame(value = sum(df[:value]))
+end
+
+pol2 = by(prodVars, [:scen,:parName,:region,:year]) do df
+   DataFrame(value = sum(df[:value]))
+end
+
+pol=vcat([pol1,pol2])
+
+policy_vars = ["polBal_mktDirInt_s", "polBal_mktDirInt_d", "polBal_trSub", "polBal_tcSub", "pol_fiSub", "surplus_prod", "surplus_cons"]
+pol = pol[ [i in policy_vars for i in pol[:parName]] ,:]
+
+nat_pol = pivot(pol,[:scen,:parName],:year,:value,
+                sort = :scen
+)
+
+reg_pol =  pivot(pol,[:scen,:year,:region],:parName,:value,
+                 sort = [:scen,:year],
+                 filter = Dict(:year => [2015,2020,2030,2050])
+)
 
 #writetable("debug.csv", debug, separator = ';', header = true)
 
