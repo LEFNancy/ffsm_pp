@@ -3,6 +3,10 @@ include("pivot.jl")
 
 scenarios = ["RCP00_BAS_EXT",            "RCP00_BAS_ADAPT_BASE",               "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
              "RCP00_BAS_ADAPT_SUBSIDES",       "RCP00_BAS_ADAPT_STRUCTURALPOLICIES", "RCP00_BAS_ADAPT"]
+scenarios = ["RCP00_BAS_EXT_FINAL","RCP00_BAS_ADAPT_FINAL"]
+
+scenarios = ["RCP00_BAS_ADAPT", "RCP00_BAS_ADAPT_FINAL"]
+
 #scenarios = ["RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_SUBSIDES_GRAD"]
 #scenarios = ["debug","debug_pol_mktDirInt_s"]
 #scenarios = ["debug","debug_pol_mktDirInt_d"]
@@ -67,14 +71,19 @@ pgroup_map = Dict(
 forestData_byscenario = [readtable(baseIDir*"/forestData_"*scenario*".csv", separator = ';') for scenario in scenarios];
 productData_byscenario = [readtable(baseIDir*"/productData_"*scenario*".csv", separator = ';') for scenario in scenarios];
 carbonData_byscenario = [readtable(baseIDir*"/carbonBalance_"*scenario*".csv", separator = ';') for scenario in scenarios];
+hVDet_byscenario = [readtable(baseIDir*"/detailedHV_"*scenario*".csv", separator = ';') for scenario in scenarios];
 forVars = vcat(forestData_byscenario)
 prodVars = vcat(productData_byscenario)
 cVars = vcat(carbonData_byscenario)
-delete!(forVars, [:x,:country,:freeDim]) # delete columns X (empty at the end), country and freeDim
-[delete!(dfi, [:x,:country,]) for dfi in [cVars, prodVars]] # delete columns X (empty at the end) and country
+hVDet = vcat(hVDet_byscenario)
+#delete!(forVars, [:x,:country,:freeDim]) # delete columns X (empty at the end), country and freeDim
+[delete!(dfi, [:x,:country,]) for dfi in [cVars, prodVars, forVars,hVDet]] # delete columns X (empty at the end) and country
+forVars[:prod] = ""
+
 print("Data loaded")
 
 head(forVars)
+
 
 #head(forVars)  # scen	parName	region	forType	year	value
 #head(prodVars) # scen	parName	region	prod	freeDim	year	value
@@ -84,9 +93,25 @@ head(forVars)
 # Data clean-up
 forVars[:forGroup] = map(k->fgroup_map[k], forVars[:forType])
 forVars[:ref]      = map(k->refor_map[k],  forVars[:forType])
+hVDet[:forGroup] = map(k->fgroup_map[k], hVDet[:forType])
+hVDet[:ref]      = map(k->refor_map[k],  hVDet[:forType])
+
 prodVars[:prodLev] = map(k->pgroup_map[k], prodVars[:prod])
 
 years = [2012,2013,2014,2015,2019,2020,2030,2035,2040,2050]
+
+ign = vcat([forVars,hVDet])
+ign = ign[[i in ["vol","hVbyPrd","regArea"] for i in ign[:parName] ], :]
+writetable("ign.csv", ign, separator = ';', header = true)
+
+names(ign)
+
+debugtest = 1
+
+debug = pivot(ign,[:parName,:scen],:year,:value
+
+            )
+
 
 forV = pivot(forVars,[:parName,:scen],:year,:value,
              filter = Dict(:parName=>["hV","vol","polBal_fiSub"], :year=>years)
