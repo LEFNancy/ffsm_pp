@@ -46,7 +46,6 @@ ModelCoreSpatial::~ModelCoreSpatial(){
 
 void
 ModelCoreSpatial::runInitPeriod(){
-  Pixel* debug = MTHREAD->GIS->getPixel(20798);
   cacheSettings();                ///< cashe things like first year, second year, dClasses...
   initializePixelVolumes();       ///< compute px volumes vol for 2005 (including exogenous loaded volumes)
   assignSpMultiplierPropToVols(); // assign the spatial multiplier (used in the time of return) based no more on a Normal distribution but on the volumes present in the pixel: more volume, more the pixel is fit for the ft
@@ -58,12 +57,12 @@ ModelCoreSpatial::runInitPeriod(){
   resetPixelValues();             ///< swap volumes->lagged_volumes and reset the other pixel vectors
   cachePixelExogenousData();      ///< compute pixel tp, meta and mort
   computeInventary();             ///< in=f(vol_t-1)
-//printDebugInitRegionalValues();
+  //printDebugInitRegionalValues();
   computeCumulativeData();        ///< compute cumTp_exp, vHa_exp, vHa
   initializePixelArea();          ///< compute px->area for each ft and dc (including exogenous loaded areas)
   runBiologicalModule();
   runManagementModule();
-  MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
+  //MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
   updateMapAreas();               ///< update the forArea_{ft} layer on each pixel as old value-hArea+regArea
   updateOtherMapData();           ///< update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   sumRegionalForData();           ///< only for printing stats as forest data is never used at regional level
@@ -84,7 +83,7 @@ ModelCoreSpatial::runSimulationYear(){
   cachePixelExogenousData();
   runBiologicalModule();
   runManagementModule();
-  MTHREAD->DO->printDebugPixelValues();
+  //MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
   updateMapAreas();
   updateOtherMapData();        // update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   sumRegionalForData();        // only for printing stats as forest data is never used at regional level
@@ -500,7 +499,7 @@ ModelCoreSpatial::runBiologicalModule(){
       //px->expectedReturns.clear();
       for(uint j=0;j<fTypes.size();j++){
         string ft = fTypes[j];
-        double pxArea_debug     = px->getDoubleValue("forArea_"+ft, true);
+        //double pxArea_debug     = px->getDoubleValue("forArea_"+ft, true);
         vector <double>            hV_byDiam;
         vector <double>            productivity_byDc; // mc/ha/y
         vector < vector <double> > hV_byDiamAndPrd;
@@ -657,7 +656,7 @@ ModelCoreSpatial::runBiologicalModule(){
             vol = 0.0;
           }else if(u==1){
             vol = max(0.0,(1-1/tp-mort))*pastYearVol+vReg; //Antonello, "bug" fixed 20160203: In case of very strong mortality this quantity (that doesn't include harvesting) could be negative!
-            double debug = vol;
+            //double debug = vol;
             #ifdef QT_DEBUG
             if ((1-1/tp-mort)<0.0){
               msgOut(MSG_DEBUG,"The sum of leaving trres and mortality would have lead to nevative volume if we didn't put a max. 1/tp: "+d2s(1/tp)+",  mort: "+d2s(mort)+", total coeff: "+d2s((1-1/tp-mort))+" ");
@@ -981,8 +980,8 @@ ModelCoreSpatial::runManagementModule(){
                 if(siblings[j2]==ft){
                   siblingAreas.push_back(0.0);
                 } else {
-                  string debug_sibling_ft = siblings[j2];
-                  int debug_positin = getPos(debug_sibling_ft,fTypes);
+                  //string debug_sibling_ft = siblings[j2];
+                  //int debug_positin = getPos(debug_sibling_ft,fTypes);
                   double thisSiblingArea = vSum(px->area.at(getPos(siblings[j2],fTypes)));
                   siblingAreas.push_back(thisSiblingArea);
                 }
@@ -1044,7 +1043,8 @@ ModelCoreSpatial::runManagementModule(){
     }
 
     for(uint j=0;j<fTypes.size();j++){
-      sfd((polBal_fiSub[j]/1000000),"polBal_fiSub",regId,fTypes[j],"",DATA_NOW,true); //M€
+      double debug = polBal_fiSub[j]/1000000;
+      sfd((polBal_fiSub[j]/1000000.0),"polBal_fiSub",regId,fTypes[j],"",DATA_NOW,true); //M€
 
     }
   } // end of each region
@@ -1090,8 +1090,8 @@ ModelCoreSpatial::initializePixelVolumes(){
     ModelRegion* reg = MD->getRegion(regIds2[i]);
     vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
     for (uint j=0;j<rpx.size();j++){
-      int debugPx = rpx[j]->getID();
-      int debug2 = debugPx;
+      //int debugPx = rpx[j]->getID();
+      //int debug2 = debugPx;
       rpx[j]->vol.clear(); // not actually necessary
       for(uint y=0;y<fTypes.size();y++){
         vector <double> vol_byu;
@@ -1528,7 +1528,7 @@ ModelCoreSpatial::computeCumulativeData(){
 
 
       } // end of each ft
-      double debug = 0.0;
+      //double debug = 0.0;
     } // end of each pixel
   } // end of each region
   MD->setErrorLevel(MSG_ERROR);

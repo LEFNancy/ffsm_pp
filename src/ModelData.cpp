@@ -738,7 +738,10 @@ ModelData::applyOverrides(){
   keysToRemove.clear();
   for(p=forDataMap.begin();p!=forDataMap.end();p++){
     unpackKeyForData(p->first,parName,regId,forType,diamClass);
-    //if(!regionExist(regId)) continue;
+    if(!regionExist(regId)){
+      msgOut(MSG_CRITICAL_ERROR,"Forest variable has a unknown region code If you want not to model a region, set residual=true.: "+parName+"\t"+i2s(regId));
+      continue;
+    }
     if(getRegion(regId)->getRegLevel() == 0){
       vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
       for(uint j=0;j<childs.size();j++){
@@ -767,7 +770,10 @@ ModelData::applyOverrides(){
   keysToRemove.clear();
   for(p=forDataMap.begin();p!=forDataMap.end();p++){
     unpackKeyForData(p->first,parName,regId,forType,diamClass);
-    //if(!regionExist(regId)) continue;
+    if(!regionExist(regId)){
+      msgOut(MSG_CRITICAL_ERROR,"Forest variable has a unknown region code If you want not to model a region, set residual=true.: "+parName+"\t"+i2s(regId));
+      continue;
+    }
     if(getRegion(regId)->getRegLevel() == 1){
       vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
       for(uint j=0;j<childs.size();j++){
@@ -793,7 +799,10 @@ ModelData::applyOverrides(){
   keysToRemove.clear();
   for(p=prodDataMap.begin();p!=prodDataMap.end();p++){
     unpackKeyProdData(p->first,parName,regId,prod,freeDim);
-    //if(!regionExist(regId)) continue;
+    if(!regionExist(regId)){
+      msgOut(MSG_CRITICAL_ERROR,"Product variable has a unknown region code If you want not to model a region, set residual=true.: "+parName+"\t"+i2s(regId));
+      continue;
+    }
     if(getRegion(regId)->getRegLevel() == 0){
       vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
       for(uint j=0;j<childs.size();j++){
@@ -823,7 +832,10 @@ ModelData::applyOverrides(){
   for(p=prodDataMap.begin();p!=prodDataMap.end();p++){
     string debug = p->first;
     unpackKeyProdData(p->first,parName,regId,prod,freeDim);
-    //if(!regionExist(regId)) continue;
+    if(!regionExist(regId)){
+      msgOut(MSG_CRITICAL_ERROR,"Product variable has a unknown region code If you want not to model a region, set residual=true.: "+parName+"\t"+i2s(regId));
+      continue;
+    }
     if(getRegion(regId)->getRegLevel() == 1){
       vector<ModelRegion*> childs = getRegion(regId)->getChildren(false);
       for(uint j=0;j<childs.size();j++){
@@ -849,7 +861,10 @@ ModelData::applyOverrides(){
   //apply override from level 0 to level 1 for reclassification rules
   for(uint i=0;i<reclRules.size();i++){
     if(reclRules[i].regId == 0){
-      //if(!regionExist(reclRules[i].regId)) continue;
+      if(!regionExist(reclRules[i].regId)){
+        msgOut(MSG_CRITICAL_ERROR,"Reclassification rule has a unknown region code If you want not to model a region, set residual=true.: "+i2s(reclRules[i].regId));
+        continue;
+      }
       for(uint j=0;j<getRegion(reclRules[i].regId)->getNChildren(false);j++){
         vector<ModelRegion*> childs = getRegion(reclRules[i].regId)->getChildren(false);
         bool found = 0;
@@ -878,7 +893,10 @@ ModelData::applyOverrides(){
 
   //apply override from level 1 to level 2 for reclassification rules
   for(uint i=0;i<reclRules.size();i++){
-    //if(!regionExist(reclRules[i].regId)) continue;
+    if(!regionExist(reclRules[i].regId)){
+      msgOut(MSG_CRITICAL_ERROR,"Reclassification rule has a unknown region code. If you want not to model a region, set residual=true.: "+i2s(reclRules[i].regId));
+      continue;
+    }
     if(getRegion(reclRules[i].regId)->getRegLevel() == 1){
       for(uint j=0;j<getRegion(reclRules[i].regId)->getNChildren(false);j++){
         vector<ModelRegion*> childs = getRegion(reclRules[i].regId)->getChildren(false);
