@@ -1859,7 +1859,7 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
   //);
   if(years_h<0) return 0.;
   if(years_h==0) return amount_h;
-  double ir = getDoubleSetting("ir");    
+  double ir = getDoubleSetting("ir",DATA_NOW);
   double eai = amount_h * ir / (pow(1.0+ir,years_h)-1.0);
 
   return eai;
@@ -1962,7 +1962,7 @@ ModelData::createCombinationsVector(const int& nItems) {
 
 double
 ModelData::getAvailableDeathTimber(const vector<string> &primProd_h, int regId_h, int year_h){
-  if (!getBoolSetting("useDeathTimber")) return 0;
+  if (!getBoolSetting("useDeathTimber",DATA_NOW)) return 0;
   double toReturn = 0.0;
   vector <string> forTypesIds = getForTypeIds();
   for (uint i=0;i<forTypesIds.size();i++){
@@ -1992,7 +1992,7 @@ ModelData::getAvailableDeathTimber(const vector<string> &primProd_h, int regId_h
 vector <int>
 ModelData::getAllocableProductIdsFromDeathTimber(const int &regId_h, const string &ft, const string &dc, const int &harvesting_year, int request_year){
   vector<int> allocableProductIds;
-  if (!getBoolSetting("useDeathTimber")) return allocableProductIds;
+  if (!getBoolSetting("useDeathTimber",DATA_NOW)) return allocableProductIds;
   if (request_year == DATA_NOW) request_year = MTHREAD->SCD->getYear();
   for(uint p=0;p<priProducts.size();p++){
     string primProd = priProducts[p];

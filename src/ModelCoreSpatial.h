@@ -99,7 +99,8 @@ public:
 
   void                  registerCarbonEvents();   ///< call registerHarvesting(), registerDeathBiomass(), registerProducts() and registerTransports()
   void                  cacheSettings();          ///< just cache exogenous settings from ModelData
-  void                  initializePixelVolumes();  ///< distribuite regional exogenous volumes to pixel volumes using corine land cover area as weight
+  void                  cacheDynamicSettings();   ///< cache settings that may change with time
+  void                  initializePixelVolumes(); ///< distribuite regional exogenous volumes to pixel volumes using corine land cover area as weight
   void                  assignSpMultiplierPropToVols(); // assign the spatial multiplier (used in the time of return) based no more on a Normal distribution but on the volumes present in the pixel: more volume, more the pixel is fit for the ft
   void                  initializePixelArea();    ///< compute px->area for each ft and dc
   void                  resetPixelValues();       ///< swap volumes->lagged_volumes and reset the other pixel vectors

@@ -272,7 +272,7 @@ ModelCore::runMarketModule(){
   //} else {
   //  application->Options()->SetStringValue("warm_start_init_point", "yes");
   //}
-  string linearSolver = MTHREAD->MD->getStringSetting("linearSolver");
+  string linearSolver = MTHREAD->MD->getStringSetting("linearSolver",DATA_NOW);
   application->Options()->SetStringValue("linear_solver", linearSolver); // default in ipopt is ma27
   //application->Options()->SetStringValue("hessian_approximation", "limited-memory"); // quasi-newton approximation of the hessian
   //application->Options()->SetIntegerValue("mumps_mem_percent", 100);

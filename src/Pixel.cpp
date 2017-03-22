@@ -196,7 +196,7 @@ Pixel::getMultiplier (const string& multiplierName, const string& forName, int y
       int regId = getMyRegion()->getRegId();
       double multiplier = MTHREAD->MD->getForData(multiplierName, regId, forName, "",year);
       if (multiplierName == "mortCoef_multiplier"){
-        return pow(multiplier,MTHREAD->MD->getDoubleSetting("mortMultiplier_link"))*multiplierSpVar; //Added to account that our multipliers are based on probability of presence and not on planted/managed forests, where mortality is somhow reduced
+        return pow(multiplier,MTHREAD->MD->getDoubleSetting("mortMultiplier_link",DATA_NOW))*multiplierSpVar; //Added to account that our multipliers are based on probability of presence and not on planted/managed forests, where mortality is somhow reduced
       }
       return multiplier*multiplierSpVar;
 

@@ -281,7 +281,7 @@ Carbon::registerTransports(const double &distQ, const int & regId){
   // transportEmissionsCoeff:  [Kg CO2 / (km*m^3) ]
   // desidered output: Mt CO2
   // ==> I must divide by 1000
-  double transportEmissionsCoeff = MTHREAD->MD->getDoubleSetting("transportEmissionsCoeff");
+  double transportEmissionsCoeff = MTHREAD->MD->getDoubleSetting("transportEmissionsCoeff",DATA_NOW);
   addSavedEmissions(-transportEmissionsCoeff*distQ/1000,regId,EM_FOROP);
 }
 

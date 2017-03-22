@@ -75,6 +75,7 @@ ModelCoreSpatial::runInitPeriod(){
 void
 ModelCoreSpatial::runSimulationYear(){
   int thisYear = MTHREAD->SCD->getYear(); // for debugging
+  cacheDynamicSettings();      // cache settings that may change every year
   resetPixelValues();          // swap volumes->lagged_volumes and reset the other pixel vectors
   cachePixelExogenousData();   // compute pixel tp, meta and mort
   computeInventary();          // in=f(vol_t-1)
@@ -302,7 +303,7 @@ ModelCoreSpatial::runMarketModule(){
   //Opt *OPTa = new Opt(MTHREAD);
   //SmartPtr<TNLP> OPTa = new Opt(MTHREAD);
   SmartPtr<IpoptApplication> application = new IpoptApplication();
-  string linearSolver = MTHREAD->MD->getStringSetting("linearSolver");
+  string linearSolver = MTHREAD->MD->getStringSetting("linearSolver",DATA_NOW);
   application->Options()->SetStringValue("linear_solver", linearSolver); // default in ipopt is ma27
   //application->Options()->SetStringValue("hessian_approximation", "limited-memory"); // quasi-newton approximation of the hessian
   //application->Options()->SetIntegerValue("mumps_mem_percent", 100);
@@ -474,7 +475,7 @@ ModelCoreSpatial::runBiologicalModule(){
 
   msgOut(MSG_INFO, "Starting resource module..");
   int thisYear = MTHREAD->SCD->getYear();
-  bool useDeathTimber = MD->getBoolSetting("useDeathTimber");
+  bool useDeathTimber = MD->getBoolSetting("useDeathTimber",DATA_NOW);
 
   for(uint i=0;i<regIds2.size();i++){
     int r2 = regIds2[i];
@@ -817,7 +818,7 @@ ModelCoreSpatial::runManagementModule(){
     mr = MD->getForData("mr",regId,"","");
     if(!MTHREAD->MD->getTempBool()) { // mr not found in the forest data
       MD->setErrorLevel(MSG_CRITICAL_ERROR);
-      mr = MD->getDoubleSetting("mr");
+      mr = MD->getDoubleSetting("mr",DATA_NOW);
     }
     //try{
     //  mr = MD->getForData("mr",regId,"","");
@@ -892,7 +893,7 @@ ModelCoreSpatial::runManagementModule(){
           }
         }
         px->expectedReturnsNotCorrByRa.push_back(expReturns);
-        if(MD->getBoolSetting("heterogeneousRiskAversion")){
+        if(MD->getBoolSetting("heterogeneousRiskAversion",DATA_NOW)){
           double ra = px->getDoubleValue("ra");
           double cumMort = 1-px->cumAlive_exp.at(j).at(optDc);
           //cout << px->getID() << "\t" << ft << "\t\t" << "optDc" << optDc << "\t" << cumMort << endl;
@@ -1031,7 +1032,7 @@ ModelCoreSpatial::runManagementModule(){
       double totalRegArea = vSum(thisYearRegAreas);
       if (! (totalRegArea==0.0 && totalHarvestedArea==0.0)){
         double ratio = totalRegArea / totalHarvestedArea ;
-        if(rescaleFrequencies && (ratio < 0.99999999999 || ratio > 1.00000000001) ) {
+        if(rescaleFrequencies && (ratio < 0.99999999999 || ratio > 1.00000000001) && forestAreaChangeMethod != "fixed") {
           msgOut(MSG_CRITICAL_ERROR, "Sum of regeneration areas not equal to sum of harvested area in runManagementModel()!");
         }
       }
@@ -1068,15 +1069,19 @@ ModelCoreSpatial::cacheSettings(){
   pDClasses.insert(pDClasses.end(), dClasses.begin()+1, dClasses.end() );
   fTypes= MD->getForTypeIds();
   l2r = MD->getRegionIds();
-  regType = MTHREAD->MD->getStringSetting("regType"); // how the regeneration should be computed (exogenous, from hr, from allocation choises)
-  natRegAllocation = MTHREAD->MD->getStringSetting("natRegAllocation"); // how to allocate natural regeneration
-  rescaleFrequencies = MD->getBoolSetting("rescaleFrequencies");
-  oldVol2AreaMethod = MD->getBoolSetting("oldVol2AreaMethod");
+}
+
+void
+ModelCoreSpatial::cacheDynamicSettings(){
+  // Settings needs explicitly DATA_NOW to have a temporal dymension..
+  msgOut(MSG_INFO, "Cashing model settings that may change every year..");
+  regType = MTHREAD->MD->getStringSetting("regType",DATA_NOW); // how the regeneration should be computed (exogenous, from hr, from allocation choises)
+  natRegAllocation = MTHREAD->MD->getStringSetting("natRegAllocation",DATA_NOW); // how to allocate natural regeneration
+  rescaleFrequencies = MD->getBoolSetting("rescaleFrequencies",DATA_NOW);
+  oldVol2AreaMethod = MD->getBoolSetting("oldVol2AreaMethod",DATA_NOW);
   //mr = MD->getDoubleSetting("mr");
-  forestAreaChangeMethod =  MTHREAD->MD->getStringSetting("forestAreaChangeMethod");
-  ir = MD->getDoubleSetting("ir");
-
-
+  forestAreaChangeMethod =  MTHREAD->MD->getStringSetting("forestAreaChangeMethod",DATA_NOW);
+  ir = MD->getDoubleSetting("ir",DATA_NOW);
 }
 
 void
@@ -1852,7 +1857,7 @@ ModelCoreSpatial::sumRegionalForData(){
           hArea += px->hArea.at(j).at(u);
           vMort += px->vMort.at(j).at(u);
           sumHProductivity += (px->hProductivity.at(j).at(u) * px->hArea.at(j).at(u));
-          if(MD->getBoolSetting("outDetailedHv")){
+          if(MD->getBoolSetting("outDetailedHv",DATA_NOW)){
             for(uint pp=0;pp<priProducts.size();pp++){
               string pr =  priProducts[pp];
               // vector <string> hVKey = {i2s(regId), ft, dc, pr};
@@ -2312,7 +2317,7 @@ ModelCoreSpatial::printDebugInitRegionalValues(){
 
 vector <double>
 ModelCoreSpatial::allocateHarvesting(vector<double> total_st, const int &regId){
-   if(!MD->getBoolSetting("useDeathTimber")) return total_st;
+   if(!MD->getBoolSetting("useDeathTimber",DATA_NOW)) return total_st;
    vector <double> stFromHarvesting(priProducts.size(),0.);
    //map<iisskey, double > *  deathTimberInventory= MD->getDeathTimberInventory();
    int maxYears = MD->getMaxYearUsableDeathTimber();

@@ -312,7 +312,7 @@ Output::initOutputForestData(){
   out.close();
 
   // gonna do the same for detailed hV..
-  if(!MTHREAD->MD->getBoolSetting("outDetailedHv")) return;
+  if(!MTHREAD->MD->getBoolSetting("outDetailedHv",DATA_NOW)) return;
   outFileName = baseDir+oDir+"results/detailedHV_"+scenarioName+oFileExt;
   ofstream outHV(outFileName.c_str(), ios::out);
   if (!outHV){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for reading.");}
@@ -983,7 +983,7 @@ Output::cleanScenario(string fileName, string scenarioName, char d){
 
  void
  Output::printDetailedHV(map<tr1::array<string, 4>,double> hVol_byPrd){
-   if(!MTHREAD->MD->getBoolSetting("outDetailedHv")) return;
+   if(!MTHREAD->MD->getBoolSetting("outDetailedHv",DATA_NOW)) return;
    outFileName = baseDir+oDir+"results/detailedHV_"+scenarioName+oFileExt;
    int currentYear = MTHREAD->SCD->getYear();
    ofstream outHV(outFileName.c_str(), ios::app);

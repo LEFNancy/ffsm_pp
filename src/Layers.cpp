@@ -250,7 +250,7 @@ Layers::randomShuffle(){
 void
 Layers::print(){
 
-  if(MTHREAD->MD->getIntSetting("outputLevel")<OUTVL_MAPS) return;
+  if(MTHREAD->MD->getIntSetting("outputLevel",DATA_NOW)<OUTVL_MAPS) return;
   if(!display || !dynamicContent) return;
   string mapBaseDirectory = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getOutputDirectory()+"maps/";
   string mapGridOutputDirectory = mapBaseDirectory+"asciiGrids/";
@@ -265,7 +265,7 @@ Layers::print(){
 
   // printing the map...
   string header;
-  if(MTHREAD->MD->getIntSetting("mapOutputFormat") == 1){ // GRASS ASCII Grid
+  if(MTHREAD->MD->getIntSetting("mapOutputFormat",DATA_NOW) == 1){ // GRASS ASCII Grid
     header =      "north: " + d2s(MTHREAD->GIS->getGeoTopY()) + "\n"
           + "south: " + d2s(MTHREAD->GIS->getGeoBottomY()) + "\n"
           + "east: " + d2s(MTHREAD->GIS->getGeoRightX()) + "\n"
@@ -274,7 +274,7 @@ Layers::print(){
           + "cols: " + i2s(MTHREAD->GIS->getXNPixels()) + "\n"
           + "null: " + d2s(MTHREAD->GIS->getNoValue()) + "\n";
 
-  } else if(MTHREAD->MD->getIntSetting("mapOutputFormat") == 2){
+  } else if(MTHREAD->MD->getIntSetting("mapOutputFormat",DATA_NOW) == 2){
     header =      "ncols: " + i2s(MTHREAD->GIS->getXNPixels()) + "\n"
           + "lrows: " + i2s(MTHREAD->GIS->getYNPixels()) + "\n"
           + "xllcornel: " + d2s(MTHREAD->GIS->getGeoLeftX()) + "\n"
