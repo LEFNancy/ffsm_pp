@@ -47,6 +47,7 @@ ModelCoreSpatial::~ModelCoreSpatial(){
 void
 ModelCoreSpatial::runInitPeriod(){
   cacheSettings();                ///< cashe things like first year, second year, dClasses...
+  cacheDynamicSettings();      // cache settings that may change every year
   initializePixelVolumes();       ///< compute px volumes vol for 2005 (including exogenous loaded volumes)
   assignSpMultiplierPropToVols(); // assign the spatial multiplier (used in the time of return) based no more on a Normal distribution but on the volumes present in the pixel: more volume, more the pixel is fit for the ft
   initMarketModule();             ///< inside it uses first year, second year
