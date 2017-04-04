@@ -1,5 +1,6 @@
-using DataArrays, DataFrames, DataFramesMeta, Plots, StatPlots
-include("pivot.jl")
+using DataArrays, DataFrames, DataFramesMeta, Plots, StatPlots, LAJuliaUtils
+#include("pivot.jl")
+
 
 scenarios = ["RCP00_BAS_EXT",            "RCP00_BAS_ADAPT_BASE",               "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
              "RCP00_BAS_ADAPT_SUBSIDES",       "RCP00_BAS_ADAPT_STRUCTURALPOLICIES", "RCP00_BAS_ADAPT"]
@@ -126,6 +127,25 @@ prodV = pivot(prodVars,[:parName,:prod,:scen],:year,:value,
                :prod => ["fuelW","hardWSawnW","softWSawnW", "plyW","pulpW","pannels"],
                :year=>years)
             )
+supply = pivot(prodVars,[:parName],:year,:value,
+             filter = Dict(
+               :parName=>["st"],
+               :prodLev => ["priProd"],
+               :year=>years,
+               :scen => ["RCP00_BAS_ADAPT"],
+               )
+            )
+
+supply2 = pivot(prodVars,[:prodLev],:year,:value,
+             filter = Dict(
+               :parName=>["dl","sa"],
+               :prodLev => ["priProd"],
+               :year=>years,
+               :scen => ["RCP00_BAS_ADAPT"],
+               )
+            )
+
+
 debug = pivot(prodVars,[:parName,:prod],:year,:value,
              filter = Dict(
                :scen    => ["RCP00_BAS_EXT_2007V"],
@@ -134,6 +154,8 @@ debug = pivot(prodVars,[:parName,:prod],:year,:value,
                #:prod    => ["fuelW"],
              )
 )
+
+
 
 pol1 = by(forVars, [:scen,:parName,:region,:year]) do df
    DataFrame(value = sum(df[:value]))
