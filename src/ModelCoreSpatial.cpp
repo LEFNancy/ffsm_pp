@@ -1033,7 +1033,7 @@ ModelCoreSpatial::runManagementModule(){
       double totalRegArea = vSum(thisYearRegAreas);
       if (! (totalRegArea==0.0 && totalHarvestedArea==0.0)){
         double ratio = totalRegArea / totalHarvestedArea ;
-        if(rescaleFrequencies && (ratio < 0.99999999999 || ratio > 1.00000000001) && forestAreaChangeMethod != "fixed") {
+        if(rescaleFrequencies && (ratio < 0.99999999999 || ratio > 1.00000000001) && forestAreaChangeMethod == "fixed") {
           msgOut(MSG_CRITICAL_ERROR, "Sum of regeneration areas not equal to sum of harvested area in runManagementModel()!");
         }
       }
