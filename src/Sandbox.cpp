@@ -132,6 +132,19 @@ void
 Sandbox::basicTest(){
 
    /*
+    // Testing initializating a matrix with fixed values in C++11
+    //vector< vector<double> > deltaAreas(fTypes.size()+1, vector<double>(fTypes.size()+1,5));
+    vector< vector<double> > deltaAreas(3, vector<double>(5,4));
+    for (uint i=0;i<3;i++){
+       for (uint j=0;j<5;j++){
+         cout << deltaAreas.at(i).at(j) << "\t";
+       }
+       cout << endl;
+    }
+    exit(1);
+    */
+
+   /*
     // Testing map of generic vector of strings
     //map<vector<string>,double>  testMap;
     map<tr1::array<string, 3>,double> testMap;

@@ -104,6 +104,7 @@ public:
 
   vector <vector <double> >                  vol; // by ft,dc
   vector <vector <double> >                 area; // by ft,dc
+  vector <vector <double> >            deltaArea; // by ft_in + "", ft_out + "" // delta areas, transiction matrix
   vector <double>                 initialDc0Area; // by ft
   vector <vector <double> >                hArea; // by ft, dc  // possibly in ha, but to be check for 100% sure
   vector <vector <double> >                 hVol; // by ft.dc
