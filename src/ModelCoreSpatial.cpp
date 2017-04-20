@@ -85,7 +85,7 @@ ModelCoreSpatial::runSimulationYear(){
   cachePixelExogenousData();
   runBiologicalModule();
   runManagementModule();
-  //MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
+  MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
   updateMapAreas();
   updateOtherMapData();        // update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   sumRegionalForData();        // only for printing stats as forest data is never used at regional level
@@ -1063,10 +1063,6 @@ ModelCoreSpatial::runManagementModule(){
         }
       }
       #endif
-
-      double debug1 = vSum(deltaAreas);
-      double debug2 = vSum(px->hArea);
-
 
       px->regArea.insert(pair <int, vector<double> > (MTHREAD->SCD->getYear(), thisYearRegAreas));
       px->deltaArea = deltaAreas;

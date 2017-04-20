@@ -242,6 +242,14 @@ Output::initDebugPixelValues(){
             out << header <<d;
           }
         }
+        for(uint f=0;f<fTypes.size()+1;f++){
+          string ft1 = (f == fTypes.size()) ? "NonFor" : fTypes[f];
+          for(uint f2=0;f2<fTypes.size()+1;f2++){
+            string ft2 = (f2 == fTypes.size()) ? "NonFor" : fTypes[f2];
+            string header = ft1+"_2_"+ft2;
+            out << header <<d;
+          }
+        }
         out << "\n";
 
 
@@ -944,6 +952,31 @@ Output::printDebugPixelValues(){
           out << vSum(px->vHa_exp[f]) << d;
         }
         out << "\n";
+        //----
+        out << common <<"hArea" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << px->hArea[f][u]<< d;
+          }
+          out << vSum(px->hArea[f]) << d;
+        }
+        out << "\n";
+        //----
+        out << common <<"deltaAreas" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << d;
+          }
+          out << d;
+        }
+        for(uint f=0;f<fTypes.size()+1;f++){
+          for(uint f2=0;f2<fTypes.size()+1;f2++){
+            out << px->deltaArea[f][f2]<<d;
+          }
+        }
+        out << "\n";
+
+
       } // end for each pixel
     } // end for each region
   } // end filter
