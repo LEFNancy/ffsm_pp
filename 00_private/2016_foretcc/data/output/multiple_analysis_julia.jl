@@ -1,16 +1,23 @@
-using DataArrays, DataFrames, DataFramesMeta, Plots, StatPlots, LAJuliaUtils
+using DataFrames, DataFramesMeta, Plots, StatPlots, LAJuliaUtils, OdsIO
 #include("pivot.jl")
 
 
 scenarios = [
 "RCP00_BAS_EXT",
-#"RCP00_BAS_ADAPT",
-#"RCP00_BAS_ADAPT_BASE",
-#"RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
-#"RCP00_BAS_ADAPT_SUBSIDES",
-#"RCP00_BAS_ADAPT_STRUCTURALPOLICIES",
+"RCP00_BAS_ADAPT",
+"RCP00_BAS_ADAPT_BASE",
+"RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
+"RCP00_BAS_ADAPT_SUBSIDES",
+"RCP00_BAS_ADAPT_STRUCTURALPOLICIES",
 "RCP86_BAS_EXT",
-#"RCP86_BAS_ADAPT"
+"RCP86_BAS_ADAPT"
+]
+
+mainScenarios = [
+"RCP00_BAS_EXT",
+"RCP00_BAS_ADAPT",
+"RCP86_BAS_EXT",
+"RCP86_BAS_ADAPT"
 ]
 
 
@@ -97,7 +104,9 @@ forVars[:ref]      = map(k->refor_map[k],  forVars[:forType])
 
 prodVars[:prodLev] = map(k->pgroup_map[k], prodVars[:prod])
 
-years = [2012,2013,2014,2015,2019,2020,2030,2035,2040,2050]
+years = [2012,2013,2014,2015,2019,2020,2025,2030,2035,2040,2045,2050]
+years5 = collect(2015:5:2050)
+
 
 #ign = vcat([forVars,hVDet])
 #ign = ign[[i in ["vol","hVbyPrd","regArea"] for i in ign[:parName] ], :]
@@ -105,71 +114,89 @@ years = [2012,2013,2014,2015,2019,2020,2030,2035,2040,2050]
 
 #names(ign)
 
-
-forV = pivot(forVars,[:parName,:scen],:year,:value,
-             filter = Dict(:parName=>["hV","vol","polBal_fiSub"], :year=>years)
-            )
-regArea = pivot(forVars,[:parName,:ref,:scen],:year,:value,
-             filter = Dict(:parName=>["hV","regArea"], :year=>years)
-            )
-prodV = pivot(prodVars,[:parName,:prod,:scen],:year,:value,
-             #filter = Dict(:parName=>["st","polBal_mktDirInt_s", "polBal_mktDirInt_d", "polBal_trSub", "polBal_tcSub",
-            #             "surplus_prod", "surplus_cons"],
-             filter = Dict(:parName=>["da","dl","dt","pl"],
-               :prod => ["fuelW","hardWSawnW","softWSawnW", "plyW","pulpW","pannels"],
-               :year=>years)
-            )
-supply = pivot(prodVars,[:parName],:year,:value,
+# Forest dynamics
+forDyn = pivot(forVars,[:parName,:scen],:year,:value,
              filter = Dict(
-               :parName=>["st"],
-               :prodLev => ["priProd"],
-               :year=>years,
-               :scen => ["RCP00_BAS_ADAPT"],
+               :parName => ["hV","vol"],
+               :scen    => mainScenarios,
+               :year    => years5)
+            )
+#writetable("tables/forDyn.csv", forDyn, separator = ';')
+ods_write("formattedOutput.ods",Dict(("forDyn",1,1) => forDyn )  )
+
+# Forest dynamics by typology (traditional vf reforested plantation)
+forDynByType = pivot(forVars,[:parName,:ref,:scen],:year,:value,
+               filter = Dict(
+                 :parName => ["hV","vol","regArea"],
+                 :scen    => mainScenarios,
+                 :year    => years5)
                )
-            )
+#writetable("tables/forDynByType.csv", forDynByType, separator = ';')
+ods_write("formattedOutput.ods",Dict(("forDynByType",1,1) => forDynByType )  )
 
-supply2 = pivot(prodVars,[:prodLev],:year,:value,
-             filter = Dict(
-               :parName=>["dl","sa"],
-               :prodLev => ["priProd"],
-               :year=>years,
-               :scen => ["RCP00_BAS_ADAPT"],
+# Forest dynamic by spGroup (con, broad..)
+forDynBySpGroup = pivot(forVars,[:parName,:forGroup,:scen],:year,:value,
+               filter = Dict(
+                 :parName => ["hV","vol","regArea"],
+                 :scen    => mainScenarios,
+                 :year    => years5)
                )
-            )
+#writetable("tables/forDynBySpGroup.csv", forDynBySpGroup, separator = ';')
+ods_write("formattedOutput.ods",Dict(("forDynBySpGroup",1,1) => forDynBySpGroup )  )
 
+# Product balance
+prodBalance = pivot(prodVars,[:year,:scen,:prodLev,:prod],:parName,:value,
+                    filter = Dict(
+                        :parName => ["st","da","dt","sa"],
+                        :scen    => mainScenarios,
+                        :year    => [2015,2050]),
+                    sort = [:year,:scen,:prodLev,:prod],
+              )
+#writetable("tables/prodBalance.csv", prodBalance, separator = ';')
+ods_write("formattedOutput.ods",Dict(("prodBalance",1,1) => prodBalance )  )
 
-debug = pivot(prodVars,[:parName,:prod],:year,:value,
-             filter = Dict(
-               :scen    => ["RCP00_BAS_EXT_2007V"],
-               :year    => years,
-               :parName => ["da"],
-               #:prod    => ["fuelW"],
-             )
-)
+# Product balance all years
+prodBalanceAll5Y = pivot(prodVars,[:parName,:prodLev,:prod,:scen,],:year,:value,
+                    filter = Dict(
+                        :parName => ["st","da","dt","sa"],
+                        :scen    => mainScenarios,
+                        :year    => years5),
+                    sort = [:parName,:prodLev,:prod,:scen,],
+              )
+#writetable("tables/prodBalanceAll5Y.csv", prodBalanceAll5Y, separator = ';')
+ods_write("formattedOutput.ods",Dict(("prodBalanceAll5Y",1,1) => prodBalanceAll5Y )  )
 
-
-
+# Preparation of policy variables
 pol1 = by(forVars, [:scen,:parName,:region,:year]) do df
    DataFrame(value = sum(df[:value]))
 end
-
 pol2 = by(prodVars, [:scen,:parName,:region,:year]) do df
    DataFrame(value = sum(df[:value]))
 end
-
 pol=vcat([pol1,pol2])
-
 policy_vars = ["polBal_mktDirInt_s", "polBal_mktDirInt_d", "polBal_trSub", "polBal_tcSub", "pol_fiSub", "surplus_prod", "surplus_cons"]
 pol = pol[ [i in policy_vars for i in pol[:parName]] ,:]
 
-nat_pol = pivot(pol,[:scen,:parName],:year,:value,
-                sort = :scen
+# Policy cost analysis (national)
+polCosts_nat = pivot(pol,[:scen,:parName],:year,:value,
+            filter = Dict(
+                :scen    => mainScenarios,
+                :year    => years5
+            ),
+            sort = [:scen, :parName]
 )
+ods_write("formattedOutput.ods",Dict(("polCosts_nat",1,1) => polCosts_nat )  )
 
-reg_pol =  pivot(pol,[:scen,:year,:region],:parName,:value,
-                 sort = [:scen,:year],
-                 filter = Dict(:year => [2015,2020,2030,2050])
+# Policy cost analysis (regional)
+polCosts_reg = pivot(pol,[:scen,:parName],:region,:value,
+            filter = Dict(
+                :scen    => mainScenarios,
+                :year    => 2050
+            ),
+            sort = [:scen, :parName]
 )
+ods_write("formattedOutput.ods",Dict(("polCosts_reg",1,1) => polCosts_reg )  )
+
 
 #writetable("debug.csv", debug, separator = ';', header = true)
 
