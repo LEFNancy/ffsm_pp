@@ -1,12 +1,11 @@
 using DataFrames, DataFramesMeta, Plots, StatPlots, LAJuliaUtils, OdsIO
-#include("pivot.jl")
-
 
 scenarios = [
 "RCP00_BAS_EXT",
 "RCP00_BAS_ADAPT",
 "RCP00_BAS_ADAPT_BASE",
-"RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM",
+"RCP00_BAS_ADAPT_ALLPOLICIES",
+"RCP00_BAS_ADAPT_ACTIVEMGM",
 "RCP00_BAS_ADAPT_SUBSIDES",
 "RCP00_BAS_ADAPT_STRUCTURALPOLICIES",
 "RCP86_BAS_EXT",
@@ -19,8 +18,6 @@ mainScenarios = [
 "RCP86_BAS_EXT",
 "RCP86_BAS_ADAPT"
 ]
-
-
 
 baseIDir = "results";
 
@@ -71,6 +68,14 @@ pgroup_map = Dict(
  "pannels"     => "secProd",
 )
 
+cbal_map = Dict(
+    "EM_ENSUB"       => "1Emissions",
+    "EM_FOROP"       => "1Emissions",
+    "EM_MATSUB"      => "1Emissions",
+    "STOCK_EXTRA"    => "0Pools",
+    "STOCK_INV"      => "0Pools",
+    "STOCK_PRODUCTS" => "0Pools",
+)
 
 # Data import
 forestData_byscenario = [readtable(baseIDir*"/forestData_"*scenario*".csv", separator = ';') for scenario in scenarios];
@@ -88,9 +93,6 @@ delete!(forVars, [:freeDim])
 
 print("Data loaded")
 
-head(forVars)
-
-
 #head(forVars)  # scen	parName	region	forType	year	value
 #head(prodVars) # scen	parName	region	prod	freeDim	year	value
 #head(cVars)    # scen	region	balItem	year	value
@@ -99,6 +101,10 @@ head(forVars)
 # Data clean-up
 forVars[:forGroup] = map(k->fgroup_map[k], forVars[:forType])
 forVars[:ref]      = map(k->refor_map[k],  forVars[:forType])
+cVars[:totItem]    = map(k->cbal_map[k],   cVars[:balItem])
+cVars[:y2] = ""
+[r[:y2] = "y" * string(r[:year])  for r in eachrow(cVars)] # Creating a column of years starting with a letter
+
 #hVDet[:forGroup] = map(k->fgroup_map[k], hVDet[:forType])
 #hVDet[:ref]      = map(k->refor_map[k],  hVDet[:forType])
 
@@ -121,7 +127,6 @@ forDyn = pivot(forVars,[:parName,:scen],:year,:value,
                :scen    => mainScenarios,
                :year    => years5)
             )
-#writetable("tables/forDyn.csv", forDyn, separator = ';')
 ods_write("formattedOutput.ods",Dict(("forDyn",1,1) => forDyn )  )
 
 # Forest dynamics by typology (traditional vf reforested plantation)
@@ -131,7 +136,6 @@ forDynByType = pivot(forVars,[:parName,:ref,:scen],:year,:value,
                  :scen    => mainScenarios,
                  :year    => years5)
                )
-#writetable("tables/forDynByType.csv", forDynByType, separator = ';')
 ods_write("formattedOutput.ods",Dict(("forDynByType",1,1) => forDynByType )  )
 
 # Forest dynamic by spGroup (con, broad..)
@@ -141,7 +145,6 @@ forDynBySpGroup = pivot(forVars,[:parName,:forGroup,:scen],:year,:value,
                  :scen    => mainScenarios,
                  :year    => years5)
                )
-#writetable("tables/forDynBySpGroup.csv", forDynBySpGroup, separator = ';')
 ods_write("formattedOutput.ods",Dict(("forDynBySpGroup",1,1) => forDynBySpGroup )  )
 
 # Product balance
@@ -152,7 +155,6 @@ prodBalance = pivot(prodVars,[:year,:scen,:prodLev,:prod],:parName,:value,
                         :year    => [2015,2050]),
                     sort = [:year,:scen,:prodLev,:prod],
               )
-#writetable("tables/prodBalance.csv", prodBalance, separator = ';')
 ods_write("formattedOutput.ods",Dict(("prodBalance",1,1) => prodBalance )  )
 
 # Product balance all years
@@ -163,7 +165,6 @@ prodBalanceAll5Y = pivot(prodVars,[:parName,:prodLev,:prod,:scen,],:year,:value,
                         :year    => years5),
                     sort = [:parName,:prodLev,:prod,:scen,],
               )
-#writetable("tables/prodBalanceAll5Y.csv", prodBalanceAll5Y, separator = ';')
 ods_write("formattedOutput.ods",Dict(("prodBalanceAll5Y",1,1) => prodBalanceAll5Y )  )
 
 # Preparation of policy variables
@@ -174,7 +175,7 @@ pol2 = by(prodVars, [:scen,:parName,:region,:year]) do df
    DataFrame(value = sum(df[:value]))
 end
 pol=vcat([pol1,pol2])
-policy_vars = ["polBal_mktDirInt_s", "polBal_mktDirInt_d", "polBal_trSub", "polBal_tcSub", "pol_fiSub", "surplus_prod", "surplus_cons"]
+policy_vars = ["polBal_mktDirInt_s", "polBal_mktDirInt_d", "polBal_trSub", "polBal_tcSub", "polBal_fiSub", "surplus_prod", "surplus_cons"]
 pol = pol[ [i in policy_vars for i in pol[:parName]] ,:]
 
 # Policy cost analysis (national)
@@ -197,137 +198,78 @@ polCosts_reg = pivot(pol,[:scen,:parName],:region,:value,
 )
 ods_write("formattedOutput.ods",Dict(("polCosts_reg",1,1) => polCosts_reg )  )
 
+#Scenario component analysis
+adaptScenarios = [
+  "RCP00_BAS_ADAPT",
+  "RCP00_BAS_ADAPT_BASE",
+  "RCP00_BAS_ADAPT_ACTIVEMGM",
+  "RCP00_BAS_ADAPT_ALLPOLICIES",
+  "RCP00_BAS_ADAPT_SUBSIDES",
+  "RCP00_BAS_ADAPT_STRUCTURALPOLICIES",
+]
+polSA_1 = pivot(forVars,:scen,:parName,:value,
+                filter = Dict(
+                    :scen    => adaptScenarios,
+                    :year    => 2050,
+                    :parName => ["hV","vol"]
+                ),
+                sort = :scen,
+           )
+polSA_2 = pivot(forVars,:scen,:parName,:value,
+               filter = Dict(
+                   :scen    => adaptScenarios,
+                   :year    => 2050,
+                   :parName => ["regArea"],
+                   :ref     => ["Refor"]
+               ),
+               sort = :scen,
+          )
+polSA_3 = pivot(pol,:scen,:parName,:value,
+               filter = Dict(
+                   :scen    => adaptScenarios,
+                   :year    => 2050,
+               ),
+               sort = :scen,
+          )
+polSA = hcat(polSA_1,polSA_2,polSA_3)
+polSA[:pol_costs] = polSA[:polBal_mktDirInt_s] + polSA[:polBal_mktDirInt_d] + polSA[:polBal_trSub] + polSA[:polBal_tcSub] + polSA[:polBal_fiSub]
+polSA[:welf_gross] = polSA[:surplus_prod] + polSA[:surplus_cons]
+polSA[:welf_net]   = polSA[:pol_costs] + polSA[:welf_gross]
+delete!(polSA, [:scen_1, :scen_2, :polBal_mktDirInt_s, :polBal_mktDirInt_d, :polBal_trSub, :polBal_tcSub, :polBal_fiSub, :surplus_prod, :surplus_cons])
+rename!(polSA, Dict(:regArea => :reforRegArea))
+ods_write("formattedOutput.ods",Dict(("polSA",1,1) => polSA )  )
 
-#writetable("debug.csv", debug, separator = ';', header = true)
-
-#=
-## Create winden versions of datasets..
-# Taking ages because of the trade in prodVarsW
-forVarsW = unstack(forVars, :parName, :value)
-prodVarsW = unstack(prodVars, :parName, :value)
-cVarsW = unstack(cVars, :balItem, :value)
-
-# Adding cumulative harvesting
-forVarsW[:cumHV] = 0.0
-forVarsW[:cumRegArea] = 0.0
-by(forVarsW, [:scen,:region,:forType]) do dd
-    dd[:cumHV] = cumsum(dd[:hV])
-    dd[:cumRegArea] = cumsum(dd[:regArea])
+# Carbon balance
+ymin = minimum(cVars[:year])
+ymax = maximum(cVars[:year])
+cBal = pivot(cVars,[:scen,:totItem,:balItem],:y2,:value,
+                filter = Dict(:scen => mainScenarios),
+                sort = [:scen,:totItem,:balItem],
+           )
+cBal = by(cBal, :scen) do sub1
+    t = DataFrame(totItem=NA, balItem=NA)
+    [t[Symbol("y"*string(i))] = sum(sub1[Symbol("y"*string(i))]) for i = collect(ymin:ymax)]
+    sub1mod = by(sub1, [:scen,:totItem]) do sub2
+       t2 = DataFrame(balItem=NA)
+       [t2[Symbol("y"*string(i))] = sum(sub2[Symbol("y"*string(i))]) for i = collect(ymin:ymax)]
+       t3 = vcat(t2,sub2)
+     end
+     t2 = vcat(t,sub1mod)
 end
-#forVarsW[9000:9020,:]
-
-# Aggregating volumes at national level and for the whole forest
-volHVTotal = by(forVarsW, [:scen,:year]) do df
-    DataFrame(hV = sum(dropna(df[:hV])), vol = sum(dropna(df[:vol])), cumHV =sum(dropna(df[:cumHV])), hR = sum(dropna(df[:hV]))/sum(dropna(df[:vol])))
-end
-volHVTotal[:cumHV_stacked] = volHVTotal[:vol] + volHVTotal[:cumHV]
-volHVTotal[:hR] = volHVTotal[:hV] ./ volHVTotal[:vol]
-# Preparing data to plot
-#=
-
-#=
-years = unique(volHVTotal[:year])
-vol_ext = volHVTotal[volHVTotal[:scen]   .== "RCP00_BAS_EXT" , :vol]
-vol_adapt = volHVTotal[volHVTotal[:scen] .== "RCP00_BAS_ADAPT" , :vol]
-cumHV_ext = volHVTotal[volHVTotal[:scen]   .== "RCP00_BAS_EXT" , :cumHV] +  vol_ext
-cumHV_adapt = volHVTotal[volHVTotal[:scen]   .== "RCP00_BAS_ADAPT" , :cumHV] +  vol_adapt
-
-p1=layer(x=years,y=vol_ext,Geom.line)
-p2=layer(x=years,y=cumHV_ext,Geom.line)
-plot(p1,p2,
-     Guide.xlabel("Years"), Guide.ylabel("Mm^3"), Guide.title("Extensive scenario")
-)
-
-p3=layer(x=years,y=vol_adapt,Geom.line)
-p4=layer(x=years,y=cumHV_adapt,Geom.line)
-plot(p3,p4,
-    Guide.xlabel("Years"), Guide.ylabel("Mm^3"), Guide.title("Adaptative scenario")
-)
+delete!(cBal, [:scen_2,  :scen_1,  :totItem_1])
 
 
-plot(volHVTotal, x="year", y="vol", color="scen", Geom.line)
-=#
+[cBal[Symbol("y"*string(i))] = cBal[Symbol("y"*string(i))] - cBal[Symbol("y"*string(i-1))]  for i = collect(ymax:-1:ymin+1)] # computing diff
+delete!(cBal, :y2012)
+#[cBal[isna(cBal[Symbol("y"*string(i))]), Symbol("y"*string(i))] = 0 for i = collect(ymin+1:ymax)] # removing na
+cBal[isna(cBal[:totItem]), :totItem] = ""
+cBal[isna(cBal[:balItem]), :balItem] = ""
+ods_write("formattedOutput.ods",Dict(("cBal",1,1) => cBal )  )
 
-
-
-#=
-plotlyjs()
-temp = volHVTotal[ [s in ["RCP00_BAS_EXT","RCP00_BAS_ADAPT_SUBSIDES","RCP00_BAS_ADAPT_SUBSIDES_GRAD"] for s in volHVTotal[:scen]], :]
-# :blue, :yellow, :red
-mycolors = [:blue :green :red]
-volHVTotal_plot = plot(temp, :year, :vol, group=:scen, linestyle = :dot, linewidth=3, color = mycolors)
-plot!(temp, :year, :cumHV_stacked, group=:scen, linestyle = :solid, linewidth=3,  color = mycolors)
-
-# volHVTotal_plot = plot([1, 2, 3], [[4, 6, 8] [5, 6, 9]], linestyle = :solid, linewidth=3, linecolor=:red)
-volHVTotal_plot = plot(volHVTotal[ [s in ["RCP00_BAS_EXT","RCP00_BAS_ADAPT","RCP00_BAS_ADAPT_BASE"] for s in volHVTotal[:scen]], :] ,
-    layer(x="year", y="vol", color="scen", Geom.line, Theme(line_width=1.5pt)),
-    layer(x="year", y="cumHV_stacked", color="scen", Geom.line, Theme(line_width=1pt))
-)
-draw(SVG("volHVTotal.svg", 15cm, 10cm), volHVTotal_plot)
-
-hV_plot = plot(volHVTotal[
-      ([s in ["RCP00_BAS_EXT","RCP00_BAS_ADAPT","RCP00_BAS_ADAPT_BASE"] for s in volHVTotal[:scen]]) & (volHVTotal[:year] .> 2012), :] ,
-    layer(x="year", y="hV", color="scen", Geom.line, Theme(line_width=1.5pt)),
-    #layer(x="year", y="cumHV_stacked", color="scen", Geom.line, Theme(line_width=1pt))
-)
-draw(SVG("hV.svg", 15cm, 10cm), hV_plot)
-hR_plot = plot(volHVTotal[
-      ([s in ["RCP00_BAS_EXT","RCP00_BAS_ADAPT","RCP00_BAS_ADAPT_BASE"] for s in volHVTotal[:scen]]) & (volHVTotal[:year] .> 2012), :] ,
-    layer(x="year", y="hR", color="scen", Geom.line, Theme(line_width=1.5pt)),
-    #layer(x="year", y="cumHV_stacked", color="scen", Geom.line, Theme(line_width=1pt))
-)
-draw(SVG("hR.svg", 15cm, 10cm), hR_plot)
-
-
-volHVTotal_plotsa = plot(volHVTotal[ [s in ["RCP00_BAS_ADAPT_BASE", "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM", "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STUCTURALPOLICIES", "RCP00_BAS_ADAPT"] for s in volHVTotal[:scen]], :] ,
-    layer(x="year", y="vol", color="scen", Geom.line, Theme(line_width=1.5pt)),
-    layer(x="year", y="cumHV_stacked", color="scen", Geom.line, Theme(line_width=1pt))
-)
-draw(SVG("volHVTotal_sa.svg", 18cm, 10cm), volHVTotal_plotsa)
-
-
-volHVTotal_mainyears=volHVTotal[[y in [2012,2020,2030,2040,2050] for y in volHVTotal[:year]],:]
-
-volHVTotal_mainyears_long = melt(volHVTotal_mainyears, [:scen,:year])
-
-volHVTotal_mainyears2 = unstack(volHVTotal_mainyears_long, :year, :value)
-
-#sort!(volHVTotal_mainyears2, cols = (:scen, :variable), rev = (false, false))
-
-writetable("volHVTotal_mainyears2.csv", volHVTotal_mainyears2, separator = ';', header = true)
-
-
-# Regeneration area (to compute the amount of total area regenerated)
-regArea = forVarsW[(forVarsW[:year] .>2020) & (forVarsW[:year] .<=2030), :]
-
-regArea = by(regArea, [:scen]) do df
-    DataFrame(regArea = sum(dropna(df[:regArea])) )
-end
-writetable("regArea.csv", regArea, separator = ';', header = true)
-
-#################################
-## Forest area
-#################################
-# Aggregating forest area at national level and for the whole forest
-
-
-
-forArea = by(forVarsW, [:scen,:year,:forType,:forGroup]) do df
-    DataFrame(forArea = sum(dropna(df[:forArea])), regArea = sum(dropna(df[:regArea])),  cumRegArea =  sum(dropna(df[:cumRegArea]))  )
-end
-
-# Filters..
-forArea = @where(forArea, indexin(:forType, ["Fut_Feu", "Fut_Mix","Fut_Con","Mel_Feu","Mel_Mix","Tail_Feu"]) .> 0 ) # only atomic cathegories have forArea
-forArea = vcat(
-  @where(forArea, :scen .== "RCP00_BAS_EXT", :year .== 2012),
-  @where(forArea, indexin(:scen, ["RCP00_BAS_EXT", "RCP00_BAS_ADAPT_BASE", "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM", "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STUCTURALPOLICIES", "RCP00_BAS_ADAPT"]) .> 0, :year .== 2050)
-)
-# Create a new column with both scenario and year
-forArea[:scenYear] = map((x,y) -> string(x, "_", y), forArea[:scen], forArea[:year])
-
-forArea_plot = plot(forArea, x="scenYear", y="forArea", color="forType", Geom.bar)
-draw(PNG("forArea_plot.png", 30cm, 20cm), forArea_plot)
-draw(SVG("forArea_plot.svg", 30cm, 20cm), forArea_plot)
-writetable("forArea.csv", forArea, separator = ';', header = true)
-
-=#
+# Carbon balance just every 5 year
+cBal5y = DataFrame()
+cBal5y[:scen] = cBal[:scen]
+cBal5y[:totItem] = cBal[:totItem]
+cBal5y[:balItem] = cBal[:balItem]
+[cBal5y[Symbol("y"*string(i))] = cBal[Symbol("y"*string(i))] for i = collect(2015:5:ymax)]
+ods_write("formattedOutput.ods",Dict(("cBal5y",1,1) => cBal5y )  )
