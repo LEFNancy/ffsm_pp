@@ -1,5 +1,8 @@
-using DataFrames, DataFramesMeta, Plots, StatPlots, LAJuliaUtils, OdsIO
+using DataFrames, DataFramesMeta, Plots, StatPlots, LAJuliaUtils, OdsIO, NamedColors
 
+##########################################################
+### Settings and definitions
+##########################################################
 scenarios = [
 "RCP00_BAS_EXT",
 "RCP00_BAS_ADAPT",
@@ -77,7 +80,15 @@ cbal_map = Dict(
     "STOCK_PRODUCTS" => "0Pools",
 )
 
-# Data import
+odsOut          = "juliaOut/formattedOutput.ods"
+odsOut_template = "juliaOut/formattedOutput_template.ods"
+
+years = [2012,2013,2014,2015,2019,2020,2025,2030,2035,2040,2045,2050]
+years5 = collect(2015:5:2050)
+
+##########################################################
+### Data import
+##########################################################
 forestData_byscenario = [readtable(baseIDir*"/forestData_"*scenario*".csv", separator = ';') for scenario in scenarios];
 productData_byscenario = [readtable(baseIDir*"/productData_"*scenario*".csv", separator = ';') for scenario in scenarios];
 carbonData_byscenario = [readtable(baseIDir*"/carbonBalance_"*scenario*".csv", separator = ';') for scenario in scenarios];
@@ -98,7 +109,10 @@ print("Data loaded")
 #head(cVars)    # scen	region	balItem	year	value
 #unique(prodVars[:prod])
 
-# Data clean-up
+
+##########################################################
+### Data clean-up and initialisation
+##########################################################
 forVars[:forGroup] = map(k->fgroup_map[k], forVars[:forType])
 forVars[:ref]      = map(k->refor_map[k],  forVars[:forType])
 cVars[:totItem]    = map(k->cbal_map[k],   cVars[:balItem])
@@ -110,15 +124,39 @@ cVars[:y2] = ""
 
 prodVars[:prodLev] = map(k->pgroup_map[k], prodVars[:prod])
 
-years = [2012,2013,2014,2015,2019,2020,2025,2030,2035,2040,2045,2050]
-years5 = collect(2015:5:2050)
+function applyScenType(dfs)
+  for df in dfs
+    df[:ccTypeScen]   = ""
+    df[:econTypeScen] = ""
+      for r in eachrow(df)
+        r[:ccTypeScen]   = r[:scen][1:9]
+        if contains(r[:scen],"ADAPT")
+            r[:econTypeScen] = "ADAPT"
+        elseif contains(r[:scen],"EXT")
+            r[:econTypeScen] = "EXT"
+        end
+      end
+  end
+end
+applyScenType([forVars,prodVars,cVars])
 
+
+
+cp(odsOut_template, odsOut; remove_destination=true) # copy template odsFile. Don't forget CTRL+Shift+F9 to update the spreadsheet
+
+##########################################################
+### Elaborations
+##########################################################
+
+################ Ign out..
 
 #ign = vcat([forVars,hVDet])
 #ign = ign[[i in ["vol","hVbyPrd","regArea"] for i in ign[:parName] ], :]
 #writetable("ign.csv", ign, separator = ';', header = true)
 
 #names(ign)
+
+################ Tables..
 
 # Forest dynamics
 forDyn = pivot(forVars,[:parName,:scen],:year,:value,
@@ -127,7 +165,7 @@ forDyn = pivot(forVars,[:parName,:scen],:year,:value,
                :scen    => mainScenarios,
                :year    => years5)
             )
-ods_write("formattedOutput.ods",Dict(("forDyn",1,1) => forDyn )  )
+ods_write(odsOut,Dict(("forDyn",1,1) => forDyn )  )
 
 # Forest dynamics by typology (traditional vf reforested plantation)
 forDynByType = pivot(forVars,[:parName,:ref,:scen],:year,:value,
@@ -136,7 +174,7 @@ forDynByType = pivot(forVars,[:parName,:ref,:scen],:year,:value,
                  :scen    => mainScenarios,
                  :year    => years5)
                )
-ods_write("formattedOutput.ods",Dict(("forDynByType",1,1) => forDynByType )  )
+ods_write(odsOut,Dict(("forDynByType",1,1) => forDynByType )  )
 
 # Forest dynamic by spGroup (con, broad..)
 forDynBySpGroup = pivot(forVars,[:parName,:forGroup,:scen],:year,:value,
@@ -145,7 +183,7 @@ forDynBySpGroup = pivot(forVars,[:parName,:forGroup,:scen],:year,:value,
                  :scen    => mainScenarios,
                  :year    => years5)
                )
-ods_write("formattedOutput.ods",Dict(("forDynBySpGroup",1,1) => forDynBySpGroup )  )
+ods_write(odsOut,Dict(("forDynBySpGroup",1,1) => forDynBySpGroup )  )
 
 # Product balance
 prodBalance = pivot(prodVars,[:year,:scen,:prodLev,:prod],:parName,:value,
@@ -155,7 +193,7 @@ prodBalance = pivot(prodVars,[:year,:scen,:prodLev,:prod],:parName,:value,
                         :year    => [2015,2050]),
                     sort = [:year,:scen,:prodLev,:prod],
               )
-ods_write("formattedOutput.ods",Dict(("prodBalance",1,1) => prodBalance )  )
+ods_write(odsOut,Dict(("prodBalance",1,1) => prodBalance )  )
 
 # Product balance all years
 prodBalanceAll5Y = pivot(prodVars,[:parName,:prodLev,:prod,:scen,],:year,:value,
@@ -165,7 +203,7 @@ prodBalanceAll5Y = pivot(prodVars,[:parName,:prodLev,:prod,:scen,],:year,:value,
                         :year    => years5),
                     sort = [:parName,:prodLev,:prod,:scen,],
               )
-ods_write("formattedOutput.ods",Dict(("prodBalanceAll5Y",1,1) => prodBalanceAll5Y )  )
+ods_write(odsOut,Dict(("prodBalanceAll5Y",1,1) => prodBalanceAll5Y )  )
 
 # Preparation of policy variables
 pol1 = by(forVars, [:scen,:parName,:region,:year]) do df
@@ -186,7 +224,7 @@ polCosts_nat = pivot(pol,[:scen,:parName],:year,:value,
             ),
             sort = [:scen, :parName]
 )
-ods_write("formattedOutput.ods",Dict(("polCosts_nat",1,1) => polCosts_nat )  )
+ods_write(odsOut,Dict(("polCosts_nat",1,1) => polCosts_nat )  )
 
 # Policy cost analysis (regional)
 polCosts_reg = pivot(pol,[:scen,:parName],:region,:value,
@@ -196,7 +234,7 @@ polCosts_reg = pivot(pol,[:scen,:parName],:region,:value,
             ),
             sort = [:scen, :parName]
 )
-ods_write("formattedOutput.ods",Dict(("polCosts_reg",1,1) => polCosts_reg )  )
+ods_write(odsOut,Dict(("polCosts_reg",1,1) => polCosts_reg )  )
 
 #Scenario component analysis
 adaptScenarios = [
@@ -237,7 +275,7 @@ polSA[:welf_gross] = polSA[:surplus_prod] + polSA[:surplus_cons]
 polSA[:welf_net]   = polSA[:pol_costs] + polSA[:welf_gross]
 delete!(polSA, [:scen_1, :scen_2, :polBal_mktDirInt_s, :polBal_mktDirInt_d, :polBal_trSub, :polBal_tcSub, :polBal_fiSub, :surplus_prod, :surplus_cons])
 rename!(polSA, Dict(:regArea => :reforRegArea))
-ods_write("formattedOutput.ods",Dict(("polSA",1,1) => polSA )  )
+ods_write(odsOut,Dict(("polSA",1,1) => polSA )  )
 
 # Carbon balance
 ymin = minimum(cVars[:year])
@@ -264,7 +302,7 @@ delete!(cBal, :y2012)
 #[cBal[isna(cBal[Symbol("y"*string(i))]), Symbol("y"*string(i))] = 0 for i = collect(ymin+1:ymax)] # removing na
 cBal[isna(cBal[:totItem]), :totItem] = ""
 cBal[isna(cBal[:balItem]), :balItem] = ""
-ods_write("formattedOutput.ods",Dict(("cBal",1,1) => cBal )  )
+ods_write(odsOut,Dict(("cBal",1,1) => cBal )  )
 
 # Carbon balance just every 5 year
 cBal5y = DataFrame()
@@ -272,4 +310,30 @@ cBal5y[:scen] = cBal[:scen]
 cBal5y[:totItem] = cBal[:totItem]
 cBal5y[:balItem] = cBal[:balItem]
 [cBal5y[Symbol("y"*string(i))] = cBal[Symbol("y"*string(i))] for i = collect(2015:5:ymax)]
-ods_write("formattedOutput.ods",Dict(("cBal5y",1,1) => cBal5y )  )
+ods_write(odsOut,Dict(("cBal5y",1,1) => cBal5y )  )
+
+
+################ Plots..
+plotlyjs()
+
+# Harvesting volumes
+forVar_00base = pivot(forVars,[:scen,:ccTypeScen,:econTypeScen,:year],:parName,:value,
+          filter = Dict(:scen => mainScenarios,
+                        :year => collect(2015:1:2050),
+                        :ccTypeScen => ["RCP00_BAS"],
+          ),
+)
+forVar_86base = pivot(forVars,[:scen,:ccTypeScen,:econTypeScen,:year],:parName,:value,
+          filter = Dict(:scen => mainScenarios,
+                        :year => collect(2015:1:2050),
+                        :ccTypeScen => ["RCP86_BAS"],
+          ),
+)
+
+unique(forVar2[:econTypeScen])
+
+# :blue, :yellow, :red
+
+mycolors = [colorant"olive green" colorant"rust orange" colorant"Gold Fusion" colorant"stormy blue"]
+vol = plot(forVar_00base, :year, :vol, group=:scen, linestyle = :solid, linewidth=3, color = mycolors, label  = (sort(unique(forVar_00base[:scen]))') )
+plot!(forVar_86base, :year, :vol, group=:econTypeScen, linestyle = :dot, linewidth=3,  color = mycolors,  label  = (sort(unique(forVar_00base[:scen]))')    )
