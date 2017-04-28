@@ -1,4 +1,4 @@
-using DataFrames, DataFramesMeta, Plots, StatPlots, LAJuliaUtils, OdsIO, NamedColors
+using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatPlots, Plots #  PlotlyJS  Plots
 
 ##########################################################
 ### Settings and definitions
@@ -11,15 +11,15 @@ scenarios = [
 "RCP00_BAS_ADAPT_ACTIVEMGM",
 "RCP00_BAS_ADAPT_SUBSIDES",
 "RCP00_BAS_ADAPT_STRUCTURALPOLICIES",
-"RCP86_BAS_EXT",
-"RCP86_BAS_ADAPT"
+"RCP85_BAS_EXT",
+"RCP85_BAS_ADAPT"
 ]
 
 mainScenarios = [
 "RCP00_BAS_EXT",
 "RCP00_BAS_ADAPT",
-"RCP86_BAS_EXT",
-"RCP86_BAS_ADAPT"
+"RCP85_BAS_EXT",
+"RCP85_BAS_ADAPT"
 ]
 
 baseIDir = "results";
@@ -82,6 +82,7 @@ cbal_map = Dict(
 
 odsOut          = "juliaOut/formattedOutput.ods"
 odsOut_template = "juliaOut/formattedOutput_template.ods"
+chartOutDir     = "juliaOut"
 
 years = [2012,2013,2014,2015,2019,2020,2025,2030,2035,2040,2045,2050]
 years5 = collect(2015:5:2050)
@@ -126,21 +127,37 @@ prodVars[:prodLev] = map(k->pgroup_map[k], prodVars[:prod])
 
 function applyScenType(dfs)
   for df in dfs
-    df[:ccTypeScen]   = ""
-    df[:econTypeScen] = ""
+    df[:scenTypeCC]   = ""
+    df[:scenTypeEcon] = ""
+    df[:scenLevel] = ""
       for r in eachrow(df)
-        r[:ccTypeScen]   = r[:scen][1:9]
+        r[:scenTypeCC] = r[:scen][1:9]
         if contains(r[:scen],"ADAPT")
-            r[:econTypeScen] = "ADAPT"
+            r[:scenTypeEcon] = "ADAPT"
         elseif contains(r[:scen],"EXT")
-            r[:econTypeScen] = "EXT"
+            r[:scenTypeEcon] = "EXT"
         end
+        r[:scenLevel] =  r[:scen] in mainScenarios ? "main" : "sa"
       end
   end
 end
 applyScenType([forVars,prodVars,cVars])
 
-
+# Creating pivoted sum variants (without forest type or product information)
+forVar_piv = pivot(forVars,[:scen,:scenLevel,:scenTypeCC,:scenTypeEcon,:year],:parName,:value,
+          filter = Dict(:year => collect(2015:1:2050),
+          ),
+)
+prodVar_piv = pivot(prodVars,[:scen,:scenLevel,:scenTypeCC,:scenTypeEcon,:year],:parName,:value,
+          filter = Dict(:year => collect(2015:1:2050),
+          ),
+)
+cVars_piv = pivot(cVars,[:scen,:scenLevel,:scenTypeCC,:scenTypeEcon,:year],:balItem,:value,
+          filter = Dict(:year => collect(2015:1:2050),
+          ),
+)
+vars_piv = join(forVar_piv, prodVar_piv, on = [:scen,:scenLevel,:scenTypeCC,:scenTypeEcon,:year])
+vars_piv = join(vars_piv, cVars_piv, on = [:scen,:scenLevel,:scenTypeCC,:scenTypeEcon,:year])
 
 cp(odsOut_template, odsOut; remove_destination=true) # copy template odsFile. Don't forget CTRL+Shift+F9 to update the spreadsheet
 
@@ -312,28 +329,112 @@ cBal5y[:balItem] = cBal[:balItem]
 [cBal5y[Symbol("y"*string(i))] = cBal[Symbol("y"*string(i))] for i = collect(2015:5:ymax)]
 ods_write(odsOut,Dict(("cBal5y",1,1) => cBal5y )  )
 
+# Forest density (reg)
+dens = pivot(forVars,[:scen,:year,:parName],:region,:value,
+             filter = Dict(
+               :parName => ["vol","forArea"],
+               :scen    => mainScenarios,
+               :year    => [2015,2050])
+            )
+dens = by(dens, [:scen,:year]) do sub
+    nreg = size(sub)[2]
+    forArea = sub[1,:] #ha
+    vol = sub[2,:] #M m^3
+    d = deepcopy(vol)
+    d[:parName] = "density"
+    [d[1,i] =  (vol[1,i]*1000000) / forArea[1,i] for i in collect(4:nreg)] #mc/ha
+    vcat(vol,forArea,d)
+end
+delete!(dens,[:scen_1, :year_1])
+ods_write(odsOut,Dict(("dens",1,1) => dens )  )
+
+# Coniferous share
+conShare = pivot(forVars,[:scen,:year,:forGroup],:region,:value,
+             filter = Dict(
+               :parName => ["forArea"],
+               :scen    => mainScenarios,
+               :year    => [2015,2050])
+            )
+
+conShare = by(conShare, [:scen,:year]) do sub
+    nreg = size(sub)[2]
+    broadL = sub[1,:] #ha
+    con = sub[2,:]
+    mix = sub[3,:]
+    conSh = deepcopy(con)
+    conSh[:forGroup] = "conShare"
+    [conSh[1,i] =  con[1,i] / (broadL[1,i]+mix[1,i]+con[1,i]) for i in collect(4:nreg)] #mc/ha
+    vcat(broadL,mix,con,conSh)
+end
+
+delete!(conShare,[:scen_1, :year_1])
+ods_write(odsOut,Dict(("conShare",1,1) => conShare )  )
 
 ################ Plots..
-plotlyjs()
-
-# Harvesting volumes
-forVar_00base = pivot(forVars,[:scen,:ccTypeScen,:econTypeScen,:year],:parName,:value,
-          filter = Dict(:scen => mainScenarios,
-                        :year => collect(2015:1:2050),
-                        :ccTypeScen => ["RCP00_BAS"],
-          ),
-)
-forVar_86base = pivot(forVars,[:scen,:ccTypeScen,:econTypeScen,:year],:parName,:value,
-          filter = Dict(:scen => mainScenarios,
-                        :year => collect(2015:1:2050),
-                        :ccTypeScen => ["RCP86_BAS"],
-          ),
-)
-
-unique(forVar2[:econTypeScen])
-
-# :blue, :yellow, :red
+plotlyjs() # For displaying
+#pyplot() # For printing
 
 mycolors = [colorant"olive green" colorant"rust orange" colorant"Gold Fusion" colorant"stormy blue"]
-vol = plot(forVar_00base, :year, :vol, group=:scen, linestyle = :solid, linewidth=3, color = mycolors, label  = (sort(unique(forVar_00base[:scen]))') )
-plot!(forVar_86base, :year, :vol, group=:econTypeScen, linestyle = :dot, linewidth=3,  color = mycolors,  label  = (sort(unique(forVar_00base[:scen]))')    )
+
+vars_00base_main = vars_piv[((vars_piv[:scenTypeCC] .== "RCP00_BAS") & (vars_piv[:scenLevel] .== "main")) , :]
+vars_85base_main = vars_piv[((vars_piv[:scenTypeCC] .== "RCP85_BAS") & (vars_piv[:scenLevel] .== "main")) , :]
+
+# Volumes
+vol = plot(vars_00base_main, :year, :vol, group=:scen, linestyle = :solid, linewidth=3, color = mycolors, label  = (sort(unique(vars_00base_main[:scen]))') )
+plot!(vars_85base_main, :year, :vol, group=:scen, linestyle = :dot, linewidth=3,  color = mycolors,  label  = (sort(unique(vars_85base_main[:scen]))')    )
+savefig(chartOutDir*"/vol.png")
+
+# Harvested Volumes
+hV = plot(vars_00base_main, :year, :hV, group=:scen, linestyle = :solid, linewidth=3, color = mycolors, label  = (sort(unique(vars_00base_main[:scen]))') )
+plot!(vars_85base_main, :year, :hV, group=:scen, linestyle = :dot, linewidth=3,  color = mycolors,  label  = (sort(unique(vars_85base_main[:scen]))')    )
+savefig(chartOutDir*"/hV.png")
+
+# Volumes of Reforestations
+refor_00base= pivot(forVars,[:scen,:scenLevel,:scenTypeCC,:scenTypeEcon,:year],:parName,:value,
+              filter = Dict(
+                :year       => collect(2015:1:2050),
+                :ref        => ["Refor"],
+                :scenTypeCC => ["RCP00_BAS"],
+                :scenLevel  => ["main"]
+          ),
+)
+refor_85base= pivot(forVars,[:scen,:scenLevel,:scenTypeCC,:scenTypeEcon,:year],:parName,:value,
+              filter = Dict(
+                :year       => collect(2015:1:2050),
+                :ref        => ["Refor"],
+                :scenTypeCC => ["RCP85_BAS"],
+                :scenLevel  => ["main"]
+          ),
+)
+
+vol = plot(refor_00base, :year, :vol, group=:scen, linestyle = :solid, linewidth=3, color = mycolors, label  = (sort(unique(refor_00base[:scen]))') )
+plot!(refor_85base, :year, :vol, group=:scen, linestyle = :dot, linewidth=3,  color = mycolors,  label  = (sort(unique(refor_85base[:scen]))')    )
+savefig(chartOutDir*"/vol_refor.png")
+# Harvested Volumes
+hV = plot(refor_00base, :year, :hV, group=:scen, linestyle = :solid, linewidth=3, color = mycolors, label  = (sort(unique(refor_00base[:scen]))') )
+plot!(refor_85base, :year, :hV, group=:scen, linestyle = :dot, linewidth=3,  color = mycolors,  label  = (sort(unique(refor_85base[:scen]))')    )
+savefig(chartOutDir*"/hV_refor.png")
+
+# Carbon balance
+cBal2 = pivot(cVars,[:scen,:scenTypeCC,:scenTypeEcon,:year],:balItem,:value,
+             filter=Dict(
+               :scenLevel => ["main"],
+             ),
+)
+cBal2[:Pools]
+cBal_rcp00base_ext = cBal2[cBal2[:scen] .== "RCP00_BAS_EXT",:]
+cBal_rcp00base_ext_plot = plot(cBal_rcp00base_ext, :year, :hV, group=:scen, linestyle = :solid, linewidth=3, color = mycolors, label  = (sort(unique(refor_85base[:scen]))') )
+plot!(refor_85base, :year, :hV, group=:scen, linestyle = :dot, linewidth=3,  color = mycolors,  label  = (sort(unique(refor_85base[:scen]))')    )
+savefig(chartOutDir*"/hV_refor.png")
+
+cBal2 = by(cVars, [:scen,:year]) do sub1
+    println(sub1)
+    #t = DataFrame(totItem=NA, balItem="Total")
+    #[t[Symbol("y"*string(i))] = sum(sub1[Symbol("y"*string(i))]) for i = collect(ymin:ymax)]
+    #sub1mod = by(sub1, [:scen,:totItem]) do sub2
+    #   t2 = DataFrame(balItem=NA)
+    #   [t2[Symbol("y"*string(i))] = sum(sub2[Symbol("y"*string(i))]) for i = collect(ymin:ymax)]
+    #   t3 = vcat(t2,sub2)
+    # end
+    # t2 = vcat(t,sub1mod)
+end

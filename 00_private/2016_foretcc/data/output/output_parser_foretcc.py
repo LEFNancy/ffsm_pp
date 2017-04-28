@@ -33,15 +33,12 @@ def override_globals():
 
   g.scenarios = {
     'RCP00_BAS_EXT':                           '#8c0000', # red-brown
-    'RCP00_BAS_ADAPT_BASE':                    '#000000',
-    'RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM': '#000000',
-    'RCP00_BAS_ADAPT_SUBSIDES':                '#000000',
-    'RCP00_BAS_ADAPT_OPENMARKETS':             '#000000',
-    'RCP00_BAS_ADAPT_STUCTURALPOLICIES':       '#000000',
-    'RCP00_BAS_ADAPT':                         '#2329C1', # blue  
+    'RCP00_BAS_ADAPT':                         '#1349B5',  
+    'RCP86_BAS_EXT':                           '#4389A0',     
+    'RCP86_BAS_ADAPT':                         '#2369C1', # blue  
   }
   
-  g.forIFiles   = [ 'results/forestData_'+i+'.csv' for i in  g.scenarios]
+  g.forIFiles    = [ 'results/forestData_'+i+'.csv' for i in  g.scenarios]
   g.carbonIFiles = [ 'results/carbonBalance_'+i+'.csv' for i in  g.scenarios]
 
   
@@ -112,8 +109,10 @@ def printCharts():
   
   title('c','subsection', "Carbon charts")
   # def plotCarbonChart(scenarios_h,region,title, filename):
-  plotCarbonChart(['RCP00_BAS_EXT','RCP00_BAS_ADAPT'],'FRA','','cbalance')
-  
+  plotCarbonChart(['RCP00_BAS_EXT','RCP00_BAS_ADAPT'],'FRA','','cbalance_ecoeffect_rpc00')
+  plotCarbonChart(['RCP86_BAS_EXT','RCP86_BAS_ADAPT'],'FRA','','cbalance_ecoeffect_rpc86')
+  plotCarbonChart(['RCP00_BAS_EXT','RCP86_BAS_EXT'],'FRA','','cbalance_cceffect_ext')
+  plotCarbonChart(['RCP00_BAS_ADAPT','RCP86_BAS_ADAPT'],'FRA','','cbalance_cceffect_adapt')
   
 # =============================================================================  
 def printTables():
@@ -131,19 +130,20 @@ def printTables():
   outvars_state = ['forArea','vol']
   outvars_flow = ['expReturns','harvestedArea','hV','regArea','vReg']
   printTable('RCP00_BAS_EXT',['RCP00_BAS_EXT'],outvars,['FRA'],['2050'],'[2050 vs 2012]','RCP00_BAS_EXT_2012-2050',False,2012)
-  printTable('RCP00_BAS_ADAPT',['RCP00_BAS_ADAPT'],outvars,['FRA'],['2050'],'[2050 vs 2012]','RCP00_BAS_ADAPT_2012-2050',False,2012)
+  #printTable('RCP00_BAS_ADAPT',['RCP00_BAS_ADAPT'],outvars,['FRA'],['2050'],'[2050 vs 2012]','RCP00_BAS_ADAPT_2012-2050',False,2012)
   
   printTable('RCP00_BAS_EXT',['RCP00_BAS_ADAPT'],outvars_state,['FRA'],['2050'],'EXT\_vs\_ADAPT [2050]','EXT_vs_ADAPT_2050',False)
   printTable('RCP00_BAS_EXT',['RCP00_BAS_ADAPT'],outvars_flow,['FRA'],g.years,'EXT\_vs\_ADAPT [avg 2012-2050]','EXT_vs_ADAPT_2012-2050',False)    
   
-  printTable('RCP00_BAS_ADAPT_BASE',[ "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM", "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STUCTURALPOLICIES", "RCP00_BAS_ADAPT"],outvars_state,['FRA'],['2050'],'ADAPT\_* [2050]','ADAPT_2050',False)
-  printTable('RCP00_BAS_ADAPT_BASE',[ "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM", "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STUCTURALPOLICIES", "RCP00_BAS_ADAPT"],outvars_flow,['FRA'],g.years,'ADAPT\_* [avg 2012-2050]','ADAPT_2012-2050',False)    
+  #printTable('RCP00_BAS_ADAPT_BASE',[ "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM", "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STUCTURALPOLICIES", "RCP00_BAS_ADAPT"],outvars_state,['FRA'],['2050'],'ADAPT\_* [2050]','ADAPT_2050',False)
+  #printTable('RCP00_BAS_ADAPT_BASE',[ "RCP00_BAS_ADAPT_REFORESTATION_ACTIVEMGM", "RCP00_BAS_ADAPT_SUBSIDES", "RCP00_BAS_ADAPT_OPENMARKETS", "RCP00_BAS_ADAPT_STUCTURALPOLICIES", "RCP00_BAS_ADAPT"],outvars_flow,['FRA'],g.years,'ADAPT\_* [avg 2012-2050]','ADAPT_2012-2050',False)    
   
   
   title('t','subsection',"Carbon tables")
   #printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year_end, title, filename, avg=False, singleComparation=True )
   printCarbonTable('RCP00_BAS_EXT',['RCP00_BAS_ADAPT'],'FRA', '2012', '2050', "\\ce{CO2} balance [yearly avg. 2012-2050]",'cbalance_11000', True, False)
-  printCarbonTable('RCP00_BAS_ADAPT',['RCP00_BAS_ADAPT'],'FRA', '2012', '2050', "\\ce{CO2} balance [yearly avg. 2012-2050]",'cbalance_adapt_11000', True, False)
+  printCarbonTable('RCP00_BAS_EXT',['RCP86_BAS_EXT'],'FRA', '2012', '2050', "\\ce{CO2} balance [yearly avg. 2012-2050]",'cbalance_cceff_ext_11000', True, False)
+  #printCarbonTable('RCP00_BAS_ADAPT',['RCP00_BAS_ADAPT'],'FRA', '2012', '2050', "\\ce{CO2} balance [yearly avg. 2012-2050]",'cbalance_adapt_11000', True, False)
 # =============================================================================  
 def printAATables():
   print ("Printing area allocation tables..")

@@ -118,17 +118,19 @@ ModelCoreSpatial::initMarketModule(){
         gpd("a",r2,priProducts[pp],secondYear, secProducts[sp]);
       }
       spd(value,"dl",r2,priProducts[pp],secondYear,true);
+      double stvalue =   gpd("sl",r2,priProducts[pp],secondYear)
+                       + gpd("sa",r2,priProducts[pp],secondYear);
+      spd(stvalue,"st",r2,priProducts[pp],secondYear,true);
+      double supply_fromForestShare = gpd("supply_fromForestShare",r2,priProducts[pp],secondYear);
+      spd(stvalue*supply_fromForestShare,"st_fromHarv",r2,priProducts[pp],secondYear,true); // needed for the biological module in year starty+1
     }
     // RPAR('st',i,prd,t-1)    =  RPAR('sl',i,prd,t-1)+RPAR('sa',i,prd,t-1);
     // RPAR('dt',i,prd,t-1)    =  RPAR('dl',i,prd,t-1)+RPAR('da',i,prd,t-1);
     for (uint ap=0;ap<allProducts.size();ap++){
       //double debug = gpd("dl",r2,allProducts[ap],secondYear);
-      double stvalue =   gpd("sl",r2,allProducts[ap],secondYear)
-                       + gpd("sa",r2,allProducts[ap],secondYear);
       double dtvalue =   gpd("dl",r2,allProducts[ap],secondYear)
                        + gpd("da",r2,allProducts[ap],secondYear);
-      spd(stvalue,"st",r2,allProducts[ap],secondYear,true);
-      spd(stvalue,"stFromHarvesting",r2,allProducts[ap],secondYear,true);
+
       spd(dtvalue,"dt",r2,allProducts[ap],secondYear,true);
     }
 
@@ -144,11 +146,12 @@ ModelCoreSpatial::initMarketModule(){
       double dl  = gpd("dl",r2,secProducts[sp],secondYear);
       double da  = gpd("da",r2,secProducts[sp],secondYear);
       double pl  = gpd("pl",r2,secProducts[sp],secondYear);
+      double sa  = gpd("sa",r2,secProducts[sp],secondYear);
       double sl  = gpd("sl",r2,secProducts[sp],secondYear);
       double k1  = gpd("k1",r2,secProducts[sp],secondYear);
       double pWo = gpd("pl",WL2,secProducts[sp],secondYear); // World price (local price for region 99999)
 
-
+      double stvalue =   sl+sa;
       double q1  = 1/ ( 1+pow(dl/da,1/psi)*(pl/pWo) );
       double p1  = 1-q1;
       double dc  = pow(
@@ -161,6 +164,7 @@ ModelCoreSpatial::initMarketModule(){
       double pw = (dl*pl+da*pWo)/(dl+da);
       double k = k1*sl;
 
+      spd(stvalue,"st",r2,secProducts[sp],secondYear,true);
       spd(q1,"q1",r2,secProducts[sp],firstYear,true);
       //spd(p1,"p1",r2,secProducts[sp],firstYear,true);
       spd(dc,"dc",r2,secProducts[sp],secondYear,true);
@@ -362,6 +366,20 @@ ModelCoreSpatial::runMarketModule(){
     int regId = regIds2[r2];
     ModelRegion* REG = MTHREAD->MD->getRegion(regId);
 
+    // *** st adjustments:***
+    // st_or[pp]             -> original st from the mkt module
+    // st_fromFor[pp]     -> cover the volumes from both alive trees and death ones. This should be bounded by inResByAnyCombination, that already includes death resources
+    // st_fromHarv[pp] -> from harvesting. This should be equal to hV and IGN data
+    // st
+    // st_or = st
+    // st_fromFor = st_or * a
+    // st_fromFor > in:
+    //   (overharvesting)
+    //   overHarv = st_fromFor - in
+    //   st_fromFor = in
+    //   st = st_fromFor/a
+    // st_fromHarv = distribute(st_fromFor)
+
     //  // total supply and total demand..
     //  RPAR('st',i,prd,t)   =  RPAR('sl',i,prd,t)+RPAR('sa',i,prd,t);
     //  RPAR('dt',i,prd,t)   =  RPAR('dl',i,prd,t)+RPAR('da',i,prd,t);
@@ -390,8 +408,10 @@ ModelCoreSpatial::runMarketModule(){
       double sa = gpd("sa",regId,priProducts[p]);  // bug corrected 20120913
       double pworld = gpd("pl", WL2,priProducts[p]);
       double st = gpd("st",regId,priProducts[p]);
+      double st_fromFor = st * gpd("supply_fromForestShare",regId,priProducts[p]);
       double pw = st?(sl*pl+sa*pworld)/st:0.0;
       spd(pw,"pw",regId,priProducts[p]);
+      spd(st_fromFor,"st_fromFor",regId,priProducts[p],DATA_NOW,true);
     }
 
     // Correcting st if this is over the in
@@ -405,7 +425,7 @@ ModelCoreSpatial::runMarketModule(){
       double sumIn = REG->inResByAnyCombination[i];
      // double sumIn2 = 0.0;
       for (uint p=0;p<priPrCombs[i].size();p++){
-        stMkMod += gpd("st",regId,priProducts[priPrCombs[i][p]]);
+        stMkMod += gpd("st_fromFor",regId,priProducts[priPrCombs[i][p]]);
         //sumIn2 += gpd("in",regId,priProducts[priPrCombs[i][p]]);
       }
 
@@ -423,8 +443,8 @@ ModelCoreSpatial::runMarketModule(){
         cumOverHarvesting += (stMkMod-sumIn);
         msgOut(MSG_DEBUG, "Overharvesting has happened. Year: "+i2s(thisYear)+ "Region: "+i2s(regId)+"Involved products:  "+pProductsInvolved+". sumIn: "+d2s(sumIn)+" stMkMod:" +d2s(stMkMod) + " cumOverHarvesting: "+d2s(cumOverHarvesting));
         for (uint p=0;p<priPrCombs[i].size();p++){
-          double st_orig = gpd("st",regId,priProducts[priPrCombs[i][p]]);
-          spd(st_orig*inV_over_hV_ratio,"st",regId,priProducts[priPrCombs[i][p]]);
+          double st_fromFor_orig = gpd("st_fromFor",regId,priProducts[priPrCombs[i][p]]);
+          spd(st_fromFor_orig*inV_over_hV_ratio,"st_fromFor",regId,priProducts[priPrCombs[i][p]]);
         }
       }
 
@@ -433,20 +453,20 @@ ModelCoreSpatial::runMarketModule(){
 
     }
 
-    // here we create stFromHarvesting as st - st_from_deathbiomass
+    // here we create st_fromHarv as st_fromFor - st_from_deathbiomass
     vector <double> total_st(priProducts.size(),0.);
     vector <double> in_deathTimber(priProducts.size(),0.);
     vector <double> in_aliveForest (priProducts.size(),0.);
     for (uint i=0;i<priProducts.size();i++){
-      total_st[i] = gpd("st",regId,priProducts[i]);
+      total_st[i] = gpd("st_fromFor",regId,priProducts[i]);
       in_deathTimber[i] = gpd("in_deathTimber",regId,priProducts[i]);
       in_aliveForest[i] = gpd("in",regId,priProducts[i]);
     }
 
-    vector <double> stFromHarvesting = allocateHarvesting(total_st, regId);
+    vector <double> st_fromHarv= allocateHarvesting(total_st, regId);
 
     for (uint i=0;i<priProducts.size();i++){
-      spd(stFromHarvesting[i],"stFromHarvesting",regId,priProducts[i],DATA_NOW,true);
+      spd(st_fromHarv[i],"st_fromHarv",regId,priProducts[i],DATA_NOW,true);
     }
 
   } // end of each region
@@ -603,7 +623,7 @@ ModelCoreSpatial::runBiologicalModule(){
           //hV(u,i,essence,lambda,t) = hr(u,i,essence,lambda,t) * V(u,i,lambda,essence,t-1);
           //hV_byPrd(u,i,essence,lambda,p_pr,t) =  prov(u,essence,lambda,p_pr)*(RPAR('st',i,p_pr,t)/In(i,p_pr,t))*V(u,i,lambda,essence,t-1);
           for(uint pp=0;pp<priProducts.size();pp++){
-            double st = gpd("stFromHarvesting",r2,priProducts[pp]);
+            double st = gpd("st_fromHarv",r2,priProducts[pp]);
             double in = gpd("in",r2,priProducts[pp]);
             double hr_pr = in ? app(priProducts[pp],ft,dc)*st/in : 0.0;
             hr_byPrd.push_back( hr_pr);
@@ -757,7 +777,7 @@ ModelCoreSpatial::runBiologicalModule(){
     double sumSt = 0.0;
     double sumHv = 0.0;
     for(uint pp=0;pp<priProducts.size();pp++){
-      sumSt += gpd("stFromHarvesting",r2,priProducts[pp]);
+      sumSt += gpd("st_fromHarv",r2,priProducts[pp]);
     }
     for (uint p=0;p<regPx.size();p++){
       for(uint j=0;j<fTypes.size();j++){
@@ -2347,7 +2367,7 @@ ModelCoreSpatial::printDebugInitRegionalValues(){
 vector <double>
 ModelCoreSpatial::allocateHarvesting(vector<double> total_st, const int &regId){
    if(!MD->getBoolSetting("useDeathTimber",DATA_NOW)) return total_st;
-   vector <double> stFromHarvesting(priProducts.size(),0.);
+   //vector <double> st_fromHarv(priProducts.size(),0.);
    //map<iisskey, double > *  deathTimberInventory= MD->getDeathTimberInventory();
    int maxYears = MD->getMaxYearUsableDeathTimber();
    int currentYear = MTHREAD->SCD->getYear();

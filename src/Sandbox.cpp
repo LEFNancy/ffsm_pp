@@ -587,6 +587,14 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+
+  /*
+  //testing supply_fromForestShare
+  double test = MTHREAD->MD->getProdData("supply_fromForestShare",11042,"hardWRoundW",2006);
+  cout << test << endl;
+  exit(1);
+  */
+
   /*
   // Testing getSiblings() ok
   ModelRegion* reg1 = MTHREAD->MD->getRegion(11042);

@@ -268,8 +268,7 @@ Carbon::registerProducts(const double &value, const int & regId, const string & 
   // subEnergyCoeff and subMaterialCoeff:  [kgCO2/m^3 wood]
   // desidered output: Mt CO2
   // ==> I must divide by 1000
-  //addSavedEmissions(subEnergyCoeff*value/1000,regId,EM_ENSUB);
-  addSavedEmissions(subMaterialCoeff*value/1000,regId,EM_MATSUB);
+  addSavedEmissions(subMaterialCoeff*value/1000,regId,EM_MATSUB); // EM_ENSUB are now included in eol2energy, instantaneous for fuelwoods
 }
 
 
