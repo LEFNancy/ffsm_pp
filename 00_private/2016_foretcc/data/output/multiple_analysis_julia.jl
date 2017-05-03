@@ -165,22 +165,6 @@ cp(odsOut_template, odsOut; remove_destination=true) # copy template odsFile. Do
 ### Elaborations
 ##########################################################
 
-
-hVReg = pivot(forVars,[:scen,:region],:year,:value,
-                filter = Dict(
-                  :parName => ["hV"],
-                ),
-            )
-ods_write(odsOut,Dict(("hVReg",1,1) => hVReg )  )
-hVNat = pivot(forVars,[:scen,],:year,:value,
-                filter = Dict(
-                  :parName => ["hV"],
-                ),
-            )
-ods_write(odsOut,Dict(("hVNat",1,1) => hVNat )  )
-
-
-
 ################ Ign out..
 
 #ign = vcat([forVars,hVDet])
@@ -217,6 +201,16 @@ forDynBySpGroup = pivot(forVars,[:parName,:forGroup,:scen],:year,:value,
                  :year    => years5)
                )
 ods_write(odsOut,Dict(("forDynBySpGroup",1,1) => forDynBySpGroup )  )
+
+# Regional forest harvesting
+hVReg = pivot(forVars,[:scen,:region],:year,:value,
+                filter = Dict(
+                  :parName => ["hV"],
+                  :scen    => mainScenarios,
+                  :year    => years5
+                ),
+            )
+ods_write(odsOut,Dict(("hVReg",1,1) => hVReg )  )
 
 # Product balance
 prodBalance = pivot(prodVars,[:year,:scen,:prodLev,:prod],:parName,:value,
@@ -431,6 +425,7 @@ hV = plot(refor_00base, :year, :hV, group=:scen, linestyle = :solid, linewidth=3
 plot!(refor_85base, :year, :hV, group=:scen, linestyle = :dot, linewidth=3,  color = mycolors,  label  = (sort(unique(refor_85base[:scen]))')    )
 savefig(chartOutDir*"/hV_refor.png")
 
+#=
 # Carbon balance
 cBal2 = pivot(cVars,[:scen,:scenTypeCC,:scenTypeEcon,:year],:balItem,:value,
              filter=Dict(
@@ -454,3 +449,4 @@ cBal2 = by(cVars, [:scen,:year]) do sub1
     # end
     # t2 = vcat(t,sub1mod)
 end
+=#
