@@ -11,7 +11,7 @@ scenarios = [
 "RCP00_BAS_ADAPT_ACTIVEMGM",
 "RCP00_BAS_ADAPT_SUBSIDES",
 "RCP00_BAS_ADAPT_STRUCTURALPOLICIES",
-"RCP85_BAS_EXT",
+"RCP85_BAS_EXT", # correct to 85
 "RCP85_BAS_ADAPT"
 ]
 
@@ -164,6 +164,22 @@ cp(odsOut_template, odsOut; remove_destination=true) # copy template odsFile. Do
 ##########################################################
 ### Elaborations
 ##########################################################
+
+
+hVReg = pivot(forVars,[:scen,:region],:year,:value,
+                filter = Dict(
+                  :parName => ["hV"],
+                ),
+            )
+ods_write(odsOut,Dict(("hVReg",1,1) => hVReg )  )
+hVNat = pivot(forVars,[:scen,],:year,:value,
+                filter = Dict(
+                  :parName => ["hV"],
+                ),
+            )
+ods_write(odsOut,Dict(("hVNat",1,1) => hVNat )  )
+
+
 
 ################ Ign out..
 

@@ -38,6 +38,7 @@
 
    
 #last run:
+# 20170502, implemented new area changes from Anna v4 
 # 20170123, nomgm scenarios were actually running with management due to not sync of the data table with new regionalised mr in the code. Running only the nomgm scenarios
 # 20161129, implemented new area changes from Anna v3
 # 20160825, changed reported expected returns by ft: expRet{ft,r} are now sum{px}{expRet{ft,px}*fArea_{px}}/fArea{r} and no longer sum{px}{expRet{ft,px}*fArea_{px,ft}}/fArea{r,ft}  
