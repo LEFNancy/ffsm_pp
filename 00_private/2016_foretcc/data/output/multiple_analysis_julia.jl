@@ -14,6 +14,12 @@ scenarios = [
 "RCP85_BAS_EXT", # correct to 85
 "RCP85_BAS_ADAPT"
 ]
+scenarios = [
+"RCP00_BAS_EXT",
+"RCP00_BAS_ADAPT",
+"RCP85_BAS_EXT",
+"RCP85_BAS_ADAPT"
+]
 
 mainScenarios = [
 "RCP00_BAS_EXT",
@@ -21,8 +27,6 @@ mainScenarios = [
 "RCP85_BAS_EXT",
 "RCP85_BAS_ADAPT"
 ]
-
-baseIDir = "results";
 
 fgroup_map = Dict(
  "Fut_Feu"         => "Broadleaved",
@@ -80,6 +84,7 @@ cbal_map = Dict(
     "STOCK_PRODUCTS" => "0Pools",
 )
 
+baseIDir = "results";
 odsOut          = "juliaOut/formattedOutput.ods"
 odsOut_template = "juliaOut/formattedOutput_template.ods"
 chartOutDir     = "juliaOut"
@@ -93,23 +98,18 @@ years5 = collect(2015:5:2050)
 forestData_byscenario = [readtable(baseIDir*"/forestData_"*scenario*".csv", separator = ';') for scenario in scenarios];
 productData_byscenario = [readtable(baseIDir*"/productData_"*scenario*".csv", separator = ';') for scenario in scenarios];
 carbonData_byscenario = [readtable(baseIDir*"/carbonBalance_"*scenario*".csv", separator = ';') for scenario in scenarios];
-#hVDet_byscenario = [readtable(baseIDir*"/detailedHV_"*scenario*".csv", separator = ';') for scenario in scenarios];
 forVars = vcat(forestData_byscenario)
 prodVars = vcat(productData_byscenario)
 cVars = vcat(carbonData_byscenario)
-#hVDet = vcat(hVDet_byscenario)
 [delete!(dfi, [:x,:country,]) for dfi in [cVars, prodVars, forVars]] # delete columns X (empty at the end) and country
-delete!(forVars, [:freeDim])
+
+#hVDet_byscenario = [readtable(baseIDir*"/detailedHV_"*scenario*".csv", separator = ';') for scenario in scenarios];
+#hVDet = vcat(hVDet_byscenario)
 #[delete!(dfi, [:x,:country,]) for dfi in [hVDet]] # delete columns X (empty at the end) and country
 #forVars[:prod] = ""
+delete!(forVars, [:freeDim])
 
 print("Data loaded")
-
-#head(forVars)  # scen	parName	region	forType	year	value
-#head(prodVars) # scen	parName	region	prod	freeDim	year	value
-#head(cVars)    # scen	region	balItem	year	value
-#unique(prodVars[:prod])
-
 
 ##########################################################
 ### Data clean-up and initialisation
@@ -165,13 +165,20 @@ cp(odsOut_template, odsOut; remove_destination=true) # copy template odsFile. Do
 ### Elaborations
 ##########################################################
 
-################ Ign out..
-
-#ign = vcat([forVars,hVDet])
-#ign = ign[[i in ["vol","hVbyPrd","regArea"] for i in ign[:parName] ], :]
-#writetable("ign.csv", ign, separator = ';', header = true)
-
-#names(ign)
+# ################ Ign out..
+# ign = vcat([forVars,hVDet])
+# ign = ign[[i in ["vol","hVbyPrd","regArea"] for i in ign[:parName] ], :]
+# delete!(ign, :scenLevel )
+# rename!(ign, Dict(:freeDim => :dc, :ref => :reforestationType ))
+# writetable("ign_v3_calibratedHarvestingRates.csv", ign, separator = ';', header = true)
+# ############### Ign in testing
+# ignIn = readtable("ign_v3_calibratedHarvestingRates.csv", separator = ';')
+# ignTest = pivot(ignIn,[:scen,:parName],:year,:value,
+#                 filter=Dict(
+#                   :year => collect(2012:2050),
+#                 ),
+# )
+# ods_write("ignTest.ods",Dict(("ignTestV3",1,1) => ignTest )  )
 
 ################ Tables..
 
