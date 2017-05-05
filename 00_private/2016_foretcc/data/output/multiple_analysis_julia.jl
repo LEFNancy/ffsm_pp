@@ -14,12 +14,6 @@ scenarios = [
 "RCP85_BAS_EXT", # correct to 85
 "RCP85_BAS_ADAPT"
 ]
-scenarios = [
-"RCP00_BAS_EXT",
-"RCP00_BAS_ADAPT",
-"RCP85_BAS_EXT",
-"RCP85_BAS_ADAPT"
-]
 
 mainScenarios = [
 "RCP00_BAS_EXT",
@@ -170,7 +164,7 @@ cp(odsOut_template, odsOut; remove_destination=true) # copy template odsFile. Do
 # ign = ign[[i in ["vol","hVbyPrd","regArea"] for i in ign[:parName] ], :]
 # delete!(ign, :scenLevel )
 # rename!(ign, Dict(:freeDim => :dc, :ref => :reforestationType ))
-# writetable("ign_v3_calibratedHarvestingRates.csv", ign, separator = ';', header = true)
+# writetable("ign_v4_calibratedHarvestingRates_andForestGrowth.csv", ign, separator = ';', header = true)
 # ############### Ign in testing
 # ignIn = readtable("ign_v3_calibratedHarvestingRates.csv", separator = ';')
 # ignTest = pivot(ignIn,[:scen,:parName],:year,:value,
