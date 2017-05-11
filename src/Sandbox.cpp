@@ -587,6 +587,13 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+  // Testing shareMortalityUsableTimber call for a specific forest type and at the opposite with a null forest type
+  // to see if gfd() expands as expected
+
+  double test1 = MTHREAD->MD->getForData("shareMortalityUsableTimber",11041,"","15",2016);
+
+  cout << "test1: " << test1 << endl;
+  exit(1);
 
   /*
   //testing supply_fromForestShare
