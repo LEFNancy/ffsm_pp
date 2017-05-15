@@ -504,12 +504,7 @@ ModelCoreSpatial::runBiologicalModule(){
     ModelRegion* REG = MTHREAD->MD->getRegion(r2);
     //Gis* GIS = MTHREAD->GIS;
     regPx = REG->getMyPixels();
-    double shareMortalityUsableTimber;
-    if(useDeathTimber){
-        shareMortalityUsableTimber = gfd("shareMortalityUsableTimber",r2,"","");
-    } else {
-        shareMortalityUsableTimber = 0.0;
-    }
+    double shareMortalityUsableTimber = 0.0;
 
     for (uint p=0;p<regPx.size();p++){
       Pixel* px = regPx[p];
@@ -605,7 +600,11 @@ ModelCoreSpatial::runBiologicalModule(){
 
         //double harvestedArea = 0;
 
-
+        if(useDeathTimber){
+            shareMortalityUsableTimber = gfd("shareMortalityUsableTimber",r2,ft,"");
+        } else {
+           shareMortalityUsableTimber = 0.0;
+        }
 
         for (uint u=0; u<dClasses.size(); u++){
           string dc  = dClasses[u];
@@ -671,6 +670,7 @@ ModelCoreSpatial::runBiologicalModule(){
 
           if(useDeathTimber){
             iisskey key(thisYear,r2,ft,dc);
+
             MD->deathTimberInventory_incrOrAdd(key,vMort*shareMortalityUsableTimber);
           }
 

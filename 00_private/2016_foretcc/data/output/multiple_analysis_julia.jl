@@ -12,7 +12,9 @@ scenarios = [
 "RCP00_BAS_ADAPT_SUBSIDES",
 "RCP00_BAS_ADAPT_STRUCTURALPOLICIES",
 "RCP85_BAS_EXT", # correct to 85
-"RCP85_BAS_ADAPT"
+"RCP85_BAS_ADAPT",
+"RCP00_TEMP-FEU-SCOL_EXT",
+"RCP00_TEMP-FEU-SCOL_ADAPT"
 ]
 
 mainScenarios = [
@@ -21,6 +23,49 @@ mainScenarios = [
 "RCP85_BAS_EXT",
 "RCP85_BAS_ADAPT"
 ]
+
+crisisScenarios_full = [
+  "RCP00_BAS_EXT",
+  "RCP00_BAS_ADAPT",
+  "RCP00_TEMP-FEU-SCOL_EXT",
+  "RCP00_TEMP-FEU-SCOL_ADAPT"
+]
+
+crisisScenarios = [
+  "RCP00_TEMP-FEU-SCOL_EXT",
+  "RCP00_TEMP-FEU-SCOL_ADAPT"
+]
+
+regions_crisis_full = [
+  "AlsChaLor",
+  "AquPoi",
+  "AuvLim",
+  "BouFra",
+  "Cen",
+  "Rho",
+]
+
+regions_crisis = [
+  "AlsChaLor",
+  "AquPoi",
+  "AuvLim",
+  "BouFra",
+]
+
+regcrisis_map = Dict(
+    "AlsChaLor" => true,
+    "AquPoi"    => true,
+    "AuvLim"    => true,
+    "BasHau"    => false,
+    "BouFra"    => true,
+    "BrePay"    => false,
+    "Cen"       => false,
+    "Cor"       => false,
+    "IleNorPic" => false,
+    "LanPro"    => false,
+    "Mid"       => false,
+    "Rho"       => false,
+)
 
 fgroup_map = Dict(
  "Fut_Feu"         => "Broadleaved",
@@ -79,12 +124,14 @@ cbal_map = Dict(
 )
 
 baseIDir = "results";
-odsOut          = "juliaOut/formattedOutput.ods"
+odsOut          = "juliaOut/formattedOutput_v4.ods"
+odsOutCrisis    = "juliaOut/formattedOutput_crisis.ods"
 odsOut_template = "juliaOut/formattedOutput_template.ods"
 chartOutDir     = "juliaOut"
 
-years = [2012,2013,2014,2015,2019,2020,2025,2030,2035,2040,2045,2050]
-years5 = collect(2015:5:2050)
+years       = [2012,2013,2014,2015,2019,2020,2025,2030,2035,2040,2045,2050]
+years5      = collect(2015:5:2050)
+yearsCrisis = [2015; 2026:2035; 2050]
 
 ##########################################################
 ### Data import
@@ -110,6 +157,7 @@ print("Data loaded")
 ##########################################################
 forVars[:forGroup] = map(k->fgroup_map[k], forVars[:forType])
 forVars[:ref]      = map(k->refor_map[k],  forVars[:forType])
+forVars[:crisisArea] = map(k->regcrisis_map[k],  forVars[:region])
 cVars[:totItem]    = map(k->cbal_map[k],   cVars[:balItem])
 cVars[:y2] = ""
 [r[:y2] = "y" * string(r[:year])  for r in eachrow(cVars)] # Creating a column of years starting with a letter
@@ -118,6 +166,7 @@ cVars[:y2] = ""
 #hVDet[:ref]      = map(k->refor_map[k],  hVDet[:forType])
 
 prodVars[:prodLev] = map(k->pgroup_map[k], prodVars[:prod])
+prodVars[:crisisArea] = map(k->regcrisis_map[k],  prodVars[:region])
 
 function applyScenType(dfs)
   for df in dfs
@@ -153,6 +202,16 @@ cVars_piv = pivot(cVars,[:scen,:scenLevel,:scenTypeCC,:scenTypeEcon,:year],:balI
 vars_piv = join(forVar_piv, prodVar_piv, on = [:scen,:scenLevel,:scenTypeCC,:scenTypeEcon,:year])
 vars_piv = join(vars_piv, cVars_piv, on = [:scen,:scenLevel,:scenTypeCC,:scenTypeEcon,:year])
 
+cVars_piv = pivot(cVars,[:scen,:scenLevel,:scenTypeCC,:scenTypeEcon,:year],:balItem,:value,
+                sort = [:scen,:year],
+            )
+cVars_piv[:STOCK_FOR] = cVars_piv[:STOCK_INV] + cVars_piv[:STOCK_EXTRA]
+cVars_piv[:STOCKS] = cVars_piv[:STOCK_FOR] + cVars_piv[:STOCK_PRODUCTS]
+cVars_piv[:EM_NET] = cVars_piv[:EM_ENSUB] + cVars_piv[:EM_FOROP] + cVars_piv[:EM_MATSUB]
+cVars_piv[:STOCK_PRODUCTS_cum] = cVars_piv[:STOCK_FOR] + cVars_piv[:STOCK_PRODUCTS]
+cVars_piv[:TOT_BAL] =  cVars_piv[:STOCK_PRODUCTS_cum] + cVars_piv[:EM_NET]
+cVars2 = stack(cVars_piv) # rest in long format but with totals
+
 cp(odsOut_template, odsOut; remove_destination=true) # copy template odsFile. Don't forget CTRL+Shift+F9 to update the spreadsheet
 
 ##########################################################
@@ -175,6 +234,17 @@ cp(odsOut_template, odsOut; remove_destination=true) # copy template odsFile. Do
 # ods_write("ignTest.ods",Dict(("ignTestV3",1,1) => ignTest )  )
 
 ################ Tables..
+
+#forVol = pivot(forVars,[:scen,:region,:freeDim],:forType,:value,
+#  filter = Dict(
+#    :parName => ["vol"],
+#    :scen    => ["RCP00_BAS_EXT","RCP00_BAS_ADAPT"],
+#    :region  => ["AlsChaLor","AquPoi","AuvLim","BouFra"],
+#    :year    => [2027],
+#  ),
+#)
+#[forVol[isna(forVol[i]), i] = 999 for i in names(forVol)] # remove na from vol without dc dimension
+#ods_write(odsOut,Dict(("forVol",1,1) => forVol )  )
 
 # Forest dynamics
 forDyn = pivot(forVars,[:parName,:scen],:year,:value,
@@ -305,7 +375,7 @@ delete!(polSA, [:scen_1, :scen_2, :polBal_mktDirInt_s, :polBal_mktDirInt_d, :pol
 rename!(polSA, Dict(:regArea => :reforRegArea))
 ods_write(odsOut,Dict(("polSA",1,1) => polSA )  )
 
-# Carbon balance
+# Carbon balance yearly
 ymin = minimum(cVars[:year])
 ymax = maximum(cVars[:year])
 cBal = pivot(cVars,[:scen,:totItem,:balItem],:y2,:value,
@@ -332,13 +402,22 @@ cBal[isna(cBal[:totItem]), :totItem] = ""
 cBal[isna(cBal[:balItem]), :balItem] = ""
 ods_write(odsOut,Dict(("cBal",1,1) => cBal )  )
 
-# Carbon balance just every 5 year
+# Carbon balance yearly just every 5 year
 cBal5y = DataFrame()
 cBal5y[:scen] = cBal[:scen]
 cBal5y[:totItem] = cBal[:totItem]
 cBal5y[:balItem] = cBal[:balItem]
 [cBal5y[Symbol("y"*string(i))] = cBal[Symbol("y"*string(i))] for i = collect(2015:5:ymax)]
 ods_write(odsOut,Dict(("cBal5y",1,1) => cBal5y )  )
+
+# Carbon balance cumulative every 5 years
+cBalCum = pivot(cVars2,[:scen,:variable],:year,:value,
+                filter = Dict(
+                  :scen => mainScenarios,
+                  :variable => [:TOT_BAL, :STOCKS, :STOCK_EXTRA, :STOCK_INV, :EM_NET, :EM_ENSUB, :EM_FOROP, :EM_MATSUB],
+                  ),
+                sort = [:scen],
+           )
 
 # Forest density (reg)
 dens = pivot(forVars,[:scen,:year,:parName],:region,:value,
@@ -381,9 +460,53 @@ end
 delete!(conShare,[:scen_1, :year_1])
 ods_write(odsOut,Dict(("conShare",1,1) => conShare )  )
 
+################ Tempets analysis
+
+# Regional forest harvesting
+forDyRegCrisis = pivot(forVars,[:scen,:region,:parName],:year,:value,
+                filter = Dict(
+                  :parName => ["hV","vol","regArea"],
+                  :scen    => crisisScenarios_full,
+                  :region  => regions_crisis_full,
+                  :year    => yearsCrisis
+                ),
+            )
+ods_write(odsOut,Dict(("forDyRegCrisis",1,1) => forDyRegCrisis )  )
+
+mktDynRegCrisis = pivot(prodVars,[:scen,:crisisArea,:parName],:year,:value,
+                filter = Dict(
+                  :parName => ["da","dt","sa","st","st_fromFor","st_fromHarv"],
+                  :scen    => crisisScenarios_full,
+                  :year    => yearsCrisis
+                ),
+            )
+ods_write(odsOut,Dict(("mktDynRegCrisis",1,1) => mktDynRegCrisis )  )
+
+hVRegCrisis = pivot(forVars,[:scen,:region,:forType],:year,:value,
+                filter = Dict(
+                  :parName => ["hV"],
+                  :scen    => crisisScenarios_full,
+                  :year    => yearsCrisis,
+                  :region  => regions_crisis_full,
+                ),
+            )
+ods_write(odsOut,Dict(("hVRegCrisis",1,1) => hVRegCrisis)  )
+
+mkDynRegDetCrisis = pivot(prodVars,[:scen,:parName,:region,:prod],:year,:value,
+                filter = Dict(
+                  :parName => ["pl","pw","st","sa","sl","dt","da","dl"],
+                  :scen    => crisisScenarios_full,
+                  :year    => yearsCrisis,
+                  :region  => regions_crisis_full,
+                ),
+            )
+ods_write(odsOut,Dict(("mkDynRegDetCrisis",1,1) => mkDynRegDetCrisis )  )
+
+
+
 ################ Plots..
 plotlyjs() # For displaying
-#pyplot() # For printing
+pyplot() # For printing
 
 mycolors = [colorant"olive green" colorant"rust orange" colorant"Gold Fusion" colorant"stormy blue"]
 
@@ -425,6 +548,25 @@ savefig(chartOutDir*"/vol_refor.png")
 hV = plot(refor_00base, :year, :hV, group=:scen, linestyle = :solid, linewidth=3, color = mycolors, label  = (sort(unique(refor_00base[:scen]))') )
 plot!(refor_85base, :year, :hV, group=:scen, linestyle = :dot, linewidth=3,  color = mycolors,  label  = (sort(unique(refor_85base[:scen]))')    )
 savefig(chartOutDir*"/hV_refor.png")
+
+# Carbon balance
+cBal00 = cBalPivot[((cBalPivot[:scenLevel] .== "main" ) & (cBalPivot[:scenTypeCC] .== "RCP00_BAS")), : ]
+
+plotcBal00 = plot(cBal00, :year, :TOT_BAL, group=:scen, linestyle = :solid, linewidth=3, label = ("Net cumulative subs effect - " * sort(unique(cBal00[:scen]))'), color=mycolors)
+plot!(cBal00, :year, :STOCK_PRODUCTS_cum, group=:scen, linestyle = :dash, linewidth=2, label = ("HWP pool stock - " * sort(unique(cBal00[:scen]))'), color=mycolors)
+plot!(cBal00, :year, :STOCK_FOR, group=:scen, linestyle = :dot, linewidth=2, label = ("Forest pool stock - " * sort(unique(cBal00[:scen]))'), color=mycolors, legend = :bottomright, ylabel = "M m^3 CO2 eq")
+
+savefig(chartOutDir*"/cBal_cum_00.png")
+
+
+# Carbon balance Tempets
+cBalCrisis = cBalPivot[ [i in crisisScenarios for i in cBalPivot[:scen]], :]
+cBalCrisisPlot = plot(cBalCrisis, :year, :TOT_BAL, group=:scen, linestyle = :solide, linewidth=3, label = ("Net cumulative subs effect - " * sort(unique(cBalCrisis[:scen]))'), color=mycolors,legend = :top)
+plot!(cBalCrisis, :year, :STOCK_FOR, group=:scen, linestyle = :dot, linewidth=2, label = ("Forest pool stock - " * sort(unique(cBalCrisis[:scen]))'), color=mycolors)
+plot!(cBalCrisis, :year, :STOCK_PRODUCTS_cum, group=:scen, linestyle = :dash, linewidth=2, label = ("HWP pool stock - " * sort(unique(cBalCrisis[:scen]))'), color=mycolors,)
+savefig(chartOutDir*"/cBal_cum_crisis.png")
+
+
 
 #=
 # Carbon balance
