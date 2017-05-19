@@ -148,7 +148,7 @@ cVars = vcat(carbonData_byscenario)
 #hVDet = vcat(hVDet_byscenario)
 #[delete!(dfi, [:x,:country,]) for dfi in [hVDet]] # delete columns X (empty at the end) and country
 #forVars[:prod] = ""
-delete!(forVars, [:freeDim])
+#delete!(forVars, [:freeDim])
 
 print("Data loaded")
 
@@ -273,6 +273,36 @@ forDynBySpGroup = pivot(forVars,[:parName,:forGroup,:scen],:year,:value,
                )
 ods_write(odsOut,Dict(("forDynBySpGroup",1,1) => forDynBySpGroup )  )
 
+# Forest dynamic by diameter class
+forDynByDc1 = forVars[complete_cases(forVars[[:freeDim]]),:]
+forDynByDc2015 = pivot(forDynByDc1,[:year,:freeDim],:scen,:value,
+        filter = Dict(
+                 :parName => ["vol"],
+                 :scen    => ["RCP00_BAS_EXT","RCP00_BAS_ADAPT"],
+                 :year    => [2015],
+                 :freeDim => collect(10:10:130)
+        )
+)
+forDynByDc2030 = pivot(forDynByDc1,[:year,:freeDim],:scen,:value,
+        filter = Dict(
+                 :parName => ["vol"],
+                 :scen    => ["RCP00_BAS_EXT","RCP00_BAS_ADAPT"],
+                 :year    => [2030],
+                 :freeDim => collect(10:10:130)
+        )
+)
+forDynByDc2050 = pivot(forDynByDc1,[:year,:freeDim],:scen,:value,
+        filter = Dict(
+                 :parName => ["vol"],
+                 :scen    => ["RCP00_BAS_EXT","RCP00_BAS_ADAPT"],
+                 :year    => [2050],
+                 :freeDim => collect(10:10:130)
+        )
+)
+ods_write(odsOut,Dict(("forDynByDc",2,1) => forDynByDc2015 )  )
+ods_write(odsOut,Dict(("forDynByDc",2,5) => forDynByDc2030 )  )
+ods_write(odsOut,Dict(("forDynByDc",2,9) => forDynByDc2050 )  )
+
 # Regional forest harvesting
 hVReg = pivot(forVars,[:scen,:region],:year,:value,
                 filter = Dict(
@@ -304,10 +334,10 @@ prodBalanceAll5Y = pivot(prodVars,[:parName,:prodLev,:prod,:scen,],:year,:value,
 ods_write(odsOut,Dict(("prodBalanceAll5Y",1,1) => prodBalanceAll5Y )  )
 
 # Preparation of policy variables
-pol1 = by(forVars, [:scen,:parName,:region,:year]) do df
+pol1 = by(forVars, [:scen,:parName,:region,:crisisArea,:year]) do df
    DataFrame(value = sum(df[:value]))
 end
-pol2 = by(prodVars, [:scen,:parName,:region,:year]) do df
+pol2 = by(prodVars, [:scen,:parName,:region,:crisisArea,:year]) do df
    DataFrame(value = sum(df[:value]))
 end
 pol=vcat([pol1,pol2])
@@ -333,6 +363,8 @@ polCosts_reg = pivot(pol,[:scen,:parName],:region,:value,
             sort = [:scen, :parName]
 )
 ods_write(odsOut,Dict(("polCosts_reg",1,1) => polCosts_reg )  )
+
+
 
 #Scenario component analysis
 adaptScenarios = [
@@ -411,13 +443,16 @@ cBal5y[:balItem] = cBal[:balItem]
 ods_write(odsOut,Dict(("cBal5y",1,1) => cBal5y )  )
 
 # Carbon balance cumulative every 5 years
-cBalCum = pivot(cVars2,[:scen,:variable],:year,:value,
+cBal5yCum = pivot(cVars2,[:scen,:variable],:year,:value,
                 filter = Dict(
                   :scen => mainScenarios,
-                  :variable => [:TOT_BAL, :STOCKS, :STOCK_EXTRA, :STOCK_INV, :EM_NET, :EM_ENSUB, :EM_FOROP, :EM_MATSUB],
+                  :variable => [:TOT_BAL, :STOCKS, :STOCK_EXTRA, :STOCK_INV, :STOCK_PRODUCTS, :EM_NET, :EM_ENSUB, :EM_FOROP, :EM_MATSUB],
+                  :year => collect(2015:5:ymax),
                   ),
                 sort = [:scen],
            )
+ods_write(odsOut,Dict(("cBal5yCum",1,1) => cBal5yCum )  )
+
 
 # Forest density (reg)
 dens = pivot(forVars,[:scen,:year,:parName],:region,:value,
@@ -502,10 +537,56 @@ mkDynRegDetCrisis = pivot(prodVars,[:scen,:parName,:region,:prod],:year,:value,
             )
 ods_write(odsOut,Dict(("mkDynRegDetCrisis",1,1) => mkDynRegDetCrisis )  )
 
+# Carbon balance crisis cumulative every 5 years
+cBal5yCum_crisis = pivot(cVars2,[:scen,:variable],:year,:value,
+                   filter = Dict(
+                     :scen => crisisScenarios_full,
+                     :variable => [:TOT_BAL, :STOCKS, :STOCK_EXTRA, :STOCK_INV, :STOCK_PRODUCTS, :EM_NET, :EM_ENSUB, :EM_FOROP, :EM_MATSUB],
+                     :year => collect(2015:5:ymax),
+                   ),
+                   sort = [:scen],
+           )
+ods_write(odsOut,Dict(("cBal5yCum_crisis",1,1) => cBal5yCum_crisis )  )
+
+# Policy cost analysis with crisis (national)
+polCosts_nat_crisis = pivot(pol,[:scen,:parName],:year,:value,
+            filter = Dict(
+                :scen    => crisisScenarios_full,
+                :year    => [2015;2020; 2028:2035; 2040:5:2050],
+            ),
+            sort = [:scen, :parName]
+)
+ods_write(odsOut,Dict(("polCosts_nat_crisis",1,1) => polCosts_nat_crisis )  )
+
+# Policy cost analysis with crisis (regional)
+polCosts_reg_crisis_2829 = pivot(pol,[:scen,:parName],:crisisArea,:value,
+            filter = Dict(
+                :scen    => crisisScenarios_full,
+                :year    => 2028:2029
+            ),
+            sort = [:scen, :parName]
+)
+polCosts_reg_crisis_3031 = pivot(pol,[:scen,:parName],:crisisArea,:value,
+            filter = Dict(
+                :scen    => crisisScenarios_full,
+                :year    => 2030:2031
+            ),
+            sort = [:scen, :parName]
+)
+polCosts_reg_crisis_3236 = pivot(pol,[:scen,:parName],:crisisArea,:value,
+            filter = Dict(
+                :scen    => crisisScenarios_full,
+                :year    => 2032:2036
+            ),
+            sort = [:scen, :parName]
+)
+ods_write(odsOut,Dict(("polCosts_reg_crisis",2,1) => polCosts_reg_crisis_2829 ) )
+ods_write(odsOut,Dict(("polCosts_reg_crisis",2,5) => polCosts_reg_crisis_3031 ) )
+ods_write(odsOut,Dict(("polCosts_reg_crisis",2,9) => polCosts_reg_crisis_3236 ) )
 
 
 ################ Plots..
-plotlyjs() # For displaying
+#plotlyjs() # For displaying
 pyplot() # For printing
 
 mycolors = [colorant"olive green" colorant"rust orange" colorant"Gold Fusion" colorant"stormy blue"]
@@ -550,7 +631,7 @@ plot!(refor_85base, :year, :hV, group=:scen, linestyle = :dot, linewidth=3,  col
 savefig(chartOutDir*"/hV_refor.png")
 
 # Carbon balance
-cBal00 = cBalPivot[((cBalPivot[:scenLevel] .== "main" ) & (cBalPivot[:scenTypeCC] .== "RCP00_BAS")), : ]
+cBal00 = cVars_piv[((cVars_piv[:scenLevel] .== "main" ) & (cVars_piv[:scenTypeCC] .== "RCP00_BAS")), : ]
 
 plotcBal00 = plot(cBal00, :year, :TOT_BAL, group=:scen, linestyle = :solid, linewidth=3, label = ("Net cumulative subs effect - " * sort(unique(cBal00[:scen]))'), color=mycolors)
 plot!(cBal00, :year, :STOCK_PRODUCTS_cum, group=:scen, linestyle = :dash, linewidth=2, label = ("HWP pool stock - " * sort(unique(cBal00[:scen]))'), color=mycolors)
@@ -560,13 +641,45 @@ savefig(chartOutDir*"/cBal_cum_00.png")
 
 
 # Carbon balance Tempets
-cBalCrisis = cBalPivot[ [i in crisisScenarios for i in cBalPivot[:scen]], :]
+cBalCrisis = cVars_piv[ [i in crisisScenarios for i in cVars_piv[:scen]], :]
 cBalCrisisPlot = plot(cBalCrisis, :year, :TOT_BAL, group=:scen, linestyle = :solide, linewidth=3, label = ("Net cumulative subs effect - " * sort(unique(cBalCrisis[:scen]))'), color=mycolors,legend = :top)
 plot!(cBalCrisis, :year, :STOCK_FOR, group=:scen, linestyle = :dot, linewidth=2, label = ("Forest pool stock - " * sort(unique(cBalCrisis[:scen]))'), color=mycolors)
-plot!(cBalCrisis, :year, :STOCK_PRODUCTS_cum, group=:scen, linestyle = :dash, linewidth=2, label = ("HWP pool stock - " * sort(unique(cBalCrisis[:scen]))'), color=mycolors,)
+plot!(cBalCrisis, :year, :STOCK_PRODUCTS_cum, group=:scen, linestyle = :dash, linewidth=2, label = ("HWP pool stock - " * sort(unique(cBalCrisis[:scen]))'), color=mycolors, ylabel = "M m^3 CO2 eq")
 savefig(chartOutDir*"/cBal_cum_crisis.png")
 
-
+#=
+# Violin plots of forest structure (pivot computationally intensive)
+vol_bydckk1 = forVars[complete_cases(forVars[[:freeDim]]),:]
+vol_bydckk = pivot(vol_bydckk1,[:year,:freeDim],:scen,:value,
+        filter = Dict(
+                 :parName => ["vol"],
+                 :scen    => ["RCP00_BAS_EXT","RCP00_BAS_ADAPT"],
+                 :year    => [2015,2030,2050],
+                 :freeDim => collect(10:10:100)
+        )
+)
+forStruct_RCP00_BAS_EXT = DataFrame(
+  dc   = [],
+  year = String[]
+)
+forStruct_RCP00_BAS_ADAPT = DataFrame(
+  dc   = [],
+  year = String[]
+)
+for r in eachrow(vol_bydckk)
+  for i in range(1,Int(round(r[:RCP00_BAS_EXT]/30)))
+    push!(forStruct_RCP00_BAS_EXT, [r[:freeDim] string(r[:year])])
+  end
+  for i in range(1,Int(round(r[:RCP00_BAS_ADAPT]/30)))
+    push!(forStruct_RCP00_BAS_ADAPT, [r[:freeDim] string(r[:year])])
+  end
+end
+#ods_write(odsOut,Dict(("temp1",1,1) => vol_bydckk) )
+#ods_write(odsOut,Dict(("temp2",1,1) => forStruct_RCP00_BAS_EXT) )
+forStructPlot = violin(forStruct_RCP00_BAS_EXT,:year,:dc, side=:left, marker=(1,:blue,stroke(0)), label="RCP00_BAS_EXT")
+violin!(forStruct_RCP00_BAS_ADAPT,:year,:dc, side=:right, marker=(0.2,:red,stroke(0)), label="RCP00_BAS_ADAPT")
+savefig(chartOutDir*"/forStructPlot.png")
+=#
 
 #=
 # Carbon balance
