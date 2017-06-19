@@ -445,6 +445,10 @@ def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename, comp1_color='
   # diffcomp_color: color (English or #HTML_code) of the vector representing the difference component
   '''
 
+  matplotlib.rc('xtick', labelsize=30) 
+  matplotlib.rc('ytick', labelsize=30) 
+  matplotlib.rcParams.update({'font.size': 26})
+
   a   = plt.figure()
   ax  = plt.gca()
   fig = plt.gcf()
