@@ -63,12 +63,11 @@ ModelCoreSpatial::runInitPeriod(){
   initializePixelArea();          ///< compute px->area for each ft and dc (including exogenous loaded areas)
   runBiologicalModule();
   runManagementModule();
-  //MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
   updateMapAreas();               ///< update the forArea_{ft} layer on each pixel as old value-hArea+regArea
   updateOtherMapData();           ///< update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   sumRegionalForData();           ///< only for printing stats as forest data is never used at regional level
   initialiseCarbonModule();
-
+  MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
 
   MTHREAD->DO->print();
 }

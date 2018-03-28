@@ -251,7 +251,7 @@ void
 Layers::print(){
 
   if(MTHREAD->MD->getIntSetting("outputLevel",DATA_NOW)<OUTVL_MAPS) return;
-  if(!display || !dynamicContent) return;
+  //if(!display || !dynamicContent) return; // already checked in Gis::printLayers() and allowed only for the first year
   string mapBaseDirectory = MTHREAD->MD->getBaseDirectory()+MTHREAD->MD->getOutputDirectory()+"maps/";
   string mapGridOutputDirectory = mapBaseDirectory+"asciiGrids/";
   string catsOutputDirectory = mapBaseDirectory+"cats/";

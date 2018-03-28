@@ -886,7 +886,7 @@ Output::printDebugPixelValues(){
     vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
     for (uint r=0;r<regIds2.size();r++){
       int rId = regIds2[r];
-      //if(rId != 11061) continue;
+      //if(rId != 11002) continue;
       ModelRegion* REG = MTHREAD->MD->getRegion(rId);
       vector<Pixel*> regPx = REG->getMyPixels();
       for (uint p=0;p<regPx.size();p++){
@@ -905,17 +905,18 @@ Output::printDebugPixelValues(){
           common += d2s(m_m)+d;
         }
 
-        // First vars by only ft...
-        // expectedReturns
-        out << common << "expectedReturns" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << d;
-          }
-          out << px->expectedReturns[f] << d;
-          //out << 0.0 << d;
-        }
-        out << "\n";
+//        // First vars by only ft...
+//        // expectedReturns
+//        out << common << "expectedReturns" << d;
+//        for(uint f=0;f<fTypes.size();f++){
+//          for(uint u=0;u<dClasses.size()-1;u++){
+//            out << d;
+//          }
+//          out << px->expectedReturns[f] << d;
+//          //out << 0.0 << d;
+//        }
+//        out << "\n";
+
         //----
         out << common <<"vol" << d;
         for(uint f=0;f<fTypes.size();f++){
@@ -935,23 +936,23 @@ Output::printDebugPixelValues(){
         }
         out << "\n";
         //----
-        out << common <<"cumTp_exp" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << px->cumTp_exp[f][u]<< d;
-          }
-          out << vSum(px->cumTp_exp[f]) << d;
-        }
-        out << "\n";
-        //----
-        out << common <<"vHa_exp" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << px->vHa_exp[f][u]<< d;
-          }
-          out << vSum(px->vHa_exp[f]) << d;
-        }
-        out << "\n";
+//        out << common <<"cumTp_exp" << d;
+//        for(uint f=0;f<fTypes.size();f++){
+//          for(uint u=0;u<dClasses.size()-1;u++){
+//            out << px->cumTp_exp[f][u]<< d;
+//          }
+//          out << vSum(px->cumTp_exp[f]) << d;
+//        }
+//        out << "\n";
+//        //----
+//        out << common <<"vHa_exp" << d;
+//        for(uint f=0;f<fTypes.size();f++){
+//          for(uint u=0;u<dClasses.size()-1;u++){
+//            out << px->vHa_exp[f][u]<< d;
+//          }
+//          out << vSum(px->vHa_exp[f]) << d;
+//        }
+//        out << "\n";
         //----
         out << common <<"hArea" << d;
         for(uint f=0;f<fTypes.size();f++){
@@ -961,21 +962,55 @@ Output::printDebugPixelValues(){
           out << vSum(px->hArea[f]) << d;
         }
         out << "\n";
-        //----
-        out << common <<"deltaAreas" << d;
+        out << common <<"hVol" << d;
         for(uint f=0;f<fTypes.size();f++){
           for(uint u=0;u<dClasses.size()-1;u++){
-            out << d;
+            out << px->hVol[f][u]<< d;
           }
-          out << d;
-        }
-        for(uint f=0;f<fTypes.size()+1;f++){
-          for(uint f2=0;f2<fTypes.size()+1;f2++){
-            out << px->deltaArea[f][f2]<<d;
-          }
+          out << vSum(px->hVol[f]) << d;
         }
         out << "\n";
+        //----
+//        out << common <<"deltaAreas" << d;
+//        for(uint f=0;f<fTypes.size();f++){
+//          for(uint u=0;u<dClasses.size()-1;u++){
+//            out << d;
+//          }
+//          out << d;
+//        }
+//        for(uint f=0;f<fTypes.size()+1;f++){
+//          for(uint f2=0;f2<fTypes.size()+1;f2++){
+//            out << px->deltaArea[f][f2]<<d;
+//          }
+//        }
+//        out << "\n";
+        //----
 
+
+        out << common <<"tp" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << px->tp[f][u]<< d;
+          }
+          out << 0 << d;
+        }
+        out << "\n";
+        out << common <<"mort" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << px->mort[f][u]<< d;
+          }
+          out << 0 << d;
+        }
+        out << "\n";
+        out << common <<"vMort" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << px->vMort[f][u]<< d;
+          }
+          out << vSum(px->vMort[f]) << d;
+        }
+        out << "\n";
 
       } // end for each pixel
     } // end for each region

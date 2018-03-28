@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import os, sys
 import csv, math
 import matplotlib.pyplot as plt
@@ -166,7 +167,7 @@ def printCharts():
   
   selectedregions=['FRA', 'LO (FR41)']
   
-  for region in selectedregions: #selectedregions:#g.sortedregions:
+  for region in g.sortedregions: #selectedregions:#g.sortedregions:
     title('c','subsection',g.regions[region])
 
     title('c', 'subsubsection', "a1b vs constant")
@@ -183,7 +184,7 @@ def printCharts():
 
     title('c', 'subsubsection', "Just volume and area")
     plotMultivariable(['arpege_a1b'], ['vol', 'forArea'], region, 'arpege\_a1b', 'vol_area1', True, fwidth=10, fheight=8)
-    plotMultivariable(['arpege_a1b'], ['vol'], region, 'arpege\_a1b', 'vol1', True, fwidth=10, fheight=6)
+    plotMultivariable(['arpege_a1b'], ['vol'], region, 'arpege\_a1b', 'vol1', True, fwidth=12, fheight=8.5)
     plotMultivariable(['arpege_a1b'], ['vol'], region, 'arpege\_a1b', 'vol1_nolegend', False, fwidth=10, fheight=4)
     plotLegend(['arpege_a1b'], 'vol1_legend')
     plotMultivariable(['constant', 'arpege_a1b'], ['vol', 'forArea'], region, 'constant vs arpege\_a1b', 'vol_area2', True, fwidth=10, fheight=8)
@@ -218,7 +219,7 @@ def printTables():
   
   outvars = ['expReturns','harvestedArea','hV','regArea','vReg','forArea','vol']
   
-  for region in selectedregions: #selectedregions:#g.sortedregions:
+  for region in g.sortedregions: #selectedregions:#g.sortedregions:
     title('t','subsection',g.regions[region])
 
 
@@ -305,7 +306,7 @@ def printAATables():
 
  
   selectedregions=['FRA', 'CE (FR24)', 'AQ (FR61)', 'RA (FR71)','PA (FR82)','LO (FR41)']
-  regions = selectedregions #selectedregions:#g.sortedregions:
+  regions = g.sortedregions #selectedregions:#g.sortedregions:
 
   title('t','section',"Area allocation")
   printAATable(['constant', 'constant', 'constant'],['arpege_a1b','arpege_a2','arpege_b1'], regions, ['2100'],'Area allocation [% variation over constant]', 'area_allocation_2100')

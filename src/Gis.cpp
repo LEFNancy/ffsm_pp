@@ -358,6 +358,15 @@ Gis::initLayersPixelData(){
     }
   }
 
+  // Add layer of pixel IDs
+  addLayer("pixelIds","Pixel IDs", true, false, "", true);
+  vector <Pixel*> allPx = getAllPlots();
+  for (unsigned int i = 0; i < allPx.size();i++) {
+      allPx[i]->changeValue("pixelIds", allPx[i]->getID());
+  }
+
+
+
 }
 
 /** Init the layers of exogenous data at pixel level (e.g. time of passage)
@@ -910,6 +919,9 @@ Gis::printLayers(string layerName_h){
   int iteration = MTHREAD->SCD->getIteration(); // are we on the first year of the simulation ??
   if(layerName_h == ""){
     for (uint i=0;i<layerVector.size();i++){
+      //if(layerVector[i].getName() == "pixelIds"){
+      //   cout << layerVector[i].getName() << endl;
+      //}
       // not printing if we are in a not-0 iteration and the content of the map doesn't change
       if (!iteration || layerVector[i].getDynamicContent()) layerVector[i].print();
     }
