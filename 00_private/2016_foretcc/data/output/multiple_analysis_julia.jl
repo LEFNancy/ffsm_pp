@@ -1,4 +1,4 @@
-using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatPlots, Plots #  PlotlyJS  Plots
+using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatPlots, Plots, CSV #  PlotlyJS  Plots
 
 ##########################################################
 ### Settings and definitions
@@ -136,13 +136,15 @@ yearsCrisis = [2015; 2026:2035; 2050]
 ##########################################################
 ### Data import
 ##########################################################
-forestData_byscenario = [readtable(baseIDir*"/forestData_"*scenario*".csv", separator = ';') for scenario in scenarios];
-productData_byscenario = [readtable(baseIDir*"/productData_"*scenario*".csv", separator = ';') for scenario in scenarios];
-carbonData_byscenario = [readtable(baseIDir*"/carbonBalance_"*scenario*".csv", separator = ';') for scenario in scenarios];
-forVars = vcat(forestData_byscenario)
-prodVars = vcat(productData_byscenario)
-cVars = vcat(carbonData_byscenario)
-[delete!(dfi, [:x,:country,]) for dfi in [cVars, prodVars, forVars]] # delete columns X (empty at the end) and country
+
+forestData_byscenario = [CSV.read(baseIDir*"/forestData_"*scenario*".csv"; delim=';', missingstring="") for scenario in scenarios];
+productData_byscenario = [CSV.read(baseIDir*"/productData_"*scenario*".csv"; delim=';', types=problematicCols) for scenario in scenarios];
+carbonData_byscenario = [CSV.read(baseIDir*"/carbonBalance_"*scenario*".csv"; delim=';', missingstring="") for scenario in scenarios];
+
+forVars = vcat(forestData_byscenario...)
+prodVars = vcat(productData_byscenario...)
+cVars = vcat(carbonData_byscenario...)
+[delete!(dfi, [:country,]) for dfi in [cVars, prodVars, forVars]] # delete columns country
 
 #hVDet_byscenario = [readtable(baseIDir*"/detailedHV_"*scenario*".csv", separator = ';') for scenario in scenarios];
 #hVDet = vcat(hVDet_byscenario)
