@@ -60,6 +60,7 @@ public:
   double              getPastRegArea(const int& ft_idx, const int& year);
   void                setPastRegArea(const double& value, const int& ft_idx, const int& year);
   ModelRegion*        getMyRegion(const int& rLevel = 2);
+  double              getSTData(const string& parName, const string& forName, int year, const string& d2 ="", double naToReturn = RETNA); // Get spatio-temporal data from layers whose name follows a given pattern
 
 
   // space..
@@ -136,7 +137,7 @@ public:
   double                                 expType; ///< Sampling derived expectation types of this agent (forest bilogical parameters: growth, mortality)
   double                           expTypePrices; ///< Sampling derived expectation types of this agent (prices)
   bool                              usePortfolio; ///< Sampling derived usage of portfolio management (false/true)
-  double                                avalCoef; ///< Availability (of wood resources) coefficient. A [0,1] coefficient that reduce avaiability of wood resources to exploitation due to local reasons (protected area, altimetry..)
+  vector <double>                       avalCoef; ///< Availability (of wood resources) coefficient. A [0,1] coefficient (new: by forest type) that reduces avaiability of wood resources to exploitation due to local reasons (protected area, altimetry..)
 
 private:  
   map<string, double>            values;  ///< Map of values for each layer

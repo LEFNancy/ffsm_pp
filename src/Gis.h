@@ -108,7 +108,7 @@ public:
   /// Return the vector (shuffled) of all plots with specific values for a specified layer. It is also possible to specify the level in case of failure
   vector <Pixel*>     getAllPlotsByValue(string layer_h, vector<int> layerValues_h, int outputLevel=MSG_WARNING);
   /// Return the vector (shuffled) of all plots. It is also possible to specify the level in case of failure
-  vector <Pixel*>     getAllPlots(int outputLevel=MSG_WARNING);
+  vector <Pixel*>     getAllPlots(bool masked=true, int outputLevel=MSG_WARNING);
   /// Return the vector of all plots by a specific region (main region or subregion), optionally shuffled;
   vector <Pixel*>     getAllPlotsByRegion(ModelRegion &region_h, bool shuffle=false);
   vector <Pixel*>     getAllPlotsByRegion(int regId_h, bool shuffle=false);
@@ -154,7 +154,7 @@ private:
   void                loadLayersDataFromFile(); ///< Load the data of a layer its datafile
   void          applySpatialStochasticValues(); ///< Apply stochastic simulation, e.g. regional volume growth s.d. -> tp multipliers
   void          applyStochasticRiskAdversion(); ///< Give to each agend a stochastic risk adversion. For now Pixel = Agent
-  void                      cachePixelValues(); ///< For computational reasons cache some values in constant layers directly as properties of the pixel object
+  //void                      cachePixelValues(); ///< For computational reasons cache some values in constant layers directly as properties of the pixel object
   vector <Pixel>                      pxVector; ///< array of Pixel objects
   vector <Layers>                  layerVector; ///< array of Layer objects  
   vector <double>                   lUseTotals; ///< totals, in ha, of area in the region for each type (cached values)

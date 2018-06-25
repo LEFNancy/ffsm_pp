@@ -634,10 +634,10 @@ ModelCoreSpatial::runBiologicalModule(){
           hr = min(1.0,hr);
           for(uint pp=0;pp<priProducts.size();pp++){
             double hr_pr = origHr ? hr_byPrd[pp] * min(1.0,1.0/origHr) : 0.0;
-            hV_byPrd.push_back( hr_pr*pastYearVol*px->avalCoef);
+            hV_byPrd.push_back( hr_pr*pastYearVol*px->avalCoef.at(j));
           }
 
-          double hV = hr*pastYearVol*px->avalCoef;
+          double hV = hr*pastYearVol*px->avalCoef.at(j);
 
 
           hV_byDiam.push_back(hV);
@@ -708,7 +708,7 @@ ModelCoreSpatial::runBiologicalModule(){
               hArea_byDc.push_back(finalHarvestFlag*1000000*hV/vHa); // volumes are in Mm^3, area in ha, vHa in m^3/ha
             } else {
               double finalHarvestedVolumes = finalHarvestFlag* hV;
-              double finalHarvestedRate = pastYearVol?finalHarvestedVolumes/pastYearVol:0.0; // Here we want the harvested rate over the whole volumes, not just the available ones, so we don't need to multiply to px->avalCoef
+              double finalHarvestedRate = pastYearVol?finalHarvestedVolumes/pastYearVol:0.0; // Here we want the harvested rate over the whole volumes, not just the available ones, so we don't need to multiply to px->avalCoef.at(j)
               #ifdef QT_DEBUG
               if (finalHarvestedRate > 1.0){
                 msgOut(MSG_CRITICAL_ERROR,"Negative final harvested rate.");
@@ -1634,6 +1634,8 @@ void
 ModelCoreSpatial::cachePixelExogenousData(){
 
   msgOut(MSG_INFO, "Starting cashing on pixel spatial-level exogenous data");
+  bool applyAvalCoef = MTHREAD->MD->getBoolSetting("applyAvalCoef");
+
   for(uint r2= 0; r2<regIds2.size();r2++){
     int regId = regIds2[r2];
     regPx = MTHREAD->MD->getRegion(regId)->getMyPixels();
@@ -1642,6 +1644,7 @@ ModelCoreSpatial::cachePixelExogenousData(){
       px->tp.clear();
       px->beta.clear();
       px->mort.clear();
+      px->avalCoef.clear();
 
       for(uint j=0;j<fTypes.size();j++){
         string ft = fTypes[j];
@@ -1652,7 +1655,7 @@ ModelCoreSpatial::cachePixelExogenousData(){
         double tp_multiplier_now       = px->getMultiplier("tp_multiplier",ft,DATA_NOW);
         double mortCoef_multiplier_now = px->getMultiplier("mortCoef_multiplier",ft,DATA_NOW);
         double betaCoef_multiplier_now = px->getMultiplier("betaCoef_multiplier",ft,DATA_NOW);
-
+        double avalCoef_ft             = applyAvalCoef?px->getSTData("avalCoef",ft,DATA_NOW):1.0;
 
         for (uint u=0; u<dClasses.size(); u++){
           string dc = dClasses[u];
@@ -1671,10 +1674,11 @@ ModelCoreSpatial::cachePixelExogenousData(){
           tp_byu.push_back(tp);
           beta_byu.push_back(beta_real);
           mort_byu.push_back(mort_real);
-        } // end of each tp
+        } // end of each dc
         px->tp.push_back(tp_byu);
         px->beta.push_back(beta_byu);
         px->mort.push_back(mort_byu);
+        px->avalCoef.push_back(avalCoef_ft);
       } // end of each ft
     } // end of each pixel
   } // end of each region
@@ -1703,7 +1707,7 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
         double in = 0;
         for(uint ft=0;ft<fTypes.size();ft++){
           for(uint dc=0;dc<dClasses.size();dc++){
-            in += app(priProducts[pp],fTypes[ft],dClasses[dc])*px->vol_l.at(ft).at(dc)*px->avalCoef;
+            in += app(priProducts[pp],fTypes[ft],dClasses[dc])*px->vol_l.at(ft).at(dc)*px->avalCoef.at(ft);
           }
         }
         //px->in.push_back(in);

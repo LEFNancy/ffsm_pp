@@ -213,24 +213,7 @@
       <legendItem label="5000 - 10000 e/ha" rColor="050" gColor="050" bColor="050" minValue="5000" maxValue="10000">5000</legendItem>
       <legendItem label="over 10000 e/ha" rColor="025" gColor="025" bColor="025" minValue="10000" maxValue="100000000">10000</legendItem>
     </legendItems>
-  </layer>
-  <layer>
-    <name>avalCoef</name>
-    <label>Availability coefficient</label>
-    <isInteger>false</isInteger><!-- Bool. If "isInteger" is not true, minValue and maxValue must be specified for each legendItem -->
-    <readAtStart>true</readAtStart><!-- bool -->
-    <dynamicContent>false</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->
-    <expandByFt>false</expandByFt><!-- bool. If true this ft expand for each forest type -->
-    <dirName>gis/france/</dirName>
-    <fileName>avalcoef.grd</fileName>
-    <legendItems>
-      <legendItem label="0 - 0.2" rColor="230" gColor="230" bColor="230" minValue="0" maxValue="0.2">0</legendItem>
-      <legendItem label="0.2 - 0.4" rColor="160" gColor="160" bColor="160" minValue="0.2" maxValue="0.4">20</legendItem>
-      <legendItem label="0.4 - 0-6" rColor="100" gColor="100" bColor="100" minValue="0.4" maxValue="0.6">40</legendItem>    
-      <legendItem label="0.8 - 1" rColor="40" gColor="40" bColor="40" minValue="0.8" maxValue="1.001">80</legendItem>
-    </legendItems>
   </layer>	
-	
 	
 </gis>
 

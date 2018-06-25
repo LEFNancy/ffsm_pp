@@ -31,7 +31,7 @@ Pixel::Pixel(double ID_h, ThreadManager* MTHREAD_h): ID(ID_h)
   vector<double> temp(nft,1);
   //vector<double> temp2(nft,0);
   spMods = temp;
-  avalCoef = 1;
+  avalCoef = temp;
   //vMort  = temp2;
   //std::fill(v.begin(), v.end(), 0);
 }
@@ -181,7 +181,7 @@ If the tp_multiplier is asked for, it will adjusts for spatial variance coeffici
 If the mortCoef_multiplier is used and we are in the table settings it will adjust it by mortCoef_link.
 */
 double
-Pixel::getMultiplier (const string& multiplierName, const string& forName, int year){
+Pixel::getMultiplier(const string& multiplierName, const string& forName, int year){
 
 
   if(year==DATA_NOW){year = MTHREAD->SCD->getYear();}
@@ -202,28 +202,91 @@ Pixel::getMultiplier (const string& multiplierName, const string& forName, int y
 
     } else {
       // load multiplier from layer file..
+      return getSTData(multiplierName, forName, year, "", 1.0);
 
-      // return 1 if not using pixel mode
-      if(!MTHREAD->MD->getBoolSetting("usePixelData")) return 1.0;
-      string search_for = multiplierName+"#"+forName+"##"+i2s(year);
-      map <string,double>::const_iterator i = values.upper_bound(search_for); //return the position always upper to the found one, even if it's an equal match.
-      if(i!= values.begin())  i--; // this rewind the position to the one just before or equal
-      const string& key = i->first;
-      string search_base = search_for.substr(0,search_for.size()-4);
-      if (key.compare(0, search_base.size(), search_base) == 0){
-          //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
-          //if(i->second != 1){
-          //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
-          //  exit(0);
-          //}
-          return i->second*multiplierSpVar;
-      } else {
-          //cout << "NOTM:  " << search_for <<", "<< i->first << endl;
-          return 1.0*multiplierSpVar;
-      }
+//      // return 1 if not using pixel mode
+//      if(!MTHREAD->MD->getBoolSetting("usePixelData")) return 1.0;
+//      string search_for = multiplierName+"#"+forName+"##"+i2s(year);
+//      map <string,double>::const_iterator i = values.upper_bound(search_for); //return the position always upper to the found one, even if it's an equal match.
+//      if(i!= values.begin())  i--; // this rewind the position to the one just before or equal
+//      const string& key = i->first;
+//      string search_base = search_for.substr(0,search_for.size()-4);
+//      if (key.compare(0, search_base.size(), search_base) == 0){
+//          //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
+//          //if(i->second != 1){
+//          //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
+//          //  exit(0);
+//          //}
+//          return i->second*multiplierSpVar;
+//      } else {
+//          //cout << "NOTM:  " << search_for <<", "<< i->first << endl;
+//          return 1.0*multiplierSpVar;
+//      }
 
     }
 }
+
+/**
+getSTData() (standing for "get spatial temporal data") returns the value memorized in a spatial layer whose name follows the above convention
+
+parName#fType#dimension2#year
+
+It queries the layer framework with the following logic:
+
+@param parName    Parameter name (exact match)
+@param forName    Forest type (exact match or look for "")
+@param year       Year (exact match or look for the highest lower value). Accept enum DATA_NOW
+@param d2         Optional dimension (exact match, string. Default = "")
+@param naToReturn Optional value to return if no match (default to secnario-specific novalue)
+
+
+*/
+
+double
+Pixel::getSTData(const string& parName, const string& forName, int year, const string& d2, double naToReturn){
+
+  if (naToReturn == RETNA) naToReturn = MTHREAD->MD->getDoubleSetting("noValue");
+
+  // return NA if not using pixel mode
+  if(!MTHREAD->MD->getBoolSetting("usePixelData")) return naToReturn;
+
+  // If year is DATA_NOW get current year
+  if (year == DATA_NOW) year = MTHREAD->SCD->getYear();
+
+  // Looking for an exact match in forName
+  string search_for = parName+"#"+forName+"#"+d2+"#"+i2s(year);
+  map <string,double>::const_iterator i = values.upper_bound(search_for); //return the position always upper to the found one, even if it's an equal match.
+  if(i!= values.begin())  i--; // this rewind the position to the one just before or equal
+  const string& key = i->first;
+  string search_base = search_for.substr(0,search_for.size()-4);
+  if (key.compare(0, search_base.size(), search_base) == 0){
+      //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
+      //if(i->second != 1){
+      //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
+      //  exit(0);
+      //}
+      return i->second;
+  } else {
+      // An exact match in forName has not being found, look for no forName:
+      string search_for2 = parName+"#"+"#"+d2+"#"+i2s(year);
+      map <string,double>::const_iterator i2 = values.upper_bound(search_for2); //return the position always upper to the found one, even if it's an equal match.
+      if(i2!= values.begin())  i2--; // this rewind the position to the one just before or equal
+      const string& key2 = i2->first;
+      string search_base2 = search_for2.substr(0,search_for2.size()-4);
+      if (key2.compare(0, search_base2.size(), search_base2) == 0){
+        //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
+        //if(i->second != 1){
+        //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
+        //  exit(0);
+        //}
+        return i2->second;
+      } else {
+        //cout << "NOTM:  " << search_for <<", "<< i->first << endl;
+        return naToReturn;
+      }
+  }
+}
+
 
 /**
 The mortality returned is the increased yearly mortality due to any affecting pathogenes.

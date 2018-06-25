@@ -2028,7 +2028,7 @@ ModelData::getAvailableAliveTimber(const vector<string> &primProd_h, int regId_h
       if(possible){
         for (uint p=0;p<regPx.size();p++){
           Pixel* px = regPx[p];
-          toReturn += px->vol_l.at(i).at(u)*px->avalCoef;
+          toReturn += px->vol_l.at(i).at(u)*px->avalCoef.at(i);
         }
       }
     }

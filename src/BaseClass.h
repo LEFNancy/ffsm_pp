@@ -69,12 +69,13 @@ enum dataType{
 };
 /// A generic enum to deal with data requests
 enum dataRequest {
-  DATA_NOW               =-1,            ///< The required data is for the current year
+  DATA_NOW               = -1,           ///< The required data is for the current year
   DATA_INIT              = -2,           ///< Setting a data request for the init period
   DATA_ERROR             = -99999999999, ///< There is an error in retrieving the data
   // operations possible in certain contexts
   OP_SUM                 =1,             ///< Perform a SUM operation
   OP_AVG                 =5,             ///< Perform an AVERAGE operation
+  RETNA                  = -9999         ///< Request the (scenario specific) NO VALUE to be returned
 };
 /// Verbosity level of the output
 enum outputVerbosity {

@@ -93,7 +93,7 @@ Gis::setSpace(){
 
   applySpatialStochasticValues(); // regional variance -> different tp in each pixel trought tp modifiers
   applyStochasticRiskAdversion(); // risk adversion to each pixel
-  cachePixelValues(); // For computational reasons cache some values in the constant layers directly as properties of the pixel object
+  //cachePixelValues(); // For computational reasons cache some values in the constant layers directly as properties of the pixel object
 
 //  //< Print a layer of pixels id..
 //  addLayer("pxIds", "idx of the pixels", true, true, "pxIds.grd", true);
@@ -221,12 +221,16 @@ Gis::applyStochasticRiskAdversion(){
   }
 }
 
+
+/*
 void
 Gis::cachePixelValues(){
   /// Set the avalCoef (availability coefficient) from layer
   if(!MTHREAD->MD->getBoolSetting("usePixelData")) return;
+  if(!MTHREAD->MD->getBoolSetting("applyAvalCoef")) return;
 
   bool applyAvalCoef = MTHREAD->MD->getBoolSetting("applyAvalCoef");
+
   vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
 
   for(uint i=0;i<regIds2.size();i++){
@@ -239,6 +243,7 @@ Gis::cachePixelValues(){
     }
   }
 }
+*/
 
 /**
 Called from setSpace(), initLayers() is responsable of:
@@ -307,7 +312,7 @@ Gis::initLayers(){
 }
 
 /** Init the layers of exogenous data at pixel level (e.g. time of passage, multipliers, volumes of sp. espl. ft, spread models)
-    These layers will then be read from datafile
+    These layers will then be read from datafile @see loadLayersDataFromFile
 */
 void
 Gis::initLayersPixelData(){
@@ -360,7 +365,7 @@ Gis::initLayersPixelData(){
 
   // Add layer of pixel IDs
   addLayer("pixelIds","Pixel IDs", true, false, "", true);
-  vector <Pixel*> allPx = getAllPlots();
+  vector <Pixel*> allPx = getAllPlots(false);
   for (unsigned int i = 0; i < allPx.size();i++) {
       allPx[i]->changeValue("pixelIds", allPx[i]->getID());
   }
@@ -765,7 +770,7 @@ Gis::getAllPlotsByValue(string layer_h, int layerValue_h, int outputLevel){
     random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
   }
   else {
-    msgOut(outputLevel,"We can't find any free plot with "+d2s(layerValue_h)+" value on layer "+layer_h+".");
+    msgOut(outputLevel,"We can't find any free pixel with "+d2s(layerValue_h)+" value on layer "+layer_h+".");
   }
   return candidates;
 }
@@ -813,16 +818,32 @@ Gis::getAllPlotsByValue(string layer_h, vector<int> layerValues_h, int outputLev
 
 */
 vector <Pixel*>
-Gis::getAllPlots(int outputLevel){
+Gis::getAllPlots(bool masked, int outputLevel){
   vector <Pixel* > candidates;
-  for (uint i=0;i<pxVector.size();i++){
-    candidates.push_back(&pxVector.at(i));
-  }
-  if (candidates.size()>0){
-    random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
-  }
-  else {
-    msgOut(outputLevel,"We can't find any free plot.");
+  if(masked = false){
+    for (uint i=0;i<pxVector.size();i++){
+      candidates.push_back(&pxVector.at(i));
+    }
+    if (candidates.size()>0){
+      random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
+    } else {
+      msgOut(outputLevel,"We can't find any free plot.");
+    }
+  } else {
+    // Only pixels within a L2 region
+    vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
+    for(uint i=0;i<regIds2.size();i++){
+      vector <Pixel*> rpx = getAllPlotsByRegion(regIds2[i]);
+      //for (uint i=0;i<rpx.size();i++){
+      //  candidates.push_back(rpx.at(i));
+      //}
+      candidates.insert( candidates.end(), rpx.begin(), rpx.end() );
+    }
+    if (candidates.size()>0){
+      random_shuffle(candidates.begin(), candidates.end()); // randomize ther elements of the array... cool !!! ;-)))
+    } else {
+      msgOut(outputLevel,"We can't find any free plot.");
+    }
   }
   return candidates;
 }

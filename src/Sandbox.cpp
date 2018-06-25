@@ -588,6 +588,18 @@ void
 Sandbox::fullTest(){
 
   /*
+  // Testing the new getSTData() function
+  cout << "Starting test" << endl;
+  Pixel* px = MTHREAD->GIS->getPixel(32,30);
+  cout << "got pixel" << endl;
+  //double avalCoef = px->getMultiplier("avalCoefTest", "con_highF", 2007);
+  double avalCoef =  px->getSTData("avalCoef","broadL_highF",2008);
+  cout << avalCoef << endl;
+  exit(1);
+  */
+
+
+  /*
   // Testing shareMortalityUsableTimber call for a specific forest type and at the opposite with a null forest type
   // to see if gfd() expands as expected
 
