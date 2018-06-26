@@ -832,6 +832,8 @@ ModelCoreSpatial::runManagementModule(){
     // 20170123: if mr is defined at regional level in the forData table, good, otherwise we look at settings table.
     // If it isn't there as well, we rise a critical error.
     // 20170302: removed the (false positive) error message raised if we put mr in setting table
+    // 20180626: mr is now, like all the other settings, powered with a regional dimension, so this looking in the
+    // forest data is no longer needed, but we keep it as some old projects have mr in the forData sheet.
     double mr;
     int origErrorLevel = MD->getErrorLevel();
     MTHREAD->MD->setTempBool(true); // this should not be needed as it is set positive in getForData() map soubroutine..
@@ -839,7 +841,7 @@ ModelCoreSpatial::runManagementModule(){
     mr = MD->getForData("mr",regId,"","");
     if(!MTHREAD->MD->getTempBool()) { // mr not found in the forest data
       MD->setErrorLevel(MSG_CRITICAL_ERROR);
-      mr = MD->getDoubleSetting("mr",DATA_NOW);
+      mr = MD->getDoubleSetting("mr",DATA_NOW,regId);
     }
     //try{
     //  mr = MD->getForData("mr",regId,"","");

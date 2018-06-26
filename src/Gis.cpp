@@ -131,15 +131,16 @@ Gis::applySpatialStochasticValues(){
   //double sumc = 0;
   //double nc = 0;
   for(uint i=0;i<regIds2.size();i++){
-    ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
-    vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
+    int regId = regIds2[i];
+    ModelRegion* reg = MTHREAD->MD->getRegion(regId );
+    vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regId );
     vector <string> fTypes = MTHREAD->MD->getForTypeIds();
 
     // regional variance
     if(MTHREAD->MD->getBoolSetting("useSpatialRegionalVariance")){
       for(uint j=0; j<fTypes.size(); j++){
-        double sStDev = MTHREAD->MD->getForData("sStDev",regIds2[i],fTypes[j],""); // spatial standard deviation
-        double agr = MTHREAD->MD->getForData("agr",regIds2[i],fTypes[j],""); // average growth
+        double sStDev = MTHREAD->MD->getForData("sStDev",regId ,fTypes[j],""); // spatial standard deviation
+        double agr = MTHREAD->MD->getForData("agr",regId ,fTypes[j],""); // average growth
         // BUG solved 20141220 To obtain a population with the same avg and st.dev of the original using moltipliers, I need to use the cv not the st.dev. !
         // tested with excel
         normal_distribution<double> d(1,sStDev/agr); // default any how to double
@@ -158,10 +159,10 @@ Gis::applySpatialStochasticValues(){
     }
 
     // expectation types
-    double avgExpTypes       = MTHREAD->MD->getDoubleSetting("expType");
-    double avgExpTypesPrices = MTHREAD->MD->getDoubleSetting("expTypePrices");
-    double expTypes_cv       = MTHREAD->MD->getDoubleSetting("expType_cv");
-    double expTypesPrices_cv = MTHREAD->MD->getDoubleSetting("expTypePrices_cv");
+    double avgExpTypes       = MTHREAD->MD->getDoubleSetting("expType",DATA_NOW,regId);
+    double avgExpTypesPrices = MTHREAD->MD->getDoubleSetting("expTypePrices",DATA_NOW,regId);
+    double expTypes_cv       = MTHREAD->MD->getDoubleSetting("expType_cv",DATA_NOW,regId);
+    double expTypesPrices_cv = MTHREAD->MD->getDoubleSetting("expTypePrices_cv",DATA_NOW,regId);
     if((avgExpTypes<0 || avgExpTypes>1) && avgExpTypes != -1){
       msgOut(MSG_CRITICAL_ERROR, "expType parameter must be between 1 (expectations) and 0 (adaptative) or -1 (fixed).");
     }
@@ -205,12 +206,13 @@ Gis::applyStochasticRiskAdversion(){
   vector <int> regIds2 = MTHREAD->MD->getRegionIds(2);
   bool raEnabled = MTHREAD->MD->getBoolSetting("heterogeneousRiskAversion");
   for(uint i=0;i<regIds2.size();i++){
-    ModelRegion* reg = MTHREAD->MD->getRegion(regIds2[i]);
-    vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regIds2[i]);
+    int regId = regIds2[i];
+    ModelRegion* reg = MTHREAD->MD->getRegion(regId);
+    vector <Pixel*> rpx = MTHREAD->GIS->getAllPlotsByRegion(regId);
     for (uint z=0;z<rpx.size();z++){
       if(raEnabled){
-        double raStDev = MTHREAD->MD->getDoubleSetting("riskAversionAgentSd");
-        double avg = MTHREAD->MD->getDoubleSetting("riskAversionAgentAverage");
+        double raStDev = MTHREAD->MD->getDoubleSetting("riskAversionAgentSd",DATA_NOW,regId);
+        double avg = MTHREAD->MD->getDoubleSetting("riskAversionAgentAverage",DATA_NOW,regId);
         normal_distribution<double> d(avg,raStDev); // default any how to double
         double c = d(*MTHREAD->gen);
         rpx[z]->setValue ("ra", c);
