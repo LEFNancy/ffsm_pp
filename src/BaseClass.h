@@ -75,7 +75,8 @@ enum dataRequest {
   // operations possible in certain contexts
   OP_SUM                 =1,             ///< Perform a SUM operation
   OP_AVG                 =5,             ///< Perform an AVERAGE operation
-  RETNA                  = -9999         ///< Request the (scenario specific) NO VALUE to be returned
+  RETNA                  = -9999,        ///< Request the (scenario specific) NO VALUE to be returned
+  WORLD                  = -99999        ///< Request something that is not region-specific
 };
 /// Verbosity level of the output
 enum outputVerbosity {

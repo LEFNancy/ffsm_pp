@@ -150,14 +150,14 @@ public:
   double              getTimedData(const vector <double> &dated_vector, const int& year_h) const; ///< Return the value for the specified year in a timelly ordered vector, taking the last value if this is smaller than the required position.
   void                setTimedData(const double& value_h, vector<double> &dated_vector, const int& year_h, const int& MSG_LEVEL=MSG_WARNING);
 
-  int                 getIntSetting          (const string &name_h, int position=0) const;
-  double              getDoubleSetting       (const string &name_h, int position=0) const;
-  string              getStringSetting       (const string &name_h, int position=0) const;
-  bool                getBoolSetting         (const string &name_h, int position=0) const;
-  vector <int>        getIntVectorSetting    (const string &name_h) const;
-  vector <double>     getDoubleVectorSetting (const string &name_h) const;
-  vector <string>     getStringVectorSetting (const string &name_h) const;
-  vector <bool>       getBoolVectorSetting   (const string &name_h) const;
+  int                 getIntSetting          (const string &name_h, int position=0, int reg=WORLD) const;
+  double              getDoubleSetting       (const string &name_h, int position=0, int reg=WORLD) const;
+  string              getStringSetting       (const string &name_h, int position=0, int reg=WORLD) const;
+  bool                getBoolSetting         (const string &name_h, int position=0, int reg=WORLD) const;
+  vector <int>        getIntVectorSetting    (const string &name_h, int reg=WORLD) const;
+  vector <double>     getDoubleVectorSetting (const string &name_h, int reg=WORLD) const;
+  vector <string>     getStringVectorSetting (const string &name_h, int reg=WORLD) const;
+  vector <bool>       getBoolVectorSetting   (const string &name_h, int reg=WORLD) const;
 
 
   const double        getProdData(const string &type_h, const int& regId_h, const string &prodId_h, const int &year=DATA_NOW, const string &freeDim_h="");
@@ -184,10 +184,10 @@ public:
   void                cacheSettings(); ///< Called after input reading, it fix frequently used data;
   int                 getCachedInitialYear(){return cached_initialYear;}
 
-  void                setBasicData(const string &name_h, int value, int position=0);
-  void                setBasicData(const string &name_h, double value, int position=0);
-  void                setBasicData(const string &name_h, string value, int position=0);
-  void                setBasicData(const string &name_h, bool value, int position=0);
+  //void                setBasicData(const string &name_h, int value, int position=0);
+  //void                setBasicData(const string &name_h, double value, int position=0);
+  //void                setBasicData(const string &name_h, string value, int position=0);
+  //void                setBasicData(const string &name_h, bool value, int position=0);
   friend void         Output::printForestData(bool finalFlush=false);
   friend void         Output::printProductData(bool finalFlush=false);
   void                deathTimberInventory_incrOrAdd(const iisskey &thekey, double value_h){incrOrAddMapValue(deathTimberInventory,thekey, value_h);}
@@ -200,9 +200,9 @@ public:
   scenarioData        scenario;
 
 private:
-  string              getBaseData (const string &name_h, int type_h, int position=0);
-  vector <string>     getVectorBaseData (const string &name_h, int type_h);
-  void                setBasicData(const string &name_h, string value, int type_h, int position);
+  string              getBaseData (const string &name_h, int type_h, int position=0, int regID_h=WORLD);
+  vector <string>     getVectorBaseData (const string &name_h, int type_h, int regID_h=WORLD);
+  //void                setBasicData(const string &name_h, string value, int type_h, int position);
 
   bool                dataMapCheckExist(const DataMap& map, const string& search_for, const bool& exactMatch=true) const;
   double              dataMapGetValue(const DataMap& map, const string& search_for, const int& year_h, const bool& exactMatch=true);
@@ -267,6 +267,7 @@ struct BasicData {
   /// Values are stored as "string" because we don't yet know at this point if they are string, double or integers!
   vector <string>                                 values;
   int                                               type; //< enum TYPE_*
+  int                                              regID;
   string                                         comment;
 };
 

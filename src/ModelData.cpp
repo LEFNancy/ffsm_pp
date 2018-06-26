@@ -199,9 +199,11 @@ ModelData::setDefaultSettings(){
     SETT.name = table.getData(i,"name");
     string type = table.getData(i,"type");
     SETT.type = getType(type);
+    string region_s= table.getData(i,"region");
+    SETT.regID = region_s==""?WORLD:s2i(table.getData(i,"region"));
     SETT.comment = table.getData(i,"comment");
     vector <string> values;
-    for (int z=0;z<nheaders-3;z++){ // don't consider name, type and comment headers
+    for (int z=0;z<nheaders-4;z++){ // don't consider name, type, comment and region headers
       string toSearch = "value_"+i2s(z);
       string value = table.getData(i,toSearch);
       if (value != ""){
@@ -225,27 +227,38 @@ ModelData::setScenarioSettings(){
 
   int nheaders = table.nheaders();
   for(int i=0; i< table.nrecords(); i++){
-    BasicData SETT;
     string name = table.getData(i,"name");
     string stype = table.getData(i,"type");
     int type = getType(stype);
+    string region_s= table.getData(i,"region");
+    int    regID = region_s==""?WORLD:s2i(table.getData(i,"region"));
     string comment = table.getData(i,"comment");
     vector <string> values;
-    for (int z=0;z<nheaders-3;z++){ // don't consider name, type and comment headers
+    for (int z=0;z<nheaders-4;z++){ // don't consider name, type and comment headers
       string toSearch = "value_"+i2s(z);
       string value = table.getData(i,toSearch);
       if (value != ""){
         values.push_back(value);
       }
     }
-
+    bool found = false;
     for(uint i=0;i<programSettingsVector.size();i++){
-      if(programSettingsVector[i].name == name){
+      if(programSettingsVector[i].name == name && programSettingsVector[i].regID == regID){
         programSettingsVector[i].values = values;
         programSettingsVector[i].type = type;
         programSettingsVector[i].comment = comment;
+        found = true;
         break;
       }
+    }
+    if(!found){
+      BasicData SETT;
+      SETT.name = name;
+      SETT.type = type;
+      SETT.regID = regID;
+      SETT.comment = comment;
+      SETT.values = values;
+      programSettingsVector.push_back(SETT);
     }
 
   }
@@ -974,11 +987,16 @@ ModelData::setOutputDirectory(const char* output_dirname_h){
 }  
 
 string
-ModelData::getBaseData (const string &name_h, int type_h, int position){
+ModelData::getBaseData (const string &name_h, int type_h, int position, int regID){
   // If the data is called with DATA_NOW we interpret the array of values as a temporal array and we return the value at the current time.
   if(position == DATA_NOW) {
     position = MTHREAD->SCD->getIteration();
   }
+
+  vector <int> regIds;
+  bool found = false;
+
+
   for (uint i=0; i<programSettingsVector.size();i++){
     if (programSettingsVector.at(i).name == name_h){
       int type = programSettingsVector.at(i).type;
@@ -1009,8 +1027,83 @@ ModelData::getBaseData (const string &name_h, int type_h, int position){
   return "";
 }
 
+
+/*
+
+const double
+ModelData::getProdData(const string &type_h, const int& regId_h, const string &prodId_h, const int& year, const string &freeDim_h) {
+
+  double value=0;
+  vector <int> regIds;
+  string key;
+  DataMap::const_iterator p;
+
+  bool found = false;
+  vector <string> products;
+  bool exactMatch=true;
+
+  if(prodId_h == PROD_PRI){
+    products = priProducts;
+  } else if (prodId_h == PROD_SEC){
+    products = secProducts;
+  } else if (prodId_h == PROD_ALL || prodId_h == ""){
+    products = allProducts;
+    products.push_back("");
+  } else  {
+    products.push_back(prodId_h);
+  }
+  if(freeDim_h=="") exactMatch=false;
+
+  // Make sure to set the new value to all l2 regions if requested for a reg1 level
+  if(getRegion(regId_h)->getRegLevel()==2){
+    regIds.push_back(regId_h);
+  } else if (getRegion(regId_h)->getRegLevel()==1) {
+    for(uint i=0;i<getRegion(regId_h)->getNChildren();i++){
+      regIds.push_back(getRegion(regId_h)->getChildren()[i]->getRegId());
+    }
+  } else {
+    msgOut(MSG_CRITICAL_ERROR, "Error in setProdData(). Setting a value for the whole World is not supported.");
+  }
+  int regIdsS = regIds.size();
+
+
+  for(uint r=0;r<regIdsS;r++){
+    for(uint i=0;i<products.size();i++){
+      key = makeKeyProdData(type_h,i2s(regIds[r]),products[i],freeDim_h);
+      if (!exactMatch && key.size () > 0)  key.resize (key.size () - 1); // bug 20140402, removing the last #
+      value += dataMapGetValue(prodDataMap,key,year,exactMatch);
+      if(tempBool) found = true;
+    }
+  }
+
+  if(!found){
+    valueFoundBool = false;
+    msgOut(errorLevel, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
+  }
+  return value;
+
+
+}
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 vector <string>
-ModelData::getVectorBaseData (const string &name_h, int type_h){
+ModelData::getVectorBaseData (const string &name_h, int type_h, int regID){
   for (uint i=0; i<programSettingsVector.size();i++){
     if (programSettingsVector.at(i).name == name_h){
       int type = programSettingsVector.at(i).type;
@@ -1025,73 +1118,74 @@ ModelData::getVectorBaseData (const string &name_h, int type_h){
 
 // ------------- start getSetting() amd getMacro() functions ....... -----------------
 int
-ModelData::getIntSetting(const string &name_h, int position) const{
-  return s2i( MTHREAD->MD->getBaseData(name_h,TYPE_INT,position) );
+ModelData::getIntSetting(const string &name_h, int position, int reg) const{
+  return s2i( MTHREAD->MD->getBaseData(name_h,TYPE_INT,position, reg) );
 }
 double
-ModelData::getDoubleSetting(const string &name_h, int position) const{
-  return s2d( MTHREAD->MD->getBaseData(name_h,TYPE_DOUBLE,position) );
+ModelData::getDoubleSetting(const string &name_h, int position, int reg) const{
+  return s2d( MTHREAD->MD->getBaseData(name_h,TYPE_DOUBLE,position,reg) );
 }
 string
-ModelData::getStringSetting(const string &name_h, int position) const{
-  return MTHREAD->MD->getBaseData(name_h,TYPE_STRING,position);
+ModelData::getStringSetting(const string &name_h, int position, int reg) const{
+  return MTHREAD->MD->getBaseData(name_h,TYPE_STRING,position,reg);
 }
 bool
-ModelData::getBoolSetting(const string &name_h, int position) const{
-  return s2b( MTHREAD->MD->getBaseData(name_h,TYPE_BOOL,position) );
+ModelData::getBoolSetting(const string &name_h, int position, int reg) const{
+  return s2b( MTHREAD->MD->getBaseData(name_h,TYPE_BOOL,position,reg) );
 }
 vector<int>
-ModelData::getIntVectorSetting(const string &name_h) const{
-  return s2i(MTHREAD->MD->getVectorBaseData(name_h,TYPE_INT));
+ModelData::getIntVectorSetting(const string &name_h, int reg) const{
+  return s2i(MTHREAD->MD->getVectorBaseData(name_h,TYPE_INT,reg));
 }
 vector<double>
-ModelData::getDoubleVectorSetting(const string &name_h) const{
-  return s2d(MTHREAD->MD->getVectorBaseData(name_h,TYPE_DOUBLE));
+ModelData::getDoubleVectorSetting(const string &name_h, int reg) const{
+  return s2d(MTHREAD->MD->getVectorBaseData(name_h,TYPE_DOUBLE,reg));
 }
 vector<string>
-ModelData::getStringVectorSetting(const string &name_h) const{
-  return MTHREAD->MD->getVectorBaseData(name_h,TYPE_STRING);
+ModelData::getStringVectorSetting(const string &name_h, int reg) const{
+  return MTHREAD->MD->getVectorBaseData(name_h,TYPE_STRING,reg);
 }
 vector<bool>
-ModelData::getBoolVectorSetting(const string &name_h) const{
-  return s2b(MTHREAD->MD->getVectorBaseData(name_h,TYPE_BOOL));
+ModelData::getBoolVectorSetting(const string &name_h, int reg) const{
+  return s2b(MTHREAD->MD->getVectorBaseData(name_h,TYPE_BOOL,reg));
 }
 
 // ------ END of getSetting() functions --------------------- 
 
-void
-ModelData::setBasicData(const string &name_h, int value, int position){
-  setBasicData(name_h, i2s(value), TYPE_INT, position);
-}
-void
-ModelData::setBasicData(const string &name_h, double value, int position){
-  setBasicData(name_h, d2s(value), TYPE_DOUBLE, position);
-}
-void 
-ModelData::setBasicData(const string &name_h, string value, int position){
-  setBasicData(name_h, value, TYPE_STRING, position);
-}
-void
-ModelData::setBasicData(const string &name_h, bool value, int position){
-  setBasicData(name_h, b2s(value), TYPE_BOOL, position);
-}
+//// Never used
+//void
+//ModelData::setBasicData(const string &name_h, int value, int position){
+//  setBasicData(name_h, i2s(value), TYPE_INT, position);
+//}
+//void
+//ModelData::setBasicData(const string &name_h, double value, int position){
+//  setBasicData(name_h, d2s(value), TYPE_DOUBLE, position);
+//}
+//void
+//ModelData::setBasicData(const string &name_h, string value, int position){
+//  setBasicData(name_h, value, TYPE_STRING, position);
+//}
+//void
+//ModelData::setBasicData(const string &name_h, bool value, int position){
+//  setBasicData(name_h, b2s(value), TYPE_BOOL, position);
+//}
 
-void
-ModelData::setBasicData(const string &name_h, string value, int type_h, int position){
-  for (uint i=0; i<programSettingsVector.size();i++){
-    if (programSettingsVector.at(i).name == name_h){
-      int type = programSettingsVector.at(i).type;
-      if(type != type_h){msgOut(MSG_CRITICAL_ERROR, "mismatching type in calling setBasicData() for "+name_h);}
-      if(programSettingsVector.at(i).values.size() > ((uint)position)) {
-        programSettingsVector.at(i).values.at(position)=value;
-        return;
-      }
-      else {msgOut(MSG_CRITICAL_ERROR, "out-of-bound error calling setBasicData() for "+name_h); }
-    }
-  }
-  msgOut(MSG_CRITICAL_ERROR, "Error calling setBasicData() for "+ name_h +". No setting option or macro data found with this name.");
-  return;
-}
+//void
+//ModelData::setBasicData(const string &name_h, string value, int type_h, int position){
+//  for (uint i=0; i<programSettingsVector.size();i++){
+//    if (programSettingsVector.at(i).name == name_h){
+//      int type = programSettingsVector.at(i).type;
+//      if(type != type_h){msgOut(MSG_CRITICAL_ERROR, "mismatching type in calling setBasicData() for "+name_h);}
+//      if(programSettingsVector.at(i).values.size() > ((uint)position)) {
+//        programSettingsVector.at(i).values.at(position)=value;
+//        return;
+//      }
+//      else {msgOut(MSG_CRITICAL_ERROR, "out-of-bound error calling setBasicData() for "+name_h); }
+//    }
+//  }
+//  msgOut(MSG_CRITICAL_ERROR, "Error calling setBasicData() for "+ name_h +". No setting option or macro data found with this name.");
+//  return;
+//}
 
 std::string
 ModelData::getFilenameByType(std::string type_h){
