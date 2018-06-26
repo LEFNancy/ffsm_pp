@@ -200,7 +200,7 @@ ModelData::setDefaultSettings(){
     string type = table.getData(i,"type");
     SETT.type = getType(type);
     string region_s= table.getData(i,"region");
-    SETT.regID = region_s==""?WORLD:s2i(table.getData(i,"region"));
+    SETT.regId = region_s==""?WORLD:s2i(table.getData(i,"region"));
     SETT.comment = table.getData(i,"comment");
     vector <string> values;
     for (int z=0;z<nheaders-4;z++){ // don't consider name, type, comment and region headers
@@ -231,7 +231,7 @@ ModelData::setScenarioSettings(){
     string stype = table.getData(i,"type");
     int type = getType(stype);
     string region_s= table.getData(i,"region");
-    int    regID = region_s==""?WORLD:s2i(table.getData(i,"region"));
+    int    regId = region_s==""?WORLD:s2i(table.getData(i,"region"));
     string comment = table.getData(i,"comment");
     vector <string> values;
     for (int z=0;z<nheaders-4;z++){ // don't consider name, type and comment headers
@@ -243,7 +243,7 @@ ModelData::setScenarioSettings(){
     }
     bool found = false;
     for(uint i=0;i<programSettingsVector.size();i++){
-      if(programSettingsVector[i].name == name && programSettingsVector[i].regID == regID){
+      if(programSettingsVector[i].name == name && programSettingsVector[i].regId == regId){
         programSettingsVector[i].values = values;
         programSettingsVector[i].type = type;
         programSettingsVector[i].comment = comment;
@@ -255,7 +255,7 @@ ModelData::setScenarioSettings(){
       BasicData SETT;
       SETT.name = name;
       SETT.type = type;
-      SETT.regID = regID;
+      SETT.regId = regId;
       SETT.comment = comment;
       SETT.values = values;
       programSettingsVector.push_back(SETT);
@@ -986,30 +986,59 @@ ModelData::setOutputDirectory(const char* output_dirname_h){
   MTHREAD->setOutputDirName(outputDirname); //for the GUI
 }  
 
+/**
+Returns the value stored in the settings database.
+
+
+Regional overriding.
+
+Concerning the param regId_h:
+it expect either world (default), a L2 or L1 region.
+Settings in the memory are stored also with data in one or more of these levels (e.g. we may have a general WORLD value and then a more specific L2 value.
+The function is done such that if WORLD is used to query it, it returns only a world value, if L1 is used instead, it looks for this L1 value and then eventually
+(if nothing is found) for WORLD. Finally, if L2 is used, it query, in the order, for L2, L1 or world levels.
+
+*/
 string
-ModelData::getBaseData (const string &name_h, int type_h, int position, int regID){
+ModelData::getBaseData (const string &name_h, int type_h, int position, int regId_h){
   // If the data is called with DATA_NOW we interpret the array of values as a temporal array and we return the value at the current time.
   if(position == DATA_NOW) {
     position = MTHREAD->SCD->getIteration();
   }
 
   vector <int> regIds;
-  bool found = false;
+
+  if(regId_h == WORLD){
+    regIds.push_back(WORLD);
+  } else if (getRegion(regId_h)->getRegLevel()==1){
+    regIds.push_back(regId_h);
+    regIds.push_back(WORLD);
+  } else if (getRegion(regId_h)->getRegLevel()==2) {
+    regIds.push_back(regId_h);
+    regIds.push_back(getRegion(regId_h)->getParRegId());
+    regIds.push_back(WORLD);
+  } else {
+    msgOut(MSG_CRITICAL_ERROR, "Error in getBaseData(). Data requested for a unknown region level.");
+  }
 
 
-  for (uint i=0; i<programSettingsVector.size();i++){
-    if (programSettingsVector.at(i).name == name_h){
-      int type = programSettingsVector.at(i).type;
-      if(type != type_h){msgOut(MSG_CRITICAL_ERROR, "mismatching type in calling getBaseData() for "+name_h);}
-      if(programSettingsVector.at(i).values.size() > ((uint)position)) {
-        return programSettingsVector.at(i).values.at(position);
-      } else if (programSettingsVector.at(i).values.size() > 0 ){
-        // returning the last available value...
-        return programSettingsVector.at(i).values.at( programSettingsVector.at(i).values.size()-1 );
+  for (uint j=0; j<regIds.size();j++){
+    int regId = regIds[j];
+    for (uint i=0; i<programSettingsVector.size();i++){
+      if (programSettingsVector.at(i).name == name_h & programSettingsVector.at(i).regId == regId){
+        int type = programSettingsVector.at(i).type;
+        if(type != type_h){msgOut(MSG_CRITICAL_ERROR, "mismatching type in calling getBaseData() for "+name_h);}
+        if(programSettingsVector.at(i).values.size() > ((uint)position)) {
+          return programSettingsVector.at(i).values.at(position);
+        } else if (programSettingsVector.at(i).values.size() > 0 ){
+          // returning the last available value...
+          return programSettingsVector.at(i).values.at( programSettingsVector.at(i).values.size()-1 );
+        }
+        else {msgOut(MSG_CRITICAL_ERROR, "Error: "+name_h+" doesn't have any value, even on the first position(year)!"); }
       }
-      else {msgOut(MSG_CRITICAL_ERROR, "Error: "+name_h+" doesn't have any value, even on the first position(year)!"); }
     }
   }
+
   msgOut(MSG_CRITICAL_ERROR, "Error calling getBaseData() for "+ name_h +". No setting option or macro data found with this name.");
 
 //  switch(type_h){
@@ -1028,87 +1057,30 @@ ModelData::getBaseData (const string &name_h, int type_h, int position, int regI
 }
 
 
-/*
-
-const double
-ModelData::getProdData(const string &type_h, const int& regId_h, const string &prodId_h, const int& year, const string &freeDim_h) {
-
-  double value=0;
-  vector <int> regIds;
-  string key;
-  DataMap::const_iterator p;
-
-  bool found = false;
-  vector <string> products;
-  bool exactMatch=true;
-
-  if(prodId_h == PROD_PRI){
-    products = priProducts;
-  } else if (prodId_h == PROD_SEC){
-    products = secProducts;
-  } else if (prodId_h == PROD_ALL || prodId_h == ""){
-    products = allProducts;
-    products.push_back("");
-  } else  {
-    products.push_back(prodId_h);
-  }
-  if(freeDim_h=="") exactMatch=false;
-
-  // Make sure to set the new value to all l2 regions if requested for a reg1 level
-  if(getRegion(regId_h)->getRegLevel()==2){
-    regIds.push_back(regId_h);
-  } else if (getRegion(regId_h)->getRegLevel()==1) {
-    for(uint i=0;i<getRegion(regId_h)->getNChildren();i++){
-      regIds.push_back(getRegion(regId_h)->getChildren()[i]->getRegId());
-    }
-  } else {
-    msgOut(MSG_CRITICAL_ERROR, "Error in setProdData(). Setting a value for the whole World is not supported.");
-  }
-  int regIdsS = regIds.size();
-
-
-  for(uint r=0;r<regIdsS;r++){
-    for(uint i=0;i<products.size();i++){
-      key = makeKeyProdData(type_h,i2s(regIds[r]),products[i],freeDim_h);
-      if (!exactMatch && key.size () > 0)  key.resize (key.size () - 1); // bug 20140402, removing the last #
-      value += dataMapGetValue(prodDataMap,key,year,exactMatch);
-      if(tempBool) found = true;
-    }
-  }
-
-  if(!found){
-    valueFoundBool = false;
-    msgOut(errorLevel, "Error in getProdData: no combination found for "+type_h+", "+i2s(regId_h)+", "+prodId_h+", "+i2s(year)+", "+freeDim_h+". Returning 0, but double check that this is ok for your model.");
-  }
-  return value;
-
-
-}
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 vector <string>
-ModelData::getVectorBaseData (const string &name_h, int type_h, int regID){
-  for (uint i=0; i<programSettingsVector.size();i++){
-    if (programSettingsVector.at(i).name == name_h){
-      int type = programSettingsVector.at(i).type;
-      if(type != type_h){msgOut(MSG_CRITICAL_ERROR, "mismatching type in calling getVectorBaseData() for "+name_h);}
-      return programSettingsVector.at(i).values;
+ModelData::getVectorBaseData (const string &name_h, int type_h, int regId_h){
+  vector <int> regIds;
+  if(regId_h == WORLD){
+    regIds.push_back(WORLD);
+  } else if(getRegion(regId_h)->getRegLevel()==1){
+    regIds.push_back(regId_h);
+    regIds.push_back(WORLD);
+  } else if (getRegion(regId_h)->getRegLevel()==2) {
+    regIds.push_back(regId_h);
+    regIds.push_back(getRegion(regId_h)->getParRegId());
+    regIds.push_back(WORLD);
+  } else {
+    msgOut(MSG_CRITICAL_ERROR, "Error in getBaseData(). Data requested for a unknown region level.");
+  }
+
+  for (uint j=0; j<regIds.size();j++){
+    int regId = regIds[j];
+    for (uint i=0; i<programSettingsVector.size();i++){
+      if (programSettingsVector.at(i).name == name_h & programSettingsVector.at(i).regId == regId){
+        int type = programSettingsVector.at(i).type;
+        if(type != type_h){msgOut(MSG_CRITICAL_ERROR, "mismatching type in calling getVectorBaseData() for "+name_h);}
+        return programSettingsVector.at(i).values;
+      }
     }
   }
   msgOut(MSG_CRITICAL_ERROR, "Error calling getVectorBaseData() for "+ name_h +". No setting option or macro data found with this name.");

@@ -588,6 +588,16 @@ void
 Sandbox::fullTest(){
 
   /*
+  // Testing regional overriding in the new getBaseData() function
+  double mr11061 = MTHREAD->MD->getDoubleSetting("mr",DATA_NOW,11061);
+  double mr11042 = MTHREAD->MD->getDoubleSetting("mr",DATA_NOW,11042);
+  double mr      = MTHREAD->MD->getDoubleSetting("mr",DATA_NOW);
+  // this should give critical error:
+  double mr5     = MTHREAD->MD->getDoubleSetting("mr",DATA_NOW,5);
+  exit(1);
+  */
+
+  /*
   // Testing the new getSTData() function
   cout << "Starting test" << endl;
   Pixel* px = MTHREAD->GIS->getPixel(32,30);

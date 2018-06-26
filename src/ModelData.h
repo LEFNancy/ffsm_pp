@@ -194,14 +194,14 @@ public:
   void                deathTimberInventory_incr(const iisskey &thekey, double value_h){incrMapValue(deathTimberInventory,thekey, value_h);}
   double              deathTimberInventory_get(const iisskey &thekey){return findMap(deathTimberInventory, thekey);}
   map<iisskey, double > *  getDeathTimberInventory() {return &deathTimberInventory;};
-  double              getAvailableDeathTimber(const vector<string> &primProd_h, int regID_h, int year_h); ///< Returns the timber available for a given set of primary products as stored in the deathTimberInventory map
+  double              getAvailableDeathTimber(const vector<string> &primProd_h, int regId_h, int year_h); ///< Returns the timber available for a given set of primary products as stored in the deathTimberInventory map
   double              getAvailableAliveTimber(const vector<string> &primProd_h, int regId_h); ///< Returns the timber available for a given set of primary products as stored in the px->vol_l vector
   vector <int>        getAllocableProductIdsFromDeathTimber(const int &regId_h, const string &ft, const string &dc, const int &harvesting_year, int request_year=DATA_NOW); ///< Returns the ids of the primary products that is possible to obtain using the timber recorded death in the specific year, ft, dc combination
   scenarioData        scenario;
 
 private:
-  string              getBaseData (const string &name_h, int type_h, int position=0, int regID_h=WORLD);
-  vector <string>     getVectorBaseData (const string &name_h, int type_h, int regID_h=WORLD);
+  string              getBaseData (const string &name_h, int type_h, int position=0, int regId_h=WORLD);
+  vector <string>     getVectorBaseData (const string &name_h, int type_h, int regId_h=WORLD);
   //void                setBasicData(const string &name_h, string value, int type_h, int position);
 
   bool                dataMapCheckExist(const DataMap& map, const string& search_for, const bool& exactMatch=true) const;
@@ -267,7 +267,7 @@ struct BasicData {
   /// Values are stored as "string" because we don't yet know at this point if they are string, double or integers!
   vector <string>                                 values;
   int                                               type; //< enum TYPE_*
-  int                                              regID;
+  int                                              regId;
   string                                         comment;
 };
 
