@@ -66,6 +66,7 @@ struct scenarioData {
   string                                 prodDataTable;
   string                                forToProdTable;
   string                                     pathTable;
+  string                                   settingFile;
 };
 
 /// Regional data, including macros and settings
@@ -85,7 +86,8 @@ public:
   /// Unzip the OpenOffice input file (NEW 2008.05.13)
   void                loadInput();
 
-  void                loadDataFromCache(string tablename); ///< Load data from a cached CSV instead of the openoffice file
+  //void                loadDataFromCache(string tablename); ///< Load data from a cached CSV instead of the openoffice file
+  LLData              getTableFromFile(string tablename, string filename_h); ///< Load and return a data table from a file (instead that from a spreadsheet sheet)
   vector<string>      getScenarios();
   int                 getScenarioIndex();
   bool                delDir(QString dirname); ///< Recursivelly delete a directory 
@@ -335,9 +337,9 @@ public:
   int                 nheaders(){return headers.size();}
   string              getData(const int& pos_h, const string& header_h, const int& debugLevel=MSG_CRITICAL_ERROR) const;
   friend void ModelData::loadInput();
-  friend void ModelData::loadDataFromCache(string tablename);
+  //friend void ModelData::loadDataFromCache(string tablename);
+  //friend void ModelData::getTableFromFile(string tablename, string filename_h);
 
-private:
   string                             tableName;
   vector<string>                       headers;
   vector < vector <string> >           records;

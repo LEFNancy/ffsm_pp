@@ -181,6 +181,7 @@ ModelData::setScenarioData(){
       scenario.prodDataTable  = table.getData(i,"prodDataTable");
       scenario.forToProdTable = table.getData(i,"forToProdTable");
       scenario.pathTable      = table.getData(i,"pathTable");
+      scenario.settingFile    = table.getData(i,"settingFile");
       return;
     }
   }
@@ -222,8 +223,18 @@ ModelData::setDefaultSettings(){
 void
 ModelData::setScenarioSettings(){
 
-  if(scenario.settingTable=="") {return;}
-  LLData table = getTable(scenario.settingTable, MSG_CRITICAL_ERROR); //this scenario could not have an associated setting sheet
+  if(scenario.settingTable=="" && scenario.settingFile=="") {return;}
+  if(scenario.settingTable!="" && scenario.settingFile!="") {
+   msgOut(MSG_CRITICAL_ERROR,"Scenario-specific settings has been indicated to be loaded from BOTH from the spreadsheet and a file. Choose one of them.");
+  }
+  LLData table(MTHREAD,"settings");
+  if(scenario.settingTable!=""){
+    table = getTable(scenario.settingTable, MSG_CRITICAL_ERROR); //this scenario could not have an associated setting sheet
+  } else {
+    table = getTableFromFile("settings",scenario.settingFile);
+  }
+
+
 
   int nheaders = table.nheaders();
   for(int i=0; i< table.nrecords(); i++){
@@ -1577,16 +1588,11 @@ ModelData::loadInput(){
   for(uint i=0;i<tables.size();i++){
     string tableName = tables[i].getStringAttributeByName("name");
     //cout <<tableName<<endl;
-    if( tableName == "forData"){
-      if(QFile::exists(forDataCachedFilename.c_str())){
-        loadDataFromCache("forData");
-        continue;
-      }
-    } else if (tableName == "prodData"){
-        if (QFile::exists(prodDataCachedFilename.c_str())) {
-          loadDataFromCache("prodData");
-        continue;
-        }
+    if( (tableName == "forData" || tableName == "prodData") && QFile::exists(forDataCachedFilename.c_str()) )  {
+      msgOut(MSG_INFO,"Attenction, using cached data (csv) for "+tableName);
+      string fileName = MTHREAD->getBaseDirectory()+"cachedInput/"+tableName+".csv";
+      LLDataVector.push_back(MTHREAD->MD->getTableFromFile(tableName, fileName));
+      continue;
     }
     LLData data(MTHREAD,tables[i].getStringAttributeByName("name"));
     vector <InputNode> rows = tables[i].getNodesByName("table-row",MSG_NO_MSG,true);
@@ -1682,14 +1688,14 @@ ModelData::loadInput(){
 }
 
 
-
+/*
 void
 ModelData::loadDataFromCache(string tablename){
   msgOut(MSG_INFO,"Attenction, using cached data (csv) for "+tablename);
   string fileName = MTHREAD->getBaseDirectory()+"cachedInput/"+tablename+".csv";
   QFile file(fileName.c_str());
   if (!file.open(QFile::ReadOnly)) {
-      msgOut(MSG_ERROR, "Cannot open cached file "+fileName+" for reading.");
+      msgOut(MSG_ERROR, "Cannot open file "+fileName+" for reading.");
   }
   QTextStream in(&file);
   LLData data(MTHREAD, tablename);
@@ -1718,6 +1724,45 @@ ModelData::loadDataFromCache(string tablename){
   LLDataVector.push_back(data);
 
 }
+*/
+
+LLData
+ModelData::getTableFromFile(string tablename, string filename_h){
+  string fileName = MTHREAD->getBaseDirectory()+filename_h;
+  QFile file(fileName.c_str());
+  if (!file.open(QFile::ReadOnly)) {
+      msgOut(MSG_ERROR, "Cannot open file "+fileName+" for reading.");
+  }
+  QTextStream in(&file);
+  LLData data(MTHREAD, tablename);
+  int countRow = 0;
+  while (!in.atEnd()) {
+    QString line = in.readLine();
+    if(line=="") continue; //skipping completelly empty lines, even without separators
+    QStringList fields = line.split(';');
+    bool emptyLine = true;
+    if (countRow==0){ // building headers
+      for(uint i =0;i<fields.size();i++){
+        data.headers.push_back(fields.at(i).toStdString());
+      }
+    } else {
+      vector<string> record ; //= fields.toVector().toStdVector();
+      unsigned int z = fields[0].toStdString().find("#");
+      if( z!=string::npos && z == 0) continue; // found "#" on fist position, it's a comment!
+      for(uint i =0;i<fields.size();i++){
+        string field = fields.at(i).toStdString();
+        replace(field.begin(), field.end(), ',', '.');
+        record.push_back(field);
+        if(field!="") emptyLine = false;
+      }
+      if(!emptyLine){data.records.push_back(record);};
+    }
+    countRow++;
+  }
+  data.clean();
+  return data;
+}
+
 
 bool
 ModelData::delDir(QString dirname) {

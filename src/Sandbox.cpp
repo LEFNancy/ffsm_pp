@@ -587,6 +587,14 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+
+  /*
+  // Testing getTableFromFile() function
+  LLData debug = MTHREAD->MD->getTableFromFile("debug", "scenarios/debug.csv");
+  exit(1);
+  */
+
+
   /*
   // Testing regional overriding in the new getBaseData() function
   double mr11061 = MTHREAD->MD->getDoubleSetting("mr",DATA_NOW,11061);
