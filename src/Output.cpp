@@ -94,6 +94,10 @@ Output::commonInit(){
   forestDiamDetailedOutput = MTHREAD->MD->getBoolSetting("forestDiamDetailedOutput");
   fTypes                   = MTHREAD->MD->getForTypeIds();
 
+  oForData    = (oLevel>=OUTVL_DETAILED && outForVariables.size() > 0)?true:false;
+  oProdData   = (oLevel>=OUTVL_DETAILED && outProdVariables.size() > 0)?true:false;
+  oCarbonData = (oLevel>=OUTVL_DETAILED)?true:false;
+
   priPr    = MTHREAD->MD->getStringVectorSetting("priProducts");
   secPr    = MTHREAD->MD->getStringVectorSetting("secProducts");
   allPr    = priPr;
@@ -290,7 +294,7 @@ Output::initDebugPixelValues(){
 
 void
 Output::initOutputForestData(){
-  if(oLevel<OUTVL_DETAILED) return;
+  if(!oForData) return;
 
   if(oSingleFile){
     outFileName = baseDir+oDir+"results/forestData"+oFileExt;
@@ -332,7 +336,7 @@ Output::initOutputForestData(){
 
 void
 Output::initOutputProductData(){
-  if(oLevel<OUTVL_DETAILED) return;
+  if(!oProdData) return;
 
   if(oSingleFile){
     outFileName = baseDir+oDir+"results/productData"+oFileExt;
@@ -364,7 +368,7 @@ Output::initOutputProductData(){
 
 void
 Output::initCarbonBalance(){
-
+  if(!oCarbonData) return;
   if(oSingleFile){
     outFileName = baseDir+oDir+"results/carbonBalance"+oFileExt;
     ifstream in(outFileName.c_str(), ios::in);
@@ -470,7 +474,7 @@ Output::printFinalOutput(){
 void
 Output::printForestData(bool finalFlush){
 
-  if(oLevel<OUTVL_DETAILED) return;
+  if(!oForData) return;
   if(oHRedeable && !finalFlush) return;
 
   msgOut(MSG_INFO, "Printing forest data..");
@@ -585,7 +589,7 @@ Output::printForestData(bool finalFlush){
 void
 Output::printProductData(bool finalFlush){
 
-  if(oLevel<OUTVL_DETAILED) return;
+  if(!oProdData) return;
   if(oHRedeable && !finalFlush) return;
 
   msgOut(MSG_INFO, "Printing market data..");
@@ -723,6 +727,7 @@ Output::printProductData(bool finalFlush){
 void
 Output::printCarbonBalance(){
 
+  if(!oCarbonData) return;
   int currentYear = MTHREAD->SCD->getYear();
   if (currentYear == inYear) {return;} // don't print carbon balance on first year, carbon balance containers has not yet been initialised
 

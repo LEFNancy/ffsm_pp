@@ -93,6 +93,9 @@ private:
   string                              outFileName;
   vector <string>                 outForVariables;
   vector <string>                outProdVariables;
+  bool                                   oForData;
+  bool                                  oProdData;
+  bool                                oCarbonData;
   int                                outStepRange;
   bool                   forestDiamDetailedOutput;
   vector<string>                           priPr;
