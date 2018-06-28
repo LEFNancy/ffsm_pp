@@ -1,0 +1,79 @@
+%paper also and it is very nice !
+\documentclass[a4paper,11pt]{paper}
+
+\usepackage[a4paper,margin=1in]{geometry}
+%\usepackage[a4paper,margin=1in,landscape]{geometry}
+\usepackage{graphicx}
+%\usepackage{float}% If comment this, figure moves
+\usepackage{mwe}    % loads »blindtext« and »graphicx«
+%\usepackage{subfig} % error
+\usepackage{subcaption} % sub figure placement
+\usepackage[english]{babel}
+\usepackage{ucs}               % require separate debian package 
+\usepackage[utf8x]{inputenc}   % require ucs. Allows both Italian and English letters.
+\usepackage{textcomp}          % allow euro symbol
+\usepackage{fancyhdr}
+\usepackage{amssymb,amsmath}
+\usepackage{threeparttable}
+\usepackage{color}
+\usepackage{url}
+\usepackage{natbib}  % substituted hardvard with natbib as the former package doesn't like the hyperref one
+\usepackage{rotating} %to have text vertical alignment in some table headers
+\usepackage{url}
+\usepackage{moreverb}
+\usepackage{tabularx} % allow line breaks in tables
+\usepackage{html,htmllist} % don't think will be needed
+\usepackage{hyperref}
+\usepackage{mhchem} % for \ce{CO2}
+
+\setlength{\pdfpagewidth}{\paperwidth}
+\setlength{\pdfpageheight}{\paperheight}
+
+\bibliographystyle{agsmurl}  % bibliographic style
+
+
+%opening
+\title{FFSM++ complete output, Oracle project}
+
+\author{Antonello Lobianco, Sylvain Caurla, Philippe Delacote, Jean-Daniel Bontemps, Pierre Mérian, Anna Lungarska, Ahmed Barkaoui}
+
+\date{\today}
+
+\bibliographystyle{agsmurl}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This book contains the complete results of FFSM++ (within the project Oracle) in terms of tables and charts, hierarchically organised by region and theme.
+
+Tables present a comparison (either at 2100 or as average of multiple years) between a reference scenario and a comparing one. If the latter one is a random scenario run multiple times some basic statistic is given.
+
+On the other side charts provide a quick overview of the dynamic of key variables over time.
+
+This document is generated automatically trough a script directly from the model's output. Please refer to the article for model description, scenario definition and output interpretation.
+
+\end{abstract}
+
+\thispagestyle{empty}
+\newpage
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+\part[Tables]{Output tables}
+\input{tables/00_master_tables}
+\clearpage
+\newpage
+\part[Charts]{Output charts}
+\input{charts/00_master_charts}
+\clearpage
+\newpage
+\part[Maps]{Output maps}
+\input{maps/bitmaps/00_master_maps}
+
+%\newpage
+%\bibliography{biblio}
+
+\end{document}
+\endinput
+
