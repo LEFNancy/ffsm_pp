@@ -88,19 +88,19 @@ runScenarios ="""
 #  Shell script to run ffsm scenarios
 #---------------------------------------\n\n
 # It can be run in parallel using GNU parallel:
-# parallel --jobs <n of jobs> -a runscenarios_2018_mgm2cbl.sh\n
+# parallel --jobs <n of jobs> -a runscenarios_2018_mgm2cbal.sh\n
 # Management to carbon balance scenarios
 """
 for s in builtScenarios
   runScenarios = runScenarios * "  ./run_single_scenario.sh 'data/ffsmInput_2018_mgm2cbal.ods' '$(s.name)'\n"
 end
-open("runscenarios_2018_mgm2cbl.sh", "w") do f
+open("runscenarios_2018_mgm2cbal.sh", "w") do f
     write(f, runScenarios)
 end
 
 scenariosBaseDir = "scenarios/"
 for s in builtScenarios
   open("$(scenariosBaseDir)$(s.name).csv", "w") do f
-      write(f, runScenarios)
+      write(f, s.content)
   end
 end

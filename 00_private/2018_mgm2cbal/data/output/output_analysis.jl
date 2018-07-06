@@ -4,16 +4,87 @@ using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatPlots,
 ### Settings and definitions
 ##########################################################
 scenarios = [
-"default",
-"raHvarL",
-#"raHvarH",
-"raLvarL",
-"expPrLvarL",
-"expPrHvarL",
-"expCCHvarL",
-"expCCLvarL",
-#"expCCLvarL20",
-#"expCCHvarL20",
+    "mr0.1-ec0.0-ep0.0-ra0.0",
+    "mr0.1-ec0.0-ep0.0-ra1.5",
+    "mr0.1-ec0.0-ep0.0-ra3.0",
+    "mr0.1-ec0.0-ep0.5-ra0.0",
+    "mr0.1-ec0.0-ep0.5-ra1.5",
+    "mr0.1-ec0.0-ep0.5-ra3.0",
+    "mr0.1-ec0.0-ep1.0-ra0.0",
+    "mr0.1-ec0.0-ep1.0-ra1.5",
+    "mr0.1-ec0.0-ep1.0-ra3.0",
+    "mr0.1-ec0.5-ep0.0-ra0.0",
+    "mr0.1-ec0.5-ep0.0-ra1.5",
+    "mr0.1-ec0.5-ep0.0-ra3.0",
+    "mr0.1-ec0.5-ep0.5-ra0.0",
+    "mr0.1-ec0.5-ep0.5-ra1.5",
+    "mr0.1-ec0.5-ep0.5-ra3.0",
+    "mr0.1-ec0.5-ep1.0-ra0.0",
+    "mr0.1-ec0.5-ep1.0-ra1.5",
+    "mr0.1-ec0.5-ep1.0-ra3.0",
+    "mr0.1-ec1.0-ep0.0-ra0.0",
+    "mr0.1-ec1.0-ep0.0-ra1.5",
+    "mr0.1-ec1.0-ep0.0-ra3.0",
+    "mr0.1-ec1.0-ep0.5-ra0.0",
+    "mr0.1-ec1.0-ep0.5-ra1.5",
+    "mr0.1-ec1.0-ep0.5-ra3.0",
+    "mr0.1-ec1.0-ep1.0-ra0.0",
+    "mr0.1-ec1.0-ep1.0-ra1.5",
+    "mr0.1-ec1.0-ep1.0-ra3.0",
+    "mr0.5-ec0.0-ep0.0-ra0.0",
+    "mr0.5-ec0.0-ep0.0-ra1.5",
+    "mr0.5-ec0.0-ep0.0-ra3.0",
+    "mr0.5-ec0.0-ep0.5-ra0.0",
+    "mr0.5-ec0.0-ep0.5-ra1.5",
+    "mr0.5-ec0.0-ep0.5-ra3.0",
+    "mr0.5-ec0.0-ep1.0-ra0.0",
+    "mr0.5-ec0.0-ep1.0-ra1.5",
+    "mr0.5-ec0.0-ep1.0-ra3.0",
+    "mr0.5-ec0.5-ep0.0-ra0.0",
+    "mr0.5-ec0.5-ep0.0-ra1.5",
+    "mr0.5-ec0.5-ep0.0-ra3.0",
+    "mr0.5-ec0.5-ep0.5-ra0.0",
+    "mr0.5-ec0.5-ep0.5-ra1.5",
+    "mr0.5-ec0.5-ep0.5-ra3.0",
+    "mr0.5-ec0.5-ep1.0-ra0.0",
+    "mr0.5-ec0.5-ep1.0-ra1.5",
+    "mr0.5-ec0.5-ep1.0-ra3.0",
+    "mr0.5-ec1.0-ep0.0-ra0.0",
+    "mr0.5-ec1.0-ep0.0-ra1.5",
+    "mr0.5-ec1.0-ep0.0-ra3.0",
+    "mr0.5-ec1.0-ep0.5-ra0.0",
+    "mr0.5-ec1.0-ep0.5-ra1.5",
+    "mr0.5-ec1.0-ep0.5-ra3.0",
+    "mr0.5-ec1.0-ep1.0-ra0.0",
+    "mr0.5-ec1.0-ep1.0-ra1.5",
+    "mr0.5-ec1.0-ep1.0-ra3.0",
+    "mr0.9-ec0.0-ep0.0-ra0.0",
+    "mr0.9-ec0.0-ep0.0-ra1.5",
+    "mr0.9-ec0.0-ep0.0-ra3.0",
+    "mr0.9-ec0.0-ep0.5-ra0.0",
+    "mr0.9-ec0.0-ep0.5-ra1.5",
+    "mr0.9-ec0.0-ep0.5-ra3.0",
+    "mr0.9-ec0.0-ep1.0-ra0.0",
+    "mr0.9-ec0.0-ep1.0-ra1.5",
+    "mr0.9-ec0.0-ep1.0-ra3.0",
+    "mr0.9-ec0.5-ep0.0-ra0.0",
+    "mr0.9-ec0.5-ep0.0-ra1.5",
+    "mr0.9-ec0.5-ep0.0-ra3.0",
+    "mr0.9-ec0.5-ep0.5-ra0.0",
+    "mr0.9-ec0.5-ep0.5-ra1.5",
+    "mr0.9-ec0.5-ep0.5-ra3.0",
+    "mr0.9-ec0.5-ep1.0-ra0.0",
+    "mr0.9-ec0.5-ep1.0-ra1.5",
+    "mr0.9-ec0.5-ep1.0-ra3.0",
+    "mr0.9-ec1.0-ep0.0-ra0.0",
+    "mr0.9-ec1.0-ep0.0-ra1.5",
+    "mr0.9-ec1.0-ep0.0-ra3.0",
+    "mr0.9-ec1.0-ep0.5-ra0.0",
+    "mr0.9-ec1.0-ep0.5-ra1.5",
+    "mr0.9-ec1.0-ep0.5-ra3.0",
+    "mr0.9-ec1.0-ep1.0-ra0.0",
+    "mr0.9-ec1.0-ep1.0-ra1.5",
+    "mr0.9-ec1.0-ep1.0-ra3.0",
 ]
 
 fgroup_map = Dict(
@@ -91,19 +162,11 @@ problematicCols = Dict("freeDim" => Union{Missing,Int64})
 ##########################################################
 
 forestData_byscenario = [CSV.read(baseIDir*"/forestData_"*scenario*".csv"; delim=';', missingstring="") for scenario in scenarios];
-productData_byscenario = [CSV.read(baseIDir*"/productData_"*scenario*".csv"; delim=';', types=problematicCols) for scenario in scenarios];
 carbonData_byscenario = [CSV.read(baseIDir*"/carbonBalance_"*scenario*".csv"; delim=';', missingstring="") for scenario in scenarios];
 
 forVars = vcat(forestData_byscenario...)
-prodVars = vcat(productData_byscenario...)
 cVars = vcat(carbonData_byscenario...)
-[delete!(dfi, [:country,]) for dfi in [cVars, prodVars, forVars]] # delete columns country
-
-#hVDet_byscenario = [readtable(baseIDir*"/detailedHV_"*scenario*".csv", separator = ';') for scenario in scenarios];
-#hVDet = vcat(hVDet_byscenario)
-#[delete!(dfi, [:x,:country,]) for dfi in [hVDet]] # delete columns X (empty at the end) and country
-#forVars[:prod] = ""
-#delete!(forVars, [:freeDim])
+[delete!(dfi, [:country,]) for dfi in [cVars, forVars]] # delete columns country
 
 print("Data loaded")
 
@@ -111,8 +174,7 @@ print("Data loaded")
 ### Data clean-up and initialisation
 ##########################################################
 forVars[:forGroup] = map(k->fgroup_map[k], forVars[:forType])
-prodVars[:prodLev] = map(k->pgroup_map[k], prodVars[:prod])
-[df[:region] = map(k->reg_map[k], df[:region]) for df in [forVars,prodVars,cVars]]
+[df[:region] = map(k->reg_map[k], df[:region]) for df in [forVars,cVars]]
 
 # Adding totals to carbon variables
 cVars_piv = pivot(cVars,[:scen,:year,:region],:balItem,:value,
