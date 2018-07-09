@@ -1,3 +1,4 @@
+
 using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatPlots, Plots, CSV #  PlotlyJS  Plots
 
 ##########################################################
@@ -145,7 +146,6 @@ reg_map = Dict(
     "OTH (OTH)" => "OTH",
 )
 
-
 baseIDir        = "results";
 odsOut          = "juliaOut/formattedOutput.ods"
 odsOut_template = "juliaOut/formattedOutput_template.ods"
@@ -194,31 +194,62 @@ cVars = stack(cVars_piv) # setting it back in long format but now with totals
 ################ Tables..
 
 # Forest area and forest volumes
-forArea = pivot(forVars,[:scen, :region, :forGroup,],:year,:value,
+forAreaReg = pivot(forVars,[:scen, :region, :forGroup,],:year,:value,
              filter = Dict(
                :parName => ["forArea"],
                #:year    => years
                )
             )
+forAreaNat = pivot(forVars,[:scen, :forGroup,],:year,:value,
+             filter = Dict(
+               :parName => ["forArea"],
+               #:year    => years
+               )
+            )
+forAreaNatNames = names(forAreaNat)
+forAreaNat[:region] = "France"
+forAreaNat = forAreaNat[vcat(forAreaNatNames[1:1],:region,forAreaNatNames[2:end])]
+forArea = vcat(forAreaReg,forAreaNat)
 ods_write(odsOut,Dict(("forArea",1,1) => forArea )  )
 
-forVol = pivot(forVars,[:scen, :region, :forGroup,],:year,:value,
+forVolReg = pivot(forVars,[:scen, :region, :forGroup,],:year,:value,
              filter = Dict(
                :parName => ["vol"],
                #:year    => years,
                )
             )
+forVolNat = pivot(forVars,[:scen, :forGroup,],:year,:value,
+             filter = Dict(
+               :parName => ["vol"],
+               #:year    => years,
+               )
+            )
+forVolNatNames = names(forVolNat)
+forVolNat[:region] = "France"
+forVolNat = forVolNat[vcat(forVolNatNames[1:1],:region,forVolNatNames[2:end])]
+forVol = vcat(forVolReg,forVolNat)
 ods_write(odsOut,Dict(("forVol",1,1) => forVol )  )
 
-
 # Carbon balance cumulative
-cBalCum = pivot(cVars,[:scen,:region,:variable],:year,:value,
+cBalCumReg = pivot(cVars,[:scen,:region,:variable],:year,:value,
                 #filter = Dict(
                   #:variable => [:TOT_BAL, :STOCKS, :STOCK_EXTRA, :STOCK_INV, :STOCK_PRODUCTS, :EM_NET, :EM_ENSUB, :EM_FOROP, :EM_MATSUB],
                   #:year => years,
                  # ),
                 sort = [:scen],
            )
+cBalCumNat = pivot(cVars,[:scen,:variable],:year,:value,
+                #filter = Dict(
+                  #:variable => [:TOT_BAL, :STOCKS, :STOCK_EXTRA, :STOCK_INV, :STOCK_PRODUCTS, :EM_NET, :EM_ENSUB, :EM_FOROP, :EM_MATSUB],
+                  #:year => years,
+                 # ),
+                sort = [:scen],
+           )
+cBalCumNatNames = names(cBalCumNat)
+cBalCumNat[:region] = "France"
+cBalCumNat = cBalCumNat[vcat(cBalCumNatNames[1:1],:region,cBalCumNatNames[2:end])]
+cBalCum = vcat(cBalCumReg,cBalCumNat)
+
 # reporting stocks in comparision to the first year
 ymin = minimum(cVars[:year])
 ymax = maximum(cVars[:year])
