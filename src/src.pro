@@ -64,6 +64,7 @@ CONFIG += warn_on \
 #CONFIG -= release
 
 QMAKE_CXXFLAGS += -std=c++0x
+#QMAKE_CXXFLAGS += -std=c++14
 
 #QMAKE_CXXFLAGS_RELEASE -= -O2
 #QMAKE_CXXFLAGS_RELEASE += -O3

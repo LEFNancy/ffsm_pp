@@ -42,6 +42,7 @@
 #include <numeric>
 #include <limits>
 #include <cstddef>
+#include <random>
 #include <fenv.h> // for division by zero runtime error
 
 // regmas headers...
