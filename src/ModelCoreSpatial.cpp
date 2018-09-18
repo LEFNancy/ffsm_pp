@@ -1659,6 +1659,10 @@ ModelCoreSpatial::cachePixelExogenousData(){
         double betaCoef_multiplier_now = px->getMultiplier("betaCoef_multiplier",ft,DATA_NOW);
         double avalCoef_ft             = applyAvalCoef?px->getSTData("avalCoef",ft,DATA_NOW):1.0;
 
+        if(avalCoef_ft == MTHREAD->MD->getDoubleSetting("noValue")){
+          msgOut(MSG_CRITICAL_ERROR,"applyAvalCoef has benn asked for, but I can't find the avalCoef in the data!");
+        }
+
         for (uint u=0; u<dClasses.size(); u++){
           string dc = dClasses[u];
           double pathMortality           = px->getPathMortality(ft,dc,DATA_NOW);
