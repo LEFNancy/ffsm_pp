@@ -310,7 +310,7 @@ It could be possible to change this in a map and uses name, but then we would lo
 template<class T> bool
 Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
-  double a_pr, a, sigma, ff, pol_mktDirInt_s, pol_mktDirInt_d, pol_mktDirInt_d_pSubstituted, pol_mktDirInt_d_1, pol_mktDirInt_d_1_pSubstituted, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1, supCorr, es_d, pc_1, pc_1_pSubstituted;
+  double a_pr, a, sigma, ff, pol_mktDirInt_s, pol_mktDirInt_d, pol_mktDirInt_d_pSubstituted, pol_mktDirInt_d_1, pol_mktDirInt_d_1_pSubstituted, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1, supCorr, es_d, pc_1, pc_pSubstituted, pc_1_pSubstituted;
   Index cix = 0;
   Index debug = 0;
 
@@ -334,6 +334,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     pol_mktDirInt_d_1 = gpd("pol_mktDirInt_d",l2r[r1][r2],secPr[p],previousYear); // market policies previous year
     g[cix]     = - gg*pow(x[gix("pc",r1,r2,psec)]*pol_mktDirInt_d,sigma);  // note that putting 0.0 and 0.000 IS NOT the same thing. With 0.000 I have a seg fault in ADOL-C !!
     vector<string> debug = secPr;
+    // Substitution part within forest producs (whose price is endogenous to the model)..
     for (uint p2=0;p2<secPr.size();p2++){
       es_d     = gpd("es_d",l2r[r1][r2],secPr[p],DATA_NOW,secPr[p2]);
       if(es_d){
@@ -346,6 +347,22 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
                    ((x[gix("pc",r1,r2,psec)]*pol_mktDirInt_d) / (x[gix("pc",r1,r2,priPr.size()+p2)]*pol_mktDirInt_d_pSubstituted))
                       /
                    ((pc_1*pol_mktDirInt_d_1) / (pc_1_pSubstituted*pol_mktDirInt_d_1_pSubstituted))
+                 ), es_d
+               );
+      }
+    }
+    // Substitution part with other products with exogenous prices (e.g. fossilFuels)..
+    for (uint p3=0;p3<othPr.size();p3++){
+      es_d     = gpd("es_d",l2r[r1][r2],secPr[p],DATA_NOW,othPr[p3]);
+      if(es_d){
+        pc_pSubstituted    = gpd("pl",l2r[r1][r2],othPr[p3],DATA_NOW);
+        pc_1_pSubstituted  = gpd("pl",l2r[r1][r2],othPr[p3],previousYear);
+
+        g[cix] *= pow(
+                 (
+                   (x[gix("pc",r1,r2,psec)] / pc_pSubstituted)
+                      /
+                   (pc_1 / pc_1_pSubstituted)
                  ), es_d
                );
       }
@@ -527,11 +544,13 @@ Opt::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
     // does this initialisation code only once
     priPr = MTHREAD->MD->getStringVectorSetting("priProducts");
     secPr = MTHREAD->MD->getStringVectorSetting("secProducts");
+    othPr = MTHREAD->MD->getStringVectorSetting("othExogenousProducts");
     allPr = priPr;
     allPr.insert( allPr.end(), secPr.begin(), secPr.end() );
     nPriPr = priPr.size();
     nSecPr = secPr.size();
     nAllPr = allPr.size();
+    nOthPr = othPr.size();
     std::vector<int> l1regIds =  MTHREAD->MD->getRegionIds(1, true);
     nL2r =  MTHREAD->MD->getRegionIds(2, true).size();
     firstYear = MTHREAD->MD->getIntSetting("initialYear");

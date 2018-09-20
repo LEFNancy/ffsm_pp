@@ -193,6 +193,7 @@ protected:
   vector<string>                           priPr;
   vector<string>                           secPr;
   vector<string>                           allPr;
+  vector<string>                           othPr;
   vector < vector <int> >                    l2r;
   vector < vector <int> >             priPrCombs; ///< A vector with all the possible combinations of primary products
   vector < vector < vector <double> > >      ins; ///< A copy of the inventoried resourses by region and primary product combination. It works also with dynamic loading of the region and the in, but it may be slower.
@@ -203,6 +204,7 @@ protected:
   map <string, vector < vector < vector < vector <int> > > > > vpositions; ///< cached position in the concatenated vector for each variables. Dimensions are l1reg, l2reg, prod, (l2To region).
   vector < vector < vector < vector < vector <int> > > > > cpositions; ///< cached position in the concatenated vector for each variables. Dimensions are contrain number, l1reg, l2reg, prod, (l2To region).
   int                                     nPriPr;
+  int                                     nOthPr;
   int                                nPriPrCombs;
   int                                     nSecPr;
   int                                     nAllPr;
