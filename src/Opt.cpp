@@ -408,13 +408,25 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
   // mkteq5(i,p_pr)..  RVAR('sc',i,p_pr)  =e=  FF(i,p_pr)*(RVAR('pc',i,p_pr)**sigma(p_pr)); // eq. 21
   // SUPPLY EQUATION OF PRIMARY PRODUCTS
+
+    // added for carbon project (outside loop bc doesn't change with PriProducts
+    double carbonPrice = MTHREAD->MD->getProdData("carbonPrice",11042,"",DATA_NOW); //using dummy region until Anto solves issue
+    double intRate = MTHREAD->MD->getDoubleSetting("ir");
+    double Pct = carbonPrice*intRate;
+    // ----------------------------------
+
   CONSTRAIN_START_LOOP(priPr,7)
     ff = gpd("ff",l2r[r1][r2],priPr[p]);
     pol_mktDirInt_s = gpd("pol_mktDirInt_s",l2r[r1][r2],priPr[p]);
     sigma = gpd("sigma",l2r[r1][r2],priPr[p]);
-    //g[cix] = x[gix("sc",r1,r2,p)]-mymax(ff*pow(x[gix("pc",r1,r2,p)],sigma),0.001);
-    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)]*pol_mktDirInt_s,sigma);
-    //g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)],sigma-0.0001);
+
+
+    // Added for carbon project ----------------------
+    double omega = gpd("co2content_products", 11042, priPr[p])/1000;
+    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow((x[gix("pc",r1,r2,p)]-omega*Pct)*pol_mktDirInt_s,sigma);
+    // -----------------------------------------------
+
+    //g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)]*pol_mktDirInt_s,sigma);
   CONSTRAIN_END_LOOP
 
 

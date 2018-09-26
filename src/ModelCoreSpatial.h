@@ -116,6 +116,9 @@ public:
   void                  computeEconomicBalances();///< compute the policy balances (- -> costs; + -> rev) and the producer/consumer surpluses
   double                getAvgAgeByDc(Pixel* px, int ft, int dc); ///< return the average age of a tree at a given diameter class, using the cumTp vector
 
+  // added for carbon project
+  double                getVHaByYear(Pixel* px, int ft, int year); ///< return the Volume/ha in a forest after a given number of year after planting, for a specific forest type
+
   // convenient handles to equivalent ModelData functions..
   double              gpd(const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const string &freeDim_h="") const {return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};
   double              gfd(const string &type_h, const int& regId_h, const string &forType_h, const string &freeDim_h, const int& year=DATA_NOW) const {return MTHREAD->MD->getForData(type_h, regId_h, forType_h, freeDim_h, year);};

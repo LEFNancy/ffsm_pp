@@ -586,7 +586,7 @@ Sandbox::basicTest(){
 
 void
 Sandbox::fullTest(){
-
+    ;
 
   /*
   // Testing getTableFromFile() function

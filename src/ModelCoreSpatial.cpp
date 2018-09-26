@@ -236,6 +236,12 @@ ModelCoreSpatial::runMarketModule(){
   int thisYear     =  MTHREAD->SCD->getYear();
   int previousYear = MTHREAD->SCD->getYear()-1;
 
+  // Added for carbon poject -------------------------------
+  double carbonPrice_1 = MTHREAD->MD->getProdData("carbonPrice",11042,"",previousYear); //using dummy region until Anto solves issue
+  double intRate = MTHREAD->MD->getDoubleSetting("ir");
+  double Pct_1 = carbonPrice_1*intRate;
+  // ----------------------------------------------------------------
+
   // *** PRE-OPTIMISATION YEARLY OPERATIONS..
   for(uint i=0;i<regIds2.size();i++){
     int r2 = regIds2[i];
@@ -280,6 +286,11 @@ ModelCoreSpatial::runMarketModule(){
       double t1                = gpd("t1",r2,priProducts[pp]);
       double pol_mktStr_s      = gpd("pol_mktStr_s",r2,priProducts[pp]);
 
+      // Added for carbon project ------------------------------------------
+      double omega = gpd("co2content_products", 11042, priProducts[pp])/1000; //kg to tons
+      // -------------------------------------------------------------------
+
+
       double t1_polCorr        = min(1.0, (t1-0.5)*pol_mktStr_s+0.5); // The pol_mktStr_s coefficient makes t1 (the "b" weight in the CES function) converge toward 0.5 as pol_mktStr_s goes to 0. As pol_mktStr_s can be above 1, an upper cap of unity is imposed to t1
 
 
@@ -288,7 +299,14 @@ ModelCoreSpatial::runMarketModule(){
       double in_ratio =  in/in_1;
 
       double bb = (sigma/(sigma+1.0))*pc_1*pow(sc_1,-1.0/sigma)*pow(1/in_ratio,gamma/sigma)*pow(1.0,1.0/sigma) * pol_mktDirInt_s_1/pol_mktDirInt_s ;
+
+      /* Old FF (without carbon)
       double ff = sc_1*pow(pc_1*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma); //chi
+      */
+
+      // Added for carbon project
+      double ff = sc_1*pow((pc_1 - omega * Pct_1)*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma);
+      // -----------------------------------------------
 
       spd(bb,"bb",r2,priProducts[pp],DATA_NOW,true);
       spd(ff,"ff",r2,priProducts[pp],DATA_NOW,true);
@@ -897,6 +915,7 @@ ModelCoreSpatial::runManagementModule(){
       //            RPAR("pl",i,p_pr,t)*hv2fa(i,essence,lambda,u)*(1/df_byFT(u,i,lambda,essence))*        // df_byFT(u,i,lambda,essence)
       //            expRetPondCoef(u,i,essence,lambda,p_pr)
       //            );
+
       for(uint j=0;j<fTypes.size();j++){
         string ft = fTypes[j];
         double expReturns = 0.;
@@ -2501,4 +2520,28 @@ double
 ModelCoreSpatial::getAvgAgeByDc(Pixel* px, int ft, int dc){
   if(dc ==  dClasses.size()-1) { return px->cumTp[ft][dc] * 1.2;}
   else {return (px->cumTp[ft][dc]+px->cumTp[ft][dc+1])/2; }
+}
+
+
+
+
+// added for carbon project
+/**
+  * Return the Volume/ha in a forest after a given number of year after planting, for a specific forest type
+  */
+double
+ModelCoreSpatial::getVHaByYear(Pixel* px, int ft, int year) {
+    double vHa = 0;
+    int regId = px->getMyRegion()->getRegId();
+    double extraBiomass_ratio = gfd("extraBiomass_ratio",regId,fTypes[ft],"",DATA_NOW);
+
+    for (int u = 0; u<dClasses.size(); u++){
+        double cumTP_exp = px->cumTp_exp.at(ft).at(u);
+        if (year>=cumTP_exp){
+            vHa = px->vHa_exp.at(ft).at(u)*(1+extraBiomass_ratio);
+        } else {
+            return vHa;
+        }
+    }
+    return vHa;
 }

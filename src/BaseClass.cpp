@@ -206,9 +206,9 @@ BaseClass::s2d (const  string& string_h, const bool& replaceComma) const {
 /// Includes conversion checks.
 bool
 BaseClass::s2b (const string& string_h) const {
-  if (string_h == "true" || string_h == "vero" || string_h == "TRUE" || string_h == "1" || string_h == "True")
+  if (string_h == "true" || string_h == "vero" || string_h == "TRUE" || string_h == "VRAI" || string_h == "1" || string_h == "True")
     return true;
-  else if (string_h == "false" || string_h == "falso" || string_h == "FALSE" || string_h == "0" || string_h == "" || string_h == "False")
+  else if (string_h == "false" || string_h == "falso" || string_h == "FALSE" || string_h == "FAUX" || string_h == "0" || string_h == "" || string_h == "False")
     return false;
 
   msgOut(MSG_CRITICAL_ERROR,"Conversion string to bool failed. Some problems with the data? (got\""+string_h+"\")");
