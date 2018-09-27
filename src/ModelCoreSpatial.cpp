@@ -237,9 +237,8 @@ ModelCoreSpatial::runMarketModule(){
   int previousYear = MTHREAD->SCD->getYear()-1;
 
   // Added for carbon poject -------------------------------
-  double carbonPrice_1 = MTHREAD->MD->getProdData("carbonPrice",11042,"",previousYear); //using dummy region until Anto solves issue
   double intRate = MTHREAD->MD->getDoubleSetting("ir");
-  double Pct_1 = carbonPrice_1*intRate;
+
   // ----------------------------------------------------------------
 
   // *** PRE-OPTIMISATION YEARLY OPERATIONS..
@@ -286,8 +285,12 @@ ModelCoreSpatial::runMarketModule(){
       double t1                = gpd("t1",r2,priProducts[pp]);
       double pol_mktStr_s      = gpd("pol_mktStr_s",r2,priProducts[pp]);
 
+
       // Added for carbon project ------------------------------------------
-      double omega = gpd("co2content_products", 11042, priProducts[pp])/1000; //kg to tons
+      double carbonPrice_1     = gpd("carbonPrice",r2,"",previousYear); //using dummy region until Anto solves issue // Antonello: solved but also generalised
+      double omega             = gpd("co2content_products", r2, priProducts[pp])/1000; //kg to tons
+      double Pct_1             = carbonPrice_1*intRate;
+
       // -------------------------------------------------------------------
 
 
