@@ -65,6 +65,22 @@ ModelRegion::getChildren(bool excludeResidual){
   return chRegions;
 }
 
+int
+ModelRegion::getNChildren(bool excludeResidual){
+  /*if(excludeResidual){
+    int toReturn = 0; // Bug found 20180927
+    for(uint i=0;i<chRegions.size();i++){
+      if(!chRegions[i]->getIsResidual()){
+        toReturn++;
+      }
+    }
+    return toReturn;
+  }
+  return chRegions.size();
+  */
+  return getChildren(excludeResidual).size();
+}
+
 vector<ModelRegion*>
 ModelRegion::getSiblings(bool excludeResidual){
   vector<ModelRegion*> toReturn;
@@ -80,19 +96,7 @@ ModelRegion::getSiblings(bool excludeResidual){
 
 
 
-int
-ModelRegion::getNChildren(bool excludeResidual){
-  if(excludeResidual){
-    int toReturn;
-    for(uint i=0;i<chRegions.size();i++){
-      if(!chRegions[i]->getIsResidual()){
-        toReturn++;
-      }
-    }
-    return toReturn;
-  }
-  return chRegions.size();
-}
+
 
 
 

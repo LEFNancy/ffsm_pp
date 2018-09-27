@@ -586,7 +586,13 @@ Sandbox::basicTest(){
 
 void
 Sandbox::fullTest(){
-    ;
+
+  /*
+  // Testing picking up a national level variable defined only at national level. This may raise a segfault ?
+  //double debug  = MTHREAD->MD->getProdData("carbonPrice",11000,"",2007);
+  cout << debug << endl;
+  exit(1);
+  */
 
   /*
   // Testing getTableFromFile() function
