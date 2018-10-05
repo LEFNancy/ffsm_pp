@@ -5,7 +5,9 @@ using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatPlots,
 ### Settings and definitions
 ##########################################################
 
-scenarios = ["default"]
+scenarios = []
+
+allScenariosInAFile = true
 
 fgroup_map = Dict(
   "broadL"        => "Broadleaved",
@@ -80,12 +82,25 @@ problematicCols = Dict("freeDim" => Union{Missing,Int64})
 ### Data import
 ##########################################################
 
-forestData_byscenario = [CSV.read(baseIDir*"/forestData_"*scenario*".csv"; delim=';', missingstring="") for scenario in scenarios];
-carbonData_byscenario = [CSV.read(baseIDir*"/carbonBalance_"*scenario*".csv"; delim=';', missingstring="") for scenario in scenarios];
+forestData_byscenario  = []
+productData_byscenario = []
+carbonData_byscenario  = []
+
+
+if allScenariosInAFile
+    push!(forestData_byscenario,CSV.read(baseIDir*"/forestData.csv"; delim=';', missingstring=""));
+    push!(productData_byscenario,CSV.read(baseIDir*"/productData.csv"; delim=';', missingstring="", types=problematicCols));
+    push!(carbonData_byscenario,CSV.read(baseIDir*"/carbonBalance.csv"; delim=';', missingstring=""));
+else
+    forestData_byscenario = [CSV.read(baseIDir*"/forestData_"*scenario*".csv"; delim=';', missingstring="") for scenario in scenarios];
+    productData_byscenario = [CSV.read(baseIDir*"/productData_"*scenario*".csv"; delim=';', types=problematicCols) for scenario in scenarios];
+    carbonData_byscenario = [CSV.read(baseIDir*"/carbonBalance_"*scenario*".csv"; delim=';', missingstring="") for scenario in scenarios];
+end
 
 forVars = vcat(forestData_byscenario...)
+prodVars = vcat(productData_byscenario...)
 cVars = vcat(carbonData_byscenario...)
-[delete!(dfi, [:country,]) for dfi in [cVars, forVars]] # delete columns country
+[delete!(dfi, [:country,]) for dfi in [forVars,prodVars,cVars]] # delete columns country
 
 print("Data loaded")
 
@@ -94,6 +109,7 @@ print("Data loaded")
 ##########################################################
 forVars[:forGroup] = map(k->fgroup_map[k], forVars[:forType])
 [df[:region] = map(k->reg_map[k], df[:region]) for df in [forVars,cVars]]
+prodVars[:prodLev] = map(k->pgroup_map[k], prodVars[:prod])
 
 # Adding totals to carbon variables
 cVars_piv = pivot(cVars,[:scen,:year,:region],:balItem,:value,
@@ -111,6 +127,8 @@ cVars = stack(cVars_piv) # setting it back in long format but now with totals
 ##########################################################
 
 ################ Tables..
+
+##### Forest Variables
 
 # Forest area and forest volumes
 forAreaReg = pivot(forVars,[:scen, :region, :forGroup,],:year,:value,
@@ -148,6 +166,63 @@ forVolNat[:region] = "France"
 forVolNat = forVolNat[vcat(forVolNatNames[1:1],:region,forVolNatNames[2:end])]
 forVol = vcat(forVolReg,forVolNat)
 ods_write(odsOut,Dict(("forVol",1,1) => forVol )  )
+
+##### Mkt & Policy Variables
+
+# Product balance
+prodBalance = pivot(prodVars,[:year,:scen,:prodLev,:prod],:parName,:value,
+                    filter = Dict(
+                        :parName => ["st","da","dt","sa"],
+                        :year    => [2010,2015]),
+                    sort = [:year,:scen,:prodLev,:prod],
+              )
+ods_write(odsOut,Dict(("prodBalance",1,1) => prodBalance )  )
+
+# Product balance all years
+prodBalanceAll5Y = pivot(prodVars,[:parName,:prodLev,:prod,:scen,],:year,:value,
+                    filter = Dict(
+                        :parName => ["st","da","dt","sa"],
+                        :year    => years5),
+                    sort = [:parName,:prodLev,:prod,:scen,],
+              )
+ods_write(odsOut,Dict(("prodBalanceAll5Y",1,1) => prodBalanceAll5Y )  )
+
+# Preparation of policy variables
+pol1 = by(forVars, [:scen,:parName,:region,:year]) do df
+   DataFrame(value = sum(df[:value]))
+end
+
+pol2 = by(prodVars, [:scen,:parName,:region,:year]) do df
+   DataFrame(value = sum(df[:value]))
+
+end
+a = collect(pol2[:region])
+pol2[:region] = a
+
+
+pol= vcat(pol1,pol2)
+policy_vars = ["polBal_mktDirInt_s", "polBal_mktDirInt_d", "polBal_trSub", "polBal_tcSub", "polBal_fiSub", "surplus_prod", "surplus_cons"]
+pol = pol[ [i in policy_vars for i in pol[:parName]] ,:]
+
+# Policy cost analysis (national)
+polCosts_nat = pivot(pol,[:scen,:parName],:year,:value,
+            filter = Dict(
+                :year    => years5
+            ),
+            sort = [:scen, :parName]
+)
+ods_write(odsOut,Dict(("polCosts_nat",1,1) => polCosts_nat )  )
+
+# Policy cost analysis (regional)
+polCosts_reg = pivot(pol,[:scen,:parName],:region,:value,
+            filter = Dict(
+                :year    => 2030
+            ),
+            sort = [:scen, :parName]
+)
+ods_write(odsOut,Dict(("polCosts_reg",1,1) => polCosts_reg )  )
+
+##### Carbon Variables
 
 # Carbon balance cumulative
 cBalCumReg = pivot(cVars,[:scen,:region,:variable],:year,:value,
