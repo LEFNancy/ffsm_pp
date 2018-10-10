@@ -945,18 +945,20 @@ ModelCoreSpatial::runManagementModule(){
             double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
 
             // Added for carbon project-------------------------------------------------------------------------
-            double raw_amount_carbon = 0;
-            for (uint y=1; y<=cumTp_u; y++) {
-                double carbonPrice_y = gpd("carbonPrice",r2,"",DATA_NOW + y);
-                double ir = MTHREAD->MD->getDoubleSetting("ir");
-                double Pct_y = carbonPrice_y*ir
-                double carbonRef = gfd("carbonRef",r2,ft,"",DATA_NOW + y);
-                double expectedVHa_y = getVHaByYear(px, j, y);
-                double carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - carbonRef);
-                raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y);
+            double ir = MTHREAD->MD->getDoubleSetting("ir");
+            if (MTHREAD->MD->getBoolSetting("flagHartman")==true) {
+                double raw_amount_carbon = 0;
+                for (uint y=0; y<cumTp_u; y++) {
+                    double carbonPrice_y = gpd("carbonPrice",r2,"",thisYear + y);
+                    double Pct_y = carbonPrice_y*ir;
+                    double carbonRef = gfd("carbonRef",r2,ft,"", thisYear + y);
+                    double expectedVHa_y = getVHaByYear(px, j, y);
+                    double carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - carbonRef);
+                    raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y);
+                }
+                double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u);
+                anualised_amount += anualised_amount_carbon;
             }
-            double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u);
-            anualised_amount += anualised_amount_carbon;
             // End of added-----------------------------------------------------------------------------------
 
 
