@@ -921,6 +921,12 @@ ModelCoreSpatial::runManagementModule(){
 
       for(uint j=0;j<fTypes.size();j++){
         string ft = fTypes[j];
+
+       // Added for carbon project
+        double co2content_inventory = gfd("co2content_inventory",r2,ft,"",DATA_NOW)/1000; // kilos to tons
+       // End of added
+
+
         double expReturns = 0.;
         int optDc = 0; // "optimal diameter class", the one on which the expected returns are computed
         for (uint u=0; u<dClasses.size(); u++){
@@ -937,6 +943,23 @@ ModelCoreSpatial::runManagementModule(){
             double pw_exp        = computeExpectedPrice(pl, worldCurPrice, worldFutPrice, sl, sa, px->expTypePrices); //20141030: added the expected price!
             double raw_amount = finalHarvestFlag*pw_exp*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
             double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
+
+            // Added for carbon project-------------------------------------------------------------------------
+            double raw_amount_carbon = 0;
+            for (uint y=1; y<=cumTp_u; y++) {
+                double carbonPrice_y = gpd("carbonPrice",r2,"",DATA_NOW + y);
+                double ir = MTHREAD->MD->getDoubleSetting("ir");
+                double Pct_y = carbonPrice_y*ir
+                double carbonRef = gfd("carbonRef",r2,ft,"",DATA_NOW + y);
+                double expectedVHa_y = getVHaByYear(px, j, y);
+                double carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - carbonRef);
+                raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y);
+            }
+            double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u);
+            anualised_amount += anualised_amount_carbon;
+            // End of added-----------------------------------------------------------------------------------
+
+
             if (anualised_amount>expReturns) {
               expReturns=anualised_amount;
               optDc = u;
