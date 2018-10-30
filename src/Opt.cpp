@@ -310,7 +310,7 @@ It could be possible to change this in a map and uses name, but then we would lo
 template<class T> bool
 Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
-  double a_pr, a, sigma, ff, pol_mktDirInt_s, pol_mktDirInt_d, pol_mktDirInt_d_pSubstituted, pol_mktDirInt_d_1, pol_mktDirInt_d_1_pSubstituted, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1, supCorr, es_d, pc_1, pc_pSubstituted, pc_1_pSubstituted;
+  double a_pr, a, sigma, ff, pol_mktDirInt_s, pol_mktDirInt_d, pol_mktDirInt_d_pSubstituted, pol_mktDirInt_d_1, pol_mktDirInt_d_1_pSubstituted, gg, q1, p1v, t1, r1v, psi, eta, pworld, ct, k, dispor, mv, in, in_1, supCorr, es_d, pc_1, pc_pSubstituted, pc_1_pSubstituted, additionalDemand;
   Index cix = 0;
   Index debug = 0;
 
@@ -332,6 +332,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     pc_1       = gpd("pc",l2r[r1][r2],secPr[p],previousYear);
     pol_mktDirInt_d   = gpd("pol_mktDirInt_d",l2r[r1][r2],secPr[p]);              // market policies (subs or taxes) this year
     pol_mktDirInt_d_1 = gpd("pol_mktDirInt_d",l2r[r1][r2],secPr[p],previousYear); // market policies previous year
+    additionalDemand = gpd("additionalDemand",l2r[r1][r2],secPr[p]);
     g[cix]     = - gg*pow(x[gix("pc",r1,r2,psec)]*pol_mktDirInt_d,sigma);  // note that putting 0.0 and 0.000 IS NOT the same thing. With 0.000 I have a seg fault in ADOL-C !!
     vector<string> debug = secPr;
     // Substitution part within forest producs (whose price is endogenous to the model)..
@@ -368,7 +369,7 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
       }
     }
     //g[cix] = x[gix("dc",r1,r2,p)]-gg*pow(x[gix("pc",r1,r2,psec)],sigma); // original without substitution elasticity
-    g[cix] += x[gix("dc",r1,r2,p)];
+    g[cix] += x[gix("dc",r1,r2,p)]-additionalDemand;
   CONSTRAIN_END_LOOP
 
 

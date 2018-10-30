@@ -67,8 +67,8 @@ reg_map = Dict(
     "OTH (OTH)" => "OTH",
 )
 
-baseIDir        = "results";
-odsOut          = "juliaOut/formattedOutput.ods"
+baseIDir        = "results_temp";
+odsOut          = "juliaOut/formattedOutput_temp.ods"
 odsOut_template = "juliaOut/formattedOutput_template.ods"
 chartOutDir     = "juliaOut"
 
