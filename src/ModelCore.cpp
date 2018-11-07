@@ -494,6 +494,7 @@ ModelCore::runManagementModule(){
     //cout << "year/dc/pp/eai/cumTp/vHa/pw" << endl;
 
     int thisYear = MTHREAD->SCD->getYear();
+    double ir = MTHREAD->MD->getDoubleSetting("ir");
 
   for(uint i=0;i<regIds2.size();i++){
         vector < vector <vector <vector <double> > > >  expReturnsDebug_region;
@@ -545,7 +546,7 @@ ModelCore::runManagementModule(){
                         vector <double>  expReturnsDebug_pp;
             double pw    = gpd("pw",regId,priProducts[pp]);
             double raw_amount = finalHarvestFlag*pw*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
-            double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
+            double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u, ir);
                         if (anualised_amount>expReturns) {
                             expReturns=anualised_amount;
                            // if (ft == "con_highF" && regId == 11041){
@@ -588,7 +589,7 @@ ModelCore::runManagementModule(){
             /**
             see @ModelData::calculateAnnualisedEquivalent
             */
-            double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u); //comTp is on diamClasses, u here is on pDiamClasses
+            double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u, ir); //comTp is on diamClasses, u here is on pDiamClasses
             //cout << "reg|ft|dc|prd|raw amount|ann.amount|tp|hV|hVTot|pw|pl|pW|vHa|fHFlag;";
             //cout << regId <<";"<< ft <<";"<< dc <<";" << priProducts[pp] <<";" << raw_amount <<";"<< anualised_amount<<";";
             //cout << cumTp_u <<";"<< hVol_byUPp << ";" << hV_byFT << ";" << pw << ";" << pl << ";" << pwor << ";" << vHa << ";" << finalHarvestFlag << endl;
@@ -602,7 +603,7 @@ ModelCore::runManagementModule(){
                           expReturnsDebug_pp.push_back(pw);
                           expReturnsDebug_pp.push_back(cumTp_u);
                           expReturnsDebug_pp.push_back(vHa);
-                          expReturnsDebug_pp.push_back(MD->calculateAnnualisedEquivalent(finalHarvestFlag*pw*vHa,cumTp_u));
+                          expReturnsDebug_pp.push_back(MD->calculateAnnualisedEquivalent(finalHarvestFlag*pw*vHa,cumTp_u,ir));
                           expReturnsDebug_pp.push_back(1);
                         }
                         expReturnsDebug_dc.push_back(expReturnsDebug_pp);

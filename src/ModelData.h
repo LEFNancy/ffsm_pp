@@ -176,8 +176,8 @@ public:
 
   vector<pathRule*>   getPathMortalityRule(const string& forType, const string& dC); ///< Return the pathogen mortality rule(s) associated with a given ft and dc (plural as more than a single pathogen could be found)
 
-  double              calculateAnnualisedEquivalent(double amount_h, int years_h); ///< Calculate the annual equivalent flow
-  double              calculateAnnualisedEquivalent(double amount_h, double years_h); ///< Transform the double to the highest integer and call calculateAnnualisedEquivalent(double amount_h, int years_h)
+  double              calculateAnnualisedEquivalent(const double& amount_h, const int& years_h, const double& ir) const; ///< Calculate the annual equivalent flow
+  double              calculateAnnualisedEquivalent(const double& amount_h, const double& years_h, const double& ir) const; ///< Transform the double to the highest integer and call calculateAnnualisedEquivalent(double amount_h, int years_h)
 
   void                setOutputDirectory(const char* output_dirname_h);
   void                setBaseDiretory(string baseDirectory_h){baseDirectory=baseDirectory_h;}

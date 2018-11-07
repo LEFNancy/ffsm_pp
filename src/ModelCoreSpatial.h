@@ -117,7 +117,7 @@ public:
   double                getAvgAgeByDc(Pixel* px, int ft, int dc); ///< return the average age of a tree at a given diameter class, using the cumTp vector
 
   // added for carbon project
-  double                getVHaByYear(Pixel* px, int ft, int year); ///< return the Volume/ha in a forest after a given number of year after planting, for a specific forest type
+  double                getVHaByYear (const Pixel* px, const int& ft, const int& year, const double& extraBiomass_ratio ) const; ///< return the Volume/ha in a forest after a given number of year after planting, for a specific forest type
 
   // convenient handles to equivalent ModelData functions..
   double              gpd(const string &type_h, const int& regId_h, const string &prodId_h, const int& year=DATA_NOW, const string &freeDim_h="") const {return MTHREAD->MD->getProdData(type_h, regId_h, prodId_h, year, freeDim_h);};

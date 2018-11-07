@@ -883,15 +883,21 @@ ModelCoreSpatial::runManagementModule(){
 
     // Caching carbon reference levels by ftypes
     vector<vector<double>> futureCarbonRef;
+    vector<vector<double>> futureExtraBiomass_ratio;
+
     if(flagHartman){
         for(uint j=0;j<fTypes.size();j++){
             string ft = fTypes[j];
             vector<double> futureCarbonRef_ft;
+             vector<double>futureExtraBiomass_ratio_ft;
             for (int y=0; y<1000; y++) {
                 double carbonRef = gfd("carbonRef",r2,ft,"", thisYear + y);
                 futureCarbonRef_ft.push_back(carbonRef);
+                double extraBiomass_ratio = gfd("extraBiomass_ratio",regId,ft,"",DATA_NOW);
+                futureExtraBiomass_ratio_ft.push_back(extraBiomass_ratio);
             }
             futureCarbonRef.push_back(futureCarbonRef_ft);
+            futureExtraBiomass_ratio.push_back(futureExtraBiomass_ratio_ft);
         }
     }
 
@@ -966,19 +972,19 @@ ModelCoreSpatial::runManagementModule(){
             double sa            = gpd("sa",regId,priProducts[pp]);
             double pw_exp        = computeExpectedPrice(pl, worldCurPrice, worldFutPrice, sl, sa, px->expTypePrices); //20141030: added the expected price!
             double raw_amount = finalHarvestFlag*pw_exp*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
-            double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
+            double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u, ir);
 
             // Added for carbon project-------------------------------------------------------------------------
             if (flagHartman) {
                 double raw_amount_carbon = 0;
                 for (int y=0; y<cumTp_u; y++) {
-                    double carbonPrice_y = futureCarbonPrices.at(y);
-                    double carbonRef = futureCarbonRef.at(j).at(y);
-                    double expectedVHa_y = getVHaByYear(px, j, y);
+                    double carbonPrice_y = futureCarbonPrices[y];
+                    double carbonRef = futureCarbonRef[j][y];
+                    double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y]);
                     double carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - carbonRef);
                     raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y);
                 }
-                double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u);
+                double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
                 anualised_amount += anualised_amount_carbon;
             }
             // End of added-----------------------------------------------------------------------------------
@@ -2580,15 +2586,15 @@ ModelCoreSpatial::getAvgAgeByDc(Pixel* px, int ft, int dc){
   * Return the Volume/ha in a forest after a given number of year after planting, for a specific forest type
   */
 double
-ModelCoreSpatial::getVHaByYear(Pixel* px, int ft, int year) {
+ModelCoreSpatial::getVHaByYear(const Pixel* px, const int& ft, const int& year, const double& extraBiomass_ratio) const {
     double vHa = 0;
-    int regId = px->getMyRegion()->getRegId();
-    double extraBiomass_ratio = gfd("extraBiomass_ratio",regId,fTypes[ft],"",DATA_NOW);
+    //int regId = px->getMyRegion()->getRegId();
+    //double extraBiomass_ratio = gfd("extraBiomass_ratio",regId,fTypes[ft],"",DATA_NOW);
 
     for (int u = 0; u<dClasses.size(); u++){
-        double cumTP_exp = px->cumTp_exp.at(ft).at(u);
+        double cumTP_exp = px->cumTp_exp[ft][u];
         if (year>=cumTP_exp){
-            vHa = px->vHa_exp.at(ft).at(u)*(1+extraBiomass_ratio);
+            vHa = px->vHa_exp[ft][u]*(1+extraBiomass_ratio);
         } else {
             return vHa;
         }

@@ -1957,7 +1957,7 @@ Objective is to have the present value of the final harvest (A) equal to the sum
 
 */
 double
-ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
+ModelData::calculateAnnualisedEquivalent(const double& amount_h, const int& years_h, const double& ir) const {
   // modified and tested 20120912. Before it was running this formula instead:
   // av.y.rev = rev(n)/ ( (1+ir)^1+(1+ir)^2+(1+ir)^3+...+(1+ir)^n )
   // the difference is that in this way the annual equivalent that is calulated doesn't need to be further discounted for yearly activites (e.g. agric)
@@ -1970,7 +1970,7 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
   //);
   if(years_h<0) return 0.;
   if(years_h==0) return amount_h;
-  double ir = getDoubleSetting("ir",DATA_NOW);
+  //double ir = getDoubleSetting("ir",DATA_NOW);
   double eai = amount_h * ir / (pow(1.0+ir,years_h)-1.0);
 
   return eai;
@@ -1996,13 +1996,13 @@ ModelData::calculateAnnualisedEquivalent(double amount_h, int years_h){
 }
 
 double
-ModelData::calculateAnnualisedEquivalent(double amount_h, double years_h){
+ModelData::calculateAnnualisedEquivalent(const double& amount_h, const double& years_h, const double& ir) const{
   //ceil(x) DNLP returns the smallest integer number greater than or equal to x
   //loop( (u,i,lambda,essence),
   //  cumTp(u,i,lambda,essence) =   ceil(cumTp(u,i,lambda,essence));
   //);
   int ceiledYear = ceil(years_h);
-  return calculateAnnualisedEquivalent(amount_h, ceiledYear);
+  return calculateAnnualisedEquivalent(amount_h, ceiledYear, ir);
 }
 
 /** Get a list of files in a directory */
