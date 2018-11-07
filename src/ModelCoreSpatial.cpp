@@ -825,6 +825,8 @@ ModelCoreSpatial::runManagementModule(){
   vector<string> allFTypes = MTHREAD->MD->getForTypeIds(true);
   map<string,double> hAreaByFTypeGroup = vectorToMap(allFTypes,0.0);
   int thisYear = MTHREAD->SCD->getYear();
+  double ir = MTHREAD->MD->getDoubleSetting("ir");
+  double flagHartman = MTHREAD->MD->getBoolSetting("flagHartman");
 
   // Post optimisation management module..
   for(uint i=0;i<regIds2.size();i++){
@@ -832,6 +834,14 @@ ModelCoreSpatial::runManagementModule(){
     int regId = r2;
     ModelRegion* REG = MTHREAD->MD->getRegion(r2);
     regPx = REG->getMyPixels();
+
+    // Caching futureCarbonPrices..
+    vector<double> futureCarbonPrices;
+    if(flagHartman){
+        for (int y=0; y<1000; y++) {
+            futureCarbonPrices.push_back(gpd("carbonPrice",r2,"",thisYear + y));
+        }
+    }
 
     vector<double> polBal_fiSub (fTypes.size(),0.0); // Expenses for forest investment subsides by region and destination ft €
 
@@ -870,6 +880,20 @@ ModelCoreSpatial::runManagementModule(){
     //  mr = MD->getDoubleSetting("mr");
     //}
     MD->setErrorLevel(origErrorLevel);
+
+    // Caching carbon reference levels by ftypes
+    vector<vector<double>> futureCarbonRef;
+    if(flagHartman){
+        for(uint j=0;j<fTypes.size();j++){
+            string ft = fTypes[j];
+            vector<double> futureCarbonRef_ft;
+            for (int y=0; y<1000; y++) {
+                double carbonRef = gfd("carbonRef",r2,ft,"", thisYear + y);
+                futureCarbonRef_ft.push_back(carbonRef);
+            }
+            futureCarbonRef.push_back(futureCarbonRef_ft);
+        }
+    }
 
 
     for (uint p=0;p<regPx.size();p++){
@@ -945,13 +969,11 @@ ModelCoreSpatial::runManagementModule(){
             double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u);
 
             // Added for carbon project-------------------------------------------------------------------------
-            double ir = MTHREAD->MD->getDoubleSetting("ir");
-            if (MTHREAD->MD->getBoolSetting("flagHartman")==true) {
+            if (flagHartman) {
                 double raw_amount_carbon = 0;
-                for (uint y=0; y<cumTp_u; y++) {
-                    double carbonPrice_y = gpd("carbonPrice",r2,"",thisYear + y);
-                    double Pct_y = carbonPrice_y*ir;
-                    double carbonRef = gfd("carbonRef",r2,ft,"", thisYear + y);
+                for (int y=0; y<cumTp_u; y++) {
+                    double carbonPrice_y = futureCarbonPrices.at(y);
+                    double carbonRef = futureCarbonRef.at(j).at(y);
                     double expectedVHa_y = getVHaByYear(px, j, y);
                     double carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - carbonRef);
                     raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y);
