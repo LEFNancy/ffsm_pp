@@ -999,6 +999,8 @@ ModelCoreSpatial::runManagementModule(){
             }
           }
         }
+
+
         px->expectedReturnsNotCorrByRa.push_back(expReturns);
         if(MD->getBoolSetting("heterogeneousRiskAversion",DATA_NOW)){
           double ra = px->getDoubleValue("ra");
@@ -1008,10 +1010,106 @@ ModelCoreSpatial::runManagementModule(){
           expReturns = origExpReturns * (1.0 - ra*cumMort);
         }
         px->expectedReturns.push_back(expReturns);
+
+
         expectedReturns.at(j) = expReturns;
         rotation_dc.at(j) = optDc; // here we store the index of optimal dc for the forest type considered
 
       } // end foreach forest type
+
+
+      // Added for second carbon project-------------------------------------------------------------------------------------------------------------------------------------
+      // If carbon payments are included and the reference is BAU (ie, endogenous, we need a new loop-------------------------------------------------------------------
+      // In this case, the reference is what happens without policy, i.e. the result of the previous loop when (flagHartman =="REFERENCE") is FALSE
+      // So we just redo another loop with carbon payments using the previous result as reference
+
+      if (flagHartman && !exogenousReference) { // if carbon payments take place and reference is endogenous (is BAU)
+          // STEP 1 - retrieve optimal regeneration choice without carbon payments
+          int ft_opt_index = getMaxPos(expectedReturns); // get ft with max expected returns
+          string ft_opt = fTypes[ft_opt_index]; // get its name
+          int dc_opt_index = rotation_dc[ft_opt_index]; // get dc for forest type with max expected return
+          string dc_opt = dClasses[dc_opt_index]; // get its name
+          double cumTP_opt = px->cumTp_exp.at(ft_opt_index).at(dc_opt_index);
+          double co2content_inventory_opt = gfd("co2content_inventory",r2,ft_opt,"",DATA_NOW)/1000; // kilos to tons
+          // STEP 2 - calculate expected carbon contents on the optimal choice without carbon payments, to use as reference
+          vector <double> FutureCarbonContent_opt;
+          for (int y=0; y<cumTP_opt; y++) {
+              double expectedVHa_opt_y = getVHaByYear(px, ft_opt_index, y, futureExtraBiomass_ratio[ft_opt_index][y]);
+              FutureCarbonContent_opt.push_back(co2content_inventory_opt*expectedVHa_opt_y);
+          }
+          int cumTP_opt_floor = FutureCarbonContent_opt.size(); // need to get an integer value to compare rotation lengths
+
+          // STEP 3 - new loop to find optimal regeneration choice WITH carbon payments, using the choice WITHOUT carbon payments as a reference
+
+          for(uint j=0;j<fTypes.size();j++){
+              string ft = fTypes[j];
+              double co2content_inventory = gfd("co2content_inventory",r2,ft,"",DATA_NOW)/1000; // kilos to tons
+
+              double expReturns_hartman = 0.;
+              int optDc_hartman = 0; // "optimal diameter class", the one on which the expected returns are computed
+              for (uint u=0; u<dClasses.size(); u++){
+                  string dc = dClasses[u];
+                  double vHa         = px->vHa_exp.at(j).at(u);
+                  double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
+                  double cumTp_u = px->cumTp_exp.at(j).at(u);
+                  // Here we calculate expected revenues from timber
+                  for (uint pp=0;pp<priProducts.size();pp++){
+                      double pl            = gpd("pl",regId,priProducts[pp]); // note that this is the OBSERVED price. If we call it at current year+cumTp_u we would have the expected price. But we would first have to compute it, as pw is weigthed price world-local and we don't have local price for the future. DONE 20141202 ;-)
+                      double worldCurPrice = gpd("pl",WL2,priProducts[pp]);
+                      double worldFutPrice = gpd("pl",WL2,priProducts[pp],thisYear+cumTp_u);
+                      double sl            = gpd("sl",regId,priProducts[pp]);
+                      double sa            = gpd("sa",regId,priProducts[pp]);
+                      double pw_exp        = computeExpectedPrice(pl, worldCurPrice, worldFutPrice, sl, sa, px->expTypePrices); //20141030: added the expected price!
+                      double raw_amount = finalHarvestFlag*pw_exp*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
+                      double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u, ir);
+
+                      // Now we calculate expected revenues from carbon
+                      double raw_amount_carbon = 0;
+                      for (int y=0; y<cumTp_u; y++) { // calculate yearly payment for each year of the rotation
+                          double carbonPrice_y = futureCarbonPrices[y];
+                          double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y]);
+                          double carbonPayment_y;
+                          if (y==0) { // we use euclidian division, so an exception must be made when denominator is equal to 0
+                              carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y]);
+                          } else {
+                              int factor = y/cumTP_opt_floor; // euclidian division of the two lengths we compare
+                              if (cumTP_opt_floor%y >0) { // if the year is NOT a multiple of optimal rotation time, we need to take the year-th value of vector modulus how many rotations we have passed
+                                  carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y - factor*cumTP_opt_floor]);
+                              } else { // if the year is EXACTLY a multiple of optimal rotation time, we need to take the last value of vector, not the first one
+                                  carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[cumTP_opt_floor]);
+                              }
+                          }
+
+                          raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y); // all payments put at end of rotation
+                      }
+                      // And we annualise carbon revenues and add them to annualised timber revenues
+                      double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
+                      anualised_amount += anualised_amount_carbon;
+
+                      // If the new expected revenues is higher than previously, we store the maximum value and corresponding dc.
+                      if (anualised_amount>expReturns_hartman) {
+                          expReturns_hartman=anualised_amount;
+                          optDc_hartman = u;
+                      }
+                  } // end foreach primary product
+              } // end foreach DC
+
+              px->expectedReturnsNotCorrByRa.push_back(expReturns_hartman);
+              if(MD->getBoolSetting("heterogeneousRiskAversion",DATA_NOW)){
+                  double ra = px->getDoubleValue("ra");
+                  double cumMort = 1-px->cumAlive_exp.at(j).at(optDc_hartman);
+                  //cout << px->getID() << "\t" << ft << "\t\t" << "optDc" << optDc << "\t" << cumMort << endl;
+                  double origExpReturns_hartman = expReturns_hartman;
+                  expReturns_hartman = origExpReturns_hartman * (1.0 - ra*cumMort);
+              }
+              // Now we push backs the results (it erases results from the first loop)
+              px->expectedReturns.push_back(expReturns_hartman);
+              expectedReturns.at(j) = expReturns_hartman;
+              rotation_dc.at(j) = optDc_hartman;
+          } // end foreach forest type
+
+      } // end IF Hartman reference is BAU (no policy)----------------------------------------------------------------
+      // End of added second carbon project---------------------------------------------------------------------------
 
       for(uint j=0;j<fTypes.size();j++){
         string ft = fTypes[j];
