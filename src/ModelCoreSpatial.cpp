@@ -827,6 +827,7 @@ ModelCoreSpatial::runManagementModule(){
   int thisYear = MTHREAD->SCD->getYear();
   double ir = MTHREAD->MD->getDoubleSetting("ir");
   double flagHartman = MTHREAD->MD->getBoolSetting("flagHartman");
+  double exogenousReference = MTHREAD->MD->getBoolSetting("exogenousReference"); // new setting to distinguish between exogenous and endogenous carbon reference levels
 
   // Post optimisation management module..
   for(uint i=0;i<regIds2.size();i++){
@@ -911,6 +912,7 @@ ModelCoreSpatial::runManagementModule(){
       double totalHarvestedArea     = 0.0;             // account for (eventual) forest decreases area)
       vector<double> thisYearRegAreas(fTypes.size(),0.0); // initialize a vector of fTypes.size() zeros.
       vector<double> expectedReturns(fTypes.size(),0.0);  // uncorrected expected returns (without considering transaction costs). These are in form of eai
+      vector<int> rotation_dc(fTypes.size(),0.0); //vector to store optimal dc for each ftype (to be reused when flagHartman == "BAU")
       vector< vector<double> > deltaAreas(fTypes.size()+1, vector<double>(fTypes.size()+1,0));  // matrix of regeneration areas ft_from/ft_to
 
 
@@ -974,8 +976,9 @@ ModelCoreSpatial::runManagementModule(){
             double raw_amount = finalHarvestFlag*pw_exp*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
             double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u, ir);
 
+            // If carbon payments are included and the reference is an exogenous fixed value (e.g. year of reference), we compute revenues from carbon after retrieving reference from input files
             // Added for carbon project-------------------------------------------------------------------------
-            if (flagHartman) {
+            if (flagHartman && exogenousReference) {
                 double raw_amount_carbon = 0;
                 for (int y=0; y<cumTp_u; y++) {
                     double carbonPrice_y = futureCarbonPrices[y];
@@ -992,7 +995,7 @@ ModelCoreSpatial::runManagementModule(){
 
             if (anualised_amount>expReturns) {
               expReturns=anualised_amount;
-              optDc = u;
+              optDc = u;// this is the index of the optimal dc, not the dc itself
             }
           }
         }
@@ -1006,6 +1009,8 @@ ModelCoreSpatial::runManagementModule(){
         }
         px->expectedReturns.push_back(expReturns);
         expectedReturns.at(j) = expReturns;
+        rotation_dc.at(j) = optDc; // here we store the index of optimal dc for the forest type considered
+
       } // end foreach forest type
 
       for(uint j=0;j<fTypes.size();j++){
