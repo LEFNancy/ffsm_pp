@@ -826,8 +826,7 @@ ModelCoreSpatial::runManagementModule(){
   map<string,double> hAreaByFTypeGroup = vectorToMap(allFTypes,0.0);
   int thisYear = MTHREAD->SCD->getYear();
   double ir = MTHREAD->MD->getDoubleSetting("ir");
-  double flagHartman = MTHREAD->MD->getBoolSetting("flagHartman");
-  double exogenousReference = MTHREAD->MD->getBoolSetting("exogenousReference"); // new setting to distinguish between exogenous and endogenous carbon reference levels
+
 
   // Post optimisation management module..
   for(uint i=0;i<regIds2.size();i++){
@@ -836,9 +835,15 @@ ModelCoreSpatial::runManagementModule(){
     ModelRegion* REG = MTHREAD->MD->getRegion(r2);
     regPx = REG->getMyPixels();
 
+    string flagHartman = MTHREAD->MD->getStringSetting("flagHartman",DATA_NOW,r2);
+    //double exogenousReference = MTHREAD->MD->getBoolSetting("exogenousReference"); // new setting to distinguish between exogenous and endogenous carbon reference levels
+
+
+
+
     // Caching futureCarbonPrices..
     vector<double> futureCarbonPrices;
-    if(flagHartman){
+    if(flagHartman!="NONE"){
         for (int y=0; y<1000; y++) {
             futureCarbonPrices.push_back(gpd("carbonPrice",r2,"",thisYear + y));
         }
@@ -886,7 +891,7 @@ ModelCoreSpatial::runManagementModule(){
     vector<vector<double>> futureCarbonRef;
     vector<vector<double>> futureExtraBiomass_ratio;
 
-    if(flagHartman){
+    if(flagHartman!="NONE"){
         for(uint j=0;j<fTypes.size();j++){
             string ft = fTypes[j];
             vector<double> futureCarbonRef_ft;
@@ -978,7 +983,7 @@ ModelCoreSpatial::runManagementModule(){
 
             // If carbon payments are included and the reference is an exogenous fixed value (e.g. year of reference), we compute revenues from carbon after retrieving reference from input files
             // Added for carbon project-------------------------------------------------------------------------
-            if (flagHartman && exogenousReference) {
+            if (flagHartman =="EXO") {
                 double raw_amount_carbon = 0;
                 for (int y=0; y<cumTp_u; y++) {
                     double carbonPrice_y = futureCarbonPrices[y];
@@ -1000,8 +1005,12 @@ ModelCoreSpatial::runManagementModule(){
           }
         }
 
+        //results are pushed back to pixel only if they are final
+        if (flagHartman=="NONE" || flagHartman=="EXO") {
+            px->expectedReturnsNotCorrByRa.push_back(expReturns);
+        }
 
-        px->expectedReturnsNotCorrByRa.push_back(expReturns);
+        //calculation of expected returns with risk aversion
         if(MD->getBoolSetting("heterogeneousRiskAversion",DATA_NOW)){
           double ra = px->getDoubleValue("ra");
           double cumMort = 1-px->cumAlive_exp.at(j).at(optDc);
@@ -1009,7 +1018,12 @@ ModelCoreSpatial::runManagementModule(){
           double origExpReturns = expReturns;
           expReturns = origExpReturns * (1.0 - ra*cumMort);
         }
-        px->expectedReturns.push_back(expReturns);
+
+        // results are pushed back to pixel only if they are final
+        if (flagHartman=="NONE" || flagHartman=="EXO") {
+            px->expectedReturns.push_back(expReturns);
+        }
+
 
 
         expectedReturns.at(j) = expReturns;
@@ -1023,7 +1037,7 @@ ModelCoreSpatial::runManagementModule(){
       // In this case, the reference is what happens without policy, i.e. the result of the previous loop when (flagHartman =="REFERENCE") is FALSE
       // So we just redo another loop with carbon payments using the previous result as reference
 
-      if (flagHartman && !exogenousReference) { // if carbon payments take place and reference is endogenous (is BAU)
+      if (flagHartman =="ENDO") { // if carbon payments take place and reference is endogenous (is BAU)
           // STEP 1 - retrieve optimal regeneration choice without carbon payments
           int ft_opt_index = getMaxPos(expectedReturns); // get ft with max expected returns
           string ft_opt = fTypes[ft_opt_index]; // get its name
@@ -1094,6 +1108,7 @@ ModelCoreSpatial::runManagementModule(){
                   } // end foreach primary product
               } // end foreach DC
 
+              // Here we send results to pixel because they are final
               px->expectedReturnsNotCorrByRa.push_back(expReturns_hartman);
               if(MD->getBoolSetting("heterogeneousRiskAversion",DATA_NOW)){
                   double ra = px->getDoubleValue("ra");
@@ -1101,14 +1116,18 @@ ModelCoreSpatial::runManagementModule(){
                   //cout << px->getID() << "\t" << ft << "\t\t" << "optDc" << optDc << "\t" << cumMort << endl;
                   double origExpReturns_hartman = expReturns_hartman;
                   expReturns_hartman = origExpReturns_hartman * (1.0 - ra*cumMort);
-              }
-              // Now we push backs the results (it erases results from the first loop)
+              }              
               px->expectedReturns.push_back(expReturns_hartman);
+
+              // Now we replace results from the previous loop with the new ones
               expectedReturns.at(j) = expReturns_hartman;
               rotation_dc.at(j) = optDc_hartman;
+
+
           } // end foreach forest type
 
       } // end IF Hartman reference is BAU (no policy)----------------------------------------------------------------
+
       // End of added second carbon project---------------------------------------------------------------------------
 
       for(uint j=0;j<fTypes.size();j++){
