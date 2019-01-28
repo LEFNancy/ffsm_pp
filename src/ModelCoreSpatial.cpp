@@ -989,7 +989,7 @@ ModelCoreSpatial::runManagementModule(){
                     double carbonPrice_y = futureCarbonPrices[y];
                     double carbonRef = futureCarbonRef[j][y];
                     double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y]);
-                    double carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - carbonRef);
+                    double carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - carbonRef);
                     raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y);
                 }
                 double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
@@ -1084,13 +1084,13 @@ ModelCoreSpatial::runManagementModule(){
                           double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y]);
                           double carbonPayment_y;
                           if (y==0) { // we use euclidian division, so an exception must be made when denominator is equal to 0
-                              carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y]);
+                              carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y]);
                           } else {
                               int factor = y/cumTP_opt_floor; // euclidian division of the two lengths we compare
                               if (cumTP_opt_floor%y >0) { // if the year is NOT a multiple of optimal rotation time, we need to take the year-th value of vector modulus how many rotations we have passed
-                                  carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y - factor*cumTP_opt_floor]);
+                                  carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y - factor*cumTP_opt_floor]);
                               } else { // if the year is EXACTLY a multiple of optimal rotation time, we need to take the last value of vector, not the first one
-                                  carbonPayment_y = carbonPrice_y*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[cumTP_opt_floor]);
+                                  carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[cumTP_opt_floor]);
                               }
                           }
 
