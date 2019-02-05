@@ -992,6 +992,11 @@ ModelCoreSpatial::runManagementModule(){
                     double carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - carbonRef);
                     raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y);
                 }
+                //Now we add the final payment corresponding to carbon sequestered in long-lived products
+                double pickling_pp = gpd("pickling",regId,priProducts[pp]);
+                double CarbonPrice_cumTp = futureCarbonPrices[floor(cumTp_u)];
+                raw_amount_carbon += CarbonPrice_cumTp * pickling_pp * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc);
+                // And we finally annualise everything
                 double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
                 anualised_amount += anualised_amount_carbon;
             }
@@ -1096,6 +1101,10 @@ ModelCoreSpatial::runManagementModule(){
 
                           raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y); // all payments put at end of rotation
                       }
+                      //Now we add the final payment corresponding to carbon sequestered in long-lived products
+                      double pickling_pp = gpd("pickling",regId,priProducts[pp]);
+                      double CarbonPrice_cumTp = futureCarbonPrices[floor(cumTp_u)];
+                      raw_amount_carbon += CarbonPrice_cumTp * pickling_pp * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc);
                       // And we annualise carbon revenues and add them to annualised timber revenues
                       double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
                       anualised_amount += anualised_amount_carbon;
