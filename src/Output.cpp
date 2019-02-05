@@ -226,7 +226,7 @@ Output::initDebugPixelValues(){
         ofstream out(debugPxValuesFilename.c_str(), ios::out);
         if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+debugPxValuesFilename+" for writing.");}
         out << "scenario" << d << "year" << d << "region" << d << "pxId" << d << "pxX" << d << "pxY" << d ;
-        for(uint f=0;f<fTypes.size();f++){
+        /*for(uint f=0;f<fTypes.size();f++){
           string ft = fTypes[f];
           string header = "tp_multiplier_"+ft;
           out << header <<d;
@@ -235,7 +235,7 @@ Output::initDebugPixelValues(){
           string ft = fTypes[f];
           string header = "mortCoef_multiplier_"+ft;
           out << header <<d;
-        }
+        }*/
         out << "var" << d ;
 
         for(uint f=0;f<fTypes.size();f++){
@@ -901,14 +901,16 @@ Output::printDebugPixelValues(){
         int pxY = px->getY();
         string common = scenarioName + d + i2s(currentYear) + d + i2s(rId) + d+ i2s(pxID) +d +i2s(pxX)+d+i2s(pxY)+d;
 
-        for(uint f=0;f<fTypes.size();f++){
-          double tp_m = px->getMultiplier("tp_multiplier",fTypes[f]);
-          common += d2s(tp_m)+d;
-        }
-        for(uint f=0;f<fTypes.size();f++){
-          double m_m = px->getMultiplier("mortCoef_multiplier",fTypes[f]);
-          common += d2s(m_m)+d;
-        }
+
+//        for(uint f=0;f<fTypes.size();f++){
+//          double tp_m = px->getMultiplier("tp_multiplier",fTypes[f]);
+//          common += d2s(tp_m)+d;
+//        }
+//        for(uint f=0;f<fTypes.size();f++){
+//          double m_m = px->getMultiplier("mortCoef_multiplier",fTypes[f]);
+//          common += d2s(m_m)+d;
+//        }
+
 
 //        // First vars by only ft...
 //        // expectedReturns
@@ -975,22 +977,6 @@ Output::printDebugPixelValues(){
           out << vSum(px->hVol[f]) << d;
         }
         out << "\n";
-        //----
-//        out << common <<"deltaAreas" << d;
-//        for(uint f=0;f<fTypes.size();f++){
-//          for(uint u=0;u<dClasses.size()-1;u++){
-//            out << d;
-//          }
-//          out << d;
-//        }
-//        for(uint f=0;f<fTypes.size()+1;f++){
-//          for(uint f2=0;f2<fTypes.size()+1;f2++){
-//            out << px->deltaArea[f][f2]<<d;
-//          }
-//        }
-//        out << "\n";
-        //----
-
 
         out << common <<"tp" << d;
         for(uint f=0;f<fTypes.size();f++){
@@ -1008,6 +994,25 @@ Output::printDebugPixelValues(){
           out << 0 << d;
         }
         out << "\n";
+
+        out << common <<"tp_multiplier" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << d;
+          }
+          out << px->getMultiplier("tp_multiplier",fTypes[f]) << d;
+        }
+        out << "\n";
+        out << common <<"mortCoef_multiplier" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << d;
+          }
+          out << px->getMultiplier("mortCoef_multiplier",fTypes[f]) << d;
+        }
+        out << "\n";
+
+
         out << common <<"vMort" << d;
         for(uint f=0;f<fTypes.size();f++){
           for(uint u=0;u<dClasses.size()-1;u++){
@@ -1016,6 +1021,51 @@ Output::printDebugPixelValues(){
           out << vSum(px->vMort[f]) << d;
         }
         out << "\n";
+
+        out << common <<"optDc" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << d;
+          }
+          out << px->optDc[f] << d;
+        }
+        out << "\n";
+
+        out << common <<"optFtChosen" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << d;
+          }
+          out << px->optFtChosen[f] << d;
+        }
+        out << "\n";
+
+        out << common <<"optDcChosen" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << d;
+          }
+          out << px->optDcChosen[f] << d;
+        }
+        out << "\n";
+
+        //----
+        out << common <<"deltaAreas" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << d;
+          }
+          out << d;
+        }
+        for(uint f=0;f<fTypes.size()+1;f++){
+          for(uint f2=0;f2<fTypes.size()+1;f2++){ // +1 because there is also noforest
+            out << px->deltaArea[f][f2]<<d;
+          }
+        }
+        out << "\n";
+        //----
+
+
 
       } // end for each pixel
     } // end for each region
