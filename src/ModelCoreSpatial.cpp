@@ -906,6 +906,9 @@ ModelCoreSpatial::runManagementModule(){
       Pixel* px = regPx[p];
       px->expectedReturns.clear();
       px->expectedReturnsNotCorrByRa.clear(); // BUG discovered 20160825
+      px->optDc.clear();
+      px->optFtChosen.clear();
+      px->optDcChosen.clear();
       resetMapValues(hAreaByFTypeGroup,0.0);
       double totalHarvestedAreaOrig = vSum(px->hArea); // still need to remove the forest decrease areas..
       double totalHarvestedArea     = 0.0;             // account for (eventual) forest decreases area)
@@ -1005,9 +1008,11 @@ ModelCoreSpatial::runManagementModule(){
           expReturns = origExpReturns * (1.0 - ra*cumMort);
         }
         px->expectedReturns.push_back(expReturns);
+        px->optDc.push_back(optDc);
         expectedReturns.at(j) = expReturns;
       } // end foreach forest type
 
+      // Looping again by forest types, here by ft in input (those harvested)
       for(uint j=0;j<fTypes.size();j++){
         string ft = fTypes[j];
         forType* thisFt = MTHREAD->MD->getForType(ft);
@@ -1047,6 +1052,9 @@ ModelCoreSpatial::runManagementModule(){
         //}
         // If I Implement this I'll have a minimal diff in total area.. why ?????
 
+        int optFtChosen = getMaxPos(corrExpectedReturns);
+        px->optFtChosen.push_back(optFtChosen);
+        px->optDcChosen.push_back(px->optDc.at(optFtChosen));
 
         thisYearRegAreas[getMaxPos(corrExpectedReturns)] += harvestedAreaForThisFT*mr;
         thisYearRegAreas[getMaxPos(expectedReturns)] += fArea_incr*mr/((double)fTypes.size()); // mr quota of new forest area assigned to highest expected returns ft (not considering transaction costs). Done for each forest types

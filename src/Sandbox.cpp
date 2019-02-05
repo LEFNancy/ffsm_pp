@@ -131,6 +131,17 @@ struct GccTest
 void
 Sandbox::basicTest(){
 
+    /*
+    // Checking integer division
+
+    int a = 19;
+    int b = 5;
+    int c = a/b;
+    int d = a%b;
+    cout << a << " - " << b << " - "  << c  << " - " << d << endl;
+    exit(0);
+    */
+
    /*
     // Testing initializating a matrix with fixed values in C++11
     //vector< vector<double> > deltaAreas(fTypes.size()+1, vector<double>(fTypes.size()+1,5));

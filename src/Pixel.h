@@ -117,6 +117,10 @@ public:
   vector <double>                           vReg; // by ft
   vector <vector <double> >                vMort; // by ft,dc
   vector <double>                expectedReturns; // by ft
+  vector <int>                             optDc; // The "optimal" diameter class chosen in project evaluation for the regeneration. By ft evaluated (not necessarily those then chosen)
+  vector <int>                       optFtChosen; // The ft (index) chosen as optimal in regeneration for each ft in input (harvested)
+  vector <int>                       optDcChosen; // The "optimal" diameter class of the ft chosen for regeneration. By ft in input (harvested)
+
   vector <double>     expectedReturnsNotCorrByRa; ///< by ft. Attenction, reported expReturns at "forest" level (compared with those at forest type level) do NOT include ra
 
   vector <vector <double> >                vol_l; ///< store the volumes of the previous year
