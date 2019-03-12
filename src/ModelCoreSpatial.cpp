@@ -67,7 +67,7 @@ ModelCoreSpatial::runInitPeriod(){
   updateOtherMapData();           ///< update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   sumRegionalForData();           ///< only for printing stats as forest data is never used at regional level
   initialiseCarbonModule();
-  MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
+  //MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging // moved to output->print
 
   MTHREAD->DO->print();
 }
@@ -84,7 +84,7 @@ ModelCoreSpatial::runSimulationYear(){
   cachePixelExogenousData();
   runBiologicalModule();
   runManagementModule();
-  MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging
+  //MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging // moved to output->print
   updateMapAreas();
   updateOtherMapData();        // update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
   sumRegionalForData();        // only for printing stats as forest data is never used at regional level

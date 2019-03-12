@@ -445,6 +445,7 @@ Output::print(){
   printProductData(false);
   printCarbonBalance();
   printDebugOutput();
+  printDebugPixelValues();
   MTHREAD->MD->setErrorLevel(MSG_ERROR);
 }
 
