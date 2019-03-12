@@ -1032,6 +1032,25 @@ Output::printDebugPixelValues(){
         }
         out << "\n";
 
+        out << common <<"expectedReturnsNotCorrByRa" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << d;
+          }
+          out << px->expectedReturnsNotCorrByRa[f] << d;
+        }
+        out << "\n";
+
+        out << common <<"expectedReturns" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+            out << d;
+          }
+          out << px->expectedReturns[f] << d;
+        }
+        out << "\n";
+
+
         out << common <<"optFtChosen" << d;
         for(uint f=0;f<fTypes.size();f++){
           for(uint u=0;u<dClasses.size()-1;u++){
