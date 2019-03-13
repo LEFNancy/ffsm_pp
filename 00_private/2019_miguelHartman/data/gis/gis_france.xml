@@ -105,30 +105,20 @@
 		<dynamicContent>false</dynamicContent><!-- bool. True if this layer may change during simulationj period, false if it is fixed -->
     <expandByFt>false</expandByFt><!-- bool. If true this ft expand for each forest type -->
 		<dirName>gis/france/</dirName>
-		<fileName>nut_l2.grd</fileName>
+		<fileName>nut_l2_inra2016.grd</fileName>
 		<legendItems>
-			<legendItem label="AL - Alsace" rColor="230" gColor="010" bColor="077">11042</legendItem>
-			<legendItem label="AQ - Aquitaine" rColor="230" gColor="020" bColor="077">11061</legendItem>
-			<legendItem label="AU - Auvergne" rColor="230" gColor="030" bColor="077">11072</legendItem>
-			<legendItem label="BN - Basse-Normandie" rColor="230" gColor="040" bColor="077">11025</legendItem>
-			<legendItem label="BO - Bourgogne" rColor="230" gColor="050" bColor="077">11026</legendItem>
-			<legendItem label="BR - Bretagne" rColor="230" gColor="060" bColor="077">11052</legendItem>
-			<legendItem label="CE - Centre" rColor="230" gColor="070" bColor="077">11024</legendItem>
-			<legendItem label="CA - Champagne-Ardennes" rColor="230" gColor="080" bColor="077">11021</legendItem>
-			<legendItem label="CO - Corse" rColor="230" gColor="090" bColor="077">11083</legendItem>
-			<legendItem label="FC - Franche-Compté" rColor="230" gColor="100" bColor="077">11043</legendItem>
-			<legendItem label="HN - Haute-Normandie" rColor="230" gColor="110" bColor="077">11023</legendItem>
-			<legendItem label="IF - Ile-de-France" rColor="230" gColor="120" bColor="077">11010</legendItem>
-			<legendItem label="LR - Languedoc-Roussillon" rColor="230" gColor="130" bColor="077">11081</legendItem>
-			<legendItem label="LI - Limousin" rColor="230" gColor="140" bColor="077">11063</legendItem>
-			<legendItem label="LO - Lorraine" rColor="230" gColor="150" bColor="077">11041</legendItem>
-			<legendItem label="MP - Midi-Pyrénées" rColor="230" gColor="160" bColor="077">11062</legendItem>
-			<legendItem label="NP - Nord-Pas-de-Calais" rColor="230" gColor="170" bColor="077">11030</legendItem>
-			<legendItem label="PL - Pays de la Loire" rColor="230" gColor="180" bColor="077">11051</legendItem>
-			<legendItem label="PI - Picardie" rColor="230" gColor="190" bColor="077">11022</legendItem>
-			<legendItem label="PC - Poitou-Charentes" rColor="230" gColor="200" bColor="077">11053</legendItem>
-			<legendItem label="PA - Provence-Alpes-Côte-d'Azur" rColor="230" gColor="210" bColor="077">11082</legendItem>
-			<legendItem label="RA - Rhône-Alpes" rColor="230" gColor="220" bColor="077">11071</legendItem>
+			<legendItem label="AlsChaLor - Alsace ; Champagne Ardenne ; Lorraine" rColor="230" gColor="010" bColor="077">11001</legendItem>
+			<legendItem label="AquPoi - Aquitaine ; Poitou Charentes" rColor="230" gColor="020" bColor="077">11002</legendItem>
+			<legendItem label="AuvLim - Auvergne ; Limousin" rColor="230" gColor="030" bColor="077">11003</legendItem>
+			<legendItem label="BasHau - Basse Normandie ; Haute Normandie" rColor="230" gColor="040" bColor="077">11004</legendItem>
+			<legendItem label="BouFra - Bourgogne : Franche Comté" rColor="230" gColor="050" bColor="077">11005</legendItem>
+			<legendItem label="BrePay - Bretagne ; pays de la Loire" rColor="230" gColor="060" bColor="077">11006</legendItem>
+			<legendItem label="Cen - Centre Val de Loire" rColor="230" gColor="070" bColor="077">11007</legendItem>
+			<legendItem label="Cor - Corse" rColor="230" gColor="080" bColor="077">11008</legendItem>
+			<legendItem label="IleNorPic - Ile de France ; Nord Pas de Calais ; Picardie" rColor="230" gColor="090" bColor="077">11009</legendItem>
+			<legendItem label="LanPro - Languedoc Roussillon ; Provence Alpes Côtes d'Azur" rColor="230" gColor="100" bColor="077">11010</legendItem>
+			<legendItem label="Mid - Midi Pyrénées" rColor="230" gColor="110" bColor="077">11011</legendItem>
+			<legendItem label="Rho - Rhône Alpes" rColor="230" gColor="120" bColor="077">11012</legendItem> 
 		</legendItems>	
 	</layer>
 		<layer>
