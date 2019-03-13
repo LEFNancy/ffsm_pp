@@ -826,7 +826,7 @@ ModelCoreSpatial::runManagementModule(){
   map<string,double> hAreaByFTypeGroup = vectorToMap(allFTypes,0.0);
   int thisYear = MTHREAD->SCD->getYear();
   double ir = MTHREAD->MD->getDoubleSetting("ir");
-
+  double coeffCarbon = MTHREAD->MD->getDoubleSetting("coeffCarbon");
 
   // Post optimisation management module..
   for(uint i=0;i<regIds2.size();i++){
