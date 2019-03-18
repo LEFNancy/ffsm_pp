@@ -423,7 +423,7 @@ Output::initOutputMaps(){
 }
 
 void
-Output::print(){
+Output::print(bool earlyPrint){
   int cYear = MTHREAD->SCD->getYear();
   int initialSimulationYear = MTHREAD->MD->getIntSetting("initialOptYear");
 
@@ -445,7 +445,7 @@ Output::print(){
   printProductData(false);
   printCarbonBalance();
   printDebugOutput();
-  printDebugPixelValues();
+  if(!earlyPrint) printDebugPixelValues();
   MTHREAD->MD->setErrorLevel(MSG_ERROR);
 }
 

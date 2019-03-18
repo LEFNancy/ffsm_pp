@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #---------------------------------------
-#  Shell script to import the outputed FFSM++ maps in grass
+#  Shell script to import the outputed RegMAS maps in grass
 #  together with their associated category and colour legend
 #  files...
 #  It first read the scenario name, then create an empty mapset
@@ -10,7 +10,7 @@
 #  do the import work.
 #---------------------------------------
 
-echo Importing FFSM++ generated maps in Grass..
+echo Importing RegMAS generated maps in Grass..
 echo ""
 
 # ATTENCTION TO NOT LEAVE SPACES BEFORE AND AFTER THE "=" SIGN !!!!

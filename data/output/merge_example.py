@@ -4,17 +4,16 @@
 from merge_lib import *
 
 forIFiles = [
-    'results/forestData.csv',
+    'results/forestData_default.csv',
 ]
 prdIFiles = [
-    'results/productData.csv',
+    'results/productData_default.csv',
 ]
 carbonIFiles = [
-    'results/carbonBalance.csv',
+    'results/carbonBalance_default.csv',
 ]
 scenarios = [
-  'test',
-  'test2',
+  'default',
 ]
 
 forOFilename = 'results/forestData_merged.csv'

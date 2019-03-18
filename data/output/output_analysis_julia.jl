@@ -10,14 +10,21 @@ scenarios = ["default"]
 allScenariosInAFile = true
 
 fgroup_map = Dict(
-  "broadL"        => "Broadleaved",
-  "broadL_highF"  => "Broadleaved",
-  "broadL_mixedF" => "Broadleaved",
-  "broadL_copp"   => "Broadleaved",
-  "con"           => "Coniferous",
-  "con_highF"     => "Coniferous",
-  missing         => "All forest"
-);
+ "Fut_Feu"         => "Broadleaved",
+ "Fut_Mix"         => "Mixed",
+ "Fut_Con"         => "Coniferous",
+ "Mel_Feu"         => "Broadleaved",
+ "Mel_Mix"         => "Mixed",
+ "Tail_Feu"        => "Broadleaved",
+  missing          => "All forests",
+ "broadL"          => "Broadleaved",
+ "mixedBC"         => "Mixed",
+ "con"             => "Coniferous",
+ "Reb_Fut_Con"     => "Coniferous",
+ "Reb_Fut_Feu"     => "Broadleaved",
+ "Reb_conShortRot" => "Coniferous",
+ "Reb_Tail_Feu"    => "Broadleaved",
+)
 
 pgroup_map = Dict(
  "hardWRoundW" => "priProd",
@@ -40,41 +47,15 @@ cbal_map = Dict(
     "STOCK_PRODUCTS" => "0Pools",
 )
 
-reg_map = Dict(
-    "AL (FR42)" => "AL",
-    "AQ (FR61)" => "AQ",
-    "AU (FR72)" => "AU",
-    "BN (FR25)" => "BN",
-    "BO (FR26)" => "BO",
-    "BR (FR52)" => "BR",
-    "CE (FR24)" => "CE",
-    "CA (FR21)" => "CA",
-    "CO (FR83)" => "CO",
-    "FC (FR43)" => "FC",
-    "HN (FR23)" => "HN",
-    "IF (FR10)" => "IF",
-    "LR (FR81)" => "LR",
-    "LI (FR63)" => "LI",
-    "LO (FR41)" => "LO",
-    "MP (FR62)" => "MP",
-    "NP (FR30)" => "NP",
-    "PL (FR51)" => "PL",
-    "PI (FR22)" => "PI",
-    "PC (FR53)" => "PC",
-    "PA (FR82)" => "PA",
-    "RA (FR71)" => "RA",
-    "OTH FR"    => "OTHFR",
-    "OTH (OTH)" => "OTH",
-)
 
 baseIDir        = "results_temp";
 odsOut          = "juliaOut/formattedOutput_temp.ods"
 odsOut_template = "juliaOut/formattedOutput_template.ods"
 chartOutDir     = "juliaOut"
 
-years       = collect(2007:2100)
-years5      = collect(2010:5:2100)
-years10     = collect(2010:10:2100)
+years       = collect(2011:2100)
+years5      = collect(2015:5:2100)
+years10     = collect(2020:10:2100)
 
 problematicCols = Dict("freeDim" => Union{Missing,Int64})
 
@@ -108,7 +89,7 @@ print("Data loaded")
 ### Data clean-up and initialisation
 ##########################################################
 forVars[:forGroup] = map(k->fgroup_map[k], forVars[:forType])
-[df[:region] = map(k->reg_map[k], df[:region]) for df in [forVars,cVars]]
+#[df[:region] = map(k->reg_map[k], df[:region]) for df in [forVars,cVars]]
 prodVars[:prodLev] = map(k->pgroup_map[k], prodVars[:prod])
 
 # Adding totals to carbon variables

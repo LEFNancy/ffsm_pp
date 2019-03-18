@@ -59,7 +59,7 @@ public:
     void                initDebugOutput();
     void                initDebugPixelValues();
     void                initCarbonBalance();
-  void                print();
+  void                print(bool earlyPrint=true); ///< Print output. If earlyPrinting it doesn't print some stuff for which we don't yet have values
     void                printMaps();
     void                printForestData(bool finalFlush=false);
     void                printProductData(bool finalFlush=false);

@@ -4,13 +4,13 @@
 #  This shell script is used by importInGams.sh
 #  It is executed within the grass prompt, as it has few grass
 #  specific commands.
-#  It first import the FFSM++ produced layers (tacking into account of the integer/
+#  It first import the RegMAS produced layers (tacking into account of the integer/
 #  float difference) and then copy their associated categories and colour files.
 #---------------------------------------
 
 
 # ATTENCTION TO NOT LEAVE SPACES BEFORE AND AFTER THE "=" SIGN !!!!
-REGION_NAME="france"
+REGION_NAME="colliEsini"
 SCENARIO_NAME="default"
 SCENARIO_FILENAME="scenarioName"
 I_LAYERS_FILENAME="integerListLayers"

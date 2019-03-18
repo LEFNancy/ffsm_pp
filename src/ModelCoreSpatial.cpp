@@ -52,7 +52,7 @@ ModelCoreSpatial::runInitPeriod(){
   assignSpMultiplierPropToVols(); // assign the spatial multiplier (used in the time of return) based no more on a Normal distribution but on the volumes present in the pixel: more volume, more the pixel is fit for the ft
   initMarketModule();             ///< inside it uses first year, second year
   initialiseDeathTimber();
-  MTHREAD->DO->print();
+  MTHREAD->DO->print(true);
   MTHREAD->SCD->advanceYear();    ///< 2005->2006
   int thisYear = MTHREAD->SCD->getYear(); // for debugging
   resetPixelValues();             ///< swap volumes->lagged_volumes and reset the other pixel vectors
@@ -826,7 +826,6 @@ ModelCoreSpatial::runManagementModule(){
   map<string,double> hAreaByFTypeGroup = vectorToMap(allFTypes,0.0);
   int thisYear = MTHREAD->SCD->getYear();
   double ir = MTHREAD->MD->getDoubleSetting("ir");
-  double coeffCarbon = MTHREAD->MD->getDoubleSetting("coeffCarbon");
 
   // Post optimisation management module..
   for(uint i=0;i<regIds2.size();i++){
@@ -912,6 +911,7 @@ ModelCoreSpatial::runManagementModule(){
       Pixel* px = regPx[p];
       px->expectedReturns.clear();
       px->expectedReturnsNotCorrByRa.clear(); // BUG discovered 20160825
+      //px->expectedReturnsCarbon.clear(); TODO
       px->optDc.clear();
       px->optFtChosen.clear();
       px->optDcChosen.clear();
@@ -920,6 +920,7 @@ ModelCoreSpatial::runManagementModule(){
       double totalHarvestedArea     = 0.0;             // account for (eventual) forest decreases area)
       vector<double> thisYearRegAreas(fTypes.size(),0.0); // initialize a vector of fTypes.size() zeros.
       vector<double> expectedReturns(fTypes.size(),0.0);  // uncorrected expected returns (without considering transaction costs). These are in form of eai
+      vector<double> expectedReturnsCarbon(fTypes.size(),0.0);  // expected return of the carbon only
       vector<int> rotation_dc(fTypes.size(),0.0); //vector to store optimal dc for each ftype (to be reused when flagHartman == "BAU")
       vector< vector<double> > deltaAreas(fTypes.size()+1, vector<double>(fTypes.size()+1,0));  // matrix of regeneration areas ft_from/ft_to
 
@@ -1002,6 +1003,7 @@ ModelCoreSpatial::runManagementModule(){
                 // And we finally annualise everything
                 double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
                 anualised_amount += anualised_amount_carbon;
+                //TODO no this is still within a for each product dc class px->expectedReturnsCarbon.push_back(anualised_amount_carbon);
             }
             // End of added-----------------------------------------------------------------------------------
 
@@ -1112,6 +1114,7 @@ ModelCoreSpatial::runManagementModule(){
                       // And we annualise carbon revenues and add them to annualised timber revenues
                       double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
                       anualised_amount += anualised_amount_carbon;
+                      //px->expectedReturnsCarbon = anualised_amount_carbon; TODO
 
                       // If the new expected revenues is higher than previously, we store the maximum value and corresponding dc.
                       if (anualised_amount>expReturns_hartman) {
