@@ -996,7 +996,7 @@ ModelCoreSpatial::runManagementModule(){
                 for (int y=0; y<cumTp_u; y++) {
                     double carbonPrice_y = futureCarbonPrices[y];
                     double carbonRef = futureCarbonRef[j][y];
-                    double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y]);
+                    double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y], regId);
                     double carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - carbonRef);
                     raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y); // raw amount is calculated iteratively
                 }
@@ -1066,7 +1066,7 @@ ModelCoreSpatial::runManagementModule(){
           // STEP 2 - calculate expected carbon contents on the optimal choice without carbon payments, to use as reference
           vector <double> FutureCarbonContent_opt;
           for (int y=0; y<cumTP_opt; y++) {
-              double expectedVHa_opt_y = getVHaByYear(px, ft_opt_index, y, futureExtraBiomass_ratio[ft_opt_index][y]);
+              double expectedVHa_opt_y = getVHaByYear(px, ft_opt_index, y, futureExtraBiomass_ratio[ft_opt_index][y], regId);
               FutureCarbonContent_opt.push_back(co2content_inventory_opt*expectedVHa_opt_y);
           }
           int cumTP_opt_floor = FutureCarbonContent_opt.size(); // need to get an integer value to compare rotation lengths
@@ -1102,7 +1102,7 @@ ModelCoreSpatial::runManagementModule(){
                       double raw_amount_carbon=0;
                       for (int y=0; y<cumTp_u; y++) { // calculate yearly payment for each year of the rotation
                           double carbonPrice_y = futureCarbonPrices[y];
-                          double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y]);
+                          double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y], regId);
                           double carbonPayment_y;
                           if (y==0) { // we use euclidian division, so an exception must be made when denominator is equal to 0
                               carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y]);
@@ -2743,9 +2743,57 @@ ModelCoreSpatial::getAvgAgeByDc(Pixel* px, int ft, int dc){
 
 
 // added for carbon project
-/**
+
+double
+ModelCoreSpatial::getVHaByYear(const Pixel* px, const int& ft, const int& year, const double& extraBiomass_ratio, const int& regId ) const {
+     // This function computes and send back the expected volume/ha in a forest type after a specific amount of years
+     // It uses expected volumes/ha at each diameter class, and makes a linear interpolation between the corresponding times of passage
+     // Ancient version was a "stairs" function of time, now it is a succession of linear approximations
+
+     double vHa = 0;
+     int thisYear = MTHREAD->SCD->getYear();
+
+     // This loop goes through all diameter classes to find the last one that was reached at year tested
+     for (int u = 0; u<dClasses.size(); u++){
+         // We retrieve the expected time of passage for the current diameter class
+         // and we compare it to the year tested
+         double cumTP = px->cumTp_exp[ft][u];
+         if (year>=cumTP) {
+             // Forest has already reached this class,
+             // We do nothing and go to the next one
+         }
+         else {// Forest has not reached this class yet, we stop here
+         // Assumption : Volume growth is a linear approximation between volume at previous DC and at current DC
+         // There would be a problem if "year" was negative, but it should not happen since year starts at 0
+             double cumTP_plus = px->cumTp_exp[ft][u];
+             double cumTP_minus = px->cumTp_exp[ft][u-1];
+             double volHa_plus = px->vHa_exp[ft][u];
+             double volHa_minus = px->vHa_exp[ft][u-1];
+             double slope = (volHa_plus - volHa_minus)/(cumTP_plus - cumTP_minus);
+
+             vHa = (volHa_minus + (year-cumTP_minus)*slope)*(1+extraBiomass_ratio);
+             return vHa;
+         }
+     }
+     // if we arrive here, we have exited the loop
+     // and the forest has reached the last diameter class
+     int dc = dClasses.size()-1; // index of the last diameter class
+     double mortCoeff = gfd("mort",regId,fTypes[ft],dClasses[dc],thisYear); // mortality rate of the last diameter class
+     double cumTP_max = px-> cumTp_exp[ft][dc]; // cumulative TP to reach last diameter class
+     double time_elapsed = year - cumTP_max; // time since the last class was reached
+     double volHa_max = px->cumTp_exp[ft][dc]; // volume/ha when the last class was reached
+
+     // Now we compute the volume/ha at the year tested
+     // Assumption: trees don't grow anymore but slowly die according to mortality rate
+     vHa = volHa_max*pow(1-mortCoeff,time_elapsed)*(1+extraBiomass_ratio);
+     return vHa;
+} // end of function
+
+
+
+/** ANCIENT VERSION OF FUNCTION. VOLUME WAS A STAIRS FUNCTION OF TIME
   * Return the Volume/ha in a forest after a given number of year after planting, for a specific forest type
-  */
+
 double
 ModelCoreSpatial::getVHaByYear(const Pixel* px, const int& ft, const int& year, const double& extraBiomass_ratio) const {
     double vHa = 0;
@@ -2762,3 +2810,4 @@ ModelCoreSpatial::getVHaByYear(const Pixel* px, const int& ft, const int& year, 
     }
     return vHa;
 }
+*/

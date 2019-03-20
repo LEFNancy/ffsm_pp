@@ -15,9 +15,12 @@
 ./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'quinet_low_sh'
 #./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'quinet_high_sh'
 ./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'quinet_low_endo'
-#./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'quinet_low_exo'
+./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'quinet_low_exo'
 #./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'quinet_high_endo'
 #./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'quinet_high_exo'
+#./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'quinet_quart'
+#./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'quinet_demi'
+#./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'quinet_decile'
 
 
 
