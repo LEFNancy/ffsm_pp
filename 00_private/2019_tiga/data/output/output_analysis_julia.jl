@@ -1,13 +1,13 @@
 
-using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatPlots, Plots, CSV
+using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  Plots, CSV
 
 ##########################################################
 ### Settings and definitions
 ##########################################################
 
-scenarios = ["default"]
+scenarios = ["defaultOldRegions","default","defaultTiga"]
 
-allScenariosInAFile = true
+allScenariosInAFile = false
 
 fgroup_map = Dict(
  "Fut_Feu"         => "Broadleaved",
@@ -16,26 +16,30 @@ fgroup_map = Dict(
  "Mel_Feu"         => "Broadleaved",
  "Mel_Mix"         => "Mixed",
  "Tail_Feu"        => "Broadleaved",
+ "Fut_Hetre"       => "Broadleaved",
   missing          => "All forests",
  "broadL"          => "Broadleaved",
  "mixedBC"         => "Mixed",
  "con"             => "Coniferous",
- "Reb_Fut_Con"     => "Coniferous",
- "Reb_Fut_Feu"     => "Broadleaved",
- "Reb_conShortRot" => "Coniferous",
- "Reb_Tail_Feu"    => "Broadleaved",
+ "broadL_highF"    => "Broadleaved",
+ "broadL_mixedF"   => "Broadleaved",
+ "broadL_copp"     => "Broadleaved",
+ "con_highF"       => "Coniferous",
 )
 
 pgroup_map = Dict(
  "hardWRoundW" => "priProd",
  "softWRoundW" => "priProd",
  "pulpWFuelW"  => "priProd",
+ "beechRoundW" => "priProd",
  "fuelW"       => "secProd",
  "hardWSawnW"  => "secProd",
  "softWSawnW"  => "secProd",
  "plyW"        => "secProd",
  "pulpW"       => "secProd",
  "pannels"     => "secProd",
+ "beechSawnW"  => "secProd",
+ "beechPlyW"   => "secProd",
 )
 
 cbal_map = Dict(
@@ -48,9 +52,8 @@ cbal_map = Dict(
 )
 
 
-baseIDir        = "results_temp";
-odsOut          = "juliaOut/formattedOutput_temp.ods"
-odsOut_template = "juliaOut/formattedOutput_template.ods"
+baseIDir        = "results";
+odsOut          = "juliaOut/formattedOutput.ods"
 chartOutDir     = "juliaOut"
 
 years       = collect(2011:2100)
@@ -81,7 +84,7 @@ end
 forVars = vcat(forestData_byscenario...)
 prodVars = vcat(productData_byscenario...)
 cVars = vcat(carbonData_byscenario...)
-[delete!(dfi, [:country,]) for dfi in [forVars,prodVars,cVars]] # delete columns country
+[deletecols!(dfi, [:country,]) for dfi in [forVars,prodVars,cVars]] # delete columns country
 
 print("Data loaded")
 

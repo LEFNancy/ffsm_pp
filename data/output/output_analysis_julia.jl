@@ -7,7 +7,7 @@ using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatPlots,
 
 scenarios = ["default"]
 
-allScenariosInAFile = true
+allScenariosInAFile = false
 
 fgroup_map = Dict(
  "Fut_Feu"         => "Broadleaved",

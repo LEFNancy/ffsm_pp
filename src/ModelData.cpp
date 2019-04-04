@@ -564,6 +564,7 @@ ModelData::setScenarioProdData(){
   LLData table = getTable(scenario.prodDataTable, MSG_CRITICAL_ERROR); //this scenario could not have an associated setting sheet
 
   int nheaders = table.nheaders();
+  int debug = table.nrecords();
   for(int i=0; i< table.nrecords(); i++){
     //prodData PDATA;
     bool found = false;

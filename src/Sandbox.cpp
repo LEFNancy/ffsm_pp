@@ -599,6 +599,52 @@ void
 Sandbox::fullTest(){
 
   /*
+  // checking that the overriding works also for secondary dimension
+  // yep, it works!! ;-)
+  //ct	11003	beechRoundW	11001	69.71	100
+  double ct_11003_11002_beech = MTHREAD->MD->getProdData("ct",11003,"beechRoundW",2013,"11002");
+  double ct_11003_11001_beech = MTHREAD->MD->getProdData("ct",11003,"beechRoundW",2013,"11001");
+  double ct_11003_11002_hardW = MTHREAD->MD->getProdData("ct",11003,"hardWRoundW",2013,"11002");
+  double ct_11003_11001_hardW = MTHREAD->MD->getProdData("ct",11003,"hardWRoundW",2013,"11001");
+  exit(1);
+  */
+
+  /*
+  // getting x,y of the pixel with sawmill in the TIGA project
+  Pixel* px = MTHREAD->GIS->getPixel(8967);
+  int x = px->getX();
+  int y = px->getY();
+  cout << "(X,Y) of pixel 8967: " << x << "\t" << y << endl;
+  px = MTHREAD->GIS->getPixel(0);
+  x = px->getX();
+  y = px->getY();
+  cout << "(X,Y) of pixel 0: " << x << "\t" << y <<endl;
+  exit(1);
+  */
+
+  /*   
+  // Testing overriding of just a product/region if it works
+  // Perfect.. the override works even just setting one specific ft/region value !! :-)
+  double ad = MTHREAD->MD->getProdData("additionalDemand",11001,"beechSawnW",2020); // this should be 0.004
+  double adt = MTHREAD->MD->getProdData("additionalDemand",11001,"beechSawnW",2022);
+  double adr = MTHREAD->MD->getProdData("additionalDemand",11002,"beechSawnW",2020);
+  double adp = MTHREAD->MD->getProdData("additionalDemand",11001,"hardWSawnW",2020);
+  cout << "additional demand test:" << endl;
+  cout << ad << "\t" << adt << "\t" << adr << "\t" << adp << endl;
+
+  // Testing (again, for the TIGA project) the availalibily coefficient of Hetre
+  Pixel* px = MTHREAD->GIS->getPixel(32,30);
+  double ac =  px->getSTData("avalCoef","Fut_Hetre",2013);
+  double act1 =  px->getSTData("avalCoef","Fut_Hetre",2010);
+  double act2 =  px->getSTData("avalCoef","Fut_Hetre",2014);
+  double act3 =  px->getSTData("avalCoef","Fut_Hetre",2020);
+  double acft =  px->getSTData("avalCoef","Fut_Feu",2013);
+  cout << "availability coefficient test:" << endl;
+  cout << ac << "\t" << act1 << "\t" << act2 << "\t" << act3 << "\t" << acft << endl;
+  exit(1);
+  */
+
+  /*
   // Testing picking up a national level variable defined only at national level. This may raise a segfault ?
   //double debug  = MTHREAD->MD->getProdData("carbonPrice",11000,"",2007);
   cout << debug << endl;

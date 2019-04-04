@@ -95,16 +95,16 @@ Gis::setSpace(){
   applyStochasticRiskAdversion(); // risk adversion to each pixel
   //cachePixelValues(); // For computational reasons cache some values in the constant layers directly as properties of the pixel object
 
-//  //< Print a layer of pixels id..
-//  addLayer("pxIds", "idx of the pixels", true, true, "pxIds.grd", true);
-//  resetLayer("pxIds");
-//  vector<Pixel*> allPixels = getAllPlotsByRegion(11000);
-//  for (int i=0;i<allPixels.size();i++){
-//    int pxId= allPixels[i]->getID();
-//    allPixels[i]->changeValue ("pxIds", pxId);
-//  }
-//  printLayers("pxIds");
-
+  //< Print a layer of pixels id..
+  //addLayer("pxIds", "idx of the pixels", true, true, "pxIds.grd", true);
+  //resetLayer("pxIds");
+  //vector<Pixel*> allPixels = getAllPlotsByRegion(11000);
+  //for (int i=0;i<allPixels.size();i++){
+  //  int pxId= allPixels[i]->getID();
+  //  allPixels[i]->changeValue ("pxIds", pxId);
+  //}
+  //printLayers("pxIds");
+  //exit(1);
 
   MTHREAD->fitInWindow(); // tell the gui to fit the map to the widget
 //  countItems("landUse",false); // count the various records assigned to each legendItem. Do not print debug infos
