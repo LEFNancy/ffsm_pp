@@ -5,7 +5,24 @@ using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  Plots, CSV
 ### Settings and definitions
 ##########################################################
 
-scenarios = ["defaultOldRegions","default","defaultTiga"]
+scenarios = [
+  "defaultTiga",
+  "withSawMill1_noSpatial",
+  "withSawMill1_diffused",
+  "withSawMill1_concentrated",
+  "withSawMill2_noSpatial",
+  "withSawMill2_diffused",
+  "withSawMill2_concentrated",
+  "withSawMill3_noSpatial",
+  "withSawMill3_diffused",
+  "withSawMill3_concentrated",
+  "withSawMill4_noSpatial",
+  "withSawMill4_diffused",
+  "withSawMill4_concentrated",
+  "withSawMill5_noSpatial",
+  "withSawMill5_diffused",
+  "withSawMill5_concentrated",
+]
 
 allScenariosInAFile = false
 
@@ -114,14 +131,14 @@ cVars = stack(cVars_piv) # setting it back in long format but now with totals
 
 ##### Forest Variables
 
-# Forest area and forest volumes
-forAreaReg = pivot(forVars,[:scen, :region, :forGroup,],:year,:value,
+# Forest area, forest volumes and harvested volumes..
+forAreaReg = pivot(forVars,[:scen, :region, :forType,],:year,:value,
              filter = Dict(
                :parName => ["forArea"],
                #:year    => years
                )
             )
-forAreaNat = pivot(forVars,[:scen, :forGroup,],:year,:value,
+forAreaNat = pivot(forVars,[:scen, :forType,],:year,:value,
              filter = Dict(
                :parName => ["forArea"],
                #:year    => years
@@ -133,13 +150,13 @@ forAreaNat = forAreaNat[vcat(forAreaNatNames[1:1],:region,forAreaNatNames[2:end]
 forArea = vcat(forAreaReg,forAreaNat)
 ods_write(odsOut,Dict(("forArea",1,1) => forArea )  )
 
-forVolReg = pivot(forVars,[:scen, :region, :forGroup,],:year,:value,
+forVolReg = pivot(forVars,[:scen, :region, :forType,],:year,:value,
              filter = Dict(
                :parName => ["vol"],
                #:year    => years,
                )
             )
-forVolNat = pivot(forVars,[:scen, :forGroup,],:year,:value,
+forVolNat = pivot(forVars,[:scen, :forType,],:year,:value,
              filter = Dict(
                :parName => ["vol"],
                #:year    => years,
@@ -151,25 +168,73 @@ forVolNat = forVolNat[vcat(forVolNatNames[1:1],:region,forVolNatNames[2:end])]
 forVol = vcat(forVolReg,forVolNat)
 ods_write(odsOut,Dict(("forVol",1,1) => forVol )  )
 
+forHVReg = pivot(forVars,[:scen, :region, :forType,],:year,:value,
+             filter = Dict(
+               :parName => ["hV"],
+               #:year    => years,
+               )
+            )
+forHVNat = pivot(forVars,[:scen, :forType,],:year,:value,
+             filter = Dict(
+               :parName => ["hV"],
+               #:year    => years,
+               )
+            )
+forHVNatNames = names(forHVNat)
+forHVNat[:region] = "France"
+forHVNat = forHVNat[vcat(forHVNatNames[1:1],:region,forHVNatNames[2:end])]
+forHV = vcat(forHVReg,forHVNat)
+ods_write(odsOut,Dict(("forHV",1,1) => forHV )  )
+
+
+# Forest area, forest volumes and harvesting volumes together
+forDataDetail = pivot(forVars,[:scen, :parName, :forType,],:year,:value,
+             filter = Dict(
+               :parName => ["forArea", "vol", "hV"],
+               #:year    => years
+               )
+            )
+forDataGroup = pivot(forVars,[:scen, :parName, :forGroup,],:year,:value,
+             filter = Dict(
+               :parName => ["forArea", "vol", "hV"],
+               #:year    => years
+               )
+            )
+rename!(forDataGroup, Dict(:forGroup => :forType))
+forDataTot = pivot(forVars,[:scen,:parName],:year,:value,
+             filter = Dict(
+               :parName => ["forArea", "vol", "hV"],
+               #:year    => years
+               )
+            )
+#forDataTotNames = names(forDataTot)
+forDataTot[:forType] = "All types"
+#forHVNat = forHVNat[vcat(forHVNatNames[1:1],:region,forHVNatNames[2:end])]
+forDataMultiple = vcat(forDataDetail,forDataGroup,forDataTot)
+ods_write(odsOut,Dict(("forDataMultiple",1,1) => forDataMultiple )  )
+
 ##### Mkt & Policy Variables
 
 # Product balance
-prodBalance = pivot(prodVars,[:year,:scen,:prodLev,:prod],:parName,:value,
-                    filter = Dict(
-                        :parName => ["st","da","dt","sa"],
-                        :year    => [2010,2015]),
-                    sort = [:year,:scen,:prodLev,:prod],
-              )
-ods_write(odsOut,Dict(("prodBalance",1,1) => prodBalance )  )
+#prodBalance = pivot(prodVars,[:year,:scen,:prodLev,:prod],:parName,:value,
+#                    filter = Dict(
+#                        :parName => ["st","da","dt","sa"],
+#                        :year    => [2010,2015]),
+#                    sort = [:year,:scen,:prodLev,:prod],
+#              )
+#ods_write(odsOut,Dict(("prodBalance",1,1) => prodBalance )  )
 
 # Product balance all years
-prodBalanceAll5Y = pivot(prodVars,[:parName,:prodLev,:prod,:scen,],:year,:value,
+prodBalanceAllY = pivot(prodVars,[:parName,:region,:prodLev,:prod,:scen],:year,:value,
                     filter = Dict(
                         :parName => ["st","da","dt","sa"],
-                        :year    => years5),
-                    sort = [:parName,:prodLev,:prod,:scen,],
+                        #:year    => years5
+                        ),
+                    sort = [:parName,:region,:prodLev,:prod,:scen,],
               )
-ods_write(odsOut,Dict(("prodBalanceAll5Y",1,1) => prodBalanceAll5Y )  )
+ods_write(odsOut,Dict(("prodBalanceAllY",1,1) => prodBalanceAllY )  )
+
+
 
 # Preparation of policy variables
 pol1 = by(forVars, [:scen,:parName,:region,:year]) do df

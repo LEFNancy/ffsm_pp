@@ -372,8 +372,9 @@ ModelCoreSpatial::runMarketModule(){
     MTHREAD->DO->printOptLog(true, icount, obj);
   } else {
     //Number final_obj = application->Statistics()->FinalObjective();
-    cout << "***ERROR: MODEL DIDN'T SOLVE FOR THIS YEAR" << endl;
-    msgOut(MSG_CRITICAL_ERROR, "Model DIDN'T SOLVE for this year");
+    int thisYear = MTHREAD->SCD->getYear();
+    cout << "***ERROR: MODEL DIDN'T SOLVE FOR THIS YEAR ("<<thisYear<<")"<< endl;
+    msgOut(MSG_CRITICAL_ERROR, "Model DIDN'T SOLVE for this year ("+i2s(thisYear)+")");
     // IMPORTANT! Don't place the next two lines above the msgOut() function or it will crash in windows if the user press the stop button
     //Index iter_count = application->Statistics()->IterationCount(); // syserror if model doesn't solve
     //Number final_obj = application->Statistics()->FinalObjective();

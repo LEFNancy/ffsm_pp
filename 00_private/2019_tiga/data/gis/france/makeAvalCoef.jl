@@ -1,6 +1,7 @@
 using  DelimitedFiles
 
 noValue = -9999
+noValueFloat = -9999.0
 smPx_x = 136
 smPx_y = 47
 
@@ -11,7 +12,18 @@ weigthsDiff = [1.2,1.15,1.1, 1.08,1.06,1.04,1.02,1.01,1,0.98]
 # Weigths for each pixel, as function of the distance expressed in pixel units, for the concentrated scenario:
 weigthsConc = [1.4,1.25,1.15,1.12,1.06,1.02,1.00,0.98,1,0.97]
 
-origAvCoef = readdlm("avalCoef_input.grd", Float64)
+header = "north: 3168000
+south: 1992000
+east: 4512000
+west: 2976000
+rows: 147
+cols: 192
+"
+avalCoef_baseFileName         = "spatialParameters/avalCoef###.grd"
+avalCoef_diffusedFileName     = "spatialParametersWithSawmill_diffused/avalCoef#Fut_Hetre##.grd"
+avalCoef_concentratedFileName = "spatialParametersWithSawmill_concentrated/avalCoef#Fut_Hetre##.grd"
+
+origAvCoef = readdlm(avalCoef_baseFileName, Float64, skipstart=6)
 # Manually handing of missing, it's quicker in this simple case!
 #origAvCoef = convert(Array{Union{Float64,Missing},2},origAvCoef)
 #[origAvCoef[i,j] = missing for i in 1:size(origAvCoef)[1], j in 1:size(origAvCoef)[2] if origAvCoef[i,j] == novalue]
@@ -40,5 +52,20 @@ for y in 1:size(origAvCoef)[1], x in 1:size(origAvCoef)[2]
     #end
 end
 
-writedlm( "avalCoef_diff.grd",  diffAvCoef, ' ')
-writedlm( "avalCoef_conc.grd",  concAvCoef, ' ')
+
+open(avalCoef_diffusedFileName, "w") do io
+             write(io, header)
+             writedlm(io,  diffAvCoef, ' ')
+end
+open(avalCoef_concentratedFileName, "w") do io
+             write(io, header)
+             writedlm(io,  concAvCoef, ' ')
+end
+txt = read(avalCoef_diffusedFileName, String)
+open(avalCoef_diffusedFileName, "w") do f
+   write(f, replace(txt, "$noValueFloat" => "$noValue"))
+end
+txt = read(avalCoef_concentratedFileName, String)
+open(avalCoef_concentratedFileName, "w") do f
+   write(f, replace(txt, "$noValueFloat" => "$noValue"))
+end
