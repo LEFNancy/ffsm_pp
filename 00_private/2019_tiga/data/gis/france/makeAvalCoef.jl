@@ -8,9 +8,9 @@ smPx_y = 47
 # Distances in pixel units of each weight group
 dists = [0,1,2,3,4,5,6,7,8,9]
 # Weigths for each pixel, as function of the distance expressed in pixel units, for the diffused scenario:
-weigthsDiff = [1.2,1.15,1.1, 1.08,1.06,1.04,1.02,1.01,1,0.98]
+weigthsDiff = [1.2,1.15,1.1, 1.08,1.06,1.04,1.02,1.01,1,0.9]
 # Weigths for each pixel, as function of the distance expressed in pixel units, for the concentrated scenario:
-weigthsConc = [1.4,1.25,1.15,1.12,1.06,1.02,1.00,0.98,1,0.97]
+weigthsConc = [1.6,1.4,1.15,1.12,1.06,1.02,1.00,0.9,0.8,0.7]
 
 header = "north: 3168000
 south: 1992000
@@ -22,6 +22,8 @@ cols: 192
 avalCoef_baseFileName         = "spatialParameters/avalCoef###.grd"
 avalCoef_diffusedFileName     = "spatialParametersWithSawmill_diffused/avalCoef#Fut_Hetre##.grd"
 avalCoef_concentratedFileName = "spatialParametersWithSawmill_concentrated/avalCoef#Fut_Hetre##.grd"
+nuts2_fileName                = "nut_l2_inra2016.grd"
+editRegionId                  = 11001
 
 origAvCoef = readdlm(avalCoef_baseFileName, Float64, skipstart=6)
 # Manually handing of missing, it's quicker in this simple case!
@@ -29,6 +31,7 @@ origAvCoef = readdlm(avalCoef_baseFileName, Float64, skipstart=6)
 #[origAvCoef[i,j] = missing for i in 1:size(origAvCoef)[1], j in 1:size(origAvCoef)[2] if origAvCoef[i,j] == novalue]
 diffAvCoef = copy(origAvCoef)
 concAvCoef = copy(origAvCoef)
+rIds = readdlm(nuts2_fileName, Int64, skipstart=6)
 
 for y in 1:size(origAvCoef)[1], x in 1:size(origAvCoef)[2]
     dist = ((x-smPx_x)^2+(y-smPx_y)^2)^(1/2)
@@ -41,7 +44,7 @@ for y in 1:size(origAvCoef)[1], x in 1:size(origAvCoef)[2]
             break
         end
     end
-    if(origAvCoef[y,x] != noValue)
+    if(origAvCoef[y,x] != noValue && rIds==editRegionId)
         diffAvCoef[y,x] = min(origAvCoef[y,x]*wD,1.0)
         concAvCoef[y,x] = min(origAvCoef[y,x]*wC,1.0)
     end
