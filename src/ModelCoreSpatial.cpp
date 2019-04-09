@@ -372,7 +372,7 @@ ModelCoreSpatial::runMarketModule(){
   if (status == Solve_Succeeded) {
     Index iter_count = application->Statistics()->IterationCount();
     Number final_obj = application->Statistics()->FinalObjective();
-    printf("\n*** The problem solved year "+i2s(thisYear)+" in %d iterations!\n", iter_count);
+    printf("\n*** The problem solved year %d in %d iterations!\n", thisYear, iter_count);
     printf("\n*** The final value of the objective function is %e.\n", final_obj);
     msgOut(MSG_INFO, "The problem solved successfully year "+i2s(thisYear)+" in "+i2s(iter_count)+" iterations.");
     int icount = iter_count;
