@@ -336,7 +336,15 @@ ModelCoreSpatial::runMarketModule(){
   application->Options()->SetNumericValue("max_cpu_time", 1800); // max 1/2 hour to find the optimus for one single year
   application->Options()->SetStringValue("check_derivatives_for_naninf", "yes");
   //application->Options()->SetStringValue("halt_on_ampl_error", "yes"); // not a valid option
-
+  //application->Options()->SetStringValue("print_options_documentation", "yes");  // print the ipopt options (hundreds of pages!)
+  // Relaxing tollerance options... worster effect :-(
+  //application->Options()->SetNumericValue("tol", 1e-07);
+  //application->Options()->SetNumericValue("constr_viol_tol",0.001);
+  //application->Options()->SetNumericValue("compl_inf_tol",0.001);
+  //application->Options()->SetNumericValue("acceptable_tol", 1e-05);
+  //application->Options()->SetNumericValue("acceptable_dual_inf_tol", 1e+9);
+  //application->Options()->SetNumericValue("acceptable_constr_viol_tol", 0.1);
+  //application->Options()->SetNumericValue("acceptable_compl_inf_tol", 0.1);
 
 
   // Initialize the IpoptApplication and process the options
@@ -364,9 +372,9 @@ ModelCoreSpatial::runMarketModule(){
   if (status == Solve_Succeeded) {
     Index iter_count = application->Statistics()->IterationCount();
     Number final_obj = application->Statistics()->FinalObjective();
-    printf("\n*** The problem solved in %d iterations!\n", iter_count);
+    printf("\n*** The problem solved year "+i2s(thisYear)+" in %d iterations!\n", iter_count);
     printf("\n*** The final value of the objective function is %e.\n", final_obj);
-    msgOut(MSG_INFO, "The problem solved successfully in "+i2s(iter_count)+" iterations.");
+    msgOut(MSG_INFO, "The problem solved successfully year "+i2s(thisYear)+" in "+i2s(iter_count)+" iterations.");
     int icount = iter_count;
     double obj = final_obj;
     MTHREAD->DO->printOptLog(true, icount, obj);

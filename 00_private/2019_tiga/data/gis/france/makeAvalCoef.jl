@@ -8,9 +8,13 @@ smPx_y = 47
 # Distances in pixel units of each weight group
 dists = [0,1,2,3,4,5,6,7,8,9]
 # Weigths for each pixel, as function of the distance expressed in pixel units, for the diffused scenario:
-weigthsDiff = [1.2,1.15,1.1, 1.08,1.06,1.04,1.02,1.01,1,0.9]
+weigthsDiff = [1.2,1.15,1.2,1.15,1.1,1,0.9,0.85,0.82,0.8]
+#v2:
+#weigthsDiff = [1.2,1.15,1.1, 1.08,1.06,1.04,1.02,1.01,1,0.9]
 # Weigths for each pixel, as function of the distance expressed in pixel units, for the concentrated scenario:
-weigthsConc = [1.6,1.4,1.15,1.12,1.06,1.02,1.00,0.9,0.8,0.7]
+weigthsConc = [1.6,1.4,1.2,1.1,1,0.9,0.8,0.7,0.65,0.6]
+#v2:
+#weigthsConc = [1.6,1.4,1.15,1.12,1.06,1.02,1.00,0.9,0.8,0.7]
 
 header = "north: 3168000
 south: 1992000
@@ -44,7 +48,7 @@ for y in 1:size(origAvCoef)[1], x in 1:size(origAvCoef)[2]
             break
         end
     end
-    if(origAvCoef[y,x] != noValue && rIds==editRegionId)
+    if(origAvCoef[y,x] != noValue && rIds[y,x]==editRegionId)
         diffAvCoef[y,x] = min(origAvCoef[y,x]*wD,1.0)
         concAvCoef[y,x] = min(origAvCoef[y,x]*wC,1.0)
     end

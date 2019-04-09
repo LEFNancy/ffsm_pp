@@ -6,7 +6,13 @@ using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  Plots, CSV
 ##########################################################
 
 scenarios = [
-  "defaultTiga",
+  "defaultTiga_noSpatial",
+  "defaultTiga_diffused",
+  "defaultTiga_concentrated",
+  "withSawMill5_noSpatial",
+  "withSawMill5_diffused",
+  "withSawMill5_concentrated",
+  "withSawMill5_concentrated_normalTc",
   "withSawMill1_noSpatial",
   "withSawMill1_diffused",
   "withSawMill1_concentrated",
@@ -19,9 +25,6 @@ scenarios = [
   "withSawMill4_noSpatial",
   "withSawMill4_diffused",
   "withSawMill4_concentrated",
-  "withSawMill5_noSpatial",
-  "withSawMill5_diffused",
-  "withSawMill5_concentrated",
 ]
 
 allScenariosInAFile = false
@@ -187,31 +190,14 @@ forHV = vcat(forHVReg,forHVNat)
 ods_write(odsOut,Dict(("forHV",1,1) => forHV )  )
 
 
-# Forest area, forest volumes and harvesting volumes together
-forDataDetail = pivot(forVars,[:scen, :parName, :forType,],:year,:value,
-             filter = Dict(
-               :parName => ["forArea", "vol", "hV"],
-               #:year    => years
-               )
+# All forArea vars together
+forDataDetail = pivot(forVars,[:scen, :parName, :region, :forType,],:year,:value,
+            # filter = Dict(
+            #   :parName => ["forArea", "vol", "hV", "regArea","vReg"],
+            #   #:year    => years
+            #   )
             )
-forDataGroup = pivot(forVars,[:scen, :parName, :forGroup,],:year,:value,
-             filter = Dict(
-               :parName => ["forArea", "vol", "hV"],
-               #:year    => years
-               )
-            )
-rename!(forDataGroup, Dict(:forGroup => :forType))
-forDataTot = pivot(forVars,[:scen,:parName],:year,:value,
-             filter = Dict(
-               :parName => ["forArea", "vol", "hV"],
-               #:year    => years
-               )
-            )
-#forDataTotNames = names(forDataTot)
-forDataTot[:forType] = "All types"
-#forHVNat = forHVNat[vcat(forHVNatNames[1:1],:region,forHVNatNames[2:end])]
-forDataMultiple = vcat(forDataDetail,forDataGroup,forDataTot)
-ods_write(odsOut,Dict(("forDataMultiple",1,1) => forDataMultiple )  )
+ods_write(odsOut,Dict(("forDataDetail",1,1) => forDataDetail )  )
 
 ##### Mkt & Policy Variables
 
@@ -225,45 +211,63 @@ ods_write(odsOut,Dict(("forDataMultiple",1,1) => forDataMultiple )  )
 #ods_write(odsOut,Dict(("prodBalance",1,1) => prodBalance )  )
 
 # Product balance all years
-prodBalanceAllY = pivot(prodVars,[:parName,:region,:prodLev,:prod,:scen],:year,:value,
+prodBalance = pivot(prodVars,[:parName,:region,:prodLev,:prod,:scen],:year,:value,
                     filter = Dict(
-                        :parName => ["st","da","dt","sa"],
+                        :parName => ["st","da","dt","sa","sl","dl","pl","pw"],
                         #:year    => years5
                         ),
                     sort = [:parName,:region,:prodLev,:prod,:scen,],
               )
-ods_write(odsOut,Dict(("prodBalanceAllY",1,1) => prodBalanceAllY )  )
-
-
-
-# Preparation of policy variables
-pol1 = by(forVars, [:scen,:parName,:region,:year]) do df
-   DataFrame(value = sum(df[:value]))
-end
-pol2 = by(prodVars, [:scen,:parName,:region,:year]) do df
-   DataFrame(value = sum(df[:value]))
-end
-pol=vcat(pol1,pol2)
-policy_vars = ["polBal_mktDirInt_s", "polBal_mktDirInt_d", "polBal_trSub", "polBal_tcSub", "polBal_fiSub", "surplus_prod", "surplus_cons"]
-pol = pol[ [i in policy_vars for i in pol[:parName]] ,:]
-
-# Policy cost analysis (national)
-polCosts_nat = pivot(pol,[:scen,:parName],:year,:value,
-            filter = Dict(
-                :year    => years5
-            ),
-            sort = [:scen, :parName]
+ods_write(odsOut,Dict(("prodBalance",1,1) => prodBalance )  )
+# Regional trade
+#rtBalance = pivot(prodVars,[:parName,:region,:freeDim,:prod,:scen],:year,:value,
+#                    filter = Dict(
+#                        :parName => ["rt"],
+#                        #:year    => years5
+#                        ),
+#                    sort = [:parName,:region,:freeDim,:prod,:scen,],
+#)
+#ods_write(odsOut,Dict(("rtBalance",1,1) => rtBalance )  )
+rtImportsBalance = pivot(prodVars,[:parName,:freeDim,:prod,:scen],:year,:value,
+                    filter = Dict(
+                        :parName => ["rt"],
+                        #:freeDim => [11001]
+                        #:year    => years5
+                        ),
+                    sort = [:parName,:freeDim,:prod,:scen,],
 )
-ods_write(odsOut,Dict(("polCosts_nat",1,1) => polCosts_nat )  )
+ods_write(odsOut,Dict(("rtImportsBalance",1,1) => rtImportsBalance )  )
 
-# Policy cost analysis (regional)
-polCosts_reg = pivot(pol,[:scen,:parName],:region,:value,
-            filter = Dict(
-                :year    => 2030
-            ),
-            sort = [:scen, :parName]
-)
-ods_write(odsOut,Dict(("polCosts_reg",1,1) => polCosts_reg )  )
+
+
+# # Preparation of policy variables
+# pol1 = by(forVars, [:scen,:parName,:region,:year]) do df
+#    DataFrame(value = sum(df[:value]))
+# end
+# pol2 = by(prodVars, [:scen,:parName,:region,:year]) do df
+#    DataFrame(value = sum(df[:value]))
+# end
+# pol=vcat(pol1,pol2)
+# policy_vars = ["polBal_mktDirInt_s", "polBal_mktDirInt_d", "polBal_trSub", "polBal_tcSub", "polBal_fiSub", "surplus_prod", "surplus_cons"]
+# pol = pol[ [i in policy_vars for i in pol[:parName]] ,:]
+#
+# # Policy cost analysis (national)
+# polCosts_nat = pivot(pol,[:scen,:parName],:year,:value,
+#             filter = Dict(
+#                 :year    => years5
+#             ),
+#             sort = [:scen, :parName]
+# )
+# ods_write(odsOut,Dict(("polCosts_nat",1,1) => polCosts_nat )  )
+#
+# # Policy cost analysis (regional)
+# polCosts_reg = pivot(pol,[:scen,:parName],:region,:value,
+#             filter = Dict(
+#                 :year    => 2030
+#             ),
+#             sort = [:scen, :parName]
+# )
+# ods_write(odsOut,Dict(("polCosts_reg",1,1) => polCosts_reg )  )
 
 ##### Carbon Variables
 
@@ -291,7 +295,7 @@ cBalCum = vcat(cBalCumReg,cBalCumNat)
 ymin = minimum(cVars[:year])
 ymax = maximum(cVars[:year])
 [cBalCum[Symbol(string(i))] = cBalCum[Symbol(string(i))] - cBalCum[Symbol(ymin)]  for i = collect(ymax:-1:ymin+1)]
-delete!(cBalCum, [Symbol(ymin)])
+deletecols!(cBalCum, [Symbol(ymin)])
 ods_write(odsOut,Dict(("cBalCum",1,1) => cBalCum )  )
 
 # Carbon balance yearly
