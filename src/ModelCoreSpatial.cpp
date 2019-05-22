@@ -836,12 +836,14 @@ ModelCoreSpatial::runManagementModule(){
     regPx = REG->getMyPixels();
 
     string flagHartman = MTHREAD->MD->getStringSetting("flagHartman",DATA_NOW,r2);
+
     //double exogenousReference = MTHREAD->MD->getBoolSetting("exogenousReference"); // new setting to distinguish between exogenous and endogenous carbon reference levels
 
 
 
 
     // Caching futureCarbonPrices..
+    double carbonPrice_NOW = gpd("carbonPrice",r2,"",thisYear);
     vector<double> futureCarbonPrices;
     if(flagHartman!="NONE"){
         for (int y=0; y<1000; y++) {
@@ -993,8 +995,9 @@ ModelCoreSpatial::runManagementModule(){
             // Added for carbon project-------------------------------------------------------------------------
             double raw_amount_carbon = 0; // declared and initialized before IF statement and FOR loop
             if (flagHartman =="EXO") {
+                double carbonPrice_y = carbonPrice_NOW;
                 for (int y=0; y<cumTp_u; y++) {
-                    double carbonPrice_y = futureCarbonPrices[y];
+                    //double carbonPrice_y = futureCarbonPrices[y];
                     double carbonRef = futureCarbonRef[j][y];
                     double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y], regId);
                     double carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - carbonRef);
@@ -1100,8 +1103,9 @@ ModelCoreSpatial::runManagementModule(){
 
                       // Now we calculate expected revenues from carbon
                       double raw_amount_carbon=0;
-                      for (int y=0; y<cumTp_u; y++) { // calculate yearly payment for each year of the rotation
-                          double carbonPrice_y = futureCarbonPrices[y];
+                      double carbonPrice_y = carbonPrice_NOW; //carbon price is by default current price, ie it is assumed to be constant from owner's perspective
+                      for (int y=0; y<cumTp_u; y++) {
+                          // calculate yearly payment for each year of the rotation
                           double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y], regId);
                           double carbonPayment_y;
                           if (y==0) { // we use euclidian division, so an exception must be made when denominator is equal to 0
