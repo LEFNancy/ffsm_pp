@@ -16,15 +16,15 @@ import output_parser_globals as g
 # =============================================================================
 # jit decorator tells Numba to compile this function.
 # The argument types will be inferred by Numba when function is called.
-def prepare_data():  
+def prepare_data():
   #print ("Loading and preparing the data..")
-  
-  # A - creating empty dictionaries with just the keys..   
+
+  # A - creating empty dictionaries with just the keys..
   for country, data in g.countries.items():
     g.regions[country] = data[1] # add 11000: 'France' to regions
   g.sortedregions = sorted(g.regions)
-  #k = d.keys(); k.sort(). Use k = sorted(d) 
-   
+  #k = d.keys(); k.sort(). Use k = sorted(d)
+
   specieswithAggregates = g.spGroups
   specieswithAggregates.extend(g.spAggregates.keys())
   tempSpecieswithAggregates = specieswithAggregates
@@ -32,13 +32,13 @@ def prepare_data():
   tempSpGroups = g.spGroups
   tempSpGroups.append("")
 
-  
+
   variablesWithAggregates = list(g.forVars.keys())
   for variable in g.forVars.keys():
     #'expReturns': ['Expected returns','€/ha','forArea','totalExpReturns','globalft'],
     if len(g.forVars[variable]) >= 3:
       variablesWithAggregates.append(g.forVars[variable][3])
-  
+
   for region in g.regions.keys():
     for variable in variablesWithAggregates:
       for scenario in g.scenarios.keys():
@@ -51,13 +51,13 @@ def prepare_data():
       for scenario in g.scenarios.keys():
         for spGroup in tempSpecieswithAggregates:
           key = region, variable, scenario, spGroup
-          g.odata[key] = []      
+          g.odata[key] = []
   for year in g.years:
     g.x.append(int(year))
-    
 
-  # B - loading data..      
-  for ifile in g.forIFiles:      
+
+  # B - loading data..
+  for ifile in g.forIFiles:
     idata_raw = csv.DictReader(open(ifile, 'r'), delimiter=g.sep)
     for rec in idata_raw:
       # scen;parName;country;region;forType;diamClass;year;value;
@@ -71,17 +71,17 @@ def prepare_data():
       key = rec['region'],rec['parName'],rec['scen'],iForType,rec['year']
       if key in g.idata:
         g.idata[key] += float (rec['value'])
-  debug = g.idata      
-  for ifile in g.prodIFiles:  
+  debug = g.idata
+  for ifile in g.prodIFiles:
     idata_raw = csv.DictReader(open(ifile, 'r'), delimiter=g.sep)
     for rec in idata_raw:
       # scen;parName;country;region;prod;freeDim;year;value;
       key = rec['region'],rec['parName'],rec['scen'],rec['prod'],rec['year']
       if key in g.idata:
-        g.idata[key] += float (rec['value'])      
-        
-  for ifile in g.carbonIFiles:   
-    #print (g.carbonIFiles)  
+        g.idata[key] += float (rec['value'])
+
+  for ifile in g.carbonIFiles:
+    #print (g.carbonIFiles)
     idata_raw = csv.DictReader(open(ifile, 'r'), delimiter=g.sep)
     for rec in idata_raw:
       # scen;parName;country;region;forType;diamClass;year;value;
@@ -93,7 +93,7 @@ def prepare_data():
         #print (g.idata[key])
 
   #exit(1)
-  
+
   # C - creating aggregated data for variables that need to be pondered
 #  for variable in g.forVars.keys():
 #    #'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
@@ -118,14 +118,14 @@ def prepare_data():
 #              else:
 #                  print("Error, I don't know how to handle this ponderation method: "+g.forVars[variable][4])
 #                  exit(1)
-  
+
   # D - performing various summing up..
-  
+
   # summing up the specie aggregation
   for spAggregate, species in g.spAggregates.items():
     for region in g.regions.keys():
       for variable in variablesWithAggregates:
-        if(variable != 'expReturns' and variable != 'sumExpReturns'): # let's skip these as the sumExpReturns at group/forest levels are already exogenously read as these are not the sums 
+        if(variable != 'expReturns' and variable != 'sumExpReturns'): # let's skip these as the sumExpReturns at group/forest levels are already exogenously read as these are not the sums
          for scenario in g.scenarios.keys():
            for year in g.years:
              destKey = region, variable, scenario, spAggregate, year
@@ -133,7 +133,7 @@ def prepare_data():
              for specie in species[0]:
                varToBeSumKey = region, variable, scenario, specie, year
                g.idata[destKey] +=  g.idata[varToBeSumKey]
-   
+
   # summing up to the country level..
   for country, regionsInTheCountry in g.countries.items():
     for variable in variablesWithAggregates:
@@ -145,7 +145,7 @@ def prepare_data():
             for regionInTheCountry in regionsInTheCountry[0]:
               varToBeSumKey = regionInTheCountry, variable, scenario, spGroup, year
               g.idata[destKey] +=  g.idata[varToBeSumKey]
-              
+
     # Correcting the country aggregation of expected returns
     for scenario in g.scenarios.keys():
       for spGroup in tempSpGroups:
@@ -154,22 +154,22 @@ def prepare_data():
           countrySumExpReturns_key = country, 'sumExpReturns', scenario, spGroup, year
           target_key = country,'expReturns', scenario, spGroup, year
           g.idata[target_key] = g.idata[countrySumExpReturns_key]/ g.idata[countryForArea_key]
-  
+
   # checking country aggregation, ok
   #for country, regionsInTheCountry in countries.iteritems():
     #print "country: " + country + " " + str(idata[country,'vol', 'vRegFixed', 'broadL_highF', '2006'])
     #for regionInTheCountry in regionsInTheCountry[0]:
       #print "region: " + regionInTheCountry + " " + str(idata[regionInTheCountry,'vol', 'vRegFixed', 'broadL_highF', '2006'])
- 
 
-          
+
+
   # testing specie aggregating
   #for spAggregate, species in spAggregates.iteritems():
     #print "aggregate: "+ spAggregate + " " + str(idata['11042','vol', 'vRegFixed', spAggregate, '2006'])
     #for specie in species[0]:
       #print "specieGroup: " + specie + " " + str(idata['11042','vol', 'vRegFixed', specie, '2006'])
-   
-#  # E - after all the summing up let's compute the poundered value  
+
+#  # E - after all the summing up let's compute the poundered value
 #  for variable in g.forVars.keys():
 #    #'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
 #    if len(g.forVars[variable]) >= 3:
@@ -183,7 +183,7 @@ def prepare_data():
 #              key_pvar = region, pondVariable, scenario, spGroup, year
 #              key_tvar = region, totalVariable, scenario, spGroup, year
 #              g.idata[key] =  (g.idata[key_tvar] / g.idata[key_pvar]) if  g.idata[key_pvar] != 0 else 0
-        
+
   # testing ponderation variables
   #for variable in variables.keys():
     #'expReturns': ['Expected returns','€/ha','forArea', 'totalExpReturns'],
@@ -193,7 +193,7 @@ def prepare_data():
       #print "Orig variable: " + variable + " " + str(idata['11000', variable, 'vRegFixed','Total', '2006'])
       #print "Pond variable: " + pondVariable + " " + str(idata['11000', pondVariable, 'vRegFixed', 'Total', '2006'])
       #print "Total variable: "  + totalVariable + " " + str(idata['11000', totalVariable, 'vRegFixed', 'Total', '2006'])
-  
+
   # F - converting everything in years array
   for region in g.regions.keys():
     for variable in variablesWithAggregates:
@@ -203,13 +203,13 @@ def prepare_data():
           for year in g.years:
             key_year = region, variable, scenario, spGroup, year
             g.odata[key].append(g.idata[key_year])
-  
+
   # testing odata
   #print "idata[2005]: " + str(idata['11000', 'vol', 'vRegFixed','Total', '2005'])
   #print "idata[2006]: " + str(idata['11000', 'vol', 'vRegFixed','Total', '2006'])
   #print "odata: " + str(odata['11000', 'vol', 'vRegFixed','Total'])
-  
-# =============================================================================  
+
+# =============================================================================
 def reset_output():
   # G - Reset latex files
   filename_t = g.tableoutdir+'/'+g.tablesmaster+'.tex'
@@ -221,7 +221,7 @@ def reset_output():
 
 # =============================================================================
 def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLegend=True, fwidth=10, fheight=15):
- 
+
   nvar = len(variables_h)
   nscen = len(scenarios_h)
   #plt.figure(1)
@@ -236,7 +236,7 @@ def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLe
   handles =[]
   labels = []
   #plt.suptitle(maintitle, fontsize=16, ha='center')
-  for i in range(nvar):    
+  for i in range(nvar):
     #plt.subplot(nvar,1,i+1)
     ax =fig.add_subplot(nvar,1,i+1)
     subplotTitle = myunicode(g.forVars[variables_h[i]][0])
@@ -263,7 +263,7 @@ def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLe
   plt.savefig(g.chartoutdir+"/"+filename+"_"+region+"."+g.charttype, dpi=300)
   #plt.show()
   plt.close()
-        
+
   omasterfilename = g.chartoutdir+'/'+g.chartsmaster+'.tex'
   omfile = open(omasterfilename,'a')
   omfile.write("\\begin{figure}[htbp]\n")
@@ -273,20 +273,20 @@ def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLe
   omfile.write("  \\label{fig:"+filename+"}\n")
   omfile.write("\\end{figure}\n")
   omfile.close()
- 
+
 # =============================================================================
 def plotCarbonChart(scenarios_h,region,title, filename):
 #def plotMultivariable(scenarios_h, variables_h, region, title, filename, printLegend=True):
-  
- 
+
+
   cVariables = [
       ['Forest pool', ['STOCK_INV','STOCK_EXTRA'],':',3,'#314004'],
       ['Wood products pool', ['STOCK_PRODUCTS'],'--',3,'#7f0021'],
       ['Net cumulative substitution effect', ['EM_ENSUB','EM_MATSUB','EM_FOROP'],'-',4,'#83caff'],
-  ]    
-  
+  ]
+
   nscen = len(scenarios_h)
-  
+
 
   matplotlib.rcParams.update({'font.size': 22})
 
@@ -296,17 +296,17 @@ def plotCarbonChart(scenarios_h,region,title, filename):
   ylabel = myunicode("Gt CO2 eq")
   plt.title(myunicode(title))
   plt.ylabel(ylabel)
-  
+
   totals = [[0]*len(g.x)]* nscen
-  
+
   if nscen > 1: #normal line plots
-    for idg, cGroup in enumerate(cVariables): 
-      for ids, scenario in enumerate(scenarios_h):    
+    for idg, cGroup in enumerate(cVariables):
+      for ids, scenario in enumerate(scenarios_h):
         grTotals =  [0]*len(g.x)
         #serieName = myunicode(cGroup[0] + " - " + scenario)
-        serieName = "_"+myunicode(scenario) # not shown in legend    
+        serieName = "_"+myunicode(scenario) # not shown in legend
         if idg==2:
-          serieName = myunicode(scenario)         
+          serieName = myunicode(scenario)
         serieColor = g.scenarios[scenario]
         serieLineType = cGroup[2]
         serieWidth = cGroup[3]
@@ -314,14 +314,14 @@ def plotCarbonChart(scenarios_h,region,title, filename):
           key = region, var, scenario, ""
           varData = g.odata[key]
           grTotals = [x2+y for x2, y in zip(grTotals, varData)]
-          
+
         totals[ids]  = [x3+y2 for x3, y2 in zip(totals[ids],grTotals)]
         y = [x4 / 1000 for x4 in totals[ids]]
         plt.plot(g.x, y, serieLineType, label=serieName, linewidth=serieWidth, color=serieColor)
   else: #area stacked plot
     fillColours = []
     y = []
-    for cGroup in cVariables: 
+    for cGroup in cVariables:
       y_local =  np.zeros(len(g.x))
       fillColour = cGroup[4]
       for var in cGroup[1]: # for idx, var in enumerate(cGroup[1]):
@@ -331,22 +331,22 @@ def plotCarbonChart(scenarios_h,region,title, filename):
           y_local = [t+(a/1000) for t, a in zip(y_local, varData)]
       y.append(y_local)
       fillColours.append(fillColour)
-    for cGroup in reversed(cVariables): 
-      serieName = myunicode(cGroup[0]) 
+    for cGroup in reversed(cVariables):
+      serieName = myunicode(cGroup[0])
       fillColour = cGroup[4]
       plt.plot([], [], color=fillColour, linewidth=4, label=serieName) # plotting emply data hack as stackplot doesn't support the legend
- 
+
     ax = fig.add_subplot(111)
     ax.stackplot(g.x, y, colors=fillColours, edgecolor = "none")
     ax.autoscale_view('tight')
-                   
+
   #plt.legend(loc='lower right', ncol=3, shadow=False, labelspacing=0., prop={'size':12})
   plt.legend(loc='lower right', ncol=1, shadow=False, labelspacing=0., prop={'size':14})
   #plt.ylim([0,18]) # This would scale the plot y axis to the desired ranges
   plt.savefig(g.chartoutdir+"/"+filename+"_"+region+"."+g.charttype, dpi=300)
   #plt.show()
   plt.close()
-        
+
   omasterfilename = g.chartoutdir+'/'+g.chartsmaster+'.tex'
   omfile = open(omasterfilename,'a')
   omfile.write("\\begin{figure}[htbp]\n")
@@ -355,9 +355,9 @@ def plotCarbonChart(scenarios_h,region,title, filename):
   omfile.write("  \\includegraphics[width=0.8\\textwidth]{\""+g.chartoutdir+"/"+filename+"_"+region+"\"}\n")
   omfile.write("  \\label{fig:"+filename+"}\n")
   omfile.write("\\end{figure}\n")
-  omfile.close() 
-      
-"""        
+  omfile.close()
+
+"""
       scenTotals
         y = odata[key]
   plt.plot(x, y, serieLineType, label=serieName, linewidth=serieWidth, color=serieColor)
@@ -371,7 +371,7 @@ def plotCarbonChart(scenarios_h,region,title, filename):
   plt.savefig(chartoutdir+"/"+filename+"_"+region+"."+charttype, dpi=300)
   #plt.show()
   plt.close()
-        
+
   omasterfilename = chartoutdir+'/'+chartsmaster+'.tex'
   omfile = open(omasterfilename,'a')
   omfile.write("\\begin{figure}[htbp]\n")
@@ -382,7 +382,7 @@ def plotCarbonChart(scenarios_h,region,title, filename):
   omfile.write("\\end{figure}\n")
   omfile.close()
   """
-  
+
 # =============================================================================
 def plotLegend(scenarios_h, filename, title_h=""):
   nscen = len(scenarios_h)
@@ -391,11 +391,11 @@ def plotLegend(scenarios_h, filename, title_h=""):
   fig.set_size_inches(10,fheight)
   #ax = plt.axes()
   #ax.set_axis_off()
-  
+
   #fig = plt.figure()
   ax =fig.add_subplot(111)
   ax.set_axis_off()
-  
+
   for spGroup in sorted(g.spAggregates.keys()):
     for scenario in scenarios_h:
       serieName = myunicode(spGroup + " - " + scenario)
@@ -408,10 +408,10 @@ def plotLegend(scenarios_h, filename, title_h=""):
       plt.plot(dummyx, dummyy, serieLineType, label=serieName, linewidth=serieWidth, color=serieColor)
   handles, labels = ax.get_legend_handles_labels()
   ax.legend(handles, labels, ncol=3, shadow=False) # removed title=title_h
-  plt.savefig(g.chartoutdir+"/"+filename+"."+g.charttype, bbox_inches='tight', pad_inches=0.1, dpi=300) 
+  plt.savefig(g.chartoutdir+"/"+filename+"."+g.charttype, bbox_inches='tight', pad_inches=0.1, dpi=300)
   #plt.show()
   plt.close()
-  
+
   omasterfilename = g.chartoutdir+'/'+g.chartsmaster+'.tex'
   omfile = open(omasterfilename,'a')
   omfile.write("\\begin{figure}[htbp]\n")
@@ -421,14 +421,14 @@ def plotLegend(scenarios_h, filename, title_h=""):
   omfile.write("  \\label{fig:"+filename+"}\n")
   omfile.write("\\end{figure}\n")
   omfile.close()
-  
+
 #import matplotlib.pyplot as plt
 #ax = plt.subplot()  #create the axes
 #ax.set_axis_off()  #turn off the axis
 #....  #do patches and labels
 #ax.legend(patches, labels, ...)  #legend alone in the figure
-#plt.show() 
-  
+#plt.show()
+
 # =============================================================================
 def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename, comp1_color='red', totcomp_color='blue', diffcomp_color='green'):
   '''
@@ -445,8 +445,8 @@ def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename, comp1_color='
   # diffcomp_color: color (English or #HTML_code) of the vector representing the difference component
   '''
 
-  matplotlib.rc('xtick', labelsize=30) 
-  matplotlib.rc('ytick', labelsize=30) 
+  matplotlib.rc('xtick', labelsize=30)
+  matplotlib.rc('ytick', labelsize=30)
   matplotlib.rcParams.update({'font.size': 26})
 
   a   = plt.figure()
@@ -464,11 +464,11 @@ def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename, comp1_color='
   miny = min(origin[1],end1[1],end2[1],endt[1])
   maxy = max(origin[1],end1[1],end2[1],endt[1])
   centre = (((maxx-minx)/2)+minx,((maxy-miny)/2)+miny)
-  
+
   # This allows to write a serie of arrows in one go, but didn't got how in this case colours work
   #X  = (origin[0], origin[0], origin[0])
   #Y  = (origin[1], origin[1], origin[1])
-  #X2 = (end1[0]-origin[0], endt[0]-origin[0], end2[0]-origin[0]) 
+  #X2 = (end1[0]-origin[0], endt[0]-origin[0], end2[0]-origin[0])
   #Y2 = (end1[1]-origin[1], endt[1]-origin[1], end2[1]-origin[1])
   #C  = (255,10,150) # ? colour codes, but didn't got it
   # ax.quiver(X,Y,X2,Y2,Cangles='xy',scale_units='xy',scale=1, width=0.008)
@@ -476,7 +476,7 @@ def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename, comp1_color='
   # Printing first component..
   ax.quiver(origin[0],origin[1],end1[0]-origin[0],end1[1]-origin[1],angles='xy',scale_units='xy',scale=1, width=0.008, color=comp1_color)
   # Printing total component..
-  ax.quiver(origin[0],origin[1],endt[0]-origin[0],endt[1]-origin[1],angles='xy',scale_units='xy',scale=1, width=0.008, color=totcomp_color)
+  ax.quiver(origin[0],origin[1],endt[0]-origin[0],endt[1]-origin[1],angles='xy',scale_units='xy',scale=1, width=0.02, color=totcomp_color)
   # Printing diff component..
   ax.quiver(origin[0],origin[1],end2[0]-origin[0],end2[1]-origin[1],angles='xy',scale_units='xy',scale=1, width=0.008, color=diffcomp_color)
 
@@ -484,9 +484,9 @@ def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename, comp1_color='
   y  = (end1[1],end2[1])
   x2 = (endt[0]-end1[0], endt[0]-end2[0])
   y2 = (endt[1]-end1[1], endt[1]-end2[1])
- 
+
   if(flag_2d):
-    ax.quiver(x,y,x2,y2,angles='xy',scale_units='xy',scale=1, width=0.005, color='gray')
+    ax.quiver(x,y,x2,y2,angles='xy',scale_units='xy',scale=1, linestyle='dotted', facecolor='none', linewidth=2, color='gray',  edgecolors='k',  width=0.0001, headwidth=300, headlength=500)
     ax.set_xlim([minx- (centre[0]-minx)*0.4, maxx + (maxx-centre[0])*0.4])
 
   ax.set_ylim([miny- (centre[1]-miny)*0.4, maxy + (maxy-centre[1])*0.4])
@@ -497,7 +497,8 @@ def plotVectorChart_inner(origin,end1,endt,xlabel,ylabel,filename, comp1_color='
   #plt.draw()
   #plt.show()
   plt.savefig(filename, dpi=300, transparent=False, bbox_inches='tight', pad_inches=0.1)
- 
+
+
 # =============================================================================
 def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename, singleComparation=False, refYear=0):
   """Print a LaTeX Table for variables variable_h comparing ref_scenario scenario vs coparing_scenarios.
@@ -505,7 +506,7 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
   some basic stats are computed; if False they are all represented as diff from the ref_scenario.
   @param refYear: if 0 reference vs comparing scenarios are compared on the same year (or average of years if years_h has length > 1.).
   Otherwise the comparing scneario at year(s) years_h is compared with reference scenario at year refYear (useful to see the dynamic
-  effects within a single scenario)  
+  effects within a single scenario)
   """
   d = " & "
   el = " \\\\"
@@ -517,19 +518,19 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
   nregions = len(regions_h)
   ncol = 4
   label_ref_scenario = ref_scenario.replace("_", "\\_")
-  
+
   for comp_scenario in comparing_scenarios:
     labels_comparing_scenarios.append(comp_scenario.replace("_", "\\_"))
-    
+
   if (singleComparation and nscen == 1):
     label_comparing_scenario = labels_comparing_scenarios[0]
-  
+
   if (singleComparation):
     if nscen > 2:
       ncol = 5
   else:
     ncol = nscen+2 #+1 for the val label and +1 for the ref scenario
-    
+
   oString = ""
   oString += "\\begin{table}[htbp]\n"
   oString += "\\begin{center}\n"
@@ -544,20 +545,20 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
   oString += "\\hline\n"
   if (singleComparation):
     if nscen > 2:
-      oString += d+label_ref_scenario+d+label_comparing_scenario+d+"difference"+d+"cv"+el+"\n"  
+      oString += d+label_ref_scenario+d+label_comparing_scenario+d+"difference"+d+"cv"+el+"\n"
     else:
       oString += d+label_ref_scenario+d+label_comparing_scenario+d+"difference"+el+"\n"
   else:
     oString += d+label_ref_scenario
     for label_comparing_scenarios in labels_comparing_scenarios:
       oString += d+label_comparing_scenarios
-    oString += el+'\n' 
-    
+    oString += el+'\n'
+
   for region in regions_h:
     oString += "\\hline\n"
     if nregions > 1:
       oString += "\\multicolumn{"+str(ncol)+"}{l}{"+regions[region]+"}"+el+'\n'
-  
+
     for variable in variables_h:
       oString += "\\multicolumn{"+str(ncol)+"}{l}{"+g.forVars[variable][0]+" (\\textit{"+g.forVars[variable][1]+"})}"+el+'\n'
       for spGroup in sorted(g.spAggregates.keys()):
@@ -575,9 +576,9 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
             sumCScenarios[s] += g.idata[keyc]
         valRScenario = sumRScenario/nyears
         for s in range(nscen):
-          valCScenarios[s] = sumCScenarios[s]/nyears        
+          valCScenarios[s] = sumCScenarios[s]/nyears
         oString += printTableRecord("- "+outSpGroup, d, el, nscen, valRScenario, valCScenarios, singleComparation)
-    
+
   oString += "\\hline\n"
   oString += "\\end{tabularx}\n"
   oString += "\\end{footnotesize}\n"
@@ -591,25 +592,25 @@ def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_
     oString += "\\end{tablenotes}\n"
   oString += "\\end{threeparttable}\n"
   oString += "\\end{center}\n"
-  oString += "\\end{table}\n" 
-  
+  oString += "\\end{table}\n"
+
   ofilename = g.tableoutdir+'/'+filename+'.tex'
   ofile = open(ofilename,'w')
   ofile.write(oString)
   ofile.close()
-  
+
   omasterfilename = g.tableoutdir+'/'+g.tablesmaster+'.tex'
   omfile = open(omasterfilename,'a')
   omfile.write("\\input{\""+g.tableoutdir+'/'+filename+".tex\"}\n")
   omfile.close()
-  
+
 # =============================================================================
 def printAATable(ref_scenarios, comparing_scenarios, regions_h, years_h, title, filename, refYear=0) :
-#def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename): 
+#def printTable(ref_scenario, comparing_scenarios, variables_h, regions_h, years_h, title, filename):
 #printAATable(['cc1','cc1_nospvar','cc2','cc2_nospvar','cc3','cc3_nospvar','cc3','cc3_nospvar'],['bau','bau_nospvar','bau','bau_nospvar','bau','bau_nospvar','bau','bau_nospvar'], selectedregions, ['2100'],'Area allocation [% variation over bau]', 'area_allocation')
   d = " & "
   el = " \\\\"
-  
+
   scenario_labels = []
   nscen = len(ref_scenarios)
   nscen_comp = len(comparing_scenarios)
@@ -621,8 +622,8 @@ def printAATable(ref_scenarios, comparing_scenarios, regions_h, years_h, title, 
   ntotcol = nscen+1
   for scenario in comparing_scenarios:
     scenario_labels.append(scenario.replace("_", "\\_"))
-    
-    
+
+
   oString = ""
   oString += "\\begin{table}[htbp]\n"
   oString += "\\begin{center}\n"
@@ -639,7 +640,7 @@ def printAATable(ref_scenarios, comparing_scenarios, regions_h, years_h, title, 
   oString += "Region"
   for scenario in scenario_labels:
     oString += d+scenario
-  oString += el+'\n'      
+  oString += el+'\n'
   for spGroup in sorted(g.spAggregates.keys()):
     oString += "\\multicolumn{"+str(ntotcol)+"}{l}{"+spGroup.replace("_", "\\_")+"}"+el+'\n'
     for region in regions_h:
@@ -656,21 +657,21 @@ def printAATable(ref_scenarios, comparing_scenarios, regions_h, years_h, title, 
         reldiff = (100*(sum_value_c-sum_value_b)/sum_value_b) if  sum_value_b != 0 else 0
         oString +=  d+"%+0.3f"%(reldiff)
       oString += el+'\n'
-     
-     
+
+
   oString += "\\hline\n"
   oString += "\\end{tabularx}\n"
   oString += "\\end{footnotesize}\n"
   oString += "\\label{tab:"+filename+"}\n"
   oString += "\\end{threeparttable}\n"
   oString += "\\end{center}\n"
-  oString += "\\end{table}\n" 
-  
+  oString += "\\end{table}\n"
+
   ofilename = g.tableoutdir+'/'+filename+'.tex'
   ofile = open(ofilename,'w')
   ofile.write(oString)
   ofile.close()
-  
+
   omasterfilename = g.tableoutdir+'/'+g.tablesmaster+'.tex'
   omfile = open(omasterfilename,'a')
   omfile.write("\\input{\""+g.tableoutdir+'/'+filename+".tex\"}\n")
@@ -683,10 +684,10 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
   # avg:               true  => output is the yearly average in the period,
   #                    false => output is the difference between year_start and year_end
   # singleComparation: true  => comparing scenarios are seens as repetition of a unique scenario, hence stats on their variance is performed,
-  #                    false => each comparing scenarios is presented indipendently 
+  #                    false => each comparing scenarios is presented indipendently
   d = " & "
   el = " \\\\"
-  
+
   cvariables = [
       ['Pools', "- Total pools", [
          ['STOCK_INV',"- Inventoried forest pool"],
@@ -694,31 +695,31 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
          ['STOCK_PRODUCTS',"- Wood products pool"]
          ]],
       ['Emissions', "- Net substitution",
-        [['EM_ENSUB',"- Energy substitution"], 
+        [['EM_ENSUB',"- Energy substitution"],
          ['EM_MATSUB',"- Material substitution"],
          ['EM_FOROP',"- Emissions from forest operations"]
          ]],
-  ]       
-   
+  ]
+
   label_comparing_scenario = "comparing scenarios"
   labels_comparing_scenarios = []
   nscen = len(comparing_scenarios)
   nyears = (int(year_end) - int(year_start) + 1) if avg else 1
   ncol = 4
   label_ref_scenario = ref_scenario.replace("_", "\\_")
-  
+
   for comp_scenario in comparing_scenarios:
     labels_comparing_scenarios.append(comp_scenario.replace("_", "\\_"))
-  
+
   if (singleComparation and nscen == 1):
     label_comparing_scenario = labels_comparing_scenarios[0]
-    
+
   if (singleComparation):
     if nscen > 2:
       ncol = 5
   else:
-    ncol = nscen+2 
-    
+    ncol = nscen+2
+
   oString = ""
   oString += "\\begin{table*}[!htbp]\n"
   oString += "\\begin{center}\n"
@@ -731,23 +732,23 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
     oString += "r "
   oString += "}\n"
   oString += "\\hline\n"
-  
+
   if (singleComparation):
     if nscen > 2:
-      oString += d+"\\texttt{"+label_ref_scenario+"}"+d+"\\texttt{"+label_comparing_scenario+"}"+d+"difference"+d+"cv"+el+"\n"  
+      oString += d+"\\texttt{"+label_ref_scenario+"}"+d+"\\texttt{"+label_comparing_scenario+"}"+d+"difference"+d+"cv"+el+"\n"
     else:
       oString += d+"\\texttt{"+label_ref_scenario+"}"+d+"\\texttt{"+label_comparing_scenario+"}"+d+"difference"+el+"\n"
   else:
     oString += d+label_ref_scenario
     for label_comparing_scenarios in labels_comparing_scenarios:
       oString += d+label_comparing_scenarios
-    oString += el+'\n' 
- 
+    oString += el+'\n'
+
   if(nyears > 1):
     oString += "\\multicolumn{"+str(ncol)+"}{l}{Carbon balance ($Mt~ \ce{CO2}eq.~y^{-1}$)}"+el+'\n'
   else:
     oString += "\\multicolumn{"+str(ncol)+"}{l}{Carbon balance ($Mt~ \ce{CO2}eq.)$}"+el+'\n'
-    
+
   # Total totals..
   totSumValRScenario = 0
   totSumValCScenarios = [0] * nscen
@@ -764,7 +765,7 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
       grSumValRScenario  += valRScenario
       totSumValRScenario += valRScenario
       valCScenarios       = [0] * nscen
-      
+
       for s in range(nscen):
         valCScenarios[s] = (g.idata[region, cvar_name, comparing_scenarios[s], "", year_end]-g.idata[region, cvar_name, comparing_scenarios[s], "", year_start])/nyears
         grSumValCScenarios[s] += valCScenarios[s]
@@ -772,7 +773,7 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
       oString += printTableRecord(cvar_label, d, el, nscen, valRScenario, valCScenarios,singleComparation)
     oString += printTableRecord(vargroup[1], d, el, nscen, grSumValRScenario, grSumValCScenarios,singleComparation)
   oString += printTableRecord("Total \ce{CO2} balance", d, el, nscen, totSumValRScenario, totSumValCScenarios,singleComparation)
-   
+
   oString += "\\hline\n"
   oString += "\\end{tabularx}\n"
   oString += "\\end{footnotesize}\n"
@@ -786,20 +787,20 @@ def printCarbonTable(ref_scenario, comparing_scenarios, region, year_start, year
     oString += "\\end{tablenotes}\n"
   oString += "\\end{threeparttable}\n"
   oString += "\\end{center}\n"
-  oString += "\\end{table*}\n" 
-  
+  oString += "\\end{table*}\n"
+
   ofilename = g.tableoutdir+'/'+filename+'.tex'
   ofile = open(ofilename,'w')
   ofile.write(oString)
   ofile.close()
-  
+
   omasterfilename = g.tableoutdir+'/'+g.tablesmaster+'.tex'
   omfile = open(omasterfilename,'a')
   omfile.write("\\input{\""+g.tableoutdir+'/'+filename+".tex\"}\n")
   omfile.close()
 # =============================================================================
 def printTableRecord(cvar_label, d, el, nscen, valRScenario, valCScenarios, singleComparation):
-  
+
   oString = ""
   if singleComparation:
     avgCScenarios = sum(valCScenarios) / float(nscen)
@@ -813,7 +814,7 @@ def printTableRecord(cvar_label, d, el, nscen, valRScenario, valCScenarios, sing
         qdiffCScenarios[s] = (valCScenarios[s] - avgCScenarios)**2.0
         sumqdiffCScenarios += qdiffCScenarios[s]
       sd = (sumqdiffCScenarios/(nscen-1))**0.5
-      t = abs(scenarioDiff)*nscen**0.5/sd if sd>0.0 else 0.0 
+      t = abs(scenarioDiff)*nscen**0.5/sd if sd>0.0 else 0.0
       cv = 100.0 * sd/abs(avgCScenarios) if abs(avgCScenarios)> 0.0 else 0.0
       if t >= g.tvalue001[nscen-1-1]:
         significance = '$^a$'
@@ -832,29 +833,29 @@ def printTableRecord(cvar_label, d, el, nscen, valRScenario, valCScenarios, sing
   return oString
 
 
- 
+
 # =============================================================================
 def title (cat, level, title):
   filename = ""
   if cat == 't':
     filename = g.tableoutdir+'/'+g.tablesmaster+'.tex'
-  elif cat == 'c': 
+  elif cat == 'c':
     filename = g.chartoutdir+'/'+g.chartsmaster+'.tex'
   else:
     print ("Error in printTable: not know where to print the title !")
     exit(1)
   file = open(filename,'a')
-  
+
   file.write("\n\\clearpage\n")
   file.write("\\"+level+"{"+title+"}\n")
   file.close()
-  
+
 # =============================================================================
 def text(cat, text_h):
   filename = ""
   if cat == 't':
     filename = g.tableoutdir+'/'+g.tablesmaster+'.tex'
-  elif cat == 'c': 
+  elif cat == 'c':
     filename = g.chartoutdir+'/'+g.chartsmaster+'.tex'
   else:
     print ("Error in text: not know where to print the title !")
@@ -869,4 +870,3 @@ def myunicode(astring):
     return unicode(astring, 'utf_8')
   else:
     return astring
-     

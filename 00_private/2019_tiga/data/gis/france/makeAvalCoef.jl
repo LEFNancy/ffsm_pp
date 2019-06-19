@@ -8,11 +8,11 @@ smPx_y = 47
 # Distances in pixel units of each weight group
 dists = [0,1,2,3,4,5,6,7,8,9]
 # Weigths for each pixel, as function of the distance expressed in pixel units, for the diffused scenario:
-weigthsDiff = [1.2,1.15,1.2,1.15,1.1,1,0.9,0.85,0.82,0.8]
+weightsDiffByDist = [1.2,1.15,1.2,1.15,1.1,1,0.9,0.85,0.82,0.8]
 #v2:
 #weigthsDiff = [1.2,1.15,1.1, 1.08,1.06,1.04,1.02,1.01,1,0.9]
 # Weigths for each pixel, as function of the distance expressed in pixel units, for the concentrated scenario:
-weigthsConc = [1.6,1.4,1.2,1.1,1,0.9,0.8,0.7,0.65,0.6]
+weightsConcByDist = [1.6,1.4,1.2,1.1,1,0.9,0.8,0.7,0.65,0.6]
 #v2:
 #weigthsConc = [1.6,1.4,1.15,1.12,1.06,1.02,1.00,0.9,0.8,0.7]
 
@@ -28,29 +28,39 @@ avalCoef_diffusedFileName     = "spatialParametersWithSawmill_diffused/avalCoef#
 avalCoef_concentratedFileName = "spatialParametersWithSawmill_concentrated/avalCoef#Fut_Hetre##.grd"
 nuts2_fileName                = "nut_l2_inra2016.grd"
 editRegionId                  = 11001
-
+weightsD_filename             = "weightsD.grd"
+weightsC_filename             = "weightsC.grd"
 origAvCoef = readdlm(avalCoef_baseFileName, Float64, skipstart=6)
 # Manually handing of missing, it's quicker in this simple case!
 #origAvCoef = convert(Array{Union{Float64,Missing},2},origAvCoef)
 #[origAvCoef[i,j] = missing for i in 1:size(origAvCoef)[1], j in 1:size(origAvCoef)[2] if origAvCoef[i,j] == novalue]
 diffAvCoef = copy(origAvCoef)
 concAvCoef = copy(origAvCoef)
+weightsD   = fill(noValueFloat,size(concAvCoef)...)
+weightsC   = fill(noValueFloat,size(concAvCoef)...)
 rIds = readdlm(nuts2_fileName, Int64, skipstart=6)
 
 for y in 1:size(origAvCoef)[1], x in 1:size(origAvCoef)[2]
     dist = ((x-smPx_x)^2+(y-smPx_y)^2)^(1/2)
-    wD = weigthsDiff[end]
-    wC = weigthsConc[end]
+    wD = weightsDiffByDist[end]
+    wC = weightsConcByDist[end]
     for (i,d) in enumerate(dists)
         if dist < d
-            wD = weigthsDiff[i-1]
-            wC = weigthsConc[i-1]
+            wD = weightsDiffByDist[i-1]
+            wC = weightsConcByDist[i-1]
             break
         end
     end
-    if(origAvCoef[y,x] != noValue && rIds[y,x]==editRegionId)
-        diffAvCoef[y,x] = min(origAvCoef[y,x]*wD,1.0)
-        concAvCoef[y,x] = min(origAvCoef[y,x]*wC,1.0)
+    if(origAvCoef[y,x] != noValue)
+        if (rIds[y,x]==editRegionId)
+            diffAvCoef[y,x] = min(origAvCoef[y,x]*wD,1.0)
+            concAvCoef[y,x] = min(origAvCoef[y,x]*wC,1.0)
+            weightsD[y,x]   = wD
+            weightsC[y,x]   = wC
+        else
+            weightsD[y,x]   = 1
+            weightsC[y,x]   = 1
+        end
     end
 
     # Debug..
@@ -68,6 +78,15 @@ open(avalCoef_concentratedFileName, "w") do io
              write(io, header)
              writedlm(io,  concAvCoef, ' ')
 end
+open(weightsD_filename, "w") do io
+             write(io, header)
+             writedlm(io,  weightsD, ' ')
+end
+open(weightsC_filename, "w") do io
+             write(io, header)
+             writedlm(io,  weightsC, ' ')
+end
+
 txt = read(avalCoef_diffusedFileName, String)
 open(avalCoef_diffusedFileName, "w") do f
    write(f, replace(txt, "$noValueFloat" => "$noValue"))

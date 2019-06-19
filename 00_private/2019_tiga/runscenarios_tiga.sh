@@ -18,6 +18,7 @@
 ./run_single_scenario.sh 'data/ffsmInput_tiga.ods' 'withSawMill5_diffused'
 ./run_single_scenario.sh 'data/ffsmInput_tiga.ods' 'withSawMill5_concentrated'
 ./run_single_scenario.sh 'data/ffsmInput_tiga.ods' 'withSawMill5_concentrated_normalTc'
+./run_single_scenario.sh 'data/ffsmInput_tiga.ods' 'withSawMill5_concentrated_highTpTc'
 ./run_single_scenario.sh 'data/ffsmInput_tiga.ods' 'withSawMill1_noSpatial'
 ./run_single_scenario.sh 'data/ffsmInput_tiga.ods' 'withSawMill1_diffused'
 ./run_single_scenario.sh 'data/ffsmInput_tiga.ods' 'withSawMill1_concentrated'
@@ -30,4 +31,3 @@
 ./run_single_scenario.sh 'data/ffsmInput_tiga.ods' 'withSawMill4_noSpatial'
 ./run_single_scenario.sh 'data/ffsmInput_tiga.ods' 'withSawMill4_diffused'
 ./run_single_scenario.sh 'data/ffsmInput_tiga.ods' 'withSawMill4_concentrated'
-

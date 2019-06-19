@@ -1008,13 +1008,14 @@ ModelCoreSpatial::runManagementModule(){
                 //Now we add the final payment corresponding to carbon sequestered in long-lived products
                 double pickling_pp = gpd("pickling",regId,priProducts[pp]);
                 double CarbonPrice_cumTp = futureCarbonPrices[floor(cumTp_u)];
-                raw_amount_carbon += CarbonPrice_cumTp * pickling_pp * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc);
+                raw_amount_carbon += CarbonPrice_cumTp * pickling_pp * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc); // T.O.D.O BUG ? This shoudn't be -= ? No, it's the price * long term stored that adds to the payments in terms of ir*price*sequestrered wood
                 // And we finally annualise everything
                 double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
                 anualised_amount += anualised_amount_carbon;
                 //TODO no this is still within a for each product dc class px->expectedReturnsCarbon.push_back(anualised_amount_carbon);
             }
             // End of added-----------------------------------------------------------------------------------
+
 
 
             if (anualised_amount>expReturns) {
