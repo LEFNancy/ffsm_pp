@@ -644,6 +644,20 @@ ModelData::setDefaultProductResourceMatrixLink(){
 }
 
 void
+ModelData::setDefaultProductResourceMatrixLinkRecycling(){
+  msgOut(MSG_DEBUG,"Loading forest resource to primary products io matrix..");
+  LLData table = getTable("sortToProd");
+  for (int i=0; i< table.nrecords();i++){
+    sortToProd F2PDATA;
+    F2PDATA.product = table.getData(i,"product");
+    F2PDATA.tProdOrig = table.getData(i,"tProdOrig");
+    F2PDATA.yearLag = s2i(table.getData(i,"yearLag"));
+    F2PDATA.ratio = s2d(table.getData(i,"ratio"));
+    sortToProdVector.push_back(F2PDATA);
+  }
+}
+
+void
 ModelData::setScenarioProductResourceMatrixLink(){
   if(scenario.forToProdTable==""){return;}
   LLData table = getTable(scenario.forToProdTable, MSG_CRITICAL_ERROR); //this scenario could not have an associated setting sheet

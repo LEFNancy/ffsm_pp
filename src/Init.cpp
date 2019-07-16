@@ -136,6 +136,7 @@ Init::setInitLevel1(){
   MTHREAD->MD->setDefaultPathogenRules();
   MTHREAD->MD->setScenarioPathogenRules();
   MTHREAD->MD->setDefaultProductResourceMatrixLink();
+  MTHREAD->MD->setDefaultProductResourceMatrixLinkRecycling();
   MTHREAD->MD->setScenarioProductResourceMatrixLink();
   MTHREAD->MD->applyDebugMode();
   MTHREAD->GIS->setSpace();

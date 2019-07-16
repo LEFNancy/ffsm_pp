@@ -101,6 +101,7 @@ public:
   void                setDefaultProdData();
   void                setScenarioProdData();
   void                setDefaultProductResourceMatrixLink();
+  void                setDefaultProductResourceMatrixLinkRecycling();
   void                setScenarioProductResourceMatrixLink();
   void                setForestTypes();
   void                setReclassificationRules();
@@ -139,6 +140,7 @@ public:
   vector <string>     getDiameterClasses(bool productionOnly=false);
   /// A simple function to assess if a specified product can be made by a certain forest type and diameter class
   const bool          assessProdPossibility(const string &prod_h, const string &forType_h, const string &dClass_h);
+  const double        assessProdPossibilityRecycling(const string &prod_h, const string &tProdOrig_h, const int yearLag_h);
   const int           getMaxYearUsableDeathTimber(const string &prod_h, const string &forType_h, const string &dClass_h);
   const int           getMaxYearUsableDeathTimber();
   void                setErrorLevel(int errorLevel_h){errorLevel=errorLevel_h;}
@@ -295,7 +297,7 @@ Struct containing the io matrix between the sortable products and the primary pr
 */
 struct sortToProd {
   string                                         product;
-  string                                       pProdOrig;
+  string                                       tProdOrig;
   int                                            yearLag; //< duration of use for the secondary product before being sortable waste
   double                                           ratio; //< ratio that can be sorted (account for dispersion after use...)
 };
