@@ -1,0 +1,14 @@
+EPSG ID: 3035
+projection: 99 (Lambert Azimuthal Equal Area)
+zone:       0
+datum:      etrs89
+ellipsoid:  grs80
+north:      3168000
+south:      1992000
+west:       2976000
+east:       4512000
+nsres:      8000
+ewres:      8000
+rows:       147
+cols:       192
+cells:      28224
