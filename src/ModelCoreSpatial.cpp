@@ -35,6 +35,7 @@
 #include "Gis.h"
 #include "Carbon.h"
 
+//comment
 
 ModelCoreSpatial::ModelCoreSpatial(ThreadManager *MTHREAD_h){
   MTHREAD = MTHREAD_h;
