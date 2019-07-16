@@ -451,6 +451,21 @@ ModelData::assessProdPossibility(const string &prod_h, const string &forType_h, 
   return false;
 }
 
+//for inventory of resources, look for all possible transformed products, all years
+const double
+ModelData::assessProdPossibilityRecycling(const string &prod_h, const string &tProdOrig_h, const int yearLag_h){
+  bool ok=false;
+  for(uint i=0;i<sortToProdVector.size();i++){
+    if(    sortToProdVector[i].product == prod_h
+      && sortToProdVector[i].tProdOrig == tProdOrig_h
+      && sortToProdVector[i].yearLag  == yearLag_h
+    ){
+      return sortToProdVector[i].ratio;
+    }
+  }
+  return 0;
+}
+
 
 const int
 ModelData::getMaxYearUsableDeathTimber(){

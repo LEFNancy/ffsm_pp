@@ -52,6 +52,7 @@ class  Output;
 struct forData;
 struct prodData;
 struct forToProd;
+struct sortToProd; //from consumer sortable secondary products to sorted products
 struct reclRule;
 struct pathRule;
 struct forType;
@@ -218,6 +219,9 @@ private:
   map <string, vector<double> >              prodDataMap; ///< Product data
   vector <forToProd>                     forToProdVector; ///< Vector of coefficients from forest resources to primary products
 
+  vector <sortToProd>                   sortToProdVector; ///< Vector of coefficients from sortable products to primary products
+
+
   vector <IFiles>                           iFilesVector; ///< List of all input files. Simple (struct)
   vector <BasicData>               programSettingsVector; ///< Setting data. Simple (struct)
   vector <LLData>                           LLDataVector; ///< Vector of Low Level Data
@@ -284,6 +288,18 @@ struct forToProd {
  /// The maximum year for a tree collapse that this product can be harvested from. E.g. a 0 value means it can be obtained only from live trees, a 5 years value mean it can be obtained from trees death no longer than 5 years ago.
   int                                           maxYears;
 };
+
+/// IO production matrix between the sortable products and the primary products (struct)
+/**
+Struct containing the io matrix between the sortable products and the primary products.
+*/
+struct sortToProd {
+  string                                         product;
+  string                                       pProdOrig;
+  int                                            yearLag; //< duration of use for the secondary product before being sortable waste
+  double                                           ratio; //< ratio that can be sorted (account for dispersion after use...)
+};
+
 
 /// Forest types (struct)
 /**
