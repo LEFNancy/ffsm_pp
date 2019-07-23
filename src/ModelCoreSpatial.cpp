@@ -308,7 +308,8 @@ ModelCoreSpatial::runMarketModule(){
       */
 
       // Added for carbon project
-      double ff = sc_1*pow((pc_1 - omega * Pct_1)*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma);
+      double pickling_pp = gpd("pickling",r2,priProducts[pp]);
+      double ff = sc_1*pow((pc_1 - omega *(1-pickling_pp) * Pct_1)*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma);
       // -----------------------------------------------
 
       spd(bb,"bb",r2,priProducts[pp],DATA_NOW,true);
@@ -843,7 +844,7 @@ ModelCoreSpatial::runManagementModule(){
 
 
     // Caching futureCarbonPrices..
-    double carbonPrice_NOW = gpd("carbonPrice",r2,"",thisYear);
+    double carbonPrice_NOW = gpd("carbonPrice",r2,"",thisYear+1); // first carbon payments take place the year after replanting
     vector<double> futureCarbonPrices;
     if(flagHartman!="NONE"){
         for (int y=0; y<1000; y++) {

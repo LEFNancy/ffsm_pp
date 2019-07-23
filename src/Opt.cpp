@@ -438,9 +438,10 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     double intRate     = MTHREAD->MD->getDoubleSetting("ir");
     double Pct         = carbonPrice*intRate;
     double omega       = gpd("co2content_products", l2r[r1][r2], priPr[p])/1000;  // Generalised
+    double pickling_p = gpd("pickling",r1,priPr[p]);
     // ------------------------------------------------
 
-    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow((x[gix("pc",r1,r2,p)]-omega*Pct)*pol_mktDirInt_s,sigma);
+    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow((x[gix("pc",r1,r2,p)]-omega*(1-pickling_p)*Pct)*pol_mktDirInt_s,sigma);
     // -----------------------------------------------
 
     //g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)]*pol_mktDirInt_s,sigma);
