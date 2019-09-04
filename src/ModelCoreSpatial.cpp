@@ -279,8 +279,8 @@ ModelCoreSpatial::runMarketModule(){
       double sigma             = gpd("sigma",r2,priProducts[pp]); // elast supply to price
       double pc_1              = gpd("pc",r2,priProducts[pp],previousYear);
       double sc_1              = gpd("sc",r2,priProducts[pp],previousYear);
-      double in                = gpd("in",r2,priProducts[pp])+gpd("in_deathTimber",r2,priProducts[pp]);
-      double in_1              = gpd("in",r2,priProducts[pp],previousYear)+gpd("in_deathTimber",r2,priProducts[pp],previousYear);
+      double in                = gpd("in",r2,priProducts[pp])+gpd("in_deathTimber",r2,priProducts[pp])+gpd("in_recycled",r2,priProducts[pp]);
+      double in_1              = gpd("in",r2,priProducts[pp],previousYear)+gpd("in_deathTimber",r2,priProducts[pp],previousYear)+gpd("in_recycled",r2,priProducts[pp],previousYear);
       double pol_mktDirInt_s   = gpd("pol_mktDirInt_s",r2,priProducts[pp]);
       double pol_mktDirInt_s_1 = gpd("pol_mktDirInt_s",r2,priProducts[pp],previousYear);
       double t1                = gpd("t1",r2,priProducts[pp]);
@@ -1931,6 +1931,9 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
     regPx = REG->getMyPixels();
     vector <double> in_reg(priProducts.size(),0.);             // should have ceated a vector of size priProducts.size(), all filled with zeros
     vector <double> in_deathTimber_reg(priProducts.size(),0.); // should have ceated a vector of size priProducts.size(), all filled with zeros
+    vector <double> in_recycled_reg(priProducts.size(),0.); // should have ceated a vector of size priProducts.size(), all filled with zeros
+
+    // Loop for normal wood from forest...
     for (uint p=0;p<regPx.size();p++){
       Pixel* px = regPx[p];
       //int debugPx = px->getID();
@@ -1949,6 +1952,7 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
     } // end each pixel
 
 
+    // Loop for death timber...
     for(uint pp=0;pp<priProducts.size();pp++){
       vector<string> priProducts_vector;
       priProducts_vector.push_back(priProducts[pp]);
@@ -1965,6 +1969,40 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
       //spd(max(0.001,in_reg.at(pp)),"in",r2,priProducts[pp],DATA_NOW,true);
       spd(in_reg.at(pp),"in",r2,priProducts[pp],DATA_NOW,true);
       spd(in_deathTimber_reg.at(pp),"in_deathTimber",r2,priProducts[pp],DATA_NOW,true);
+      #ifdef QT_DEBUG
+      if (in_reg.at(pp) < -0.0){
+        msgOut(MSG_CRITICAL_ERROR,"Negative inventory");
+      }
+      #endif
+    }
+
+    // Loop for the recycled inventory...
+    for(uint pp=0;pp<priProducts.size();pp++){
+      vector<string> priProducts_vector;
+      priProducts_vector.push_back(priProducts[pp]);
+
+      for(uint pp2=0;pp2<priProducts.size();pp2++){
+          double in_recycled = MD->getAvailableDeathTimber(priProducts_vector,r2,currentYear-1);
+          double ratio = MD->assessProdPossibilityRecycling(priProducts[pp], priProducts[pp2], 1);
+          double prod_base = gpd("dl",r2,priProducts[pp2],currentYear-1)+gpd("da",r2,priProducts[pp2],currentYear-1);
+          in_recycled_reg.at(pp) += ratio*prod_base;
+       }
+     }
+
+
+
+     for(uint pp=0;pp<priProducts.size();pp++){
+
+      // Even if I fixed all the lower bounds to zero in Opt::get_bounds_info still the model
+      // doesn't solve with no-forest in a region.
+      // Even with 0.0001 doesn't solve !!
+      // With 0.001 some scenarios doesn't solve in 2093
+      // With 0.003 vRegFixed doesn't solve in 2096
+      // Tried with 0.2 but no changes, so put it back on 0.003
+      //spd(max(0.001,in_reg.at(pp)),"in",r2,priProducts[pp],DATA_NOW,true);
+      spd(in_reg.at(pp),"in",r2,priProducts[pp],DATA_NOW,true);
+      spd(in_deathTimber_reg.at(pp),"in_deathTimber",r2,priProducts[pp],DATA_NOW,true);
+      spd(in_recycled_reg.at(pp),"in_recycled",r2,priProducts[pp],DATA_NOW,true);
       #ifdef QT_DEBUG
       if (in_reg.at(pp) < -0.0){
         msgOut(MSG_CRITICAL_ERROR,"Negative inventory");
