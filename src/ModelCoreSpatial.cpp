@@ -1981,10 +1981,9 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
       vector<string> priProducts_vector;
       priProducts_vector.push_back(priProducts[pp]);
 
-      for(uint pp2=0;pp2<priProducts.size();pp2++){
-          double in_recycled = MD->getAvailableDeathTimber(priProducts_vector,r2,currentYear-1);
-          double ratio = MD->assessProdPossibilityRecycling(priProducts[pp], priProducts[pp2], 1);
-          double prod_base = gpd("dl",r2,priProducts[pp2],currentYear-1)+gpd("da",r2,priProducts[pp2],currentYear-1);
+      for(uint sp=0;sp<secProducts.size();sp++){
+          double ratio = MD->assessProdPossibilityRecycling(priProducts[pp], secProducts[sp], 1);
+          double prod_base = gpd("dl",r2,secProducts[sp],currentYear-1)+gpd("da",r2,secProducts[sp],currentYear-1);
           in_recycled_reg.at(pp) += ratio*prod_base;
        }
      }
