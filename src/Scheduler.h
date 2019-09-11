@@ -47,8 +47,8 @@ public:
   void                run();
   int                 getIteration(){return iteration;};
   int                 getYear(){return year;}
-  int                 setYear(const int& year_h){year = year_h;}
-  int                 advanceYear(){year += 1;}
+  void                setYear(const int& year_h){year = year_h;}
+  void                advanceYear(){year += 1;}
 
 private:
   int                                iteration;
