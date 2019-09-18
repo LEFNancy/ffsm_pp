@@ -1,2 +1,3 @@
 scenario;year;time;opt flag;iterations;
-default;0000;10:43:9;;;
+default;0000;9:45:7;;;
+debug;0000;11:28:18;;;
