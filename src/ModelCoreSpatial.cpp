@@ -1978,17 +1978,12 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
 
     // Loop for the recycled inventory...
     for(uint pp=0;pp<priProducts.size();pp++){
-      vector<string> priProducts_vector;
-      priProducts_vector.push_back(priProducts[pp]);
-
       for(uint sp=0;sp<secProducts.size();sp++){
           double ratio = MD->assessProdPossibilityRecycling(priProducts[pp], secProducts[sp], 1);
           double prod_base = gpd("dl",r2,secProducts[sp],currentYear-1)+gpd("da",r2,secProducts[sp],currentYear-1);
           in_recycled_reg.at(pp) += ratio*prod_base;
        }
      }
-
-
 
      for(uint pp=0;pp<priProducts.size();pp++){
 
@@ -2027,7 +2022,12 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
       //}
       double bound_alive       = MD->getAvailableAliveTimber(concernedPriProducts_ids,r2); // From px->vol_l, as in "in"
       double bound_deathTimber = MD->getAvailableDeathTimber(concernedPriProducts_ids,r2,currentYear-1); // From deathTimberInventory map
-      double bound_total       = bound_alive + bound_deathTimber;
+      double bound_recycled    = 0;
+      for (uint j=0; j<concernedPriProducts.size(); j++){
+         int seqPP =  concernedPriProducts[j];
+         bound_recycled += in_recycled_reg.at(seqPP);
+      }
+      double bound_total       = bound_alive + bound_deathTimber + bound_recycled;
 
       REG->inResByAnyCombination[i]             = bound_total;
       //REG->inResByAnyCombination_deathTimber[i] = bound_deathTimber;
