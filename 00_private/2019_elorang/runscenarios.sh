@@ -22,7 +22,7 @@
 # parallel --jobs <n of jobs> -a runscenarios.sh 
 # and put something like this in the script
 
-./run_single_scenario.sh 'default'
+#./run_single_scenario.sh 'default'
 ./run_single_scenario.sh 'no_recycling'
 #./run_single_scenario.sh 'inputFile1' 'scenarioName3'
 #./run_single_scenario.sh 'inputFile2' 'scenarioName4'
