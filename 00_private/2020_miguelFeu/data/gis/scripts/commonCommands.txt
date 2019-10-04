@@ -1,0 +1,163 @@
+# Common GRASS GIS commands for various usage
+
+# create a report of each activity by each dtm_classes
+r.report farmActivities_2011_healthCheck,dtm_classes units=h > report_farmActivities_by_altimetry.txt
+
+
+# to comute mortality multipliers based on region and dtm use
+r.mapcalc 'mortality_multiplier200 = if( (regions == 61 || regions == 62 || regions == 81 || regions == 82 || regions == 83 || regions == 71) && (dtm_nonulls <= 500), 2.0, 1.0)'
+
+
+
+#### MAPS RASTERISATION #####
+
+Start GRASS, choose a folder where to keep your data, and click the Location Wizard to create a new Location. Give it a name and select as method to create the location to specify the reference systems from an EPSG code (e.g.  3035).
+To work with the default France data, set the regions details as in Table 20, for all other cases do not set the default region extend and resolution at this time (you'll do later after having imported a shapefile).
+Import a vector shapefile having the correct projection and area boundaries (e.g. the nuts of the country under interest).
+Set the region to match the newly imported vector map, setting the desired resolution (e.g. 8000) and clicking the option to align the region to resolution.
+In order to create the rasters of 8 km with inside the values of the area covered by the  clc06_{311|312|313} layers run the following script: 
+# First set resolution to 20 m..
+g.region -p res=20
+
+# Now rasterize the vector. This will give you as raster of 20m x 20m with values of 400 where the original vector covered, and null otherwise:
+v.to.rast clc06_311_v out=clc06_311_r20m type=area use=val val=400
+v.to.rast clc06_312_v out=clc06_312_r20m type=area use=val val=400
+v.to.rast clc06_313_v out=clc06_313_r20m type=area use=val val=400
+
+# Now change back the resolution to 8km..
+g.region -p res=8000
+
+# Use the "sum" method of r.resamp.stats to get the values for the new, coarse raster. This will leave you with a new raster of res 8km and with values 0-64000000:
+r.resamp.stats clc06_311_r20m out=clc06_311_8km_sqm method=sum
+r.resamp.stats clc06_312_r20m out=clc06_312_8km_sqm method=sum
+r.resamp.stats clc06_313_r20m out=clc06_313_8km_sqm method=sum
+
+## Protected areas by IUCN categories ##
+Nationally designated areas (CDDA) 
+# Source: http://www.eea.europa.eu/data-and-maps/data/nationally-designated-areas-national-cdda-9 (version 12 of 2014)
+
+# Use he same method to compute the area in the pixel of protected areas for each IUCN category
+g.region -p res=20
+v.to.rast cdda_1a_v out=cdda_1a_r20m type=area use=val val=400
+v.to.rast cdda_1b_v out=cdda_1b_r20m type=area use=val val=400
+v.to.rast cdda_2_v out=cdda_2_r20m type=area use=val val=400
+v.to.rast cdda_3_v out=cdda_3_r20m type=area use=val val=400
+v.to.rast cdda_4_v out=cdda_4_r20m type=area use=val val=400
+v.to.rast cdda_5_v out=cdda_5_r20m type=area use=val val=400
+v.to.rast cdda_6_v out=cdda_6_r20m type=area use=val val=400
+# Fill the nulls or the r.mapcalc comand will not work: (attenction this will create huge files!)
+r.null map=cdda_1a_r20m null=0
+r.null map=cdda_1b_r20m null=0
+r.null map=cdda_2_r20m null=0
+r.null map=cdda_3_r20m null=0
+r.null map=cdda_4_r20m null=0
+r.null map=cdda_5_r20m null=0
+r.null map=cdda_6_r20m null=0
+
+# Often there are overlapping, e.g. a national park that embeds a strict reserve 
+# Remove overlappings following the order between IUCN categories:
+# 1a, 3, 4, 1b, 2, 5, 6
+# Set cdda_6_r20m equal to zero if any of the other layer is different than zero
+r.mapcalc 'cdda_6_r20m =                            \
+  if(   cdda_1a_r20m == 0 && cdda_3_r20m  == 0   \
+     && cdda_4_r20m  == 0 && cdda_1b_r20m == 0   \
+     && cdda_2_r20m  == 0 && cdda_5_r20m  == 0,  \
+     cdda_6_r20m,0)'
+r.mapcalc 'cdda_5_r20m =                         \
+  if(   cdda_1a_r20m == 0 && cdda_3_r20m  == 0   \
+     && cdda_4_r20m  == 0 && cdda_1b_r20m == 0   \
+     && cdda_2_r20m  == 0,                       \
+     cdda_5_r20m,0)'     
+r.mapcalc 'cdda_2_r20m =                         \
+  if(   cdda_1a_r20m == 0 && cdda_3_r20m  == 0   \
+     && cdda_4_r20m  == 0 && cdda_1b_r20m == 0,  \
+     cdda_2_r20m,0)'       
+r.mapcalc 'cdda_1b_r20m =                        \
+  if(   cdda_1a_r20m == 0 && cdda_3_r20m  == 0   \
+     && cdda_4_r20m  == 0,                       \
+     cdda_1b_r20m,0)'       
+r.mapcalc 'cdda_4_r20m =                        \
+  if(   cdda_1a_r20m == 0 && cdda_3_r20m  == 0,   \
+     cdda_4_r20m,0)'       
+r.mapcalc 'cdda_3_r20m =    \
+  if(   cdda_1a_r20m == 0,  \
+     cdda_3_r20m,0)' 
+
+# Compute the area of each type of protected area within the 8x8km pixels
+g.region -p res=8000
+r.resamp.stats cdda_1a_r20m out=cdda_1a_r8km method=sum
+r.resamp.stats cdda_1b_r20m out=cdda_1b_r8km method=sum
+r.resamp.stats cdda_2_r20m out=cdda_2_r8km method=sum
+r.resamp.stats cdda_3_r20m out=cdda_3_r8km method=sum
+r.resamp.stats cdda_4_r20m out=cdda_4_r8km method=sum
+r.resamp.stats cdda_5_r20m out=cdda_5_r8km method=sum
+r.resamp.stats cdda_6_r20m out=cdda_6_r8km method=sum
+
+# Compute the availability coefficient based on these coefficients:
+# IUCN Protected Areas Categories System:
+# Ia Strict Nature Reserve              0%  
+# Ib Wilderness Area                    10%              
+# II National Park                      80% 
+# III Natural Monument or Feature       10% 
+# IV Habitat/Species Management Area    10% 
+# V Protected Landscape/ Seascape       90% 
+# VI Protected area with sustainable use of natural resources 95%
+# Altimetry:
+# < 500              100% 
+# 500-1000           90%  
+# 1000-2000          70%  
+# > 2000             30%
+
+r.mapcalc 'avalcoef = \
+if(dtm_nonulls < 500, \
+  1*( \
+    0.0*cdda_1a_r8km+ \
+    0.1*cdda_1b_r8km+ \
+    0.8*cdda_2_r8km+ \
+    0.1*cdda_3_r8km+ \
+    0.1*cdda_4_r8km+ \
+    0.9*cdda_5_r8km+ \
+    0.95*cdda_6_r8km+ \
+    1*(64000000-cdda_1a_r8km-cdda_1b_r8km-cdda_2_r8km-cdda_3_r8km-cdda_4_r8km-cdda_5_r8km-cdda_6_r8km) \
+  )/64000000, \
+  if(dtm_nonulls < 1000, \
+    0.9*( \
+    0.0*cdda_1a_r8km+ \
+    0.1*cdda_1b_r8km+ \
+    0.8*cdda_2_r8km+ \
+    0.1*cdda_3_r8km+ \
+    0.1*cdda_4_r8km+ \
+    0.9*cdda_5_r8km+ \
+    0.95*cdda_6_r8km+ \
+    1*(64000000-cdda_1a_r8km-cdda_1b_r8km-cdda_2_r8km-cdda_3_r8km-cdda_4_r8km-cdda_5_r8km-cdda_6_r8km) \
+  )/64000000, \
+  if(dtm_nonulls < 2000, \
+    0.7*( \
+    0.0*cdda_1a_r8km+ \
+    0.1*cdda_1b_r8km+ \
+    0.8*cdda_2_r8km+ \
+    0.1*cdda_3_r8km+ \
+    0.1*cdda_4_r8km+ \
+    0.9*cdda_5_r8km+ \
+    0.95*cdda_6_r8km+ \
+    1*(64000000-cdda_1a_r8km-cdda_1b_r8km-cdda_2_r8km-cdda_3_r8km-cdda_4_r8km-cdda_5_r8km-cdda_6_r8km) \
+  )/64000000, \
+    0.3*( \
+    0.0*cdda_1a_r8km+ \
+    0.1*cdda_1b_r8km+ \
+    0.8*cdda_2_r8km+ \
+    0.1*cdda_3_r8km+ \
+    0.1*cdda_4_r8km+ \
+    0.9*cdda_5_r8km+ \
+    0.95*cdda_6_r8km+ \
+    1*(64000000-cdda_1a_r8km-cdda_1b_r8km-cdda_2_r8km-cdda_3_r8km-cdda_4_r8km-cdda_5_r8km-cdda_6_r8km) \
+  )/64000000 \
+  )))'
+
+# Export the map in a format readable by FFSM++ (a simple ASCII file)
+r.out.ascii input=avalcoef output=/home/lobianco/git/ffsm_pp/data/gis/france/avalcoef.grd
+
+# Finally replace the NA values in the outputed file with the one used in FFSM++ (default: -9999)
+  
+
+
