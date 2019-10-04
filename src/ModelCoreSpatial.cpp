@@ -308,8 +308,7 @@ ModelCoreSpatial::runMarketModule(){
       */
 
       // Added for carbon project
-      double pickling_pp = gpd("pickling",r2,priProducts[pp]);
-      double ff = sc_1*pow((pc_1 - omega *(1-pickling_pp) * Pct_1)*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma);
+      double ff = sc_1*pow((pc_1 - omega * Pct_1)*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma);
       // -----------------------------------------------
 
       spd(bb,"bb",r2,priProducts[pp],DATA_NOW,true);
@@ -1005,9 +1004,8 @@ ModelCoreSpatial::runManagementModule(){
                     raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y); // raw amount is calculated iteratively
                 }
                 //Now we add the final payment corresponding to carbon sequestered in long-lived products
-                double pickling_pp = gpd("pickling",regId,priProducts[pp]);
                 double CarbonPrice_cumTp = futureCarbonPrices[floor(cumTp_u)];
-                raw_amount_carbon += CarbonPrice_cumTp * pickling_pp * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc); // we add the final payment to raw amount for the final year, outside the FOR loop
+                raw_amount_carbon += CarbonPrice_cumTp * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc); // we add the final payment to raw amount for the final year, outside the FOR loop
             }
             // And we finally annualise everything
             double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
@@ -1124,9 +1122,8 @@ ModelCoreSpatial::runManagementModule(){
                       }
 
                       //Now we add the final payment corresponding to carbon sequestered in long-lived products
-                      double pickling_pp = gpd("pickling",regId,priProducts[pp]);
                       double CarbonPrice_cumTp = futureCarbonPrices[floor(cumTp_u)];
-                      raw_amount_carbon += CarbonPrice_cumTp * pickling_pp * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc);
+                      raw_amount_carbon += CarbonPrice_cumTp * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc);
 
                       // And we annualise carbon revenues and add them to annualised timber revenues
                       double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);

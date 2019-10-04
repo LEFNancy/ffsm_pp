@@ -8,12 +8,12 @@
 # A better approach to run scenarios in parallel is using GNU parallel: you can set the maximum
 # number of processes and then the jobs are put in a queue.
 # In that case run this script as:
-# parallel --jobs 4 -a runscenarios_hartman.sh 
+# parallel --jobs 2 -a runscenarios_hartman.sh 
 # and put something like this in the script
-./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'med_pickling1'
-./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'med_pickling1_y'
-./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'med_pickling05'
-./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'med_pickling05_y'
+./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'default'
+./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'default_y'
+'
+
 
 
 #./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'low15_sh'
