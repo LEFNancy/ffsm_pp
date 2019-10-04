@@ -1,0 +1,59 @@
+# Compute the availability coefficient based on these coefficients:
+# IUCN Protected Areas Categories System:
+# Ia Strict Nature Reserve              0%   0
+# Ib Wilderness Area                    10%  5            
+# II National Park                      80% 30
+# III Natural Monument or Feature       10%  5
+# IV Habitat/Species Management Area    10%  5
+# V Protected Landscape/ Seascape       90% 50
+# VI Protected area with sustainable use of natural resources 95% 60
+# Altimetry:
+# < 500              100% 
+# 500-1000           90%  
+# 1000-2000          70%  
+# > 2000             30%
+
+
+if(dtm_nonulls < 500, 
+  1*( 
+    0.0 *cdda_1a_r8km+ 
+    0.05*cdda_1b_r8km+ 
+    0.3 *cdda_2_r8km+ 
+    0.05*cdda_3_r8km+ 
+    0.05*cdda_4_r8km+ 
+    0.5 *cdda_5_r8km+ 
+    0.50*cdda_6_r8km+
+    1*(64000000-cdda_1a_r8km-cdda_1b_r8km-cdda_2_r8km-cdda_3_r8km-cdda_4_r8km-cdda_5_r8km-cdda_6_r8km) )/64000000, 
+  if(dtm_nonulls < 1000, 
+    0.9*( 
+    0.0 *cdda_1a_r8km+ 
+    0.05*cdda_1b_r8km+ 
+    0.3 *cdda_2_r8km+ 
+    0.05*cdda_3_r8km+ 
+    0.05*cdda_4_r8km+ 
+    0.5 *cdda_5_r8km+ 
+    0.50*cdda_6_r8km+
+    1*(64000000-cdda_1a_r8km-cdda_1b_r8km-cdda_2_r8km-cdda_3_r8km-cdda_4_r8km-cdda_5_r8km-cdda_6_r8km) 
+  )/64000000, 
+  if(dtm_nonulls < 2000, 
+    0.7*( 
+    0.0 *cdda_1a_r8km+ 
+    0.05*cdda_1b_r8km+ 
+    0.3 *cdda_2_r8km+ 
+    0.05*cdda_3_r8km+ 
+    0.05*cdda_4_r8km+ 
+    0.5 *cdda_5_r8km+ 
+    0.50*cdda_6_r8km+
+    1*(64000000-cdda_1a_r8km-cdda_1b_r8km-cdda_2_r8km-cdda_3_r8km-cdda_4_r8km-cdda_5_r8km-cdda_6_r8km) 
+  )/64000000, 
+    0.3*( 
+    0.0 *cdda_1a_r8km+ 
+    0.05*cdda_1b_r8km+ 
+    0.3 *cdda_2_r8km+ 
+    0.05*cdda_3_r8km+ 
+    0.05*cdda_4_r8km+ 
+    0.5 *cdda_5_r8km+ 
+    0.50*cdda_6_r8km+
+    1*(64000000-cdda_1a_r8km-cdda_1b_r8km-cdda_2_r8km-cdda_3_r8km-cdda_4_r8km-cdda_5_r8km-cdda_6_r8km) 
+  )/64000000 
+  )))
