@@ -12,7 +12,6 @@
 # and put something like this in the script
 ./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'default'
 ./run_single_scenario.sh 'data/ffsmInput_carbon_miguel_2013.ods' 'default_y'
-'
 
 
 
