@@ -5,7 +5,9 @@ using DataFrames, DataFramesMeta, LAJuliaUtils, OdsIO, NamedColors,  StatsPlots,
 ### Settings and definitions
 ##########################################################
 
-scenarios = ["default"]
+cd(@__DIR__)
+
+scenarios = ["default","no_recycling"]
 
 allScenariosInAFile = true
 
