@@ -25,7 +25,7 @@
 #./run_single_scenario.sh 'default' & tail -f logs/default.txt
 ./run_single_scenario.sh 'default_prices' & tail -f logs/default_prices.txt
 #./run_single_scenario.sh 'no_recycling' & tail -f logs/no_recycling.txt
-#./run_single_scenario.sh 'inputFile1' 'scenarioName3'
+#./run_single_scenario.sh 'debug'
 #./run_single_scenario.sh 'inputFile2' 'scenarioName4'
 
 
