@@ -103,11 +103,18 @@ ModelCoreSpatial::initMarketModule(){
     //RPAR('pl',i,p_tr,t-1)   =  sum(p_pr, a(p_pr,p_tr)*RPAR('pl',i,p_pr,t-1))+m(i,p_tr);
     for(uint sp=0;sp<secProducts.size();sp++){
       double value = 0;
+      // 20191105: decomposing m_tp in m_tp,pp (keeping the unit in transformed product. Using a as weigth)
+      double a_sumpp = 0;
+      for (uint pp=0;pp<priProducts.size();pp++){
+          a_sumpp += gpd("a",r2,priProducts[pp],secondYear,secProducts[sp]);
+      }
       for (uint pp=0;pp<priProducts.size();pp++){
         value += gpd("pl",r2,priProducts[pp],secondYear)*
         gpd("a",r2,priProducts[pp],secondYear,secProducts[sp]);
+        value +=  gpd("m",r2,secProducts[sp],secondYear,priProducts[pp])
+                * gpd("pol_trSub",r2,secProducts[sp],secondYear)
+                * gpd("a",r2,priProducts[pp],secondYear,secProducts[sp])/a_sumpp;
       }
-      value += (gpd("m",r2,secProducts[sp],secondYear)* gpd("pol_trSub",r2,secProducts[sp],secondYear));
       spd(value,"pl",r2,secProducts[sp],secondYear,true);
     }
     // RPAR('dl',i,p_pr,t-1)   =  sum(p_tr, a(p_pr,p_tr)*RPAR('sl',i,p_tr,t-1));
@@ -2722,11 +2729,18 @@ ModelCoreSpatial::computeEconomicBalances(){
       double dc                = gpd("dc",regId,secProducts[p]);
       double dc_1              = gpd("dc",regId,secProducts[p],previousYear);
       double dc0               = gpd("dc",regId,secProducts[p],secondYear);
-      double m                 = gpd("m",regId,secProducts[p]);
+      // Weighted m (added 20191105 to differentiate between pp using a as weigth):
+      double a_sumpp           = 0;
+      for (uint pp=0;pp<priProducts.size();pp++){
+          a_sumpp += gpd("a",regId,priProducts[pp],DATA_NOW,secProducts[p]);
+      }
+      double m_weigthed        = 0;
+      for (uint pp=0;pp<priProducts.size();pp++){
+          m_weigthed += gpd("a",regId,priProducts[pp],DATA_NOW,secProducts[p]) * gpd("m",regId,secProducts[p],DATA_NOW,priProducts[pp])/a_sumpp;
+      }
       double sl                = gpd("sl",regId,secProducts[p]); // sl because dl include also the production from byproduct that has not subsides in the model
-
       double polBal_mktDirInt_d = pc * (pol_mktDirInt_d - 1) * dc;
-      double polBal_trSub       = m * (pol_trSub-1) * sl;
+      double polBal_trSub       = m_weigthed * (pol_trSub-1) * sl;
       double trs                = 0.5; // 0.1: we consider 90 percent of the demand integral
       double surplus_cons       =   pc_1
                                   * pol_mktDirInt_d_1
