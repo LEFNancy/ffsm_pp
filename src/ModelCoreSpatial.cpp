@@ -2380,6 +2380,9 @@ ModelCoreSpatial::registerCarbonEvents(){
       // but we consider those coming from other regions
       double consumption = gpd("dl",regIds2[i],secProducts[p],DATA_NOW); // dl = sl + net regional imports
       MTHREAD->CBAL->registerProducts(consumption, regIds2[i], secProducts[p]); // register new stock
+
+
+
     }
 
   }
