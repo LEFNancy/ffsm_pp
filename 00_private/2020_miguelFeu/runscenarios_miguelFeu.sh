@@ -11,6 +11,7 @@
 # parallel --jobs <n of jobs> -a runscenarios_tiga.sh
 # and put something like this in the script
 
+#./run_single_scenario.sh 'data/ffsmInput_miguelFeu.ods' 'debug'
 ./run_single_scenario.sh 'data/ffsmInput_miguelFeu.ods' 'default'
 
 
