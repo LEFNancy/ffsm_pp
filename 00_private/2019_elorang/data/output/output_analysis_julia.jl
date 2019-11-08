@@ -39,6 +39,7 @@ pgroup_map = Dict(
  "pulpW"             => "secProd",
  "pannels"           => "secProd",
  "sortedPulpWFuelW"  => "priProd",
+ "recycledPulpW"     => "secProd",
 )
 
 cbal_map = Dict(
