@@ -28,7 +28,7 @@
 #./run_single_scenario.sh 'cost_recy_3' #& tail -f logs/cost_recy_3.txt
 #./run_single_scenario.sh 'cost_recy_4' #& tail -f logs/cost_recy_4.txt
 #./run_single_scenario.sh 'no_recycling' & tail -f logs/no_recycling.txt
-#./run_single_scenario.sh 'debug' & tail -f logs/debug.txt
+#./run_single_scenario.sh 'debug' #& tail -f logs/debug.txt
 #./run_single_scenario.sh 'inputFile2' 'scenarioName4'
 
 
