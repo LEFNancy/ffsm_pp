@@ -198,7 +198,7 @@ ModelCoreSpatial::initMarketModule(){
 
       spd(t1,"t1",r2,priProducts[pp],firstYear,true);
      //spd(r1,"r1",r2,priProducts[pp],firstYear,true);
-      spd(sc,"sc",r2,priProducts[pp],secondYear,true); 
+      spd(sc,"sc",r2,priProducts[pp],secondYear,true);
       spd(pc,"pc",r2,priProducts[pp],secondYear,true);
       spd(pw,"pw",r2,priProducts[pp],secondYear,true);
     }
@@ -844,12 +844,15 @@ ModelCoreSpatial::runManagementModule(){
     regPx = REG->getMyPixels();
 
     string flagHartman = MTHREAD->MD->getStringSetting("flagHartman",DATA_NOW,r2);
+    double pickling = MTHREAD->MD->getDoubleSetting("pickling"); // pickling factor used to factor in sequestration ex-situ and substitution effects
+
     //double exogenousReference = MTHREAD->MD->getBoolSetting("exogenousReference"); // new setting to distinguish between exogenous and endogenous carbon reference levels
 
 
 
 
     // Caching futureCarbonPrices..
+    double carbonPrice_NOW = gpd("carbonPrice",r2,"",thisYear+1); // first carbon payments take place the year after replanting
     vector<double> futureCarbonPrices;
     if(flagHartman!="NONE"){
         for (int y=0; y<1000; y++) {
@@ -924,6 +927,8 @@ ModelCoreSpatial::runManagementModule(){
       px->optDc.clear();
       px->optFtChosen.clear();
       px->optDcChosen.clear();
+      px->expectedAnnualIncome_carbon.clear();
+      px->expectedAnnualIncome_timber.clear();
       resetMapValues(hAreaByFTypeGroup,0.0);
       double totalHarvestedAreaOrig = vSum(px->hArea); // still need to remove the forest decrease areas..
       double totalHarvestedArea     = 0.0;             // account for (eventual) forest decreases area)
@@ -977,7 +982,9 @@ ModelCoreSpatial::runManagementModule(){
        // End of added
 
 
-        double expReturns = 0.;
+        double expReturns = std::numeric_limits<double>::lowest(); // these are reset at the beginning of each forest type, and need to be declared before the next loop
+        double expReturns_carbon = std::numeric_limits<double>::lowest();
+        double expReturns_timber = std::numeric_limits<double>::lowest();
         int optDc = 0; // "optimal diameter class", the one on which the expected returns are computed
         for (uint u=0; u<dClasses.size(); u++){
           string dc = dClasses[u];
@@ -992,28 +999,29 @@ ModelCoreSpatial::runManagementModule(){
             double sa            = gpd("sa",regId,priProducts[pp]);
             double pw_exp        = computeExpectedPrice(pl, worldCurPrice, worldFutPrice, sl, sa, px->expTypePrices); //20141030: added the expected price!
             double raw_amount = finalHarvestFlag*pw_exp*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
-            double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u, ir);
+            double anualised_amount_timber =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u, ir); // expected revenues from timber
+            double anualised_amount = anualised_amount_timber; // total expected revenues (for now there is no carbon payment yet)
 
             // If carbon payments are included and the reference is an exogenous fixed value (e.g. year of reference), we compute revenues from carbon after retrieving reference from input files
             // Added for carbon project-------------------------------------------------------------------------
+            double raw_amount_carbon = 0; // declared and initialized before IF statement and FOR loop
             if (flagHartman =="EXO") {
-                double raw_amount_carbon = 0;
+                double carbonPrice_y = carbonPrice_NOW;
                 for (int y=0; y<cumTp_u; y++) {
-                    double carbonPrice_y = futureCarbonPrices[y];
+                    //double carbonPrice_y = futureCarbonPrices[y];
                     double carbonRef = futureCarbonRef[j][y];
-                    double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y]);
+                    double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y], regId);
                     double carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - carbonRef);
-                    raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y);
+                    raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y); // raw amount is calculated iteratively
                 }
                 //Now we add the final payment corresponding to carbon sequestered in long-lived products
-                double pickling_pp = gpd("pickling",regId,priProducts[pp]);
-                double CarbonPrice_cumTp = futureCarbonPrices[floor(cumTp_u)];
-                raw_amount_carbon += CarbonPrice_cumTp * pickling_pp * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc); // T.O.D.O BUG ? This shoudn't be -= ? No, it's the price * long term stored that adds to the payments in terms of ir*price*sequestrered wood
-                // And we finally annualise everything
-                double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
-                anualised_amount += anualised_amount_carbon;
-                //TODO no this is still within a for each product dc class px->expectedReturnsCarbon.push_back(anualised_amount_carbon);
+                //double CarbonPrice_cumTp = futureCarbonPrices[floor(cumTp_u)]; INSTEAD WE USE CURRENT CARBON PRICE
+                raw_amount_carbon += pickling * carbonPrice_y * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc); // we add the final payment to raw amount for the final year, outside the FOR loop
             }
+            // And we finally annualise everything
+            double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
+            anualised_amount += anualised_amount_carbon; // anualised_amount already had the timber revenues in it, now we add carbon
+
             // End of added-----------------------------------------------------------------------------------
 
 
@@ -1021,13 +1029,18 @@ ModelCoreSpatial::runManagementModule(){
             if (anualised_amount>expReturns) {
               expReturns=anualised_amount;
               optDc = u;// this is the index of the optimal dc, not the dc itself
+              expReturns_carbon = anualised_amount_carbon;
+              expReturns_timber = anualised_amount_timber;
             }
-          }
-        }
+          } // end for each product
+        } // end for each diameter class
 
         //results are pushed back to pixel only if they are final
         if (flagHartman=="NONE" || flagHartman=="EXO") {
+            px->expectedAnnualIncome_timber.push_back(expReturns_timber);
+            px->expectedAnnualIncome_carbon.push_back(expReturns_carbon);
             px->expectedReturnsNotCorrByRa.push_back(expReturns);
+            px->optDc.push_back(optDc);
         }
 
         //calculation of expected returns with risk aversion
@@ -1038,12 +1051,10 @@ ModelCoreSpatial::runManagementModule(){
           double origExpReturns = expReturns;
           expReturns = origExpReturns * (1.0 - ra*cumMort);
         }
-        px->expectedReturns.push_back(expReturns);
-        px->optDc.push_back(optDc);
 
         // results are pushed back to pixel only if they are final
         if (flagHartman=="NONE" || flagHartman=="EXO") {
-            px->expectedReturns.push_back(expReturns);
+            px->expectedReturns.push_back(expReturns); // if there is no risk version, then expectedReturns and expectedReturnsNotCorrByRa will have the same value
         }
 
         expectedReturns.at(j) = expReturns;
@@ -1069,7 +1080,7 @@ ModelCoreSpatial::runManagementModule(){
           // STEP 2 - calculate expected carbon contents on the optimal choice without carbon payments, to use as reference
           vector <double> FutureCarbonContent_opt;
           for (int y=0; y<cumTP_opt; y++) {
-              double expectedVHa_opt_y = getVHaByYear(px, ft_opt_index, y, futureExtraBiomass_ratio[ft_opt_index][y]);
+              double expectedVHa_opt_y = getVHaByYear(px, ft_opt_index, y, futureExtraBiomass_ratio[ft_opt_index][y], regId);
               FutureCarbonContent_opt.push_back(co2content_inventory_opt*expectedVHa_opt_y);
           }
           int cumTP_opt_floor = FutureCarbonContent_opt.size(); // need to get an integer value to compare rotation lengths
@@ -1080,7 +1091,9 @@ ModelCoreSpatial::runManagementModule(){
               string ft = fTypes[j];
               double co2content_inventory = gfd("co2content_inventory",r2,ft,"",DATA_NOW)/1000; // kilos to tons
 
-              double expReturns_hartman = 0.;
+              double expReturns_hartman = std::numeric_limits<double>::lowest();
+              double expReturns_timber_hartman = std::numeric_limits<double>::lowest();
+              double expReturns_carbon_hartman=std::numeric_limits<double>::lowest();
               int optDc_hartman = 0; // "optimal diameter class", the one on which the expected returns are computed
               for (uint u=0; u<dClasses.size(); u++){
                   string dc = dClasses[u];
@@ -1096,13 +1109,15 @@ ModelCoreSpatial::runManagementModule(){
                       double sa            = gpd("sa",regId,priProducts[pp]);
                       double pw_exp        = computeExpectedPrice(pl, worldCurPrice, worldFutPrice, sl, sa, px->expTypePrices); //20141030: added the expected price!
                       double raw_amount = finalHarvestFlag*pw_exp*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
-                      double anualised_amount =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u, ir);
+                      double anualised_amount_timber =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u, ir);
+                      double anualised_amount = anualised_amount_timber;
 
                       // Now we calculate expected revenues from carbon
-                      double raw_amount_carbon = 0;
-                      for (int y=0; y<cumTp_u; y++) { // calculate yearly payment for each year of the rotation
-                          double carbonPrice_y = futureCarbonPrices[y];
-                          double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y]);
+                      double raw_amount_carbon=0;
+                      double carbonPrice_y = carbonPrice_NOW; //carbon price is by default current price, ie it is assumed to be constant from owner's perspective
+                      for (int y=0; y<cumTp_u; y++) {
+                          // calculate yearly payment for each year of the rotation
+                          double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y], regId);
                           double carbonPayment_y;
                           if (y==0) { // we use euclidian division, so an exception must be made when denominator is equal to 0
                               carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y]);
@@ -1117,10 +1132,11 @@ ModelCoreSpatial::runManagementModule(){
 
                           raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y); // all payments put at end of rotation
                       }
+
                       //Now we add the final payment corresponding to carbon sequestered in long-lived products
-                      double pickling_pp = gpd("pickling",regId,priProducts[pp]);
-                      double CarbonPrice_cumTp = futureCarbonPrices[floor(cumTp_u)];
-                      raw_amount_carbon += CarbonPrice_cumTp * pickling_pp * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc);
+                      //double CarbonPrice_cumTp = futureCarbonPrices[floor(cumTp_u)]; INSTEAD WE USE CURRENT CARBON PRICE
+                      raw_amount_carbon += pickling * carbonPrice_y * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc);
+
                       // And we annualise carbon revenues and add them to annualised timber revenues
                       double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
                       anualised_amount += anualised_amount_carbon;
@@ -1129,23 +1145,32 @@ ModelCoreSpatial::runManagementModule(){
                       // If the new expected revenues is higher than previously, we store the maximum value and corresponding dc.
                       if (anualised_amount>expReturns_hartman) {
                           expReturns_hartman=anualised_amount;
+                          expReturns_carbon_hartman = anualised_amount_carbon;
+                          expReturns_timber_hartman = anualised_amount_timber;
                           optDc_hartman = u;
                       }
                   } // end foreach primary product
               } // end foreach DC
 
               // Here we send results to pixel because they are final
+              px->expectedAnnualIncome_timber.push_back(expReturns_timber_hartman);
+              px->expectedAnnualIncome_carbon.push_back(expReturns_carbon_hartman);
               px->expectedReturnsNotCorrByRa.push_back(expReturns_hartman);
+              px->optDc.push_back(optDc_hartman);
+
+              // And with risk aversion
               if(MD->getBoolSetting("heterogeneousRiskAversion",DATA_NOW)){
                   double ra = px->getDoubleValue("ra");
                   double cumMort = 1-px->cumAlive_exp.at(j).at(optDc_hartman);
                   //cout << px->getID() << "\t" << ft << "\t\t" << "optDc" << optDc << "\t" << cumMort << endl;
                   double origExpReturns_hartman = expReturns_hartman;
                   expReturns_hartman = origExpReturns_hartman * (1.0 - ra*cumMort);
-              }              
+              }
+
               px->expectedReturns.push_back(expReturns_hartman);
 
               // Now we replace results from the previous loop with the new ones
+
               expectedReturns.at(j) = expReturns_hartman;
               rotation_dc.at(j) = optDc_hartman;
 
@@ -2733,9 +2758,57 @@ ModelCoreSpatial::getAvgAgeByDc(Pixel* px, int ft, int dc){
 
 
 // added for carbon project
-/**
+
+double
+ModelCoreSpatial::getVHaByYear(const Pixel* px, const int& ft, const int& year, const double& extraBiomass_ratio, const int& regId ) const {
+     // This function computes and send back the expected volume/ha in a forest type after a specific amount of years
+     // It uses expected volumes/ha at each diameter class, and makes a linear interpolation between the corresponding times of passage
+     // Ancient version was a "stairs" function of time, now it is a succession of linear approximations
+
+     double vHa = 0;
+     int thisYear = MTHREAD->SCD->getYear();
+
+     // This loop goes through all diameter classes to find the last one that was reached at year tested
+     for (int u = 0; u<dClasses.size(); u++){
+         // We retrieve the expected time of passage for the current diameter class
+         // and we compare it to the year tested
+         double cumTP = px->cumTp_exp[ft][u];
+         if (year>=cumTP) {
+             // Forest has already reached this class,
+             // We do nothing and go to the next one
+         }
+         else {// Forest has not reached this class yet, we stop here
+         // Assumption : Volume growth is a linear approximation between volume at previous DC and at current DC
+         // There would be a problem if "year" was negative, but it should not happen since year starts at 0
+             double cumTP_plus = px->cumTp_exp[ft][u];
+             double cumTP_minus = px->cumTp_exp[ft][u-1];
+             double volHa_plus = px->vHa_exp[ft][u];
+             double volHa_minus = px->vHa_exp[ft][u-1];
+             double slope = (volHa_plus - volHa_minus)/(cumTP_plus - cumTP_minus);
+
+             vHa = (volHa_minus + (year-cumTP_minus)*slope)*(1+extraBiomass_ratio);
+             return vHa;
+         }
+     }
+     // if we arrive here, we have exited the loop
+     // and the forest has reached the last diameter class
+     int dc = dClasses.size()-1; // index of the last diameter class
+     double mortCoeff = gfd("mort",regId,fTypes[ft],dClasses[dc],thisYear); // mortality rate of the last diameter class
+     double cumTP_max = px-> cumTp_exp[ft][dc]; // cumulative TP to reach last diameter class
+     double time_elapsed = year - cumTP_max; // time since the last class was reached
+     double volHa_max = px->cumTp_exp[ft][dc]; // volume/ha when the last class was reached
+
+     // Now we compute the volume/ha at the year tested
+     // Assumption: trees don't grow anymore but slowly die according to mortality rate
+     vHa = volHa_max*pow(1-mortCoeff,time_elapsed)*(1+extraBiomass_ratio);
+     return vHa;
+} // end of function
+
+
+
+/** ANCIENT VERSION OF FUNCTION. VOLUME WAS A STAIRS FUNCTION OF TIME
   * Return the Volume/ha in a forest after a given number of year after planting, for a specific forest type
-  */
+
 double
 ModelCoreSpatial::getVHaByYear(const Pixel* px, const int& ft, const int& year, const double& extraBiomass_ratio) const {
     double vHa = 0;
@@ -2752,3 +2825,4 @@ ModelCoreSpatial::getVHaByYear(const Pixel* px, const int& ft, const int& year, 
     }
     return vHa;
 }
+*/

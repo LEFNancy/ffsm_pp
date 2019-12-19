@@ -1032,6 +1032,25 @@ Output::printDebugPixelValues(){
         }
         out << "\n";
 
+        out << common <<"expectedAnnualIncome_timber" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+              out << d;
+          }
+          out << px->expectedAnnualIncome_timber[f] << d;
+        }
+        out << "\n";
+
+        out << common <<"expectedAnnualIncome_carbon" << d;
+        for(uint f=0;f<fTypes.size();f++){
+          for(uint u=0;u<dClasses.size()-1;u++){
+              out << d;
+          }
+          out << px->expectedAnnualIncome_carbon[f] << d;
+        }
+        out << "\n";
+
+
         out << common <<"expectedReturnsNotCorrByRa" << d;
         for(uint f=0;f<fTypes.size();f++){
           for(uint u=0;u<dClasses.size()-1;u++){

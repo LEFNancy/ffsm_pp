@@ -120,6 +120,8 @@ public:
   vector <int>                             optDc; // The "optimal" diameter class chosen in project evaluation for the regeneration. By ft evaluated (not necessarily those then chosen)
   vector <int>                       optFtChosen; // The ft (index) chosen as optimal in regeneration for each ft in input (harvested)
   vector <int>                       optDcChosen; // The "optimal" diameter class of the ft chosen for regeneration. By ft in input (harvested)
+  vector <double>                    expectedAnnualIncome_carbon; //by ft
+  vector <double>                    expectedAnnualIncome_timber; // by ft
 
   vector <double>     expectedReturnsNotCorrByRa; ///< by ft. Attenction, reported expReturns at "forest" level (compared with those at forest type level) do NOT include ra
 
