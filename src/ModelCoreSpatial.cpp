@@ -90,7 +90,7 @@ ModelCoreSpatial::runSimulationYear(){
   sumRegionalForData();        // only for printing stats as forest data is never used at regional level
   registerCarbonEvents();
   computeEconomicBalances();   // policy costs and welfare analysis
-  MTHREAD->DO->print();
+  MTHREAD->DO->print(false);
 }
 
 void
