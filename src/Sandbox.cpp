@@ -598,6 +598,15 @@ Sandbox::basicTest(){
 void
 Sandbox::fullTest(){
 
+ /*
+  // Testing adfditional Mortality..
+  Pixel* px = MTHREAD->GIS->getPixel(8967);
+  double myAddMortality =  px->getSTData("additionalMortality", "", 2013, "d2", 0.0);
+  cout << "Additional mortality: " << myAddMortality <<endl;
+  exit(0);
+*/
+
+
   /*
   // checking that the overriding works also for secondary dimension
   // yep, it works!! ;-)
