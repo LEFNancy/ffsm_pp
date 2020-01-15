@@ -1711,6 +1711,9 @@ ModelCoreSpatial::computeCumulativeData(){
           double cumAlive_u, cumAlive_exp_u;
           pathMort_now = px->getPathMortality(ft,dc,DATA_NOW);
           pathMort_t0 = px->getPathMortality(ft,dc,firstYear);
+          double additionalMortality_now     = px->getSTData("additionalMortality", ft, DATA_NOW, dc, 0.0);
+          double additionalMortality_t0     = px->getSTData("additionalMortality", ft, firstYear, dc, 0.0);
+
           // only cumTp is depending for the expectations, as it is what it is used by owner to calculate return of investments.
           // the tp, beta and mort coefficients instead are the "real" ones as predicted by scientist for that specific time
 
@@ -1742,7 +1745,7 @@ ModelCoreSpatial::computeCumulativeData(){
               vHa_u = gfd("entryVolHa",regId,ft,"",thisYear);
               mort = 0.; // not info about mortality first diameter class ("00")
             } else {
-              mort = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1],thisYear)*mortCoef_multiplier_now+pathMort_now,tp); // mortality of the previous diameter class
+              mort = 1-pow(1-min(gfd("mortCoef",regId,ft,dClasses[u-1],thisYear)*mortCoef_multiplier_now+pathMort_now+additionalMortality_now,1.0),tp); // mortality of the previous diameter class
               beta = gfd("betaCoef",regId,ft,dc, thisYear)*betaCoef_multiplier_now;
               vHa_u = vHa_temp[u-1]*beta*(1-mort);
             }
@@ -1765,7 +1768,7 @@ ModelCoreSpatial::computeCumulativeData(){
                 vHa_u_exp = gfd("entryVolHa",regId,ft,"",firstYear);
                 mort_exp = 0.; // not info about mortality first diameter class ("00")
               } else {
-                mort_exp = 1-pow(1-gfd("mortCoef",regId,ft,dClasses[u-1], firstYear)*mortCoef_multiplier_t0+pathMort_t0,tp_exp); // mortality rate of previous diameter class
+                mort_exp = 1-pow(1-min(gfd("mortCoef",regId,ft,dClasses[u-1], firstYear)*mortCoef_multiplier_t0+pathMort_t0+additionalMortality_t0,1.0),tp_exp); // mortality rate of previous diameter class
                 beta_exp = gfd("betaCoef",regId,ft,dc, firstYear)*betaCoef_multiplier_t0;
                 vHa_u_exp = vHa_exp_temp[u-1]*beta_exp*(1-mort_exp);
               }
@@ -1783,10 +1786,11 @@ ModelCoreSpatial::computeCumulativeData(){
                 vHa_u_exp = vHa_u_fullExp*expType+vHa_u_noExp*(1-expType);
                 mort_exp = 0.; // not info about mortality first diameter class ("00")
               } else {
-                mort_noExp = 1-pow(1-min(1.0,gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW)*mortCoef_multiplier_now+pathMort_now), tp_noExp); // mortCoef is a yearly value. Mort coeff between class is 1-(1-mortCoeff)^tp
+                mort_noExp = 1-pow(1-min(1.0,gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW)*mortCoef_multiplier_now+pathMort_now+additionalMortality_now), tp_noExp); // mortCoef is a yearly value. Mort coeff between class is 1-(1-mortCoeff)^tp
                 double mortCoef_multiplier_dynamic = px->getMultiplier("mortCoef_multiplier",ft,thisYear+ceil(cumTp_exp_temp[u-1]));
-                double pathMort_dynamic = px->getPathMortality(ft,dc,thisYear+ceil(cumTp_exp_temp[u-1]));
-                mort_fullExp = 1-pow(1-min(1.0,gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic+pathMort_dynamic),tp_fullExp); // mortality of the previous diameter class
+                double pathMort_dynamic            = px->getPathMortality(ft,dc,thisYear+ceil(cumTp_exp_temp[u-1]));
+                double additionalMortality_dynamic = px->getSTData("additionalMortality", ft, thisYear+ceil(cumTp_exp_temp[u-1]), dc, 0.0);
+                mort_fullExp = 1-pow(1-min(1.0,gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic+pathMort_dynamic+additionalMortality_dynamic),tp_fullExp); // mortality of the previous diameter class
                 //double debug1 = gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]));
                 //double debug2 = debug1*mortCoef_multiplier_dynamic+pathMort_dynamic;
                 //double debug3 = min(1.0,debug2);
@@ -1907,6 +1911,7 @@ ModelCoreSpatial::cachePixelExogenousData(){
 
         double tp_multiplier_now       = px->getMultiplier("tp_multiplier",ft,DATA_NOW);
         double mortCoef_multiplier_now = px->getMultiplier("mortCoef_multiplier",ft,DATA_NOW);
+
         double betaCoef_multiplier_now = px->getMultiplier("betaCoef_multiplier",ft,DATA_NOW);
         double avalCoef_ft             = applyAvalCoef?px->getSTData("avalCoef",ft,DATA_NOW):1.0;
 
@@ -1917,6 +1922,7 @@ ModelCoreSpatial::cachePixelExogenousData(){
         for (uint u=0; u<dClasses.size(); u++){
           string dc = dClasses[u];
           double pathMortality           = px->getPathMortality(ft,dc,DATA_NOW);
+          double additionalMortality     = px->getSTData("additionalMortality", ft, DATA_NOW, dc, 0.0);
           double tp, beta_real, mort_real;
           if (u==0){
             // tp of first diameter class not making it change across the time dimension, otherwise problems in getting the rigth past
@@ -1927,7 +1933,7 @@ ModelCoreSpatial::cachePixelExogenousData(){
             tp  = gfd("tp",regId,ft,dClasses[u],DATA_NOW)*tp_multiplier_now; // tp is defined also in the first diameter class, as it is the years to reach the NEXT diameter class
           }
           beta_real = u?gfd("betaCoef",regId,ft,dClasses[u],DATA_NOW)*betaCoef_multiplier_now:0;
-          mort_real = min(u?gfd("mortCoef",regId,ft,dClasses[u],DATA_NOW)*mortCoef_multiplier_now+pathMortality :0,1.0);  //Antonello, bug fixed 20160203: In any case, natural plus pathogen mortality can not be larger than 1!
+          mort_real = min(u?gfd("mortCoef",regId,ft,dClasses[u],DATA_NOW)*mortCoef_multiplier_now+pathMortality+additionalMortality :0,1.0);  //Antonello, bug fixed 20160203: In any case, natural plus pathogen mortality can not be larger than 1!
           tp_byu.push_back(tp);
           beta_byu.push_back(beta_real);
           mort_byu.push_back(mort_real);

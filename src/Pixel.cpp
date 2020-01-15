@@ -236,7 +236,7 @@ It queries the layer framework with the following logic:
 @param parName    Parameter name (exact match)
 @param forName    Forest type (exact match or look for "")
 @param year       Year (exact match or look for the highest lower value). Accept enum DATA_NOW
-@param d2         Optional dimension (exact match, string. Default = "")
+@param d2         Optional dimension (exact match or look for "", string. Default = "")
 @param naToReturn Optional value to return if no match (default to secnario-specific novalue)
 
 
@@ -281,8 +281,38 @@ Pixel::getSTData(const string& parName, const string& forName, int year, const s
         //}
         return i2->second;
       } else {
-        //cout << "NOTM:  " << search_for <<", "<< i->first << endl;
-        return naToReturn;
+          // An exact match in forName or noforName has not being found, look for no dc:
+          string search_for2 = parName+"#"+forName+"#"+"#"+i2s(year);
+          map <string,double>::const_iterator i2 = values.upper_bound(search_for2); //return the position always upper to the found one, even if it's an equal match.
+          if(i2!= values.begin())  i2--; // this rewind the position to the one just before or equal
+          const string& key2 = i2->first;
+          string search_base2 = search_for2.substr(0,search_for2.size()-4);
+          if (key2.compare(0, search_base2.size(), search_base2) == 0){
+            //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
+            //if(i->second != 1){
+            //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
+            //  exit(0);
+            //}
+            return i2->second;
+          } else {
+              // An exact match, or partial match in forName or dc alones has not being found, look for no forName AND no dc:
+              string search_for2 = parName+"#"+"#"+"#"+i2s(year);
+              map <string,double>::const_iterator i2 = values.upper_bound(search_for2); //return the position always upper to the found one, even if it's an equal match.
+              if(i2!= values.begin())  i2--; // this rewind the position to the one just before or equal
+              const string& key2 = i2->first;
+              string search_base2 = search_for2.substr(0,search_for2.size()-4);
+              if (key2.compare(0, search_base2.size(), search_base2) == 0){
+                //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
+                //if(i->second != 1){
+                //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
+                //  exit(0);
+                //}
+                return i2->second;
+              } else {
+                 //cout << "NOTM:  " << search_for <<", "<< i->first << endl;
+                 return naToReturn;
+              }
+           }
       }
   }
 }
