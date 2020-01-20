@@ -20,15 +20,19 @@
 # number of processes and then the jobs are put in a queue.
 # In that case run this script as:
 # parallel --jobs <n of jobs> -a runscenarios.sh 
-# and put something like this in the script    tail -f logs/no_recycling.txt
+# and put something like this in the script    
 
-#./run_single_scenario.sh 'default' #&tail -f logs/default.txt
-#./run_single_scenario.sh 'cost_recy_1' #& tail -f logs/cost_recy_1.txt
-#./run_single_scenario.sh 'cost_recy_2' #& tail -f logs/cost_recy_2.txt
-#./run_single_scenario.sh 'cost_recy_3' #& tail -f logs/cost_recy_3.txt
-#./run_single_scenario.sh 'cost_recy_4' #& tail -f logs/cost_recy_4.txt
-#./run_single_scenario.sh 'no_recycling' #& tail -f logs/no_recycling.txt
-./run_single_scenario.sh 'debug' #& tail -f logs/debug.txt
+#./run_single_scenario.sh 'default'
+#./run_single_scenario.sh 'cost_recy_1' 
+#./run_single_scenario.sh 'cost_recy_2' 
+#./run_single_scenario.sh 'cost_recy_3' 
+#./run_single_scenario.sh 'cost_recy_4' 
+.run_single_scenario.sh 'es_d_01'
+.run_single_scenario.sh 'es_d_1'
+.run_single_scenario.sh 'es_d_m01'
+.run_single_scenario.sh 'es_d_m1'
+#./run_single_scenario.sh 'no_recycling' 
+#./run_single_scenario.sh 'debug' 
 #./run_single_scenario.sh 'inputFile2' 'scenarioName4'
 
 
