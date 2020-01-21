@@ -59,6 +59,7 @@ public:
   void                  registerHarvesting(const double & value, const int & regId, const string &fType);   ///< Registers the harvesting of trees increasing the value of cumEmittedForOper
   void                  registerDeathBiomass(const double &value, const int & regId, const string &fType);  ///< Registers the "death" of a given amount of biomass, storing it in the deathBiomass map
   void                  registerProducts(const double &value, const int & regId, const string &productName);///< Registers the production of a given amount of products, storing it in the products maps. Also increase material substitution.
+  void                  registerTransformation(const double &value, const int & regId, const string & productName); ///< Registers the transformation in the region (based on sl) of a given amount of transformed products and increase relative transformation emissions.
   void                  registerTransports(const double &distQ, const int & regId);                         ///< Registers the quantities emitted by transport of wood FROM a given region
   void                  initialiseDeathBiomassStocks(const vector<double> & deathByFt, const int & regId);  ///< Initialises the stocks of death biomass for the avgLive_* years before the simulation starts
   void                  initialiseProductsStocks(const vector<double> & qByProduct, const int &regId);      ///< Initialises the stocks of products for the avgLive_* years before the simulation starts
@@ -76,7 +77,7 @@ private:
   map<int,double>           cumSubstitutedEnergy; ///< Map that store the cumulative CO2 substituted for energy consumption, by l2_region [Mt CO2]
   map<int,double>         cumSubstitutedMaterial; ///< Map that store the cumulative CO2 substituted using less energivory material, by l2_region [Mt CO2]
   map<int,double>              cumEmittedForOper; ///< Map that store emissions for forest operations, including transport, by l2_region [Mt CO2]
-
+  map<int,double>             cumEmittedHWPTrans; ///< Map that store emissions from HWP transformation by l2_region [Mt CO2]
 
 
 };                 

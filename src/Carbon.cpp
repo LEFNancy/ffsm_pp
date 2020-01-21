@@ -162,6 +162,7 @@ Carbon::initialiseEmissionCounters(){
     cumSubstitutedEnergy.insert(mypair);
     cumSubstitutedMaterial.insert(mypair);
     cumEmittedForOper.insert(mypair);
+    cumEmittedHWPTrans.insert(mypair);
   }
 }
 
@@ -271,6 +272,38 @@ Carbon::registerProducts(const double &value, const int & regId, const string & 
   addSavedEmissions(subMaterialCoeff*value/1000,regId,EM_MATSUB); // EM_ENSUB are now included in eol2energy, instantaneous for fuelwoods
 }
 
+void
+Carbon::registerTransformation(const double &value, const int & regId, const string & productName){
+
+  // Register emissions from transformation happening between pp to tp in the region..
+  string tp = productName;
+  vector <string> priProducts = MTHREAD->MD->getStringVectorSetting("priProducts");
+  for(uint ppIdx=0;ppIdx<priProducts.size();ppIdx++){
+    string pp                      = priProducts[ppIdx];
+    double a                       = MTHREAD->MD->getProdData("a",regId,pp,DATA_NOW,tp);
+    double transformationEmissions =  MTHREAD->MD->getProdData("transformationEmissions",regId,pp,DATA_NOW,tp);
+    addSavedEmissions(value*transformationEmissions,regId,EM_TRANS); // transformationEmissions are per unit of TRANSFORMED product, I don't need to multiply by a..
+  }
+
+
+  /*
+  // Registering the CO2 stock embedded in the product...
+  int year = MTHREAD->SCD->getYear();
+  iiskey key(year,regId,productName);
+  pair<iiskey,double> mypair(key,value);
+  products.insert(mypair);
+  // registering the substituted CO2 for energy and material..
+  double subEnergyCoeff   = MTHREAD->MD->getProdData("co2sub_energy",regId,productName,DATA_NOW,"");
+  double subMaterialCoeff = MTHREAD->MD->getProdData("co2sub_material",regId,productName,DATA_NOW,"");
+  // units:
+  // value: Mm^3
+  // subEnergyCoeff and subMaterialCoeff:  [kgCO2/m^3 wood]
+  // desidered output: Mt CO2
+  // ==> I must divide by 1000
+  addSavedEmissions(subMaterialCoeff*value/1000,regId,EM_MATSUB); // EM_ENSUB are now included in eol2energy, instantaneous for fuelwoods
+  */
+}
+
 
 
 void
@@ -332,6 +365,9 @@ Carbon::addSavedEmissions(const double & value, const int & regId, const int & e
     case EM_FOROP:
       incrMapValue(cumEmittedForOper, regId, -value);
       break;
+    case EM_TRANS:
+      incrMapValue(cumEmittedHWPTrans, regId, -value);
+    break;
     default:
       msgOut(MSG_CRITICAL_ERROR,"Unexpected em_type in function getCumSavedEmissions");
   }

@@ -110,6 +110,7 @@ enum emissionType {
   EM_ENSUB               =4,             ///< Energy substitution
   EM_MATSUB              =5,             ///< Material substitution
   EM_FOROP               =6,             ///< Flow from forest operations
+  EM_TRANS               =7,             ///< Flow emission from HWP transformation
 };
 
 enum contrainDirection {
