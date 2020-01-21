@@ -22,15 +22,15 @@
 # parallel --jobs <n of jobs> -a runscenarios.sh 
 # and put something like this in the script    
 
-./run_single_scenario.sh 'default'
+./run_single_scenario.sh 'default_90pc'
 #./run_single_scenario.sh 'cost_recy_1' 
 #./run_single_scenario.sh 'cost_recy_2' 
 #./run_single_scenario.sh 'cost_recy_3' 
 #./run_single_scenario.sh 'cost_recy_4' 
-./run_single_scenario.sh 'es_d_01'
-./run_single_scenario.sh 'es_d_1'
-./run_single_scenario.sh 'es_d_m01'
-./run_single_scenario.sh 'es_d_m1'
+#./run_single_scenario.sh 'es_d_01'
+#./run_single_scenario.sh 'es_d_1'
+./run_single_scenario.sh 'es_d_m01_90pc'
+./run_single_scenario.sh 'es_d_m1_90pc'
 #./run_single_scenario.sh 'no_recycling' 
 #./run_single_scenario.sh 'debug' 
 #./run_single_scenario.sh 'inputFile2' 'scenarioName4'
