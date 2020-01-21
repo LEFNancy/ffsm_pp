@@ -285,26 +285,10 @@ Carbon::registerTransformation(const double &value, const int & regId, const str
     string pp                      = priProducts[ppIdx];
     double a                       = MTHREAD->MD->getProdData("a",regId,pp,DATA_NOW,tp);
     double transformationEmissions =  MTHREAD->MD->getProdData("transformationEmissions",regId,pp,DATA_NOW,tp);
-    addSavedEmissions(value*transformationEmissions,regId,EM_TRANS); // transformationEmissions are per unit of TRANSFORMED product, I don't need to multiply by a..
+    if (transformationEmissions > 0) {
+      addSavedEmissions(-value*transformationEmissions,regId,EM_TRANS); // transformationEmissions are per unit of TRANSFORMED product, I don't need to multiply by a.. Negative as I am not saving emission, I am emitting emissions (the map of "emissions" stores positive value)
+    }
   }
-
-
-  /*
-  // Registering the CO2 stock embedded in the product...
-  int year = MTHREAD->SCD->getYear();
-  iiskey key(year,regId,productName);
-  pair<iiskey,double> mypair(key,value);
-  products.insert(mypair);
-  // registering the substituted CO2 for energy and material..
-  double subEnergyCoeff   = MTHREAD->MD->getProdData("co2sub_energy",regId,productName,DATA_NOW,"");
-  double subMaterialCoeff = MTHREAD->MD->getProdData("co2sub_material",regId,productName,DATA_NOW,"");
-  // units:
-  // value: Mm^3
-  // subEnergyCoeff and subMaterialCoeff:  [kgCO2/m^3 wood]
-  // desidered output: Mt CO2
-  // ==> I must divide by 1000
-  addSavedEmissions(subMaterialCoeff*value/1000,regId,EM_MATSUB); // EM_ENSUB are now included in eol2energy, instantaneous for fuelwoods
-  */
 }
 
 
