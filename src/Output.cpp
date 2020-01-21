@@ -743,7 +743,7 @@ Output::printCarbonBalance(){
   if (!out){ msgOut(MSG_CRITICAL_ERROR,"Error in opening the file "+outFileName+" for writing.");}
   double outvalue=0;
 
-  vector<int> balItems {STOCK_INV,STOCK_EXTRA,STOCK_PRODUCTS,EM_ENSUB,EM_MATSUB,EM_FOROP};
+  vector<int> balItems {STOCK_INV,STOCK_EXTRA,STOCK_PRODUCTS,EM_ENSUB,EM_MATSUB,EM_FOROP,EM_TRANS};
 
   for (uint r1=0;r1<l2r.size();r1++){
     for (uint r2=0;r2<l2r[r1].size();r2++){
@@ -781,6 +781,11 @@ Output::printCarbonBalance(){
           }
           case EM_FOROP: {
             balItemString = "EM_FOROP";
+            outvalue = MTHREAD->CBAL->getCumSavedEmissions(regId, balItems[b]);
+            break;
+          }
+          case EM_TRANS: {
+            balItemString = "EM_TRANS";
             outvalue = MTHREAD->CBAL->getCumSavedEmissions(regId, balItems[b]);
             break;
           }

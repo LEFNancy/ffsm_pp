@@ -146,6 +146,9 @@ Carbon::getCumSavedEmissions(const int & regId, const int & em_type) const{
     case EM_FOROP:
       return -findMap(cumEmittedForOper, regId);
       break;
+    case EM_TRANS:
+      return -findMap(cumEmittedHWPTrans, regId);
+      break;
     default:
       msgOut(MSG_CRITICAL_ERROR,"Unexpected em_type in function getCumSavedEmissions");
   }

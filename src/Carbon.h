@@ -79,7 +79,6 @@ private:
   map<int,double>              cumEmittedForOper; ///< Map that store emissions for forest operations, including transport, by l2_region [Mt CO2]
   map<int,double>             cumEmittedHWPTrans; ///< Map that store emissions from HWP transformation by l2_region [Mt CO2]
 
-
 };                 
 
 #endif // CARBON_H
