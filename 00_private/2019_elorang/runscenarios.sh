@@ -22,7 +22,7 @@
 # parallel --jobs <n of jobs> -a runscenarios.sh 
 # and put something like this in the script    
 
-#./run_single_scenario.sh 'default'
+./run_single_scenario.sh 'default'
 #./run_single_scenario.sh 'cost_recy_1' 
 #./run_single_scenario.sh 'cost_recy_2' 
 #./run_single_scenario.sh 'cost_recy_3' 
