@@ -190,8 +190,8 @@ public:
   //void                setBasicData(const string &name_h, double value, int position=0);
   //void                setBasicData(const string &name_h, string value, int position=0);
   //void                setBasicData(const string &name_h, bool value, int position=0);
-  friend void         Output::printForestData(bool finalFlush=false);
-  friend void         Output::printProductData(bool finalFlush=false);
+  friend void         Output::printForestData(bool finalFlush);
+  friend void         Output::printProductData(bool finalFlush);
   void                deathTimberInventory_incrOrAdd(const iisskey &thekey, double value_h){incrOrAddMapValue(deathTimberInventory,thekey, value_h);}
   void                deathTimberInventory_incr(const iisskey &thekey, double value_h){incrMapValue(deathTimberInventory,thekey, value_h);}
   double              deathTimberInventory_get(const iisskey &thekey){return findMap(deathTimberInventory, thekey);}
