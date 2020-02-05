@@ -245,7 +245,8 @@ It queries the layer framework with the following logic:
 double
 Pixel::getSTData(const string& parName, const string& forName, int year, const string& d2, double naToReturn){
 
-  if (naToReturn == RETNA) naToReturn = MTHREAD->MD->getDoubleSetting("noValue");
+  double defaultNoValue = MTHREAD->MD->getDoubleSetting("noValue");
+  if (naToReturn == RETNA) naToReturn = defaultNoValue;
 
   // return NA if not using pixel mode
   if(!MTHREAD->MD->getBoolSetting("usePixelData")) return naToReturn;
@@ -265,7 +266,7 @@ Pixel::getSTData(const string& parName, const string& forName, int year, const s
       //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
       //  exit(0);
       //}
-      return i->second;
+      return i->second == defaultNoValue ? naToReturn : i->second;
   } else {
       // An exact match in forName has not being found, look for no forName:
       string search_for2 = parName+"#"+"#"+d2+"#"+i2s(year);
@@ -279,7 +280,7 @@ Pixel::getSTData(const string& parName, const string& forName, int year, const s
         //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
         //  exit(0);
         //}
-        return i2->second;
+        return i2->second == defaultNoValue ? naToReturn : i2->second;
       } else {
           // An exact match in forName or noforName has not being found, look for no dc:
           string search_for2 = parName+"#"+forName+"#"+"#"+i2s(year);
@@ -293,7 +294,7 @@ Pixel::getSTData(const string& parName, const string& forName, int year, const s
             //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
             //  exit(0);
             //}
-            return i2->second;
+            return i2->second == defaultNoValue ? naToReturn : i2->second;
           } else {
               // An exact match, or partial match in forName or dc alones has not being found, look for no forName AND no dc:
               string search_for2 = parName+"#"+"#"+"#"+i2s(year);
@@ -307,7 +308,7 @@ Pixel::getSTData(const string& parName, const string& forName, int year, const s
                 //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
                 //  exit(0);
                 //}
-                return i2->second;
+                return i2->second == defaultNoValue ? naToReturn : i2->second;
               } else {
                  //cout << "NOTM:  " << search_for <<", "<< i->first << endl;
                  return naToReturn;
