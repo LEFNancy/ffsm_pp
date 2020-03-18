@@ -20,6 +20,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <time.h> // we only use this to seed the random number generator
+#include <unistd.h>
 
 #include "Init.h"
 //#include "Pixel.h"
@@ -108,10 +109,10 @@ Init::setInitLevel1(){
     // usage example:
     // std::normal_distribution<double> d(100000,3);
     // double x = d(*MTHREAD->gen);
-    srand(time(NULL));
+    srand(time(NULL)+getpid());
     //std::random_device randev;
     //MTHREAD->gen = new std::mt19937(randev());
-    MTHREAD->gen = new std::mt19937(time(0));
+    MTHREAD->gen = new std::mt19937(time(0)+getpid());
 
     //TO.DO change scenarioname to scenarioname_random number
     uniform_int_distribution<> ud(1, 1000000);
