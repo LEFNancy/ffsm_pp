@@ -1059,19 +1059,24 @@ ModelCoreSpatial::runManagementModule(){
 
       if (flagHartman =="ENDO") { // if carbon payments take place and reference is endogenous (is BAU)
           // STEP 1 - retrieve optimal regeneration choice without carbon payments
-          int ft_opt_index = getMaxPos(expectedReturns); // get ft with max expected returns
-          string ft_opt = fTypes[ft_opt_index]; // get its name
-          int dc_opt_index = rotation_dc[ft_opt_index]; // get dc for forest type with max expected return
-          string dc_opt = dClasses[dc_opt_index]; // get its name
-          double cumTP_opt = px->cumTp_exp.at(ft_opt_index).at(dc_opt_index);
+          int ft_opt_index = getMaxPos(expectedReturns); // Faustmannian optimal forest type index
+          string ft_opt = fTypes[ft_opt_index]; // Faustmannian optimal forest type name
+          int dc_opt_index = rotation_dc[ft_opt_index]; // Faustmannian optimal diameter class index
+          string dc_opt = dClasses[dc_opt_index]; // Faustmannian optimal diameter class name
+          double cumTP_opt = px->cumTp_exp.at(ft_opt_index).at(dc_opt_index); // Faustmannian optimal rotation length
           double co2content_inventory_opt = gfd("co2content_inventory",r2,ft_opt,"",DATA_NOW)/1000; // kilos to tons
-          // STEP 2 - calculate expected carbon contents on the optimal choice without carbon payments, to use as reference
+
+          // STEP 2 - calculate expected carbon contents on the optimal choice without carbon payments (Faustmannian optimum), to use as reference
           vector <double> FutureCarbonContent_opt;
-          for (int y=0; y<cumTP_opt; y++) {
+          for (int y=0; y<=cumTP_opt; y++) {
               double expectedVHa_opt_y = getVHaByYear(px, ft_opt_index, y, futureExtraBiomass_ratio[ft_opt_index][y], regId);
-              FutureCarbonContent_opt.push_back(co2content_inventory_opt*expectedVHa_opt_y);
+              FutureCarbonContent_opt.push_back(co2content_inventory_opt*expectedVHa_opt_y);              
           }
-          int cumTP_opt_floor = FutureCarbonContent_opt.size(); // need to get an integer value to compare rotation lengths
+          // the Hartmanian choice will usually be longer, so the Faustmannian rotation needs to be replicated several times (at least 2000 years, should be enough)
+          while (FutureCarbonContent_opt.size()<=2000){
+              FutureCarbonContent_opt.insert(std::end(FutureCarbonContent_opt), std::begin(FutureCarbonContent_opt), std::end(FutureCarbonContent_opt));
+          }
+          //int cumTP_opt_floor = FutureCarbonContent_opt.size(); // need to get an integer value
 
           // STEP 3 - new loop to find optimal regeneration choice WITH carbon payments, using the choice WITHOUT carbon payments as a reference
 
@@ -1079,16 +1084,38 @@ ModelCoreSpatial::runManagementModule(){
               string ft = fTypes[j];
               double co2content_inventory = gfd("co2content_inventory",r2,ft,"",DATA_NOW)/1000; // kilos to tons
 
-              double expReturns_hartman = std::numeric_limits<double>::lowest();
-              double expReturns_timber_hartman = std::numeric_limits<double>::lowest();
-              double expReturns_carbon_hartman=std::numeric_limits<double>::lowest();
-              int optDc_hartman = 0; // "optimal diameter class", the one on which the expected returns are computed
-              for (uint u=0; u<dClasses.size(); u++){
+              double expReturns_hartman = -10000000000; // need to initialize because we use it for a comparison
+              double expReturns_timber_hartman;  // no need to give an initial value because they are not used before being given a value
+              double expReturns_carbon_hartman;
+              int optDc_hartman = -1; // "optimal diameter class", the one on which the expected returns are computed
+              for (uint u=1; u<dClasses.size(); u++){
                   string dc = dClasses[u];
+                  double cumTp_u = px->cumTp_exp.at(j).at(u);
+
+                  // First we calculate expected revenues from carbon (they used to be inside the products loop, but they don't need to be since they don't depend on products to be sold)
+                  double raw_amount_carbon=0;
+                  double carbonPrice_y = carbonPrice_NOW; //carbon price is by default current price, ie it is assumed to be constant from owner's perspective
+                  for (int y=0; y<=cumTp_u; y++) { // compute yearly carbon payments
+                       double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y], regId);
+                       double carbonPayment_y;
+                       carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y]);
+
+                       //r if (y==0) { // we use euclidian division, so an exception must be made when denominator is equal to 0
+                       //r   carbonPayment_y = 0; // in the first year, no forest can reach a non-zero volume so payments are 0
+                       //r} else {
+                       //r    int factor = y/cumTP_opt_floor; // euclidian division of the two lengths we compare
+                       //r    if (cumTP_opt_floor%y >0) { // if the year is NOT a multiple of optimal rotation time, we need to take the year-th value of vector modulus how many rotations we have passed
+                       //r       carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y - factor*cumTP_opt_floor]);
+                       //r    } else { // if the year is EXACTLY a multiple of optimal rotation time, we need to take the last value of vector, not the first one
+                       //r      carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[cumTP_opt_floor]);
+                       //r    }
+                       //r}
+                       raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y); // all payments compounded to end of rotation
+                  }
+
+                  // And now we compute revenues from timber (we try several products, as in the Faustmannian rotation)
                   double vHa         = px->vHa_exp.at(j).at(u);
                   double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
-                  double cumTp_u = px->cumTp_exp.at(j).at(u);
-                  // Here we calculate expected revenues from timber
                   for (uint pp=0;pp<priProducts.size();pp++){
                       double pl            = gpd("pl",regId,priProducts[pp]); // note that this is the OBSERVED price. If we call it at current year+cumTp_u we would have the expected price. But we would first have to compute it, as pw is weigthed price world-local and we don't have local price for the future. DONE 20141202 ;-)
                       double worldCurPrice = gpd("pl",WL2,priProducts[pp]);
@@ -1098,39 +1125,15 @@ ModelCoreSpatial::runManagementModule(){
                       double pw_exp        = computeExpectedPrice(pl, worldCurPrice, worldFutPrice, sl, sa, px->expTypePrices); //20141030: added the expected price!
                       double raw_amount = finalHarvestFlag*pw_exp*vHa*app(priProducts[pp],ft,dc); // B.U.G. 20121126, it was missing app(pp,ft,dc) !!
                       double anualised_amount_timber =  MD->calculateAnnualisedEquivalent(raw_amount,cumTp_u, ir);
-                      double anualised_amount = anualised_amount_timber;
 
-                      // Now we calculate expected revenues from carbon
-                      double raw_amount_carbon=0;
-                      double carbonPrice_y = carbonPrice_NOW; //carbon price is by default current price, ie it is assumed to be constant from owner's perspective
-                      for (int y=0; y<cumTp_u; y++) {
-                          // calculate yearly payment for each year of the rotation
-                          double expectedVHa_y = getVHaByYear(px, j, y, futureExtraBiomass_ratio[j][y], regId);
-                          double carbonPayment_y;
-                          if (y==0) { // we use euclidian division, so an exception must be made when denominator is equal to 0
-                              carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y]);
-                          } else {
-                              int factor = y/cumTP_opt_floor; // euclidian division of the two lengths we compare
-                              if (cumTP_opt_floor%y >0) { // if the year is NOT a multiple of optimal rotation time, we need to take the year-th value of vector modulus how many rotations we have passed
-                                  carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[y - factor*cumTP_opt_floor]);
-                              } else { // if the year is EXACTLY a multiple of optimal rotation time, we need to take the last value of vector, not the first one
-                                  carbonPayment_y = carbonPrice_y*ir*(co2content_inventory*expectedVHa_y - FutureCarbonContent_opt[cumTP_opt_floor]);
-                              }
-                          }
-
-                          raw_amount_carbon += carbonPayment_y*pow(1+ir,cumTp_u - y); // all payments put at end of rotation
-                      }
-
-                      //Now we add the final payment corresponding to carbon sequestered in long-lived products
-                      //double CarbonPrice_cumTp = futureCarbonPrices[floor(cumTp_u)]; INSTEAD WE USE CURRENT CARBON PRICE
+                      // Now we add the final carbon payment corresponding to carbon sequestered in long-lived products
                       raw_amount_carbon += pickling * carbonPrice_y * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc);
-
                       // And we annualise carbon revenues and add them to annualised timber revenues
                       double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
-                      anualised_amount += anualised_amount_carbon;
+                      double anualised_amount = anualised_amount_timber + anualised_amount_carbon;
 
                       // If the new expected revenues is higher than previously, we store the maximum value and corresponding dc.
-                      if (anualised_amount>expReturns_hartman) {
+                      if (anualised_amount>=expReturns_hartman) {
                           expReturns_hartman=anualised_amount;
                           expReturns_carbon_hartman = anualised_amount_carbon;
                           expReturns_timber_hartman = anualised_amount_timber;
