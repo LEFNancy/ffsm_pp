@@ -35,26 +35,33 @@
 #./run_single_scenario.sh 'es_d_m01'
 #./run_single_scenario.sh 'es_d_m1'
 
-# simulations on m (rpW) with independance
-#./run_single_scenario.sh 'm_rpW_10'
-#./run_single_scenario.sh 'm_rpW_30'
-#./run_single_scenario.sh 'm_rpW_50'
-#./run_single_scenario.sh 'm_rpW_70'
-#./run_single_scenario.sh 'm_rpW_shock'
+# simulations on m (rpW) with low complementarity (0,2)
+./run_single_scenario.sh 'm_rpW_10_es_d_02'
+./run_single_scenario.sh 'm_rpW_30_es_d_02'
+./run_single_scenario.sh 'm_rpW_50_es_d_02'
+./run_single_scenario.sh 'm_rpW_70_es_d_02'
+./run_single_scenario.sh 'm_rpW_shock_es_d_02'
 
-# simulations on m (rpW) with complementarity
-./run_single_scenario.sh 'm2_rpW_10'
-./run_single_scenario.sh 'm2_rpW_30'
-./run_single_scenario.sh 'm2_rpW_50'
-./run_single_scenario.sh 'm2_rpW_70'
-./run_single_scenario.sh 'm2_rpW_shock'
+# simulations on m (rpW) with low substitution (-0,2)
+./run_single_scenario.sh 'm2_rpW_10_es_d_m02'
+./run_single_scenario.sh 'm2_rpW_30_es_d_m02'
+./run_single_scenario.sh 'm2_rpW_50_es_d_m02'
+./run_single_scenario.sh 'm2_rpW_70_es_d_m02'
+./run_single_scenario.sh 'm2_rpW_shock_es_d_m02'
 
-# simulations on m (rpW) with complementarity
-./run_single_scenario.sh 'm3_rpW_10'
-./run_single_scenario.sh 'm3_rpW_30'
-./run_single_scenario.sh 'm3_rpW_50'
-./run_single_scenario.sh 'm3_rpW_70'
-./run_single_scenario.sh 'm3_rpW_shock'
+# simulations on m (rpW) with independant products (0)
+./run_single_scenario.sh 'm3_rpW_10_es_d_0'
+./run_single_scenario.sh 'm3_rpW_30_10_es_d_0'
+./run_single_scenario.sh 'm3_rpW_50_10_es_d_0'
+./run_single_scenario.sh 'm3_rpW_70_10_es_d_0'
+./run_single_scenario.sh 'm3_rpW_shock_10_es_d_0'
+
+# simulations on m (rpW) with high substitution (-1)
+./run_single_scenario.sh 'm2_rpW_10_es_d_m1'
+./run_single_scenario.sh 'm2_rpW_30_es_d_m1'
+./run_single_scenario.sh 'm2_rpW_50_es_d_m1'
+./run_single_scenario.sh 'm2_rpW_70_es_d_m1'
+./run_single_scenario.sh 'm2_rpW_shock_es_d_m1'
 
 # simulations for forest impacts
 #./run_single_scenario.sh 'm_change'
