@@ -552,6 +552,7 @@ ModelCoreSpatial::runBiologicalModule(){
         vector <double> hArea_byDc;
         vector <double> newVol_byDiam;
         vector <double> vMort_byDc;
+        vector <double> vMortAdd_byDc ; // fire mortality
         vector <double> areasMovingUp(dClasses.size(), 0.0);
         double areaFirstProdClass;
 
@@ -687,6 +688,7 @@ ModelCoreSpatial::runBiologicalModule(){
           double vol;
           double tp          = px->tp.at(j).at(u); //gfd("tp",regId,ft,dc);
           double mort        = px->mort.at(j).at(u); //gfd("mortCoef",regId,ft,dc);
+          double addMort = px->addMort.at(j).at(u); // fire mortality
           double vReg        = px->vReg.at(j); //gfd("vReg",regId,ft,""); // Taking it from the memory database as we could be in a fixed vReg scenario and not having calculated it from above!
           double beta        = px->beta.at(j).at(u); //gfd("betaCoef",regId,ft,dc);
           //double hv2fa       = gfd("hv2fa",regId,ft,dc);
@@ -694,8 +696,10 @@ ModelCoreSpatial::runBiologicalModule(){
           double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
 
           double vMort       = mort*pastYearVol;
+          double vMortAdd = addMort*pastYearVol;  // fire mortality
 
           vMort_byDc.push_back(vMort);
+          vMortAdd_byDc.push_back(vMortAdd); // fire mortality
 
           if(useDeathTimber){
             iisskey key(thisYear,r2,ft,dc);
@@ -783,6 +787,7 @@ ModelCoreSpatial::runBiologicalModule(){
         px->hArea.push_back(hArea_byDc);
         px->vol.push_back(newVol_byDiam);
         px->vMort.push_back(vMort_byDc);
+        px->vMortAdd.push_back(vMortAdd_byDc); // fire mortality
         px->hProductivity.push_back(productivity_byDc);
 
 
@@ -1873,6 +1878,7 @@ ModelCoreSpatial::resetPixelValues(){
       px->expectedReturns.clear(); // by ft
       px->beta.clear();
       px->mort.clear();
+      px->addMort.clear(); // fire mortality
       px->tp.clear();
       px->cumTp.clear();
       px->vHa.clear();
@@ -1881,6 +1887,7 @@ ModelCoreSpatial::resetPixelValues(){
       px->cumAlive.clear();
       px->cumAlive_exp.clear();
       px->vMort.clear();
+      px->vMortAdd.clear(); // fire mortality
       //std::fill(rpx[j]->vMort.begin(), rpx[j]->vMort.end(), 0.0);
 
     }
@@ -1901,6 +1908,7 @@ ModelCoreSpatial::cachePixelExogenousData(){
       px->tp.clear();
       px->beta.clear();
       px->mort.clear();
+      px->addMort.clear(); // fire mortality
       px->avalCoef.clear();
 
       for(uint j=0;j<fTypes.size();j++){
@@ -1908,6 +1916,7 @@ ModelCoreSpatial::cachePixelExogenousData(){
         vector <double> tp_byu;
         vector <double> beta_byu;
         vector <double> mort_byu;
+        vector <double> addMort_byu; // fire mortality
 
         double tp_multiplier_now       = px->getMultiplier("tp_multiplier",ft,DATA_NOW);
         double mortCoef_multiplier_now = px->getMultiplier("mortCoef_multiplier",ft,DATA_NOW);
@@ -1937,10 +1946,12 @@ ModelCoreSpatial::cachePixelExogenousData(){
           tp_byu.push_back(tp);
           beta_byu.push_back(beta_real);
           mort_byu.push_back(mort_real);
+          addMort_byu.push_back(additionalMortality); // fire mortality
         } // end of each dc
         px->tp.push_back(tp_byu);
         px->beta.push_back(beta_byu);
         px->mort.push_back(mort_byu);
+        px->addMort.push_back(addMort_byu); // fire mortality
         px->avalCoef.push_back(avalCoef_ft);
       } // end of each ft
     } // end of each pixel
@@ -2164,6 +2175,7 @@ ModelCoreSpatial::sumRegionalForData(){
         double hV = 0.;
         double hArea = 0.;
         double vMort = 0.;
+        double vMortAdd = 0; // fire mortality
         double sumHProductivity = 0.; // productivity * area
         for (uint pi=0;pi<regPx.size();pi++){
           Pixel* px = regPx[pi];
@@ -2171,6 +2183,7 @@ ModelCoreSpatial::sumRegionalForData(){
           hV += px->hVol.at(j).at(u);
           hArea += px->hArea.at(j).at(u);
           vMort += px->vMort.at(j).at(u);
+          vMortAdd += px->vMortAdd.at(j).at(u); // fire mortality
           sumHProductivity += (px->hProductivity.at(j).at(u) * px->hArea.at(j).at(u));
           if(MD->getBoolSetting("outDetailedHv",DATA_NOW)){
             for(uint pp=0;pp<priProducts.size();pp++){
@@ -2192,6 +2205,7 @@ ModelCoreSpatial::sumRegionalForData(){
           sfd(hProductivityByDc,"hProductivityByDc",regId,ft,dc,DATA_NOW,true);
           sfd(hArea,"harvestedArea",regId,ft,dc,DATA_NOW, true);
           sfd(vMort,"vMort",regId,ft,dc,DATA_NOW,true);
+          sfd(vMortAdd,"vMortAdd",regId,ft,dc,DATA_NOW,true); // fire mortality
           double vol_1 = gfd("vol",regId,ft,dc,currentYear-1);
           if(vol_1){
             sfd(hV/vol_1,"hr",regId,ft,dc,DATA_NOW, true);
