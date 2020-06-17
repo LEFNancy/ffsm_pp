@@ -38,29 +38,29 @@
 # simulations on m (rpW) with low complementarity (0,2)
 #./run_single_scenario.sh 'm_rpW_10_es_d_02'
 #./run_single_scenario.sh 'm_rpW_30_es_d_02'
-#./run_single_scenario.sh 'm_rpW_50_es_d_02'
+./run_single_scenario.sh 'm_rpW_50_es_d_02'
 #./run_single_scenario.sh 'm_rpW_70_es_d_02'
-#./run_single_scenario.sh 'm_rpW_shock_es_d_02'
+./run_single_scenario.sh 'm_rpW_shock_es_d_02'
 
 # simulations on m (rpW) with low substitution (-0,2)
-#./run_single_scenario.sh 'm_rpW_10_es_d_m02'
-#./run_single_scenario.sh 'm_rpW_30_es_d_m02'
-#./run_single_scenario.sh 'm_rpW_50_es_d_m02'
-#./run_single_scenario.sh 'm_rpW_70_es_d_m02'
-#./run_single_scenario.sh 'm_rpW_shock_es_d_m02'
+./run_single_scenario.sh 'm_rpW_10_es_d_m02'
+./run_single_scenario.sh 'm_rpW_30_es_d_m02'
+./run_single_scenario.sh 'm_rpW_50_es_d_m02'
+./run_single_scenario.sh 'm_rpW_70_es_d_m02'
+./run_single_scenario.sh 'm_rpW_shock_es_d_m02'
 
 # simulations on m (rpW) with independant products (0)
-#./run_single_scenario.sh 'm_rpW_10_es_d_0'
-#./run_single_scenario.sh 'm_rpW_30_es_d_0'
-#./run_single_scenario.sh 'm_rpW_50_es_d_0'
-#./run_single_scenario.sh 'm_rpW_70_es_d_0'
-#./run_single_scenario.sh 'm_rpW_shock_es_d_0'
+./run_single_scenario.sh 'm_rpW_10_es_d_0'
+./run_single_scenario.sh 'm_rpW_30_es_d_0'
+./run_single_scenario.sh 'm_rpW_50_es_d_0'
+./run_single_scenario.sh 'm_rpW_70_es_d_0'
+./run_single_scenario.sh 'm_rpW_shock_es_d_0'
 
 # simulations on m (rpW) with high substitution (-1)
-./run_single_scenario.sh 'm_rpW_10_es_d_m1'
+#./run_single_scenario.sh 'm_rpW_10_es_d_m1'
 #./run_single_scenario.sh 'm_rpW_30_es_d_m1'
 #./run_single_scenario.sh 'm_rpW_50_es_d_m1'
-./run_single_scenario.sh 'm_rpW_70_es_d_m1'
+#./run_single_scenario.sh 'm_rpW_70_es_d_m1'
 #./run_single_scenario.sh 'm_rpW_shock_es_d_m1'
 
 # simulations for forest impacts
