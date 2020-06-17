@@ -22,15 +22,53 @@
 # parallel --jobs <n of jobs> -a runscenarios.sh 
 # and put something like this in the script    
 
-./run_single_scenario.sh 'default_90pc'
-#./run_single_scenario.sh 'cost_recy_1' 
-#./run_single_scenario.sh 'cost_recy_2' 
-#./run_single_scenario.sh 'cost_recy_3' 
-#./run_single_scenario.sh 'cost_recy_4' 
+#./run_single_scenario.sh 'default'
+
+# simulations on es_d
+#./run_single_scenario.sh 'es_d_change'
+#./run_single_scenario.sh 'es_d_change_high'
+#./run_single_scenario.sh 'es_d_0'
+#./run_single_scenario.sh 'es_d_03'
+#./run_single_scenario.sh 'es_d_m03'
 #./run_single_scenario.sh 'es_d_01'
 #./run_single_scenario.sh 'es_d_1'
-./run_single_scenario.sh 'es_d_m01_90pc'
-./run_single_scenario.sh 'es_d_m1_90pc'
+#./run_single_scenario.sh 'es_d_m01'
+#./run_single_scenario.sh 'es_d_m1'
+
+# simulations on m (rpW) with low complementarity (0,2)
+#./run_single_scenario.sh 'm_rpW_10_es_d_02'
+#./run_single_scenario.sh 'm_rpW_30_es_d_02'
+#./run_single_scenario.sh 'm_rpW_50_es_d_02'
+#./run_single_scenario.sh 'm_rpW_70_es_d_02'
+#./run_single_scenario.sh 'm_rpW_shock_es_d_02'
+
+# simulations on m (rpW) with low substitution (-0,2)
+#./run_single_scenario.sh 'm_rpW_10_es_d_m02'
+#./run_single_scenario.sh 'm_rpW_30_es_d_m02'
+#./run_single_scenario.sh 'm_rpW_50_es_d_m02'
+#./run_single_scenario.sh 'm_rpW_70_es_d_m02'
+#./run_single_scenario.sh 'm_rpW_shock_es_d_m02'
+
+# simulations on m (rpW) with independant products (0)
+#./run_single_scenario.sh 'm_rpW_10_es_d_0'
+#./run_single_scenario.sh 'm_rpW_30_es_d_0'
+#./run_single_scenario.sh 'm_rpW_50_es_d_0'
+#./run_single_scenario.sh 'm_rpW_70_es_d_0'
+#./run_single_scenario.sh 'm_rpW_shock_es_d_0'
+
+# simulations on m (rpW) with high substitution (-1)
+./run_single_scenario.sh 'm_rpW_10_es_d_m1'
+#./run_single_scenario.sh 'm_rpW_30_es_d_m1'
+#./run_single_scenario.sh 'm_rpW_50_es_d_m1'
+./run_single_scenario.sh 'm_rpW_70_es_d_m1'
+#./run_single_scenario.sh 'm_rpW_shock_es_d_m1'
+
+# simulations for forest impacts
+#./run_single_scenario.sh 'm_change'
+#./run_single_scenario.sh 'm_es_d_change'
+#./run_single_scenario.sh 'es_d_change_high'
+#./run_single_scenario.sh 'es_d_m03'
+
 #./run_single_scenario.sh 'no_recycling' 
 #./run_single_scenario.sh 'debug' 
 #./run_single_scenario.sh 'inputFile2' 'scenarioName4'
