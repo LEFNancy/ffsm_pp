@@ -124,9 +124,10 @@ forAreaNat = pivot(forVars,[:scen, :forGroup,],:year,:value,
                #:year    => years
                )
             )
-forAreaNatNames = names(forAreaNat)
-forAreaNat[:region] = "France"
-forAreaNat = forAreaNat[vcat(forAreaNatNames[1:1],:region,forAreaNatNames[2:end])]
+#forAreaNatNames = names(forAreaNat)
+#forAreaNat[:region] = "France"
+#forAreaNat = forAreaNat[vcat(forAreaNatNames[1:1],:region,forAreaNatNames[2:end])]
+insertcols!(forAreaNat, 2, :region => "France" )
 forArea = vcat(forAreaReg,forAreaNat)
 ods_write(odsOut,Dict(("forArea",1,1) => forArea )  )
 
@@ -142,9 +143,10 @@ forVolNat = pivot(forVars,[:scen, :forGroup,],:year,:value,
                #:year    => years,
                )
             )
-forVolNatNames = names(forVolNat)
-forVolNat[:region] = "France"
-forVolNat = forVolNat[vcat(forVolNatNames[1:1],:region,forVolNatNames[2:end])]
+#forVolNatNames = names(forVolNat)
+#forVolNat[:region] = "France"
+#forVolNat = forVolNat[vcat(forVolNatNames[1:1],:region,forVolNatNames[2:end])]
+insertcols!(forVolNat, 2, :region => "France" )
 forVol = vcat(forVolReg,forVolNat)
 ods_write(odsOut,Dict(("forVol",1,1) => forVol )  )
 
@@ -214,9 +216,10 @@ cBalCumNat = pivot(cVars,[:scen,:variable],:year,:value,
                  # ),
                 sort = [:scen],
            )
-cBalCumNatNames = names(cBalCumNat)
-cBalCumNat[:region] = "France"
-cBalCumNat = cBalCumNat[vcat(cBalCumNatNames[1:1],:region,cBalCumNatNames[2:end])]
+#cBalCumNatNames = names(cBalCumNat)
+#cBalCumNat[:region] = "France"
+#cBalCumNat = cBalCumNat[vcat(cBalCumNatNames[1:1],:region,cBalCumNatNames[2:end])]
+insertcols!(cBalCumNat, 2, :region => "France" )
 cBalCum = vcat(cBalCumReg,cBalCumNat)
 
 # reporting stocks in comparision to the first year
