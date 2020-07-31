@@ -1147,12 +1147,9 @@ ModelCoreSpatial::runManagementModule(){
                       raw_amount_carbon += pickling * carbonPrice_y * finalHarvestFlag * vHa * app(priProducts[pp],ft,dc);
                       // And we annualise carbon revenues and add them to annualised timber revenues
                       double anualised_amount_carbon = MD->calculateAnnualisedEquivalent(raw_amount_carbon,cumTp_u, ir);
-<<<<<<< HEAD
-                      anualised_amount += anualised_amount_carbon;
                       //px->expectedReturnsCarbon = anualised_amount_carbon; TODO
-=======
+
                       double anualised_amount = anualised_amount_timber + anualised_amount_carbon;
->>>>>>> 93d69c8... Modified the Hartman framework. There was a problem which led owners to chose dc=0cm sometimes.... Has been fixed. Some more cleaning up to do before merging again.
 
                       // If the new expected revenues is higher than previously, we store the maximum value and corresponding dc.
                       if (anualised_amount>=expReturns_hartman) {
