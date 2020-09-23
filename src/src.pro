@@ -15,6 +15,9 @@ unix {
      LIBS += -ladolc
      LIBS += -lz # needed in Qt5/ ubuntu 13.10 64bit
      #LIBS += -lColPack
+     INCLUDEPATH += /usr/lib/gcc/x86_64-linux-gnu/9/include
+     INCLUDEPATH += /usr/local/include
+     INCLUDEPATH += /usr/include/x86_64-linux-gnu
      INCLUDEPATH += /usr/include/coin
      INCLUDEPATH += /usr/include/coin/ThirdParty
      INCLUDEPATH += /usr/include/adolc
