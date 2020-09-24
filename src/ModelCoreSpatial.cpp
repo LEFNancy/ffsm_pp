@@ -1720,8 +1720,11 @@ ModelCoreSpatial::computeCumulativeData(){
           double cumAlive_u, cumAlive_exp_u;
           pathMort_now = px->getPathMortality(ft,dc,DATA_NOW);
           pathMort_t0 = px->getPathMortality(ft,dc,firstYear);
-          double additionalMortality_now     = px->getSTData("additionalMortality", ft, DATA_NOW, dc, 0.0);
-          double additionalMortality_t0     = px->getSTData("additionalMortality", ft, firstYear, dc, 0.0);
+          double fireEffects_reg_ft_dc = gfd("fireEffects",regId,ft,dc, DATA_NOW);
+          double fireEffects_reg_ft_dc_t0 = gfd("fireEffects",regId,ft,dc, firstYear);
+
+          double additionalMortality_now     = px->getSTData("additionalMortality", ft, DATA_NOW, dc, 0.0)*fireEffects_reg_ft_dc;
+          double additionalMortality_t0     = px->getSTData("additionalMortality", ft, firstYear, dc, 0.0)*fireEffects_reg_ft_dc_t0;
 
           // only cumTp is depending for the expectations, as it is what it is used by owner to calculate return of investments.
           // the tp, beta and mort coefficients instead are the "real" ones as predicted by scientist for that specific time
@@ -1798,7 +1801,8 @@ ModelCoreSpatial::computeCumulativeData(){
                 mort_noExp = 1-pow(1-min(1.0,gfd("mortCoef",regId,ft,dClasses[u-1], DATA_NOW)*mortCoef_multiplier_now+pathMort_now+additionalMortality_now), tp_noExp); // mortCoef is a yearly value. Mort coeff between class is 1-(1-mortCoeff)^tp
                 double mortCoef_multiplier_dynamic = px->getMultiplier("mortCoef_multiplier",ft,thisYear+ceil(cumTp_exp_temp[u-1]));
                 double pathMort_dynamic            = px->getPathMortality(ft,dc,thisYear+ceil(cumTp_exp_temp[u-1]));
-                double additionalMortality_dynamic = px->getSTData("additionalMortality", ft, thisYear+ceil(cumTp_exp_temp[u-1]), dc, 0.0);
+                double fireEffects_reg_ft_dc_dynamic = gfd("fireEffects",regId,ft,dc, thisYear+ceil(cumTp_exp_temp[u-1]));
+                double additionalMortality_dynamic = px->getSTData("additionalMortality", ft, thisYear+ceil(cumTp_exp_temp[u-1]), dc, 0.0)*fireEffects_reg_ft_dc_dynamic;
                 mort_fullExp = 1-pow(1-min(1.0,gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]))*mortCoef_multiplier_dynamic+pathMort_dynamic+additionalMortality_dynamic),tp_fullExp); // mortality of the previous diameter class
                 //double debug1 = gfd("mortCoef",regId,ft,dClasses[u-1],thisYear+ceil(cumTp_exp_temp[u-1]));
                 //double debug2 = debug1*mortCoef_multiplier_dynamic+pathMort_dynamic;
@@ -1935,7 +1939,8 @@ ModelCoreSpatial::cachePixelExogenousData(){
         for (uint u=0; u<dClasses.size(); u++){
           string dc = dClasses[u];
           double pathMortality           = px->getPathMortality(ft,dc,DATA_NOW);
-          double additionalMortality     = px->getSTData("additionalMortality", ft, DATA_NOW, dc, 0.0);
+          double fireEffects_reg_ft_dc = gfd("fireEffects",regId,ft,dc, DATA_NOW);
+          double additionalMortality     = px->getSTData("additionalMortality", ft, DATA_NOW, dc, 0.0)*fireEffects_reg_ft_dc;
           double tp, beta_real, mort_real;
           if (u==0){
             // tp of first diameter class not making it change across the time dimension, otherwise problems in getting the rigth past
