@@ -631,16 +631,19 @@ Sandbox::fullTest(){
   exit(1);
   */
 
-  /*   
+/*
   // Testing overriding of just a product/region if it works
   // Perfect.. the override works even just setting one specific ft/region value !! :-)
-  double ad = MTHREAD->MD->getProdData("additionalDemand",11001,"beechSawnW",2020); // this should be 0.004
-  double adt = MTHREAD->MD->getProdData("additionalDemand",11001,"beechSawnW",2022);
-  double adr = MTHREAD->MD->getProdData("additionalDemand",11002,"beechSawnW",2020);
-  double adp = MTHREAD->MD->getProdData("additionalDemand",11001,"hardWSawnW",2020);
+  double ad = MTHREAD->MD->getProdData("additionalDemand",11000,"fuelW",2014); // this should be 0.004
+  double adt = MTHREAD->MD->getProdData("additionalDemand",11001,"fuelW",2014);
+  double adr = MTHREAD->MD->getProdData("additionalDemand",11002,"fuelW",2014);
+  double adp = MTHREAD->MD->getProdData("additionalDemand",11002,"hardWSawnW",2014);
   cout << "additional demand test:" << endl;
   cout << ad << "\t" << adt << "\t" << adr << "\t" << adp << endl;
+  //exit(1);
+  */
 
+/*
   // Testing (again, for the TIGA project) the availalibily coefficient of Hetre
   Pixel* px = MTHREAD->GIS->getPixel(32,30);
   double ac =  px->getSTData("avalCoef","Fut_Hetre",2013);

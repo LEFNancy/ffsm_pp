@@ -7,7 +7,7 @@ using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatsPlots
 ### Settings and definitions
 ##########################################################
 
-scenarios = ["default"]
+scenarios = ["default", "increased_demand_fuelwood"]
 
 allScenariosInAFile = true
 
@@ -50,10 +50,10 @@ cbal_map = Dict(
 )
 
 
-baseIDir        = "results";
-odsOut          = "juliaOut/formattedOutput.ods"
-odsOut_template = "juliaOut/formattedOutput_template.ods"
-chartOutDir     = "juliaOut"
+baseIDir        = joinpath(@__DIR__,"results")
+odsOut          = joinpath(@__DIR__,"juliaOut/formattedOutput.ods")
+odsOut_template = joinpath(@__DIR__,"juliaOut/formattedOutput_template.ods")
+chartOutDir     = joinpath(@__DIR__,"juliaOut")
 
 years       = collect(2011:2100)
 years5      = collect(2015:5:2100)
@@ -65,24 +65,24 @@ problematicCols = Dict("freeDim" => Union{Missing,Int64})
 ### Data import
 ##########################################################
 
-forestData_byscenario  = []
-productData_byscenario = []
-carbonData_byscenario  = []
-
-
 if allScenariosInAFile
-    push!(forestData_byscenario,CSV.read(baseIDir*"/forestData.csv", DataFrame; delim=';', missingstring=""));
-    push!(productData_byscenario,CSV.read(baseIDir*"/productData.csv", DataFrame; delim=';', missingstring="", types=problematicCols));
-    push!(carbonData_byscenario,CSV.read(baseIDir*"/carbonBalance.csv", DataFrame; delim=';', missingstring=""));
+    forVars  = CSV.read(baseIDir*"/forestData.csv", DataFrame; delim=';', missingstring="");
+    prodVars = CSV.read(baseIDir*"/productData.csv", DataFrame; delim=';', missingstring="", types=problematicCols);
+    cVars    = CSV.read(baseIDir*"/carbonBalance.csv", DataFrame; delim=';', missingstring="");
+    # cleaning to desired scenarios only...
+    forVars = forVars[in.(forVars[:,"scen"],Ref(scenarios)),:]
+    prodVars = prodVars[in.(prodVars[:,"scen"],Ref(scenarios)),:]
+    cVarsVars = cVars[in.(cVars[:,"scen"],Ref(scenarios)),:] 
 else
     forestData_byscenario = [CSV.read(baseIDir*"/forestData_"*scenario*".csv", DataFrame; delim=';', missingstring="") for scenario in scenarios];
     productData_byscenario = [CSV.read(baseIDir*"/productData_"*scenario*".csv", DataFrame; delim=';', types=problematicCols) for scenario in scenarios];
     carbonData_byscenario = [CSV.read(baseIDir*"/carbonBalance_"*scenario*".csv", DataFrame; delim=';', missingstring="") for scenario in scenarios];
+    forVars = vcat(forestData_byscenario...)
+    prodVars = vcat(productData_byscenario...)
+    cVars = vcat(carbonData_byscenario...)
 end
 
-forVars = vcat(forestData_byscenario...)
-prodVars = vcat(productData_byscenario...)
-cVars = vcat(carbonData_byscenario...)
+
 [select!(dfi, Not(["country"])) for dfi in [forVars,prodVars,cVars]] # delete columns country
 
 print("Data loaded")
@@ -152,16 +152,50 @@ insertcols!(forVolNat, 2, :region => "France" )
 forVol = vcat(forVolReg,forVolNat)
 ods_write(odsOut,Dict(("forVol",1,1) => forVol )  )
 
+hVReg = pivot(forVars,[:scen, :region, :forGroup,],:year,:value,
+             filter = Dict(
+               :parName => ["hV"],
+               :year    => years,
+               )
+            )
+hVNat = pivot(forVars,[:scen, :forGroup,],:year,:value,
+             filter = Dict(
+               :parName => ["hV"],
+               :year    => years,
+               )
+            )
+#forVolNatNames = names(forVolNat)
+#forVolNat[:region] = "France"
+#forVolNat = forVolNat[vcat(forVolNatNames[1:1],:region,forVolNatNames[2:end])]
+insertcols!(hVNat, 2, :region => "France" )
+hVol = vcat(hVReg,hVNat)
+ods_write(odsOut,Dict(("hVol",1,1) => hVol )  )
+
+
+
+
+
+
 ##### Mkt & Policy Variables
 
 # Product balance
 prodBalance = pivot(prodVars,[:year,:scen,:prodLev,:prod],:parName,:value,
                     filter = Dict(
                         :parName => ["st","da","dt","sa"],
-                        :year    => [2010,2015]),
+                        :year    => [2013,2014,2015,2016,2017,2018]),
                     sort = [:year,:scen,:prodLev,:prod],
               )
 ods_write(odsOut,Dict(("prodBalance",1,1) => prodBalance )  )
+
+# fuelW regional product balance
+prodBalanceFuelW = pivot(prodVars,[:year,:scen,:region,:prodLev,:prod],:parName,:value,
+                    filter = Dict(
+                        :parName => ["st","da","dt","sa"],
+                        :year    => [2013,2014,2015,2016,2017,2018,2019,2020,2021,2022],
+                        :prod    => ["fuelW"]),
+                    sort = [:year,:scen,:prodLev,:prod],
+              )
+ods_write(odsOut,Dict(("prodBalanceFuelW",1,1) => prodBalanceFuelW )  )
 
 # Product balance all years
 prodBalanceAll5Y = pivot(prodVars,[:parName,:prodLev,:prod,:scen,],:year,:value,
@@ -173,10 +207,6 @@ prodBalanceAll5Y = pivot(prodVars,[:parName,:prodLev,:prod,:scen,],:year,:value,
 ods_write(odsOut,Dict(("prodBalanceAll5Y",1,1) => prodBalanceAll5Y )  )
 
 # Preparation of policy variables
-pol1 = by(forVars, [:scen,:parName,:region,:year]) do df
-   DataFrame(value = sum(df[:value]))
-end 
-
 pol1 = combine(groupby(forVars,[:scen,:parName,:region,:year]) ,  "value" => sum => "value")
 pol2 = combine(groupby(prodVars,[:scen,:parName,:region,:year]) ,  "value" => sum => "value")
 
@@ -205,14 +235,14 @@ ods_write(odsOut,Dict(("polCosts_reg",1,1) => polCosts_reg )  )
 ##### Carbon Variables
 
 # Carbon balance cumulative
-cBalCumReg = pivot(cVars,[:scen,:region,:balItem],:year,:value,
+cBalCumReg = pivot(cVars,[:scen,:region,:variable],:year,:value,
                 #filter = Dict(
                   #:variable => [:TOT_BAL, :STOCKS, :STOCK_EXTRA, :STOCK_INV, :STOCK_PRODUCTS, :EM_NET, :EM_ENSUB, :EM_FOROP, :EM_MATSUB],
                   #:year => years,
                  # ),
                 sort = [:scen],
            )
-cBalCumNat = pivot(cVars,[:scen,:balItem],:year,:value,
+cBalCumNat = pivot(cVars,[:scen,:variable],:year,:value,
                 #filter = Dict(
                   #:variable => [:TOT_BAL, :STOCKS, :STOCK_EXTRA, :STOCK_INV, :STOCK_PRODUCTS, :EM_NET, :EM_ENSUB, :EM_FOROP, :EM_MATSUB],
                   #:year => years,
@@ -236,3 +266,19 @@ ods_write(odsOut,Dict(("cBalCum",1,1) => cBalCum )  )
 cBal = cBalCum
 [cBal[!,Symbol(string(i))] = cBal[!,Symbol(string(i))] - cBal[!,Symbol(string(i-1))]  for i = collect(ymax:-1:ymin+2)] # computing diff
 ods_write(odsOut,Dict(("cBal",1,1) => cBal )  )
+
+
+
+# For vol analysis
+
+forVolRatio = forVol[:,["scen","region","forGroup","2011","2100"]]
+forVolRatio.ratio = forVolRatio[!,"2100"] ./ forVolRatio[!,"2011"]
+forVolRatioDefault = forVolRatio[forVolRatio.scen .== "default",:]
+forVolRatioIncreasedDemand = forVolRatio[forVolRatio.scen .== "increased_demand_fuelwood",:]
+plotColors = [:green :blue :orange]
+@df forVolRatioDefault density(:ratio, group=(:forGroup), title="Distribution of regional vol ratios 2100 vs 2011", linestyle = :solid, color=plotColors, label = reshape(sort(unique(:forGroup)) .* " (bau)" , (1,:) ) , linewidth=3)
+@df forVolRatioIncreasedDemand density!(:ratio, group=(:forGroup), title="Distribution of regional vol ratios 2100 vs 2011", linestyle = :dot, color=plotColors, label = reshape(sort(unique(:forGroup)) .* " (increased demand)" , (1,:) ), linewidth=3 )
+
+savefig("volRatioFuelWoodShock.svg")
+
+forVolRatios = forVolRatio[forVolRatio.scen .== "increased_demand_fuelwood",:]
