@@ -1,4 +1,5 @@
 
+cd(@__DIR__)
 using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  Plots, CSV
 
 ##########################################################

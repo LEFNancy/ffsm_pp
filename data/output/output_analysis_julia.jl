@@ -101,7 +101,7 @@ cVars_piv = pivot(cVars,[:scen,:year,:region],:balItem,:value,
 cVars_piv.STOCKS = cVars_piv.STOCK_INV + cVars_piv.STOCK_EXTRA + cVars_piv.STOCK_PRODUCTS
 cVars_piv.EM_NET = cVars_piv.EM_ENSUB + cVars_piv.EM_FOROP + cVars_piv.EM_MATSUB
 cVars_piv.TOT_BAL =  cVars_piv.STOCKS + cVars_piv.EM_NET
-cVars = stack(cVars_piv) # setting it back in long format but now with totals
+cVars2 = stack(cVars_piv) # setting it back in long format but now with totals
 
 #cp(odsOut_template, odsOut; force=true) # copy template odsFile. Don't forget CTRL+Shift+F9 to update the spreadsheet
 
@@ -205,14 +205,14 @@ ods_write(odsOut,Dict(("polCosts_reg",1,1) => polCosts_reg )  )
 ##### Carbon Variables
 
 # Carbon balance cumulative
-cBalCumReg = pivot(cVars,[:scen,:region,:balItem],:year,:value,
+cBalCumReg = pivot(cVars2,[:scen,:region,:variable],:year,:value,
                 #filter = Dict(
                   #:variable => [:TOT_BAL, :STOCKS, :STOCK_EXTRA, :STOCK_INV, :STOCK_PRODUCTS, :EM_NET, :EM_ENSUB, :EM_FOROP, :EM_MATSUB],
                   #:year => years,
                  # ),
                 sort = [:scen],
            )
-cBalCumNat = pivot(cVars,[:scen,:balItem],:year,:value,
+cBalCumNat = pivot(cVars2,[:scen,:variable],:year,:value,
                 #filter = Dict(
                   #:variable => [:TOT_BAL, :STOCKS, :STOCK_EXTRA, :STOCK_INV, :STOCK_PRODUCTS, :EM_NET, :EM_ENSUB, :EM_FOROP, :EM_MATSUB],
                   #:year => years,

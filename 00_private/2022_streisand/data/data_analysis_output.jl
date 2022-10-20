@@ -1,7 +1,7 @@
 cd(@__DIR__)
 using Pkg
 Pkg.activate(".")
-using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatsPlots,  CSV
+using Statistics,  DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatsPlots,  CSV
 using StatsPlots.PlotMeasures
 using PlotlyJS
 
@@ -9,7 +9,7 @@ using PlotlyJS
 ### Settings and definitions
 ##########################################################
 
-ffsmscen = "bicaff_supply_2"
+ffsmscen = "increased_demand_fuelwood"
 ffsmscen_symbol = Symbol(ffsmscen)
 scenarios = ["default", ffsmscen]
 
@@ -59,9 +59,8 @@ odsOut          = joinpath(@__DIR__,"output","juliaOut","formattedOutput.ods")
 odsOut_template = joinpath(@__DIR__,"output","juliaOut","formattedOutput_template.ods")
 chartOutDir     = joinpath(@__DIR__,"output","juliaOut")
 
-years       = collect(2011:2100)
-years5      = collect(2015:5:2100)
-years10     = collect(2020:10:2100)
+years_ffsm       = collect(2013:2112) # years to consider for FFSM (and also BICAFF as 2015 and 2110 are the 5-years centroids)
+
 
 problematicCols = Dict("freeDim" => Union{Missing,Int64})
 oldRegions = ods_read("ffsmInput_streisand.ods",sheetName="regions",range=((9,1),(20,2)),retType="Matrix")
@@ -114,7 +113,7 @@ if allScenariosInAFile
     # cleaning to desired scenarios only...
     forVars = forVars[in.(forVars[:,"scen"],Ref(scenarios)),:]
     prodVars = prodVars[in.(prodVars[:,"scen"],Ref(scenarios)),:]
-    cVarsVars = cVars[in.(cVars[:,"scen"],Ref(scenarios)),:] 
+    cVars = cVars[in.(cVars[:,"scen"],Ref(scenarios)),:] 
 else
     forestData_byscenario = [CSV.read(baseIDir*"/forestData_"*scenario*".csv", DataFrame; delim=';', missingstring="") for scenario in scenarios];
     productData_byscenario = [CSV.read(baseIDir*"/productData_"*scenario*".csv", DataFrame; delim=';', types=problematicCols) for scenario in scenarios];
@@ -124,14 +123,19 @@ else
     cVars = vcat(carbonData_byscenario...)
 end
 
-
-[select!(dfi, Not(["country"])) for dfi in [forVars,prodVars,cVars]] # delete columns country
-
 print("Data loaded")
 
 ##########################################################
 ### Data clean-up and initialisation
 ##########################################################
+
+forVars  = forVars[in.(forVars.year, Ref(years_ffsm) ),:]
+prodVars = prodVars[in.(prodVars.year, Ref(years_ffsm) ),:]
+cVars    = cVars[in.(cVars.year, Ref(years_ffsm) ),:]
+
+[select!(dfi, Not(["country"])) for dfi in [forVars,prodVars,cVars]] # delete columns country
+
+
 forVars.forGroup = map(k->fgroup_map[k], forVars.forType)
 #[df[:region] = map(k->reg_map[k], df[:region]) for df in [forVars,cVars]]
 prodVars.prodLev = map(k->pgroup_map[k], prodVars.prod)
@@ -162,6 +166,18 @@ end
 
 ffsmout.region = [newRegionsIdToString[i] for i in ffsmout.newregid]
 
+# Adding totals to carbon variables
+cVars_piv = pivot(cVars,[:scen,:year,:region],:balItem,:value,
+                sort = [:scen,:year],
+            )
+cVars_piv.STOCKS = cVars_piv.STOCK_INV + cVars_piv.STOCK_EXTRA + cVars_piv.STOCK_PRODUCTS
+cVars_piv.EM_NET = cVars_piv.EM_ENSUB + cVars_piv.EM_FOROP + cVars_piv.EM_MATSUB
+cVars_piv.TOT_BAL =  cVars_piv.STOCKS + cVars_piv.EM_NET
+cVars = stack(cVars_piv) # setting it back in long format but now with totals
+
+
+# FFSM specific issues.......................
+
 
 # FFSM harvest
 hvffsm = @subset(ffsmout,:parName .== "hV")
@@ -187,10 +203,118 @@ harvest_by_region_ffsm.additionalHarvested = harvest_by_region_ffsm[:,ffsmscen] 
 @df harvest_by_region_ffsm bar(:region, :additionalHarvested, legend=:topleft, label=nothing, title="Additional harvest required by region (ffsm)", xrotation=45, bottom_margin=10mm)
 
 ## - FFSM harvest per species
+groups = groupby(hvffsm,["scen","region","year"])
+harvest_by_species_ffsm = combine(groups) do subdf
+    Broadl_hv         = @subset(subdf,:forGroup .== "Broadl").valuenew[1]
+    Coniferous_hv     = @subset(subdf,:forGroup .== "Coniferous").valuenew[1]
+    Mixed_hv          = @subset(subdf,:forGroup .== "Coniferous").valuenew[1]
+    Broadl_hv_new     = Broadl_hv+Mixed_hv*(Broadl_hv / (Broadl_hv+Coniferous_hv))
+    Coniferous_hv_new = Coniferous_hv+Mixed_hv*(Coniferous_hv / (Broadl_hv+Coniferous_hv))
+    Broadl_hv_new     = isnan(Broadl_hv_new) ? 0.0 : Broadl_hv_new
+    Coniferous_hv_new = isnan(Coniferous_hv_new) ? 0.0 : Coniferous_hv_new
+    (forGroup2 = ["Broadl","Coniferous"], value = [Broadl_hv_new, Coniferous_hv_new])
+end
+
+groups = groupby(harvest_by_species_ffsm,["scen","forGroup2"])
+harvest_by_species_ffsm = combine(groups) do subdf
+    (hv = sum(subdf.value),)
+end
+harvest_by_species_ffsm = unstack(harvest_by_species_ffsm,"scen","hv")
+harvest_by_species_ffsm.additionalHarvested = harvest_by_species_ffsm[:,ffsmscen] - harvest_by_species_ffsm.default
+@df harvest_by_species_ffsm bar(:forGroup2, :additionalHarvested, legend=:topleft, label=nothing, title="Additional harvest required by species group (FFSM)")
+
+## - FFSM carbon balance
+# em are already stacked !!!
+# unit is Mm^3 Co2 eq
+
+cbal = @subset(cVars, :variable .== "STOCKS" .|| :variable .== "EM_NET" )
+cbal = combine(groupby(cbal,["scen","year","variable"]), "value" => sum => "value")
+cbal = unstack(cbal,"variable","value")
+cbal.tot = cbal.STOCKS + cbal.EM_NET
+
+cbal_bau = @subset(cbal, :scen .== "default")
+cbal_scen = @subset(cbal, :scen .== ffsmscen)
+
+
+@df cbal_bau plot(:year, :STOCKS, legend=:topleft, colour=:green, linestyle=:dot, label="bau - stocks", title="Yearly carbon balance (strockage + cum em) FFSM", ylabel="Mm³ CO₂ eq")
+@df cbal_bau plot!(:year, :tot, legend=:topleft, colour=:green, label="bau - tot")
+@df cbal_scen plot!(:year, :STOCKS, legend=:topleft, colour=:red, linestyle=:dot, label=string(ffsmscen," - stocks"))
+@df cbal_scen plot!(:year, :tot, legend=:topleft, colour=:red, label=string(ffsmscen," - tot"))
+
+carbon_gain = cbal_scen.tot[end] - cbal_bau.tot[end]
+
+
+
+## - FFSM cost analysis
+groups = groupby(prodVars,["scen","year"])
+costs = combine(groups) do subdf
+    polBal_mktDirInt_s = sum( @subset(subdf, :parName .== "polBal_mktDirInt_s").value)
+    polBal_mktDirInt_d = sum( @subset(subdf, :parName .== "polBal_mktDirInt_d").value)
+    polBal_trSub = sum( @subset(subdf, :parName .== "polBal_trSub").value)
+    polBal_tcSub = sum( @subset(subdf, :parName .== "polBal_tcSub").value)
+
+    surplus_prod = sum( @subset(subdf, :parName .== "surplus_prod").value)
+    surplus_cons = sum( @subset(subdf, :parName .== "surplus_cons").value)
+    policy_cost_part = polBal_mktDirInt_s  + polBal_mktDirInt_d + polBal_trSub + polBal_tcSub
+    (policy_cost_part = policy_cost_part,surplus_prod=surplus_prod, surplus_cons=surplus_cons)
+end
+groups = groupby(forVars,["scen","year"])
+costs2 = combine(groups) do subdf
+    polBal_fiSub = sum( @subset(subdf, :parName .== "polBal_fiSub").value)
+    (polBal_fiSub = polBal_fiSub,)
+end
+
+sort!(costs,["scen","year"])
+sort!(costs2,["scen","year"])
+costs.polBal_fiSub = costs2.polBal_fiSub
+
+costs.policy_cost = costs.policy_cost_part + costs.polBal_fiSub
+costs.gross_welfare = costs.surplus_prod + costs.surplus_cons
+costs.net_welfare = costs.gross_welfare + costs.policy_cost
+
+scenarios = unique(costs.scen) 
+costs_bau = @subset(costs, :scen .== "default")
+costs_alt = @subset(costs, :scen .== ffsmscen)
+
+@df costs plot(:year, :policy_cost, group=:scen)
+@df costs plot(:year, :gross_welfare, group=:scen)
+@df costs plot!(:year, :net_welfare, group=:scen)
+
+@df costs_bau plot(:year, :gross_welfare, colour="green", label="Welfare - bau", legend=:bottomright)
+@df costs_alt plot!(:year, :gross_welfare, colour="red", label="Gross welfare - $ffsmscen ")
+@df costs_alt plot!(:year, :net_welfare, colour="red", linestyle=:dot, label="Net welfare - $ffsmscen ")
+
+avg_yearly_policy_cost = -mean(costs_alt.policy_cost) # M€
+avg_yearly_welfare_loss = mean(costs_bau.net_welfare - costs_alt.net_welfare) # M€
 
 
 
 
+#=
+groups = groupby(cbal,["scen"])
+cbaltot = combine(groups) do subdf
+    #(year = subdf.year, stocks = subdf.STOCKS, cumem = cumsum(subdf.EM_NET),totalbal = subdf.STOCKS .+ cumsum(subdf.EM_NET))
+    (year = subdf.year,totalbal = subdf.STOCKS .+ cumsum(subdf.EM_NET))
+end
+cbalstocks = combine(groups) do subdf
+    (year = subdf.year, stocks = subdf.STOCKS)
+end
+cbalem = combine(groups) do subdf
+    (year = subdf.year, cumem = cumsum(subdf.EM_NET))
+end
+cbaltot = unstack(cbaltot,"scen","totalbal")
+cbalstocks = unstack(cbalstocks,"scen","stocks")
+cbalem = unstack(cbalem,"scen","cumem")
+
+@df cbalstocks plot(:year, :default, legend=:topleft, colour=:green,label="bau", title="Yearly carbon balance (strockage + cum em) FFSM")
+plot!(cbalstocks.year, cbalstocks[:,ffsmscen], legend=:topleft, colour=:red,label=ffsmscen)
+
+@df cbalem plot(:year, :default, legend=:topleft, colour=:green,label="bau", title="Yearly carbon balance (strockage + cum em) FFSM")
+plot!(cbalem.year, cbalem[:,ffsmscen], legend=:topleft, colour=:red,label=ffsmscen)
+
+@df cbaltot plot(:year, :default, legend=:topleft, colour=:green,label="bau", title="Yearly carbon balance (strockage + cum em) FFSM")
+plot!(cbaltot.year, cbaltot[:,ffsmscen], legend=:topleft, colour=:red,label=ffsmscen)
+=#
 
 # ------------------------------------------------------------------------------
 #
@@ -239,9 +363,9 @@ harvest_yearly_top = @subset(harvest_yearly, :plots_cut .== topscenario[1], :int
 @df carbon_balance_yearly_top plot!(:year, :carbon_balance, legend=:topleft, colour=:red,label="best scenario - $(topscenario[1]) $(topscenario[2])")
 @df carbon_balance_yearly_bau plot!(:year, :carbon_balance, legend=:topleft, colour=:green,label="BAU")
 
-@df harvest_yearly plot(:year, :yearly_harvested, legend=:topleft, colour=:grey, label=nothing, title="Yearly harvesting", ylabel="m³")
-@df harvest_yearly_top plot!(:year, :yearly_harvested, legend=:topleft, colour=:red,label="best scenario - $(topscenario[1]) $(topscenario[2])")
-@df harvest_yearly_bau plot!(:year, :yearly_harvested, legend=:topleft, colour=:green,label="BAU")
+@df harvest_yearly plot(:year, :yearly_harvested, legend=:topright, colour=:grey, label=nothing, title="Yearly harvesting", ylabel="m³")
+@df harvest_yearly_top plot!(:year, :yearly_harvested, legend=:topright, colour=:red,label="best scenario - $(topscenario[1]) $(topscenario[2])")
+@df harvest_yearly_bau plot!(:year, :yearly_harvested, legend=:topright, colour=:green,label="BAU")
 
 groups      = groupby(bicaff,["plots_cut","intensity","Region"])
 harvest_by_region = combine(groups) do subdf # slower
@@ -261,7 +385,9 @@ addtraces!(fig,
            scatterpolar(r=harvest_by_region.additionalHarvested,
                         theta=categories,
                         fill="toself",
-                        name="Additional Harvest"))
+                        name="Additional Harvest",
+                        #title="Additional harvest by region (BICAFF)"
+                        ))
 relayout!(fig,  polar=attr(radialaxis=attr(visible=true, range=[0, maximum(harvest_by_region.additionalHarvested)])),
           showlegend=false, margin=5mm)
 display(fig)
@@ -283,10 +409,10 @@ annotate!(real.(z), imag.(z), text.(labels,12,justifyme.(θ[1:n]),"Computer Mode
 
 groups      = groupby(bicaff,["plots_cut","intensity","type"])
 harvest_by_species = combine(groups) do subdf # slower
-    (yearly_harvested=sum(subdf.yearly_harvested_m3),)
+    (tot_harvested=sum(subdf.yearly_harvested_m3) .* 5,)
 end
 harvest_by_species = @subset(harvest_by_species, ((:plots_cut .== topscenario[1] .&& :intensity .== topscenario[2]) .|| :plots_cut .== "BAU") )
 harvest_by_species = harvest_by_species[:,Not(:intensity)]
-harvest_by_species = unstack(harvest_by_species,"plots_cut","yearly_harvested")
+harvest_by_species = unstack(harvest_by_species,"plots_cut","tot_harvested")
 harvest_by_species.additionalHarvested = harvest_by_species.Managed-harvest_by_species.BAU
 @df harvest_by_species bar(:type, :additionalHarvested, legend=:topleft, label=nothing, title="Additional harvest required by species group", xrotation=45, bottom_margin=10mm)
