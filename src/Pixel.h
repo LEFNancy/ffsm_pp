@@ -116,6 +116,7 @@ public:
   //vector <double>                             hr; // by pp
   vector <double>                           vReg; // by ft
   vector <vector <double> >                vMort; // by ft,dc
+  vector <vector <double> >                vMortAdd; // by ft dc fire mortality
   vector <double>                expectedReturns; // by ft
   vector <int>                             optDc; // The "optimal" diameter class chosen in project evaluation for the regeneration. By ft evaluated (not necessarily those then chosen)
   vector <int>                       optFtChosen; // The ft (index) chosen as optimal in regeneration for each ft in input (harvested)
@@ -130,6 +131,7 @@ public:
 
   vector <vector <double> >                 beta;
   vector <vector <double> >                 mort;
+  vector <vector <double> >                 addMort; // fire mortality
   vector <vector <double> >                   tp;
   vector <vector <double> >                cumTp; ///< This is time of passage to REACH a diameter class (while the exogenous tp by diameter class is the time of passage to LEAVE to the next d class). By ft,dc
   vector <vector <double> >                  vHa; ///< Volume at hectar by each diameter class [m^3/ha]

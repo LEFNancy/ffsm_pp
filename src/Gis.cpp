@@ -326,7 +326,7 @@ Gis::initLayersPixelData(){
   //string parName, forName, dClass, yearString;
   //int year;
 
-  MTHREAD->MD->getFilenamesByDir (dir,files, fileExt); // Ugly format. Files is the output (reference)
+  MTHREAD->MD->getFilenamesByDir(dir,files, fileExt); // Ugly format. Files is the output (reference)
 
   for (unsigned int i = 0;i < files.size();i++) {
     fullFilename = files[i];
