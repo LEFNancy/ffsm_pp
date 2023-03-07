@@ -926,183 +926,200 @@ Output::printDebugPixelValues(){
 //        out << "\n";
 
         //----
-        out << common <<"vol" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << px->vol[f][u]<< d;
-          }
-          out << vSum(px->vol[f]) << d;
-        }
-        out << "\n";
-        //----
-        out << common <<"area" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << px->area[f][u]<< d;
-          }
-          out << vSum(px->area[f]) << d;
-        }
-        out << "\n";
-        //----
-//        out << common <<"cumTp_exp" << d;
-//        for(uint f=0;f<fTypes.size();f++){
-//          for(uint u=0;u<dClasses.size()-1;u++){
-//            out << px->cumTp_exp[f][u]<< d;
-//          }
-//          out << vSum(px->cumTp_exp[f]) << d;
-//        }
-//        out << "\n";
-//        //----
-//        out << common <<"vHa_exp" << d;
-//        for(uint f=0;f<fTypes.size();f++){
-//          for(uint u=0;u<dClasses.size()-1;u++){
-//            out << px->vHa_exp[f][u]<< d;
-//          }
-//          out << vSum(px->vHa_exp[f]) << d;
-//        }
-//        out << "\n";
-        //----
-        out << common <<"hArea" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << px->hArea[f][u]<< d;
-          }
-          out << vSum(px->hArea[f]) << d;
-        }
-        out << "\n";
-        out << common <<"hVol" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << px->hVol[f][u]<< d;
-          }
-          out << vSum(px->hVol[f]) << d;
-        }
-        out << "\n";
 
-        out << common <<"tp" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << px->tp[f][u]<< d;
-          }
-          out << 0 << d;
-        }
-        out << "\n";
-        out << common <<"mort" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << px->mort[f][u]<< d;
-          }
-          out << 0 << d;
-        }
-        out << "\n";
+        vector <string> outVars   = MTHREAD->MD->getStringVectorSetting("debugVariablesToPrint");
 
-        out << common <<"tp_multiplier" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << d;
-          }
-          out << px->getMultiplier("tp_multiplier",fTypes[f]) << d;
-        }
-        out << "\n";
-        out << common <<"mortCoef_multiplier" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << d;
-          }
-          out << px->getMultiplier("mortCoef_multiplier",fTypes[f]) << d;
-        }
-        out << "\n";
+        if (std::find(outVars.begin(), outVars.end(), "vol") != outVars.end()){
+            out << common <<"vol" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << px->vol[f][u]<< d;
+              }
+              out << vSum(px->vol[f]) << d;
+            }
+            out << "\n";
+       }
 
-
-        out << common <<"vMort" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << px->vMort[f][u]<< d;
-          }
-          out << vSum(px->vMort[f]) << d;
+        if (std::find(outVars.begin(), outVars.end(), "area") != outVars.end()){
+            out << common <<"area" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << px->area[f][u]<< d;
+              }
+              out << vSum(px->area[f]) << d;
+            }
+            out << "\n";
         }
-        out << "\n";
 
-        out << common <<"optDc" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << d;
-          }
-          out << px->optDc[f] << d;
+        if (std::find(outVars.begin(), outVars.end(), "hArea") != outVars.end()){
+            out << common <<"hArea" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << px->hArea[f][u]<< d;
+              }
+              out << vSum(px->hArea[f]) << d;
+            }
+            out << "\n";
         }
-        out << "\n";
 
-        out << common <<"expectedAnnualIncome_timber" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
+        if (std::find(outVars.begin(), outVars.end(), "hVol") != outVars.end()){
+            out << common <<"hVol" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << px->hVol[f][u]<< d;
+              }
+              out << vSum(px->hVol[f]) << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "tp") != outVars.end()){
+            out << common <<"tp" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << px->tp[f][u]<< d;
+              }
+              out << 0 << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "mort") != outVars.end()){
+            out << common <<"mort" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << px->mort[f][u]<< d;
+              }
+              out << 0 << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "tp_multiplier") != outVars.end()){
+            out << common <<"tp_multiplier" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << d;
+              }
+              out << px->getMultiplier("tp_multiplier",fTypes[f]) << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "mortCoef_multiplier") != outVars.end()){
+            out << common <<"mortCoef_multiplier" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << d;
+              }
+              out << px->getMultiplier("mortCoef_multiplier",fTypes[f]) << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "vMort") != outVars.end()){
+            out << common <<"vMort" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << px->vMort[f][u]<< d;
+              }
+              out << vSum(px->vMort[f]) << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "optDc") != outVars.end()){
+            out << common <<"optDc" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << d;
+              }
+              out << px->optDc[f] << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "expectedAnnualIncome_timber") != outVars.end()){
+            out << common <<"expectedAnnualIncome_timber" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                  out << d;
+              }
+              out << px->expectedAnnualIncome_timber[f] << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "expectedAnnualIncome_carbon") != outVars.end()){
+            out << common <<"expectedAnnualIncome_carbon" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                  out << d;
+              }
+              out << px->expectedAnnualIncome_carbon[f] << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "expectedReturnsNotCorrByRa") != outVars.end()){
+            out << common <<"expectedReturnsNotCorrByRa" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << d;
+              }
+              out << px->expectedReturnsNotCorrByRa[f] << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "expectedReturns") != outVars.end()){
+            out << common <<"expectedReturns" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << d;
+              }
+              out << px->expectedReturns[f] << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "optFtChosen") != outVars.end()){
+            out << common <<"optFtChosen" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << d;
+              }
+              out << px->optFtChosen[f] << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "optDcChosen") != outVars.end()){
+            out << common <<"optDcChosen" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << d;
+              }
+              out << px->optDcChosen[f] << d;
+            }
+            out << "\n";
+        }
+
+        if (std::find(outVars.begin(), outVars.end(), "deltaAreas") != outVars.end()){
+            out << common <<"deltaAreas" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << d;
+              }
               out << d;
-          }
-          out << px->expectedAnnualIncome_timber[f] << d;
+            }
+            for(uint f=0;f<fTypes.size()+1;f++){
+              for(uint f2=0;f2<fTypes.size()+1;f2++){ // +1 because there is also noforest
+                out << px->deltaArea[f][f2]<<d;
+              }
+            }
+            out << "\n";
         }
-        out << "\n";
-
-        out << common <<"expectedAnnualIncome_carbon" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-              out << d;
-          }
-          out << px->expectedAnnualIncome_carbon[f] << d;
-        }
-        out << "\n";
-
-
-        out << common <<"expectedReturnsNotCorrByRa" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << d;
-          }
-          out << px->expectedReturnsNotCorrByRa[f] << d;
-        }
-        out << "\n";
-
-        out << common <<"expectedReturns" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << d;
-          }
-          out << px->expectedReturns[f] << d;
-        }
-        out << "\n";
-
-
-        out << common <<"optFtChosen" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << d;
-          }
-          out << px->optFtChosen[f] << d;
-        }
-        out << "\n";
-
-        out << common <<"optDcChosen" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << d;
-          }
-          out << px->optDcChosen[f] << d;
-        }
-        out << "\n";
-
-        //----
-        out << common <<"deltaAreas" << d;
-        for(uint f=0;f<fTypes.size();f++){
-          for(uint u=0;u<dClasses.size()-1;u++){
-            out << d;
-          }
-          out << d;
-        }
-        for(uint f=0;f<fTypes.size()+1;f++){
-          for(uint f2=0;f2<fTypes.size()+1;f2++){ // +1 because there is also noforest
-            out << px->deltaArea[f][f2]<<d;
-          }
-        }
-        out << "\n";
-        //----
 
 
 

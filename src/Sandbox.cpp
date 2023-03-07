@@ -606,6 +606,23 @@ Sandbox::fullTest(){
   exit(0);
   */
 
+    /*
+    Pixel* px = MTHREAD->GIS->getPixel(8967);
+    double myAddMortality;
+    myAddMortality =  px->getSTData("test", "broadL_highF", 2012, "50", 0.0);
+    cout << "test 2012: " << myAddMortality <<endl;
+    myAddMortality =  px->getSTData("test", "broadL_highF", 2013, "50", 0.0);
+    cout << "test 2013: " << myAddMortality <<endl;
+    myAddMortality =  px->getSTData("test", "broadL_highF", 2014, "50", 0.0);
+    cout << "test 2014: " << myAddMortality <<endl;
+    myAddMortality =  px->getSTData("test", "broadL_highF", 2015, "50", 0.0);
+    cout << "test 2015: " << myAddMortality <<endl;
+    myAddMortality =  px->getSTData("test", "broadL_highF", 2016, "50", 0.0);
+    cout << "test 2016: " << myAddMortality <<endl;
+    myAddMortality =  px->getSTData("test", "broadL_highF", 2017, "50", 0.0);
+    cout << "test 2017: " << myAddMortality <<endl;
+    exit(0);
+   */
 
   /*
   // checking that the overriding works also for secondary dimension
