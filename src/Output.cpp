@@ -1028,6 +1028,17 @@ Output::printDebugPixelValues(){
             out << "\n";
         }
 
+        if (std::find(outVars.begin(), outVars.end(), "vMortAdd") != outVars.end()){
+            out << common <<"vMortAdd" << d;
+            for(uint f=0;f<fTypes.size();f++){
+              for(uint u=0;u<dClasses.size()-1;u++){
+                out << px->vMortAdd[f][u]<< d;
+              }
+              out << vSum(px->vMortAdd[f]) << d;
+            }
+            out << "\n";
+        }
+
         if (std::find(outVars.begin(), outVars.end(), "optDc") != outVars.end()){
             out << common <<"optDc" << d;
             for(uint f=0;f<fTypes.size();f++){
