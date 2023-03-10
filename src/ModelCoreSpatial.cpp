@@ -704,7 +704,7 @@ ModelCoreSpatial::runBiologicalModule(){
           if(useDeathTimber){
             iisskey key(thisYear,r2,ft,dc);
 
-            MD->deathTimberInventory_incrOrAdd(key,vMort*shareMortalityUsableTimber);
+            MD->deathTimberInventory_incrOrAdd(key,(vMort+vMortAdd)*shareMortalityUsableTimber);
           }
 
           if(u==0){
@@ -1541,7 +1541,7 @@ ModelCoreSpatial::initialiseCarbonModule(){
   for(uint i=0;i<regIds2.size();i++){
     vector<double> deathBiomass;
     for(uint j=0;j<fTypes.size();j++){
-      double deathBiomass_ft = gfd("vMort",regIds2[i],fTypes[j],DIAM_ALL,DATA_NOW);
+      double deathBiomass_ft = gfd("vMort",regIds2[i],fTypes[j],DIAM_ALL,DATA_NOW)+gfd("vMortAdd",regIds2[i],fTypes[j],DIAM_ALL,DATA_NOW);
       deathBiomass.push_back(deathBiomass_ft);
     }
     MTHREAD->CBAL->initialiseDeathBiomassStocks(deathBiomass, regIds2[i]);
@@ -2372,7 +2372,7 @@ ModelCoreSpatial::registerCarbonEvents(){
 
   for(uint i=0;i<regIds2.size();i++){
     for(uint j=0;j<fTypes.size();j++){
-      double deathBiomass = gfd("vMort",regIds2[i],fTypes[j],DIAM_ALL,DATA_NOW);
+      double deathBiomass = gfd("vMort",regIds2[i],fTypes[j],DIAM_ALL,DATA_NOW)+ gfd("vMortAdd",regIds2[i],fTypes[j],DIAM_ALL,DATA_NOW);
       double harvesting = gfd("hV",regIds2[i],fTypes[j],DIAM_ALL,DATA_NOW);
       MTHREAD->CBAL->registerDeathBiomass(deathBiomass, regIds2[i], fTypes[j]);  // register new stock
       MTHREAD->CBAL->registerHarvesting(harvesting, regIds2[i], fTypes[j]);      // account for emissions. Added 201500715: it also moves the extra biomass to the death biomass pool
