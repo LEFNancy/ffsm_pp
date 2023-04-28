@@ -696,7 +696,7 @@ ModelCoreSpatial::runBiologicalModule(){
           double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
 
           double vMort       = mort*pastYearVol;
-          double vMortAdd = addMort*pastYearVol;  // fire mortality
+          double vMortAdd = addMort*pastYearVol;
 
           vMort_byDc.push_back(vMort);
           vMortAdd_byDc.push_back(vMortAdd); // fire mortality
@@ -710,10 +710,10 @@ ModelCoreSpatial::runBiologicalModule(){
           if(u==0){
             vol = 0.0;
           }else if(u==1){
-            vol = max(0.0,(1-1/tp-mort))*pastYearVol+vReg; //Antonello, "bug" fixed 20160203: In case of very strong mortality this quantity (that doesn't include harvesting) could be negative!
+            vol = max(0.0,(1-1/tp-mort-addMort))*pastYearVol+vReg; //Antonello, "bug" fixed 20160203: In case of very strong mortality this quantity (that doesn't include harvesting) could be negative!
             //double debug = vol;
             #ifdef QT_DEBUG
-            if ((1-1/tp-mort)<0.0){
+            if ((1-1/tp-mort-addMort)<0.0){
               msgOut(MSG_DEBUG,"The sum of leaving trres and mortality would have lead to nevative volume if we didn't put a max. 1/tp: "+d2s(1/tp)+",  mort: "+d2s(mort)+", total coeff: "+d2s((1-1/tp-mort))+" ");
             }
             #endif
@@ -723,10 +723,10 @@ ModelCoreSpatial::runBiologicalModule(){
             double tp_1 = px->tp.at(j).at(u-1); //gfd("tp",regId,ft,dClasses[u-1]);
             double pastYearVol_1 = px->vol_l.at(j).at(u-1); //gfd("vol",regId,ft,dClasses[u-1],thisYear-1);
             //vol = max(0.0,(1-inc-mort-hr)*pastYearVol+(1/tp_1)*beta*pastYearVol_1);
-            vol = max(0.0,(1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1); // I can't use any more hr as it is the harvesting rate over the available volumes, not the whole ones
+            vol = max(0.0,(1-inc-mort-addMort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1); // I can't use any more hr as it is the harvesting rate over the available volumes, not the whole ones
             #ifdef QT_DEBUG
             if ((1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1 < 0){
-              double realVolumes = (1-inc-mort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1;
+              double realVolumes = (1-inc-mort-addMort)*pastYearVol-hV+(1/tp_1)*beta*pastYearVol_1;
               msgOut(MSG_DEBUG,"Negative real volumes ("+d2s(realVolumes)+"), possibly because of little bit larger bounds in the market module to avoid zeros. Volumes in the resource module set back to zero, so it should be ok.");
             }
             #endif
@@ -1939,7 +1939,7 @@ ModelCoreSpatial::cachePixelExogenousData(){
           string dc = dClasses[u];
           double pathMortality           = px->getPathMortality(ft,dc,DATA_NOW);
           double additionalMortality_multiplier_reg_ft_dc = gfd("additionalMortality_multiplier",regId,ft,dc, DATA_NOW);
-          double additionalMortality     = px->getSTData("additionalMortality", ft, DATA_NOW, dc, 0.0)*additionalMortality_multiplier_reg_ft_dc;
+          double additionalMortality     = px->getSTData("additionalMortality", ft, DATA_NOW, dc, 0.0)*additionalMortality_multiplier_reg_ft_dc; // these are volumes not rates !
           double tp, beta_real, mort_real;
           if (u==0){
             // tp of first diameter class not making it change across the time dimension, otherwise problems in getting the rigth past
@@ -1950,7 +1950,7 @@ ModelCoreSpatial::cachePixelExogenousData(){
             tp  = gfd("tp",regId,ft,dClasses[u],DATA_NOW)*tp_multiplier_now; // tp is defined also in the first diameter class, as it is the years to reach the NEXT diameter class
           }
           beta_real = u?gfd("betaCoef",regId,ft,dClasses[u],DATA_NOW)*betaCoef_multiplier_now:0;
-          mort_real = min(u?gfd("mortCoef",regId,ft,dClasses[u],DATA_NOW)*mortCoef_multiplier_now+pathMortality+additionalMortality :0,1.0);  //Antonello, bug fixed 20160203: In any case, natural plus pathogen mortality can not be larger than 1!
+          mort_real = min(u?gfd("mortCoef",regId,ft,dClasses[u],DATA_NOW)*mortCoef_multiplier_now+pathMortality :0,1.0);  // 20230428 bugfix Antonello, removed additionalMortality  //Antonello, bug fixed 20160203: In any case, natural plus pathogen mortality can not be larger than 1!
           tp_byu.push_back(tp);
           beta_byu.push_back(beta_real);
           mort_byu.push_back(mort_real);
