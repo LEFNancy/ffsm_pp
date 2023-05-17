@@ -26,7 +26,7 @@
 #include <map>
 #include <tr1/array>
 
-#include <Eigen/Dense>
+//#include <Eigen/Dense>
 
 #include "Sandbox.h"
 #include "ThreadManager.h"

@@ -28,7 +28,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <Eigen/Dense>
+//#include <Eigen/Dense>
 
 // regmas headers...
 #include "BaseClass.h"
@@ -36,7 +36,7 @@
 
 class Gis;        //forward declaration
 
-using namespace Eigen;
+//using namespace Eigen;
 
 /// Pixel-level class
 

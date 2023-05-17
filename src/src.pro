@@ -36,24 +36,24 @@ unix {
 
 }
 
-win32 {
-
-    INCLUDEPATH += ThirdParty/win32/include/coin
-    INCLUDEPATH += ThirdParty/win32/include/coin/ThirdParty
-    INCLUDEPATH += ThirdParty/win32/include
-    INCLUDEPATH += ThirdParty/win32/include/adolc
-    INCLUDEPATH += $$[QT_INSTALL_DATA]/src/3rdparty/zlib
-    LIBS += -L ThirdParty/win32/lib -lipopt
-    LIBS += -L ThirdParty/win32/lib -lcoinmetis
-    LIBS += -L ThirdParty/win32/lib -lcoinmumps
-    LIBS += -L ThirdParty/win32/lib -lcoinhsl
-    LIBS += -L ThirdParty/win32/lib -lcoinblas
-    LIBS += -L ThirdParty/win32/lib -lcoinlapack
-    LIBS += -L ThirdParty/win32/lib -ladolc
-    LIBS += -lpthread -lgfortran -lcoinmetis -lcoinblas
-    #CONFIG +=  console
-    CONFIG += exceptions
-}
+#win32 {
+#   # win32 "support" removed commit 20230523
+#    INCLUDEPATH += ThirdParty/win32/include/coin
+#    INCLUDEPATH += ThirdParty/win32/include/coin/ThirdParty
+#    INCLUDEPATH += ThirdParty/win32/include
+#    INCLUDEPATH += ThirdParty/win32/include/adolc
+#   INCLUDEPATH += $$[QT_INSTALL_DATA]/src/3rdparty/zlib
+#    LIBS += -L ThirdParty/win32/lib -lipopt
+#    LIBS += -L ThirdParty/win32/lib -lcoinmetis
+#    LIBS += -L ThirdParty/win32/lib -lcoinmumps
+#    LIBS += -L ThirdParty/win32/lib -lcoinhsl
+#    LIBS += -L ThirdParty/win32/lib -lcoinblas
+#    LIBS += -L ThirdParty/win32/lib -lcoinlapack
+#    LIBS += -L ThirdParty/win32/lib -ladolc
+#    LIBS += -lpthread -lgfortran -lcoinmetis -lcoinblas
+#    #CONFIG +=  console
+#    CONFIG += exceptions
+#}
 
 INCLUDEPATH += ThirdParty/allos/include
 
