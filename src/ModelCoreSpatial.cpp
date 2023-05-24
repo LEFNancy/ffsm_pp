@@ -51,17 +51,20 @@ ModelCoreSpatial::runInitPeriod(){
   initializePixelVolumes();       ///< compute px volumes vol for 2005 (including exogenous loaded volumes)
   assignSpMultiplierPropToVols(); // assign the spatial multiplier (used in the time of return) based no more on a Normal distribution but on the volumes present in the pixel: more volume, more the pixel is fit for the ft
   initMarketModule();             ///< inside it uses first year, second year
-  initialiseDeathTimber();
+//initialiseDeathTimber();
   MTHREAD->DO->print(true);
-  MTHREAD->SCD->advanceYear();    ///< 2005->2006
+  MTHREAD->SCD->advanceYear();    ///< 2011->2012
   int thisYear = MTHREAD->SCD->getYear(); // for debugging
   resetPixelValues();             ///< swap volumes->lagged_volumes and reset the other pixel vectors
   cachePixelExogenousData();      ///< compute pixel tp, meta and mort
-  computeInventary();             ///< in=f(vol_t-1)
+ // here
   //printDebugInitRegionalValues();
   computeCumulativeData();        ///< compute cumTp_exp, vHa_exp, vHa
   initializePixelArea();          ///< compute px->area for each ft and dc (including exogenous loaded areas)
-  runBiologicalModule();
+  computeInventary();             ///< in=f(vol_t-1)
+  runBiologicalModule();   // needs in
+  initialiseDeathTimber();
+  computeInventary();      // recompute the inventories now that the death biomass has been filled in
   runManagementModule();
   updateMapAreas();               ///< update the forArea_{ft} layer on each pixel as old value-hArea+regArea
   updateOtherMapData();           ///< update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
@@ -74,7 +77,7 @@ ModelCoreSpatial::runInitPeriod(){
 
 void
 ModelCoreSpatial::runSimulationYear(){
-  int thisYear = MTHREAD->SCD->getYear(); // for debugging
+  int thisYear = MTHREAD->SCD->getYear(); // for debugging. Here we are 2013 onward
   cacheDynamicSettings();      // cache settings that may change every year
   resetPixelValues();          // swap volumes->lagged_volumes and reset the other pixel vectors
   cachePixelExogenousData();   // compute pixel tp, meta and mort
@@ -235,6 +238,7 @@ ModelCoreSpatial::runMarketModule(){
   static double cumOverHarvesting = 0.0;
   int thisYear     =  MTHREAD->SCD->getYear();
   int previousYear = MTHREAD->SCD->getYear()-1;
+  bool useDeathTimber = MTHREAD->MD->getBoolSetting("useDeathTimber",DATA_NOW);
 
   // Added for carbon poject -------------------------------
   double intRate = MTHREAD->MD->getDoubleSetting("ir");
@@ -275,14 +279,22 @@ ModelCoreSpatial::runMarketModule(){
     for(uint pp=0;pp<priProducts.size();pp++){
       double gamma_incr        = gpd("gamma_incr",r2,priProducts[pp]); // elast supply to increasing stocks
       double gamma_decr        = gpd("gamma_decr",r2,priProducts[pp]); // elast supply to decreasing stocks
+      double gamma_d_incr        = gpd("gamma_d_incr",r2,priProducts[pp]); // elast supply to increasing stocks death timber
+      double gamma_d_decr        = gpd("gamma_d_decr",r2,priProducts[pp]); // elast supply to decreasing stocks  death timber
+
       double sigma             = gpd("sigma",r2,priProducts[pp]); // elast supply to price
       double pc_1              = gpd("pc",r2,priProducts[pp],previousYear);
       double sc_1              = gpd("sc",r2,priProducts[pp],previousYear);
-      double in                = gpd("in",r2,priProducts[pp])+gpd("in_deathTimber",r2,priProducts[pp]);
-      double in_1              = gpd("in",r2,priProducts[pp],previousYear)+gpd("in_deathTimber",r2,priProducts[pp],previousYear);
+      double in                   = gpd("in",r2,priProducts[pp]);
+      double in_1              = gpd("in",r2,priProducts[pp],previousYear);
+      double in_d               =gpd("in_deathTimber",r2,priProducts[pp]);
+      double in_d_1          = gpd("in_deathTimber",r2,priProducts[pp],previousYear);
+      double min_in_d     = in * MTHREAD->MD->getDoubleSetting("minShareDeathIn");
+
+
       double pol_mktDirInt_s   = gpd("pol_mktDirInt_s",r2,priProducts[pp]);
       double pol_mktDirInt_s_1 = gpd("pol_mktDirInt_s",r2,priProducts[pp],previousYear);
-      double t1                = gpd("t1",r2,priProducts[pp]);
+      double t1                                 = gpd("t1",r2,priProducts[pp]);
       double pol_mktStr_s      = gpd("pol_mktStr_s",r2,priProducts[pp]);
 
 
@@ -298,8 +310,26 @@ ModelCoreSpatial::runMarketModule(){
 
 
       double gamma = in>in_1 ? gamma_incr: gamma_decr; // If inventories resources are decreasing we use a given elasticity, if they are increasing we use an other one
+      double gamma_d = in_d>in_d_1 ? gamma_d_incr: gamma_d_decr; // If inventories resources are decreasing we use a given elasticity, if they are increasing we use an other one
+
 
       double in_ratio =  in/in_1;
+      double in_d_ratio =  useDeathTimber ? max(min_in_d,in_d) / max(min_in_d, in_d_1 )  :  1.0 ;  // to avoid depending on the ratio of  too small  variations in mortality
+
+      msgOut(MSG_INFO,"in_d: "+d2s(in_d));
+      msgOut(MSG_INFO,"in_d_1: "+d2s(in_d_1));
+      msgOut(MSG_INFO,"in: "+d2s(in));
+      msgOut(MSG_INFO,"in_1: "+d2s(in_1));
+      msgOut(MSG_INFO,"in_d_ratio: "+d2s(in_d_ratio));
+
+#ifdef QT_DEBUG
+if (in_d_ratio < 0.01){
+  msgOut(MSG_CRITICAL_ERROR,"Very low in_d_ratio ");
+}
+if (in_d_ratio > 100){
+  msgOut(MSG_CRITICAL_ERROR,"Very high in_d_ratio ");
+}
+#endif
 
       double bb = (sigma/(sigma+1.0))*pc_1*pow(sc_1,-1.0/sigma)*pow(1/in_ratio,gamma/sigma)*pow(1.0,1.0/sigma) * pol_mktDirInt_s_1/pol_mktDirInt_s ;
 
@@ -308,7 +338,7 @@ ModelCoreSpatial::runMarketModule(){
       */
 
       // Added for carbon project
-      double ff = sc_1*pow((pc_1 - omega * Pct_1)*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma);
+      double ff = sc_1*pow((pc_1 - omega * Pct_1)*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma)*pow(in_d_ratio,gamma_d);
       // -----------------------------------------------
 
       spd(bb,"bb",r2,priProducts[pp],DATA_NOW,true);
@@ -1564,12 +1594,15 @@ ModelCoreSpatial::initialiseCarbonModule(){
 void
 ModelCoreSpatial::initialiseDeathTimber(){
   int currentYear = MTHREAD->SCD->getYear();
-  for(int y=currentYear;y>currentYear-30;y--){
+  for(int y=currentYear-1;y>currentYear-30;y--){ // this year death timber is already filled in runBiologicalModule()
     for(uint i=0;i<regIds2.size();i++){
       for(uint j=0;j<fTypes.size();j++){
         for (uint u=0;u<dClasses.size();u++){
+          iisskey inputkey(currentYear,regIds2[i],fTypes[j],dClasses[u]);
+          double initYearDeathTimber = MD->deathTimberInventory_get(inputkey);
+          //cout << initYearDeathTimber << endl;
           iisskey key(y,regIds2[i],fTypes[j],dClasses[u]);
-          MD->deathTimberInventory_incrOrAdd(key,0.0);
+          MD->deathTimberInventory_incrOrAdd(key,initYearDeathTimber); // Should be fixed TO.DO FIX.ME this is wrong, it should be the same as init year, not zero......
         }
       }
     }

@@ -2093,7 +2093,7 @@ ModelData::getAvailableDeathTimber(const vector<string> &primProd_h, int regId_h
       if(possible){
         for(int y=year_h;y>year_h-maxYears;y--){
           iisskey key(y,regId_h,ft,dc);
-          toReturn += findMap(deathTimberInventory,key,MSG_DEBUG,0.0);
+          toReturn += findMap(deathTimberInventory,key,MSG_NO_MSG,0.0);
         }
       }
     }
