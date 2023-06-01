@@ -437,8 +437,6 @@ Output::print(bool earlyPrint){
   }
   if(outStepRange == -1 && !printThisYear) return;
 
-
-  cout << "printing " << cYear << endl;
   printMaps();
   MTHREAD->MD->setErrorLevel(MSG_NO_MSG);
   printForestData(false);

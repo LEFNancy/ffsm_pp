@@ -51,26 +51,18 @@ ModelCoreSpatial::runInitPeriod(){
   initializePixelVolumes();       ///< compute px volumes vol for 2005 (including exogenous loaded volumes)
   assignSpMultiplierPropToVols(); // assign the spatial multiplier (used in the time of return) based no more on a Normal distribution but on the volumes present in the pixel: more volume, more the pixel is fit for the ft
   initMarketModule();             ///< inside it uses first year, second year
-//initialiseDeathTimber();
+  initialiseDeathTimber();
   MTHREAD->DO->print(true);
-  MTHREAD->SCD->advanceYear();    ///< 2011->2012
+  MTHREAD->SCD->advanceYear();    ///< 2005->2006
   int thisYear = MTHREAD->SCD->getYear(); // for debugging
-  msgOut(MSG_INFO, "Starting  "+i2s(thisYear)+ " year...");
+  msgOut(MSG_INFO, "### 2013 "+i2s(thisYear)+"  year started..");
   resetPixelValues();             ///< swap volumes->lagged_volumes and reset the other pixel vectors
   cachePixelExogenousData();      ///< compute pixel tp, meta and mort
- // here
+  computeInventary();             ///< in=f(vol_t-1)
   //printDebugInitRegionalValues();
   computeCumulativeData();        ///< compute cumTp_exp, vHa_exp, vHa
   initializePixelArea();          ///< compute px->area for each ft and dc (including exogenous loaded areas)
-  //cout << "###2012a: " <<  d2s( MD->deathTimberInventory_get(iisskey (2012,11002,"Fut_Feu","30") ) ) << endl;
-  computeInventary();             ///< in=f(vol_t-1)
- //cout << "###2012b: " <<  d2s( MD->deathTimberInventory_get(iisskey (2012,11002,"Fut_Feu","30") ) ) << endl;
-  runBiologicalModule();   // needs in
-  //cout << "###2012c: " <<  d2s( MD->deathTimberInventory_get(iisskey (2012,11002,"Fut_Feu","30") ) ) << endl;
-  initialiseDeathTimber();
-  //cout << "###2012d: " <<  d2s( MD->deathTimberInventory_get(iisskey (2012,11002,"Fut_Feu","30") ) ) << endl;
-  computeInventary();      // recompute the inventories now that the death biomass has been filled in
-  //cout << "###2012e: " <<  d2s( MD->deathTimberInventory_get(iisskey (2012,11002,"Fut_Feu","30") ) ) << endl;
+  runBiologicalModule();
   runManagementModule();
   updateMapAreas();               ///< update the forArea_{ft} layer on each pixel as old value-hArea+regArea
   updateOtherMapData();           ///< update (if the layer exists) other gis-based data, as volumes and expected returns, taking them from the data in the px object
@@ -79,13 +71,11 @@ ModelCoreSpatial::runInitPeriod(){
   //MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging // moved to output->print
 
   MTHREAD->DO->print();
-  //cout << "###2012f: " <<  d2s( MD->deathTimberInventory_get(iisskey (2012,11002,"Fut_Feu","30") ) ) << endl;
 }
 
 void
 ModelCoreSpatial::runSimulationYear(){
-  int thisYear = MTHREAD->SCD->getYear(); // for debugging. Here we are 2013 onward
-  //cout << "### "+i2s(thisYear)+"a: " <<  d2s( MD->deathTimberInventory_get(iisskey (thisYear,11002,"Fut_Feu","30") ) ) << endl;
+  int thisYear = MTHREAD->SCD->getYear(); // for debugging
   cacheDynamicSettings();      // cache settings that may change every year
   resetPixelValues();          // swap volumes->lagged_volumes and reset the other pixel vectors
   cachePixelExogenousData();   // compute pixel tp, meta and mort
@@ -93,9 +83,7 @@ ModelCoreSpatial::runSimulationYear(){
   runMarketModule();           // RUN THE MARKET OPTIMISATION HERE
   computeCumulativeData();     // compute cumTp_exp, vHa_exp
   cachePixelExogenousData();
-  //cout << "### "+i2s(thisYear)+"b: " <<  d2s( MD->deathTimberInventory_get(iisskey (thisYear,11002,"Fut_Feu","30") ) ) << endl;
   runBiologicalModule();
- //cout << "### "+i2s(thisYear)+"c: " <<  d2s( MD->deathTimberInventory_get(iisskey (thisYear,11002,"Fut_Feu","30") ) ) << endl;
   runManagementModule();
   //MTHREAD->DO->printDebugPixelValues(); // uncomment to enable pixel-level debugging // moved to output->print
   updateMapAreas();
@@ -298,8 +286,13 @@ ModelCoreSpatial::runMarketModule(){
       double in                   = gpd("in",r2,priProducts[pp]);
       double in_1              = gpd("in",r2,priProducts[pp],previousYear);
       double in_d               =gpd("in_deathTimber",r2,priProducts[pp]);
-      double in_d_1          = gpd("in_deathTimber",r2,priProducts[pp],previousYear);
-      double min_in_d     = in * MTHREAD->MD->getDoubleSetting("minShareDeathIn");
+       double in_d_1 ;
+       if (thisYear == MTHREAD->MD->getIntSetting("initialOptYear")){
+             in_d_1          = gpd("in_deathTimber",r2,priProducts[pp],thisYear);
+       } else {
+            in_d_1          = gpd("in_deathTimber",r2,priProducts[pp],previousYear);
+       }
+      double min_in_d     =  max(0.00001,in * MTHREAD->MD->getDoubleSetting("minShareDeathIn"));
 
 
       double pol_mktDirInt_s   = gpd("pol_mktDirInt_s",r2,priProducts[pp]);
@@ -360,7 +353,7 @@ if (in_d_ratio > 100){
 
   } // end for each region in level 2 (and updating variables)
 
-
+  //cout << "### "+i2s(thisYear-2)+"abb: " <<  d2s( MD->deathTimberInventory_get(iisskey (thisYear-2,11001,"Fut_Feu","30") ) ) << endl;
 
   // *** OPTIMISATION....
 
@@ -399,7 +392,7 @@ if (in_d_ratio > 100){
   msgOut(MSG_INFO,"Running optimisation problem for this year (it may take a few minutes for large models)..");
   status = application->OptimizeTNLP(MTHREAD->OPT);
 
-
+ // cout << "### "+i2s(thisYear-2)+"abc: " <<  d2s( MD->deathTimberInventory_get(iisskey (thisYear-2,11001,"Fut_Feu","30") ) ) << endl;
   // *** POST OPTIMISATION....
 
   // post-equilibrium variables->parameters assignments..
@@ -522,6 +515,7 @@ if (in_d_ratio > 100){
 
     }
 
+      //cout << "### "+i2s(thisYear-2)+"abe: " <<  d2s( MD->deathTimberInventory_get(iisskey (thisYear-2,11001,"Fut_Feu","30") ) ) << endl;
     // here we create st_fromHarv as st_fromFor - st_from_deathbiomass
     vector <double> total_st(priProducts.size(),0.);
     vector <double> in_deathTimber(priProducts.size(),0.);
@@ -531,19 +525,21 @@ if (in_d_ratio > 100){
       in_deathTimber[i] = gpd("in_deathTimber",regId,priProducts[i]);
       in_aliveForest[i] = gpd("in",regId,priProducts[i]);
     }
-
+  //  cout << "### "+i2s(thisYear-2)+"abf: " <<  d2s( MD->deathTimberInventory_get(iisskey (thisYear-2,11001,"Fut_Feu","30") ) ) << endl;
     vector <double> st_fromHarv= allocateHarvesting(total_st, regId);
-
+   //cout << "### "+i2s(thisYear-2)+"abg: " <<  d2s( MD->deathTimberInventory_get(iisskey (thisYear-2,11001,"Fut_Feu","30") ) ) << endl;
     for (uint i=0;i<priProducts.size();i++){
       spd(st_fromHarv[i],"st_fromHarv",regId,priProducts[i],DATA_NOW,true);
     }
 
   } // end of each region
+
+ // cout << "### "+i2s(thisYear-2)+"abh: " <<  d2s( MD->deathTimberInventory_get(iisskey (thisYear-2,11001,"Fut_Feu","30") ) ) << endl;
+
   if (cumOverHarvesting>0.0){
     msgOut(MSG_DEBUG, "Overharvesting is present. Year: "+i2s(thisYear)+" cumOverHarvesting: "+d2s(cumOverHarvesting));
   }
 }
-
 
 /**
  * @brief ModelCoreSpatial::runBiologicalModule
@@ -1604,15 +1600,12 @@ ModelCoreSpatial::initialiseCarbonModule(){
 void
 ModelCoreSpatial::initialiseDeathTimber(){
   int currentYear = MTHREAD->SCD->getYear();
-  for(int y=currentYear-1;y>currentYear-30;y--){ // this year (2012) death timber is already filled in runBiologicalModule()
+  for(int y=currentYear;y>currentYear-30;y--){
     for(uint i=0;i<regIds2.size();i++){
       for(uint j=0;j<fTypes.size();j++){
         for (uint u=0;u<dClasses.size();u++){
-          iisskey inputkey(currentYear,regIds2[i],fTypes[j],dClasses[u]);
-          double initYearDeathTimber = MD->deathTimberInventory_get(inputkey);
-          //cout << initYearDeathTimber << endl;
           iisskey key(y,regIds2[i],fTypes[j],dClasses[u]);
-          MD->deathTimberInventory_incrOrAdd(key,initYearDeathTimber); // Should be fixed TO.DO FIX.ME this is wrong, it should be the same as init year, not zero......
+          MD->deathTimberInventory_incrOrAdd(key,0.0);
         }
       }
     }
@@ -2046,7 +2039,7 @@ ModelCoreSpatial::computeInventary(){ // in=f(vol_t-1)
       priProducts_vector.push_back(priProducts[pp]);
 
       double in_deathMortality = MD->getAvailableDeathTimber(priProducts_vector,r2,currentYear-1);
-      in_deathTimber_reg.at(pp) = in_deathMortality;
+      in_deathTimber_reg.at(pp) += in_deathMortality;
 
       // Even if I fixed all the lower bounds to zero in Opt::get_bounds_info still the model
       // doesn't solve with no-forest in a region.
