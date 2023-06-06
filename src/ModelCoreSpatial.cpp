@@ -284,6 +284,7 @@ ModelCoreSpatial::runMarketModule(){
       double pc_1              = gpd("pc",r2,priProducts[pp],previousYear);
       double sc_1              = gpd("sc",r2,priProducts[pp],previousYear);
       double in                   = gpd("in",r2,priProducts[pp]);
+       double in_0                   = gpd("in",r2,priProducts[pp],MTHREAD->MD->getIntSetting("initialYear"));
       double in_1              = gpd("in",r2,priProducts[pp],previousYear);
       double in_d               =gpd("in_deathTimber",r2,priProducts[pp]);
        double in_d_1 ;
@@ -292,7 +293,7 @@ ModelCoreSpatial::runMarketModule(){
        } else {
             in_d_1          = gpd("in_deathTimber",r2,priProducts[pp],previousYear);
        }
-      double min_in_d     =  max(0.00001,in * MTHREAD->MD->getDoubleSetting("minShareDeathIn"));
+      double min_in_d     =  max(0.00001,in_0 * MTHREAD->MD->getDoubleSetting("minShareDeathIn"));
 
 
       double pol_mktDirInt_s   = gpd("pol_mktDirInt_s",r2,priProducts[pp]);
