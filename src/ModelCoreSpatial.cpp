@@ -38,6 +38,7 @@
 
 ModelCoreSpatial::ModelCoreSpatial(ThreadManager *MTHREAD_h){
   MTHREAD = MTHREAD_h;
+
 }
 
 ModelCoreSpatial::~ModelCoreSpatial(){

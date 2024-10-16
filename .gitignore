@@ -33,4 +33,6 @@ ipopt.out
 logs/*
 callgrind.out.*
 /libadolc-1.dll
+debug/*
+release/*
 
