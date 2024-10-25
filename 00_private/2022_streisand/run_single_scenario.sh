@@ -1,1 +1,0 @@
-../../run_single_scenario.sh

@@ -1,19 +1,22 @@
 cd(@__DIR__)
 using Pkg
 Pkg.activate(".")
+Pkg.update()
+using DataFrames
 using Statistics,  DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatsPlots,  CSV
 using StatsPlots.PlotMeasures
-using PlotlyJS
+#using PlotlyJS
+
 
 ##########################################################
 ### Settings and definitions
 ##########################################################
 
-ffsmscen = "increased_demand_fuelwood"
+ffsmscen = "bicaff_supply_6"
 ffsmscen_symbol = Symbol(ffsmscen)
 scenarios = ["default", ffsmscen]
 
-allScenariosInAFile = true
+allScenariosInAFile = true # set to false for some scnearios
 
 fgroup_map = Dict(
  "Fut_Feu"         => "Broadl",
@@ -94,11 +97,11 @@ clc311_filename = joinpath(@__DIR__,"gis","france","clc_311.grd")
 clc312_filename = joinpath(@__DIR__,"gis","france","clc_312.grd")
 clc313_filename = joinpath(@__DIR__,"gis","france","clc_312.grd")
 
-new_regions = Matrix(CSV.read(nregions_filename, delim=' ', datarow=7, header=false, ignorerepeated=true, missingstring="-9999",DataFrame))
-old_regions = Matrix(CSV.read(oregions_filename, delim=' ', datarow=7, header=false, ignorerepeated=true, missingstring="-9999",DataFrame))
-clc311   = Matrix(CSV.read(clc311_filename, delim=' ', datarow=7, header=false, ignorerepeated=true, missingstring="-9999",DataFrame))
-clc312   = Matrix(CSV.read(clc312_filename, delim=' ', datarow=7, header=false, ignorerepeated=true, missingstring="-9999",DataFrame))
-clc313   = Matrix(CSV.read(clc313_filename, delim=' ', datarow=7, header=false, ignorerepeated=true, missingstring="-9999",DataFrame))
+new_regions = Matrix(CSV.read(nregions_filename, delim=' ', skipto=7, header=false, ignorerepeated=true, missingstring="-9999",DataFrame))
+old_regions = Matrix(CSV.read(oregions_filename, delim=' ', skipto=7, header=false, ignorerepeated=true, missingstring="-9999",DataFrame))
+clc311   = Matrix(CSV.read(clc311_filename, delim=' ', skipto=7, header=false, ignorerepeated=true, missingstring="-9999",DataFrame))
+clc312   = Matrix(CSV.read(clc312_filename, delim=' ', skipto=7, header=false, ignorerepeated=true, missingstring="-9999",DataFrame))
+clc313   = Matrix(CSV.read(clc313_filename, delim=' ', skipto=7, header=false, ignorerepeated=true, missingstring="-9999",DataFrame))
 forestcover = clc311+clc312+clc313
 partitioning_factors, inverted_partitioning_factors = compute_partitioning_factors(old_regions, new_regions, forestcover) # considering the forest cover
 
@@ -189,7 +192,6 @@ groups = groupby(hvffsm,["scen","year"])
 
 harvest_yearly_ffsm  = combine(groups, "valuenew" => sum => "yearly_harvested")
 harvest_yearly_ffsm  = unstack(harvest_yearly_ffsm,"scen","yearly_harvested")
-
 harvest_yearly_ffsm.diff = harvest_yearly_ffsm[:,ffsmscen] .- harvest_yearly_ffsm.default
 total_hv_diff = sum(harvest_yearly_ffsm.diff)
 plot(harvest_yearly_ffsm.year[5:end], harvest_yearly_ffsm.default[5:end], legend=:topleft, colour=:green, label="BAU", title="Yearly harvesting (FFSM)", ylabel="Mm³",ylims=[40,60])
@@ -380,7 +382,7 @@ harvest_by_region.additionalHarvested = harvest_by_region.Managed-harvest_by_reg
 
 categories = harvest_by_region.Region
 maximum(harvest_by_region.additionalHarvested)
-fig = Plot()
+fig = plot()
 addtraces!(fig, 
            scatterpolar(r=harvest_by_region.additionalHarvested,
                         theta=categories,

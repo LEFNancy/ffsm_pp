@@ -48,7 +48,7 @@ int main(int argc, char *argv[]){
   cout << "*******************************************************************" << endl;
   cout << "***    !! Welcome to FFSM - The Forest Sector Simulator !!    ***" << endl;
   cout << "***      For info & doc: http://www.ffsm-project.org/doc      ***" << endl;
-  cout << "***         Compiled on: " << __DATE__ << " - " << __TIME__ << "                 ***" << endl;
+  cout << "***   Full compiled on: " << __DATE__ << " - " << __TIME__ << "                 ***" << endl;
   cout << "*******************************************************************" << endl<<endl;
 
   // Running "simple testing" that can be done at this early time

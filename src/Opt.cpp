@@ -361,9 +361,9 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
 
         g[cix] *= pow(
                  (
-                   (x[gix("pc",r1,r2,psec)] / pc_pSubstituted)
+                   (x[gix("pc",r1,r2,psec)]*pol_mktDirInt_d / pc_pSubstituted)
                       /
-                   (pc_1 / pc_1_pSubstituted)
+                   (pc_1*pol_mktDirInt_d_1 / pc_1_pSubstituted)
                  ), es_d
                );
       }
