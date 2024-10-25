@@ -1035,9 +1035,11 @@ ModelCoreSpatial::runManagementModule(){
           double finalHarvestFlag = gfd("finalHarvestFlag",regId,ft,dc);
           double cumTp_u = px->cumTp_exp.at(j).at(u);
           for (uint pp=0;pp<priProducts.size();pp++){
-            double pl            = gpd("pl",regId,priProducts[pp]); // note that this is the OBSERVED price. If we call it at current year+cumTp_u we would have the expected price. But we would first have to compute it, as pw is weigthed price world-local and we don't have local price for the future. DONE 20141202 ;-)
-            double worldCurPrice = gpd("pl",WL2,priProducts[pp]);
-            double worldFutPrice = gpd("pl",WL2,priProducts[pp],thisYear+cumTp_u);
+            double pol_mktDirInt_s     = gpd("pol_mktDirInt_s",regId,priProducts[pp]); // This is valid also for the exported timber
+            double pol_mktDirInt_s_fut = gpd("pol_mktDirInt_s",regId,priProducts[pp],thisYear+cumTp_u);
+            double pl            = gpd("pl",regId,priProducts[pp])*pol_mktDirInt_s; // note that this is the OBSERVED price. If we call it at current year+cumTp_u we would have the expected price. But we would first have to compute it, as pw is weigthed price world-local and we don't have local price for the future. DONE 20141202 ;-)
+            double worldCurPrice = gpd("pl",WL2,priProducts[pp])*pol_mktDirInt_s*pol_mktDirInt_s;
+            double worldFutPrice = gpd("pl",WL2,priProducts[pp],thisYear+cumTp_u)*pol_mktDirInt_s_fut;
             double sl            = gpd("sl",regId,priProducts[pp]);
             double sa            = gpd("sa",regId,priProducts[pp]);
             double pw_exp        = computeExpectedPrice(pl, worldCurPrice, worldFutPrice, sl, sa, px->expTypePrices); //20141030: added the expected price!
