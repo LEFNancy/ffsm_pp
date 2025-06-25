@@ -373,10 +373,10 @@ if (in_d_ratio > 100){
   //application->Options()->SetStringValue("halt_on_ampl_error", "yes"); // not a valid option
   //application->Options()->SetStringValue("print_options_documentation", "yes");  // print the ipopt options (hundreds of pages!)
   // Relaxing tollerance options... worster effect :-(
-  //application->Options()->SetNumericValue("tol", 1e-07);
+  application->Options()->SetNumericValue("tol", 1e-06);
   //application->Options()->SetNumericValue("constr_viol_tol",0.001);
   //application->Options()->SetNumericValue("compl_inf_tol",0.001);
-  //application->Options()->SetNumericValue("acceptable_tol", 1e-05);
+  application->Options()->SetNumericValue("acceptable_tol", 1e-05);
   //application->Options()->SetNumericValue("acceptable_dual_inf_tol", 1e+9);
   //application->Options()->SetNumericValue("acceptable_constr_viol_tol", 0.1);
   //application->Options()->SetNumericValue("acceptable_compl_inf_tol", 0.1);
@@ -2388,10 +2388,18 @@ ModelCoreSpatial::sumRegionalForData(){
       }
   } // end we are using path model
 
-
-
-
+  // Storing the overall deathTimber in the region
+  vector <string> priPr    = MTHREAD->MD->getStringVectorSetting("priProducts");
+  for(uint r2= 0; r2<regIds2.size();r2++){
+    int regId = regIds2[r2];
+    float deadTimber = MTHREAD->MD->getAvailableDeathTimber(priPr,regId,currentYear);
+    sfd(deadTimber, "usableDeadTimber", regId, "", "", currentYear, true);
+    float deadTimber2 = gfd("usableDeadTimber", regId, "", "", currentYear);
+    cout << "*** Region: " << regId << "Dead timber: " << deadTimber << " - " << deadTimber2 << endl;
+    //exit(0);
+  }
 }
+
 /**
  * This function call registerHarvesting() (accounts for emissions from for. operations), registerDeathBiomass() (registers new stocks of death biomass),
  * registerProducts() (registers new stock of products) and registerTransports() (accounts for emissions from transportation).

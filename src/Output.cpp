@@ -488,7 +488,7 @@ Output::printForestData(bool finalFlush){
   double outvalue;
   for(uint v=0;v<outForVariables.size();v++){
     vector<string>fTypes_temp = fTypes;
-    if( outForVariables[v]=="expReturns" || outForVariables[v]=="sumExpReturns" ||  outForVariables[v]=="totalShareInvadedArea") {
+    if( outForVariables[v]=="expReturns" || outForVariables[v]=="sumExpReturns" ||  outForVariables[v]=="totalShareInvadedArea" ||  outForVariables[v]=="usableDeadTimber") {
       fTypes_temp.push_back(""); // adding an empty forest type to report for variables that doesn't have a forestType dimension
       vector<string> ftParents = MTHREAD->MD->getForTypeParents();
       fTypes_temp.insert(fTypes_temp.end(),ftParents.begin(),ftParents.end()); // also inserting forest type "parents" for expected returns

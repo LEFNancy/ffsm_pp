@@ -131,6 +131,7 @@ struct GccTest
 void
 Sandbox::basicTest(){
 
+
     /*
     // Checking integer division
 
@@ -597,6 +598,16 @@ Sandbox::basicTest(){
 
 void
 Sandbox::fullTest(){
+
+    /*
+    // Checking sfd for all ft
+    vector <string> priPr    = MTHREAD->MD->getStringVectorSetting("priProducts");
+    vector <int>    l2r      = MTHREAD->MD->getRegionIds(2, true);
+    int currentYear          = 2013;
+    float deathTimber = MTHREAD->MD->getAvailableDeathTimber(priPr,l2r[0],currentYear);
+    cout << "Death timber: " << deathTimber << endl;
+    exit(0);
+*/
 
   /*
   // Testing adfditional Mortality..
