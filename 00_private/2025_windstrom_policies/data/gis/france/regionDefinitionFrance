@@ -1,0 +1,14 @@
+EPSG ID: 27572
+projection: LII (Lambert zone II)
+zone:       
+datum:      
+ellipsoid:  
+north:      2677000
+south:      1621000
+west:       72000
+east:       1200000
+nsres:      8000
+ewres:      8000
+rows:       132
+cols:       141
+cells:      18162
