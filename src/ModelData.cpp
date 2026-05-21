@@ -640,6 +640,7 @@ ModelData::setScenarioProductResourceMatrixLink(){
     F2PDATA.product = table.getData(i,"product");
     F2PDATA.forType = table.getData(i,"forType");
     F2PDATA.dClass = table.getData(i,"dClass");
+    F2PDATA.maxYears = s2i(table.getData(i,"maxYears"));
     forToProdVector.push_back(F2PDATA);
   }
 }
