@@ -1,0 +1,225 @@
+
+*******************************************************************
+***    !! Welcome to FFSM - The Forest Sector Simulator !!    ***
+***      For info & doc: http://www.ffsm-project.org/doc      ***
+***         Compiled on: Jul 16 2019 - 10:15:45                 ***
+*******************************************************************
+
+Using base directory: /home/lng/ffsm_pp/00_private/2019_elorang/data/
+**INFO: Loading input files (this can take a few minutes)...
+*DEBUG: Correctly deleted old temporary data
+*DEBUG: Entering Init state 1
+**INFO: Local time is 14:32:31
+**INFO: ### USING SCENARIO: default_50pc ###
+*DEBUG: Loading forest sector data..
+*DEBUG: Loading products data..
+*DEBUG: Loading (but not yet applying) reclassification rules..
+**INFO: Starting regional overriding analysis..
+*DEBUG: Loading forest resource to primary products io matrix..
+*DEBUG: Loading forest resource to primary products io matrix..
+**INFO: Creating the space...
+**WARNING: We can't find any free plot.
+*DEBUG: Update image forArea_broadL...
+*DEBUG: Update image forArea_con...
+*DEBUG: Update image forArea_mixedBC...
+*DEBUG: Update image forArea_Fut_Feu...
+*DEBUG: Update image forArea_Fut_Mix...
+*DEBUG: Update image forArea_Fut_Con...
+*DEBUG: Update image forArea_Mel_Feu...
+*DEBUG: Update image forArea_Mel_Mix...
+*DEBUG: Update image forArea_Tail_Feu...
+**INFO: Cashing initial model settings..
+**INFO: Cashing model settings that may change every year..
+**INFO: Starting initializing pixel-level values
+**INFO: Starting market module (init stage)..
+printing 2011
+**INFO: Printing forest data..
+**INFO: Printing market data..
+**INFO: Starting resetting pixel level values
+**INFO: Starting cashing on pixel spatial-level exogenous data
+**INFO: Starting computing inventary available for this year..
+**INFO: Starting computing some cumulative values..
+**INFO: Starting initializing pixel-level area
+**INFO: Starting resource module..
+**INFO: Starting management module..
+**INFO: Updating map areas..
+*DEBUG: Update image vol_Fut_Feu...
+*DEBUG: Update image expectedReturns_Fut_Feu...
+*DEBUG: Update image vol_Fut_Mix...
+*DEBUG: Update image expectedReturns_Fut_Mix...
+*DEBUG: Update image vol_Fut_Con...
+*DEBUG: Update image expectedReturns_Fut_Con...
+*DEBUG: Update image vol_Mel_Feu...
+*DEBUG: Update image expectedReturns_Mel_Feu...
+*DEBUG: Update image vol_Mel_Mix...
+*DEBUG: Update image expectedReturns_Mel_Mix...
+*DEBUG: Update image vol_Tail_Feu...
+*DEBUG: Update image expectedReturns_Tail_Feu...
+**INFO: Summing data pixels->region..
+printing 2012
+**INFO: Printing forest data..
+**INFO: Printing market data..
+**INFO: Printing forest data..
+**INFO: ### 2013 year started.. ####
+**INFO: Cashing model settings that may change every year..
+**INFO: Starting resetting pixel level values
+**INFO: Starting cashing on pixel spatial-level exogenous data
+**INFO: Starting computing inventary available for this year..
+**INFO: Starting market module
+***ERROR: setTimedData: a dated vector has been filled several years (2) with incoming values to reach desidered position in time.
+***ERROR: setTimedData: a dated vector has been filled several years (2) with incoming values to reach desidered position in time.
+***ERROR: setTimedData: a dated vector has been filled several years (2) with incoming values to reach desidered position in time.
+***ERROR: setTimedData: a dated vector has been filled several years (2) with incoming values to reach desidered position in time.
+***ERROR: setTimedData: a dated vector has been filled several years (2) with incoming values to reach desidered position in time.
+***ERROR: setTimedData: a dated vector has been filled several years (2) with incoming values to reach desidered position in time.
+***ERROR: setTimedData: a dated vector has been filled several years (2) with incoming values to reach desidered position in time.
+***ERROR: setTimedData: a dated vector has been filled several years (2) with incoming values to reach desidered position in time.
+**INFO: Running optimisation problem for this year (it may take a few minutes for large models)..
+
+******************************************************************************
+This program contains Ipopt, a library for large-scale nonlinear optimization.
+ Ipopt is released as open source code under the Eclipse Public License (EPL).
+         For more information visit http://projects.coin-or.org/Ipopt
+******************************************************************************
+
+This is Ipopt version 3.12.12, running with linear solver mumps.
+NOTE: Other linear solvers might be more efficient (see Ipopt documentation).
+
+**INFO: The model will work with 176 variables and 222 constrains (118 equalities, 90 lower than 0 and 14 greater than 0)
+Number of nonzeros in equality constraint Jacobian...:      484
+Number of nonzeros in inequality constraint Jacobian.:      278
+Number of nonzeros in Lagrangian Hessian.............:      296
+
+Total number of variables............................:      176
+                     variables with only lower bounds:      176
+                variables with lower and upper bounds:        0
+                     variables with only upper bounds:        0
+Total number of equality constraints.................:      118
+Total number of inequality constraints...............:      104
+        inequality constraints with only lower bounds:       14
+   inequality constraints with lower and upper bounds:        0
+        inequality constraints with only upper bounds:       90
+
+*DEBUG: Running (0 iter) ..
+iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
+   0 -1.0480174e+04 1.01e+01 8.45e+02  -1.0 0.00e+00    -  0.00e+00 0.00e+00   0
+   1 -1.0489183e+04 9.98e+00 7.59e+02  -1.0 3.90e+03    -  6.88e-02 1.05e-02h  1
+   2 -1.0492120e+04 9.94e+00 7.48e+02  -1.0 3.52e+03    -  1.87e-01 3.45e-03h  1
+   3 -1.0492166e+04 9.94e+00 3.52e+05  -1.0 3.41e+03    -  6.32e-02 5.07e-05h  1
+   4 -1.0492186e+04 9.94e+00 3.23e+08  -1.0 3.41e+03    -  1.93e-02 2.08e-05h  1
+   5r-1.0492186e+04 9.94e+00 1.00e+03   0.8 0.00e+00    -  0.00e+00 1.42e-07R  2
+   6r-1.0514202e+04 6.57e+00 9.95e+02   0.8 1.33e+03    -  1.06e-02 4.99e-03f  1
+   7r-1.0557757e+04 6.18e+00 9.80e+02   0.8 1.37e+03    -  1.07e-02 1.49e-02f  1
+   8r-1.0611008e+04 5.82e+00 9.76e+02   0.8 1.08e+03    -  8.97e-03 2.21e-02f  1
+   9 -1.0611051e+04 5.82e+00 8.43e+02  -1.0 5.92e+02    -  3.21e-02 2.80e-04h  1
+*DEBUG: Running (10 iter) ..
+iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
+  10 -1.0611079e+04 5.82e+00 8.58e+02  -1.0 8.55e+02    -  1.00e-03 8.86e-05h  1
+  11r-1.0611079e+04 5.82e+00 9.99e+02   0.8 0.00e+00    -  0.00e+00 4.82e-07R  3
+  12r-1.0630073e+04 5.77e+00 9.91e+02   0.8 1.39e+03    -  1.85e-02 7.84e-03f  1
+  13r-1.0747281e+04 5.86e+00 9.72e+02   0.8 1.05e+03    -  1.44e-03 2.57e-02f  1
+  14 -1.0746977e+04 5.86e+00 1.95e+03  -1.0 1.21e+03    -  9.72e-03 5.22e-04h  1
+  15r-1.0746977e+04 5.86e+00 1.00e+03   0.7 0.00e+00    -  0.00e+00 4.19e-07R  5
+  16r-1.0759383e+04 5.10e+00 9.97e+02   0.7 1.13e+03    -  4.46e-03 2.90e-03f  1
+  17r-1.0779723e+04 4.85e+00 9.90e+02   0.7 9.60e+02    -  2.52e-02 7.37e-03f  1
+  18r-1.0856804e+04 8.56e+00 9.66e+02   0.7 1.31e+03    -  1.97e-02 2.37e-02f  1
+  19r-1.0867296e+04 7.94e+00 9.11e+02   0.7 2.25e+00   2.0 3.30e-01 7.06e-02f  1
+*DEBUG: Running (20 iter) ..
+iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
+  20r-1.0905694e+04 7.64e+00 7.43e+02   0.7 7.26e+00   1.5 4.82e-01 2.45e-01f  1
+  21r-1.0916348e+04 7.61e+00 7.25e+02   0.7 1.65e+01   1.0 1.38e-02 3.52e-02f  1
+  22r-1.0916045e+04 7.63e+00 7.12e+02   0.7 4.35e+02    -  5.22e-03 4.21e-04f  1
+  23r-1.0919571e+04 7.52e+00 1.16e+03   0.7 9.89e+01    -  2.76e-01 1.73e-02f  1
+  24r-1.1010982e+04 5.58e+00 5.99e+02   0.7 8.70e+01    -  5.89e-01 2.61e-01f  1
+  25r-1.1279777e+04 2.57e+00 3.10e+02   0.7 4.47e+01    -  4.47e-01 5.40e-01f  1
+  26 -1.1228435e+04 2.56e+00 9.73e+02  -1.0 5.98e+02    -  8.22e-02 6.26e-03f  1
+  27 -1.1216819e+04 2.55e+00 3.92e+03  -1.0 4.96e+02    -  4.83e-02 3.69e-03f  1
+  28 -1.1205910e+04 2.54e+00 1.12e+05  -1.0 5.05e+02    -  1.20e-01 4.56e-03f  1
+  29 -1.1205751e+04 2.54e+00 3.70e+08  -1.0 5.32e+02    -  3.26e-01 1.02e-04h  1
+*DEBUG: Running (30 iter) ..
+iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
+  30r-1.1205751e+04 2.54e+00 1.00e+03   0.3 0.00e+00    -  0.00e+00 3.84e-07R  3
+  31r-1.1202914e+04 1.05e+00 1.00e+03   0.3 1.93e+03    -  1.43e-02 1.14e-03f  1
+  32r-1.1202914e+04 1.05e+00 9.99e+02  -0.2 0.00e+00    -  0.00e+00 4.29e-07R  5
+  33r-1.1201577e+04 6.81e-01 9.97e+02  -0.2 2.45e+02    -  1.88e-02 1.67e-03f  1
+  34r-1.1198260e+04 6.43e-01 9.72e+02  -0.2 1.22e+02    -  3.82e-01 2.40e-02f  1
+  35r-1.1236541e+04 1.01e+00 7.93e+02  -0.2 1.48e+02    -  1.15e-02 1.86e-01f  1
+  36r-1.1305138e+04 7.82e-01 5.54e+02  -0.2 1.20e+02    -  1.81e-01 3.15e-01f  1
+  37 -1.1283881e+04 7.81e-01 1.60e+03  -1.0 4.30e+02    -  9.13e-02 1.94e-03f  1
+  38 -1.1282936e+04 7.81e-01 4.47e+04  -1.0 4.91e+02    -  4.02e-02 2.69e-04h  1
+  39 -1.1281372e+04 7.80e-01 7.58e+06  -1.0 4.88e+02    -  9.99e-02 5.56e-04h  1
+*DEBUG: Running (40 iter) ..
+iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
+  40 -1.1281311e+04 7.80e-01 1.03e+11  -1.0 4.86e+02    -  4.24e-01 3.12e-05h  1
+  41 -1.1017455e+04 1.17e+00 8.40e+10  -1.0 3.29e+02    -  1.81e-01 2.70e-01f  1
+  42 -1.1016324e+04 1.17e+00 1.34e+10  -1.0 1.06e+02    -  8.41e-01 2.40e-03f  1
+  43r-1.1016324e+04 1.17e+00 1.00e+03  -0.3 0.00e+00    -  0.00e+00 4.44e-07R  3
+  44r-1.1014024e+04 4.21e-01 9.99e+02  -0.3 8.77e+02    -  4.23e-03 1.47e-03f  1
+  45r-1.1014476e+04 4.22e-01 9.94e+02  -0.3 4.80e+01    -  2.12e-01 4.23e-03f  1
+  46r-1.1025335e+04 4.12e-01 8.61e+02  -0.3 5.27e+01    -  7.64e-03 1.35e-01f  1
+  47 -1.1024592e+04 4.12e-01 4.36e+02  -1.0 9.91e+01    -  1.30e-03 1.37e-04h  1
+  48r-1.1024592e+04 4.12e-01 9.99e+02  -0.4 0.00e+00    -  0.00e+00 3.60e-07R  5
+  49r-1.1025574e+04 4.15e-01 9.97e+02  -0.4 1.90e+02    -  4.74e-03 1.59e-03f  1
+*DEBUG: Running (50 iter) ..
+iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
+  50r-1.1026302e+04 4.22e-01 9.94e+02  -0.4 3.93e+01    -  1.73e-01 4.54e-03f  1
+  51r-1.1049071e+04 5.09e-01 8.74e+02  -0.4 1.98e+01    -  7.45e-01 1.20e-01f  1
+  52r-1.1154004e+04 5.34e-01 5.22e+02  -0.4 2.03e+01    -  7.32e-01 4.02e-01f  1
+  53r-1.1282235e+04 1.68e+00 5.19e+03  -0.4 2.41e+01    -  9.36e-01 7.92e-01f  1
+  54r-1.1282483e+04 8.49e-01 2.72e+03  -0.4 2.00e-01   2.0 1.00e+00 1.00e+00f  1
+  55r-1.1283068e+04 5.80e-01 1.82e+03  -0.4 3.21e-01   1.5 5.97e-01 5.08e-01h  1
+  56r-1.1285678e+04 5.87e-01 8.96e+02  -0.4 1.83e+00   1.0 7.35e-02 1.00e+00h  1
+  57r-1.1287770e+04 6.03e-01 6.37e+02  -0.4 7.00e+00   0.6 9.65e-01 3.37e-01h  1
+  58r-1.1290304e+04 6.14e-01 2.37e+02  -0.4 1.79e+00   1.0 7.11e-01 1.00e+00h  1
+  59r-1.1292734e+04 6.38e-01 5.10e+02  -0.4 8.34e+00   0.5 1.00e+00 4.26e-01f  1
+*DEBUG: Running (60 iter) ..
+iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
+  60r-1.1292804e+04 6.39e-01 1.98e+03  -0.4 2.09e+01    -  8.55e-01 2.61e-03h  1
+  61r-1.1304128e+04 6.46e-01 6.73e+02  -0.4 2.56e+01    -  1.00e+00 4.42e-01f  1
+  62r-1.1318341e+04 6.54e-01 2.64e+01  -0.4 1.12e+01    -  1.00e+00 1.00e+00f  1
+  63r-1.1318340e+04 6.70e-01 1.14e+01  -0.4 1.58e+00   0.0 1.00e+00 1.00e+00f  1
+  64r-1.1282041e+04 6.93e-01 1.55e+02  -1.1 1.21e+01    -  6.59e-01 2.35e-01f  1
+  65r-1.1231030e+04 7.01e-01 5.24e+01  -1.1 4.35e+01    -  1.00e+00 7.86e-01f  1
+  66r-1.1195725e+04 7.01e-01 2.53e-01  -1.1 1.00e+01    -  1.00e+00 1.00e+00f  1
+  67r-1.1102822e+04 7.03e-01 4.06e+01  -2.7 1.11e+01    -  9.32e-01 7.88e-01f  1
+  68r-1.1099197e+04 7.03e-01 4.54e+02  -2.7 8.80e+01    -  1.00e+00 2.07e-01f  1
+  69r-1.1072323e+04 7.03e-01 4.83e+01  -2.7 1.93e+01    -  1.00e+00 9.12e-01f  1
+*DEBUG: Running (70 iter) ..
+iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
+  70r-1.1068496e+04 7.03e-01 2.02e-02  -2.7 9.87e-01    -  1.00e+00 1.00e+00f  1
+  71r-1.1037371e+04 7.03e-01 7.99e-01  -4.0 3.90e+00    -  9.14e-01 1.00e+00f  1
+  72r-1.1040397e+04 7.03e-01 1.09e-02  -4.0 2.65e-01    -  1.00e+00 1.00e+00h  1
+  73r-1.1040680e+04 7.03e-01 1.67e-05  -4.0 4.97e-01    -  1.00e+00 1.00e+00h  1
+  74r-1.1032592e+04 7.03e-01 4.90e-01  -6.0 1.37e+00    -  9.41e-01 9.84e-01f  1
+  75r-1.1032987e+04 7.03e-01 7.31e+01  -6.0 1.15e-01    -  8.84e-01 1.00e+00f  1
+  76r-1.1032997e+04 7.03e-01 1.54e-07  -6.0 1.74e-01    -  1.00e+00 1.00e+00h  1
+  77r-1.1032201e+04 7.03e-01 5.05e+00  -9.0 2.85e-01    -  9.74e-01 9.15e-01f  1
+  78r-1.1032151e+04 7.03e-01 4.55e-06  -9.0 2.82e-02    -  1.00e+00 1.00e+00f  1
+
+Number of Iterations....: 78
+
+                                   (scaled)                 (unscaled)
+Objective...............:   5.5540481905368324e+03   -1.1032150904374139e+04
+Dual infeasibility......:   1.0696782678837764e+02    2.1247298665017061e+02
+Constraint violation....:   7.0341613536689562e-01    7.0341613536689562e-01
+Complementarity.........:   9.7103299570539244e-10   -1.9287881873262858e-09
+Overall NLP error.......:   1.0696782678837764e+02    2.1247298665017061e+02
+
+
+Number of objective function evaluations             = 106
+Number of objective gradient evaluations             = 33
+Number of equality constraint evaluations            = 106
+Number of inequality constraint evaluations          = 106
+Number of equality constraint Jacobian evaluations   = 87
+Number of inequality constraint Jacobian evaluations = 87
+Number of Lagrangian Hessian evaluations             = 79
+Total CPU secs in IPOPT (w/o function evaluations)   =      0.168
+Total CPU secs in NLP function evaluations           =      0.302
+
+EXIT: Converged to a point of local infeasibility. Problem may be infeasible.
+
+
+Objective value
+f(x*) = -1.103215e+04
+***ERROR: MODEL DIDN'T SOLVE FOR THIS YEAR (2013)
+****CRITICAL ERROR: Model DIDN'T SOLVE for this year (2013)

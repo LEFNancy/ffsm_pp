@@ -1,0 +1,13 @@
+
+*******************************************************************
+***    !! Welcome to FFSM - The Forest Sector Simulator !!    ***
+***      For info & doc: http://www.ffsm-project.org/doc      ***
+***         Compiled on: Jul 16 2019 - 10:15:45                 ***
+*******************************************************************
+
+Using base directory: /home/lng/ffsm_pp/00_private/2019_elorang/data/
+**INFO: Loading input files (this can take a few minutes)...
+*DEBUG: Correctly deleted old temporary data
+*DEBUG: Entering Init state 1
+**INFO: Local time is 14:47:35
+****CRITICAL ERROR: Scenario not found!

@@ -1,13 +1,15 @@
 
-using DataFrames, DataFramesMeta,  LAJuliaUtils, OdsIO, NamedColors,  StatPlots, Plots, CSV
+using DataFrames, DataFramesMeta, LAJuliaUtils, OdsIO, NamedColors,  StatsPlots, Plots, CSV
 
 ##########################################################
 ### Settings and definitions
 ##########################################################
 
-scenarios = ["default"]
+cd(@__DIR__)
 
-allScenariosInAFile = false
+scenarios = ["default","no_recycling"]
+
+allScenariosInAFile = true
 
 fgroup_map = Dict(
  "Fut_Feu"         => "Broadleaved",
@@ -27,15 +29,17 @@ fgroup_map = Dict(
 )
 
 pgroup_map = Dict(
- "hardWRoundW" => "priProd",
- "softWRoundW" => "priProd",
- "pulpWFuelW"  => "priProd",
- "fuelW"       => "secProd",
- "hardWSawnW"  => "secProd",
- "softWSawnW"  => "secProd",
- "plyW"        => "secProd",
- "pulpW"       => "secProd",
- "pannels"     => "secProd",
+ "hardWRoundW"       => "priProd",
+ "softWRoundW"       => "priProd",
+ "pulpWFuelW"        => "priProd",
+ "fuelW"             => "secProd",
+ "hardWSawnW"        => "secProd",
+ "softWSawnW"        => "secProd",
+ "plyW"              => "secProd",
+ "pulpW"             => "secProd",
+ "pannels"           => "secProd",
+ "sortedPulpWFuelW"  => "priProd",
+ "recycledPulpW"     => "secProd",
 )
 
 cbal_map = Dict(
@@ -48,8 +52,8 @@ cbal_map = Dict(
 )
 
 
-baseIDir        = "results_temp";
-odsOut          = "juliaOut/formattedOutput_temp.ods"
+baseIDir        = "results";
+odsOut          = "juliaOut/formattedOutput.ods"
 odsOut_template = "juliaOut/formattedOutput_template.ods"
 chartOutDir     = "juliaOut"
 
@@ -88,6 +92,12 @@ print("Data loaded")
 ##########################################################
 ### Data clean-up and initialisation
 ##########################################################
+
+#Filtering out junk (keeping only scenarios of interest)
+forVars = forVars[ [i in scenarios for i in forVars.scen],:]
+prodVars = prodVars[ [i in scenarios for i in prodVars.scen],:]
+cVars = cVars[ [i in scenarios for i in cVars.scen],:]
+
 forVars[:forGroup] = map(k->fgroup_map[k], forVars[:forType])
 #[df[:region] = map(k->reg_map[k], df[:region]) for df in [forVars,cVars]]
 prodVars[:prodLev] = map(k->pgroup_map[k], prodVars[:prod])
@@ -230,3 +240,12 @@ ods_write(odsOut,Dict(("cBalCum",1,1) => cBalCum )  )
 cBal = cBalCum
 [cBal[Symbol(string(i))] = cBal[Symbol(string(i))] - cBal[Symbol(string(i-1))]  for i = collect(ymax:-1:ymin+2)] # computing diff
 ods_write(odsOut,Dict(("cBal",1,1) => cBal )  )
+
+
+rateOfIn = pivot(prodVars,[:scen,:prod],:parName,:value,
+            filter = Dict(
+                :parName => ["in_recycled","st"],
+                :year    => [2015],
+                :prod    => ["sortedPulpWFuelW"],
+            )
+)

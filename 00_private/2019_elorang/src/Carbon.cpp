@@ -1,0 +1,372 @@
+/***************************************************************************
+ *   Copyright (C) 2015 by Laboratoire d'Economie Forestière               *
+ *   http://ffsm-project.org                                               *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 3 of the License, or     *
+ *   (at your option) any later version, given the compliance with the     *
+ *   exceptions listed in the file COPYING that is distribued together     *
+ *   with this file.                                                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+#include <math.h>       /* log */
+
+#include "Carbon.h"
+#include "ThreadManager.h"
+#include "ModelData.h"
+#include "Scheduler.h"
+
+
+
+Carbon::Carbon(ThreadManager* MTHREAD_h){
+  MTHREAD=MTHREAD_h;
+}
+
+Carbon::~Carbon(){
+}
+
+
+// ################# GET FUNCTIONS ################
+/**
+ * @param reg
+ * @param stock_type
+ * @return the Carbon stocked in a given sink
+ *
+ * For product sink:
+ * - for primary products it includes the primary products exported out of the country, but not those exported to other regions or used in the region as
+ *   these are assumed to be totally transformed to secondary products;
+ * - for secondary products it includes those produced in the region from locally or regionally imported primary product plus those secondary products
+ *   imported from other regions, less those exported to other regions. It doesn't include the secondary products imported from abroad the country.
+ */
+double
+Carbon::getStock(const int & regId, const int & stock_type) const{
+  double toReturn = 0.0;
+  int currentYear = MTHREAD->SCD->getYear();
+  int initialYear = MTHREAD->MD->getIntSetting("initialYear");
+  switch (stock_type){
+    case STOCK_PRODUCTS: {
+      vector <string> priProducts = MTHREAD->MD->getStringVectorSetting("priProducts");
+      vector <string> secProducts = MTHREAD->MD->getStringVectorSetting("secProducts");
+      vector <string> allProducts = priProducts;
+      allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
+      for(uint i=0;i<allProducts.size();i++){
+        double coeff = MTHREAD->MD->getProdData("co2content_products",regId,allProducts[i],DATA_NOW,""); //  [kg CO2/m^3 wood]
+        double life  = MTHREAD->MD->getProdData("avgLife_products",regId,allProducts[i],DATA_NOW,"");
+        //for(int y=currentYear;y>currentYear-life;y--){ // ok
+        //  iiskey key(y,regId,allProducts[i]);
+        //  toReturn += findMap(products,key,MSG_NO_MSG,0.0)*coeff/1000;
+        //}
+        for(int y=(initialYear-100);y<=currentYear;y++){
+          iiskey key(y,regId,allProducts[i]);
+          double originalStock = findMap(products,key,MSG_NO_MSG,0.0);
+          double remainingStock = getRemainingStock(originalStock,life,currentYear-y);
+          toReturn += remainingStock*coeff/1000;
+        }
+      }
+      break;
+    }
+    case STOCK_INV:{
+      vector <string> fTypes = MTHREAD->MD->getForTypeIds();
+      for(uint i=0;i<fTypes.size();i++){
+        // units:
+        // co2content_inventory: [Kg CO2 / m^3 wood]
+        // co2content_extra:     [Kg CO2 / m^3 inventaried wood]
+        double coeff = MTHREAD->MD->getForData("co2content_inventory",regId,fTypes[i],"",DATA_NOW); //  [kg CO2/m^3 wood]
+        double life  = MTHREAD->MD->getForData("avgLive_deathBiomass_inventory",regId,fTypes[i],"",DATA_NOW);
+        // PART A: from death biomass..
+        //for(int y=currentYear;y>currentYear-life;y--){ // ok
+        //  iiskey key(y,regId,fTypes[i]);
+        //  toReturn += findMap(deathBiomassInventory,key,MSG_NO_MSG)*coeff/1000;
+        //}
+        for(int y=(initialYear-100);y<=currentYear;y++){
+          iiskey key(y,regId,fTypes[i]);
+          double originalStock = findMap(deathBiomassInventory,key,MSG_NO_MSG,0.0);
+          double remainingStock = getRemainingStock(originalStock,life,currentYear-y);
+          toReturn += remainingStock*coeff/1000;
+        }
+
+        // PART B: from inventory volumes
+        toReturn += MTHREAD->MD->getForData("vol",regId,fTypes[i],DIAM_ALL,DATA_NOW)*coeff/1000;
+      }
+      break;
+
+    }
+    case STOCK_EXTRA:{
+      vector <string> fTypes = MTHREAD->MD->getForTypeIds();
+      for(uint i=0;i<fTypes.size();i++){
+        // units:
+        // co2content_inventory: [Kg CO2 / m^3 wood]
+        // co2content_extra:     [Kg CO2 / m^3 inventaried wood]
+        double coeff = MTHREAD->MD->getForData("co2content_extra",regId,fTypes[i],"",DATA_NOW); //  [kg CO2/m^3 wood]
+        double life  = MTHREAD->MD->getForData("avgLive_deathBiomass_extra",regId,fTypes[i],"",DATA_NOW);
+        // PART A: from death biomass..
+        //for(int y=currentYear;y>currentYear-life;y--){ // ok
+        //  iiskey key(y,regId,fTypes[i]);
+        //  toReturn += findMap(deathBiomassExtra,key,MSG_NO_MSG),0.0*coeff/1000;
+        //}
+        for(int y=(initialYear-100);y<=currentYear;y++){
+          iiskey key(y,regId,fTypes[i]);
+          double originalStock = findMap(deathBiomassExtra,key,MSG_NO_MSG,0.0);
+          double remainingStock = getRemainingStock(originalStock,life,currentYear-y);
+          toReturn += remainingStock*coeff/1000;
+        }
+        // PART B: from inventory volumes
+        double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fTypes[i],"",DATA_NOW);
+        toReturn += MTHREAD->MD->getForData("vol",regId,fTypes[i],DIAM_ALL,DATA_NOW)*extraBiomass_ratio*coeff/1000;
+      }
+      break;
+    }
+    default:
+      msgOut(MSG_CRITICAL_ERROR,"Unexpected stock_type in function getStock");
+  }
+  return toReturn;
+}
+
+
+double
+Carbon::getCumSavedEmissions(const int & regId, const int & em_type) const{
+  switch (em_type){
+    case EM_ENSUB:
+      return findMap(cumSubstitutedEnergy, regId);
+      break;
+    case EM_MATSUB:
+      return findMap(cumSubstitutedMaterial, regId);
+      break;
+    case EM_FOROP:
+      return -findMap(cumEmittedForOper, regId);
+      break;
+    case EM_TRANS:
+      return -findMap(cumEmittedHWPTrans, regId);
+      break;
+    default:
+      msgOut(MSG_CRITICAL_ERROR,"Unexpected em_type in function getCumSavedEmissions");
+  }
+  return 0.0;
+}
+
+// ################# INITIALISE FUNCTIONS ################
+
+void
+Carbon::initialiseEmissionCounters(){
+  vector<int> regIds = MTHREAD->MD->getRegionIds(2);
+  for (uint i=0;i<regIds.size();i++){
+    pair<int,double> mypair(regIds[i],0.0);
+    cumSubstitutedEnergy.insert(mypair);
+    cumSubstitutedMaterial.insert(mypair);
+    cumEmittedForOper.insert(mypair);
+    cumEmittedHWPTrans.insert(mypair);
+  }
+}
+
+void
+Carbon::initialiseDeathBiomassStocks(const vector<double> & deathByFt, const int & regId){
+  // it must initialize in the past the death biomass taking the value of the first year
+  vector <string> fTypes = MTHREAD->MD->getForTypeIds();
+  if(fTypes.size() != deathByFt.size()) {msgOut(MSG_CRITICAL_ERROR,"deathByFt and fTypes have different lenght!");}
+  int currentYear = MTHREAD->SCD->getYear();
+  //int initialYear = MD->getIntSetting("initialYear");
+
+  for(uint i=0;i<fTypes.size();i++){
+//    double life_inventory     = MTHREAD->MD->getForData("avgLive_deathBiomass_inventory",regId,fTypes[i],"",DATA_NOW);
+//    double life_extra         = MTHREAD->MD->getForData("avgLive_deathBiomass_extra",regId,fTypes[i],"",DATA_NOW);
+      double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fTypes[i],"",DATA_NOW);
+
+//    for(int y=currentYear;y>currentYear-life_inventory;y--){
+//        iiskey key(y,regId,fTypes[i]);
+//        pair<iiskey,double> mypair(key,deathByFt.at(i));
+//        deathBiomassInventory.insert(mypair);
+//    }
+//    for(int y=currentYear;y>currentYear-life_extra;y--){
+//        iiskey key(y,regId,fTypes[i]);
+//        pair<iiskey,double> mypair(key,deathByFt.at(i)*extraBiomass_ratio);
+//        deathBiomassExtra.insert(mypair);
+//    }
+
+    for(int y=currentYear;y>currentYear-100;y--){
+        iiskey key(y,regId,fTypes[i]);
+        pair<iiskey,double> mypairInventory(key,deathByFt.at(i));
+        pair<iiskey,double> mypairExtra(key,deathByFt.at(i)*extraBiomass_ratio);
+        deathBiomassInventory.insert(mypairInventory);
+        deathBiomassExtra.insert(mypairExtra);
+    }
+  }
+}
+
+void
+Carbon::initialiseProductsStocks(const vector<double> & qByProduct, const int & regId){
+  // it must initialize in the past the products taking the value of the first year
+  vector <string> priProducts = MTHREAD->MD->getStringVectorSetting("priProducts");
+  vector <string> secProducts = MTHREAD->MD->getStringVectorSetting("secProducts");
+  vector <string> allProducts = priProducts;
+  allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
+  if(allProducts.size() != qByProduct.size()) {msgOut(MSG_CRITICAL_ERROR,"allProducts and qByProduct have different lenght!");}
+  int currentYear = MTHREAD->SCD->getYear();
+  for(uint i=0;i<allProducts.size();i++){
+    double life  = MTHREAD->MD->getProdData("avgLife_products",regId,allProducts[i],DATA_NOW);
+    //for(int y=currentYear;y>currentYear-life;y--){
+    for(int y=currentYear;y>currentYear-100;y--){
+        iiskey key(y,regId,allProducts[i]);
+        pair<iiskey,double> mypair(key,qByProduct.at(i));
+        products.insert(mypair);
+    }
+  }
+  //cout << "" << endl;
+}
+
+// ################# REGISTER FUNCTIONS ################
+void
+Carbon::registerHarvesting(const double & value, const int & regId, const string & fType){
+  double convCoeff = MTHREAD->MD->getForData("forOperEmissions",regId,fType,""); //  Kg of CO2 emitted per cubic meter of forest operations
+  // units:
+  // value: Mm^3
+  // convCoeff: Kg CO2/m^3 wood
+  // desidered output: Mt CO2
+  // ==> I must divide by 1000
+  addSavedEmissions(-convCoeff*value/1000,regId,EM_FOROP);
+  // Add the extraBiomass associated to the harvested volumes to the deathBiomassExtra pool
+  int    year               = MTHREAD->SCD->getYear();
+  double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fType,"",DATA_NOW);
+  double newDeathBiomass = value*extraBiomass_ratio;
+  iiskey key(year,regId,fType);
+  incrOrAddMapValue(deathBiomassExtra, key, newDeathBiomass);
+}
+
+
+void
+Carbon::registerDeathBiomass(const double &value, const int & regId, const string & fType){
+  int year = MTHREAD->SCD->getYear();
+  iiskey key(year,regId,fType);
+  double extraBiomass_ratio = MTHREAD->MD->getForData("extraBiomass_ratio",regId,fType,"",DATA_NOW);
+  //pair<iiskey,double> mypairInventory(key,value);
+  //pair<iiskey,double> mypairExtra(key,value*extraBiomass_ratio);
+  incrOrAddMapValue(deathBiomassInventory, key, value);
+  incrOrAddMapValue(deathBiomassExtra, key, value*extraBiomass_ratio);
+  //deathBiomassInventory.insert(mypairInventory);
+  //deathBiomassExtra.insert(mypairExtra);
+
+}
+
+void
+Carbon::registerProducts(const double &value, const int & regId, const string & productName){
+  // Registering the CO2 stock embedded in the product...
+  int year = MTHREAD->SCD->getYear();
+  iiskey key(year,regId,productName);
+  pair<iiskey,double> mypair(key,value);
+  products.insert(mypair);
+  // registering the substituted CO2 for energy and material..
+  double subEnergyCoeff   = MTHREAD->MD->getProdData("co2sub_energy",regId,productName,DATA_NOW,"");
+  double subMaterialCoeff = MTHREAD->MD->getProdData("co2sub_material",regId,productName,DATA_NOW,"");
+  // units:
+  // value: Mm^3
+  // subEnergyCoeff and subMaterialCoeff:  [kgCO2/m^3 wood]
+  // desidered output: Mt CO2
+  // ==> I must divide by 1000
+  addSavedEmissions(subMaterialCoeff*value/1000,regId,EM_MATSUB); // EM_ENSUB are now included in eol2energy, instantaneous for fuelwoods
+}
+
+void
+Carbon::registerTransformation(const double &value, const int & regId, const string & productName){
+
+  // Register emissions from transformation happening between pp to tp in the region..
+  string tp = productName;
+  vector <string> priProducts = MTHREAD->MD->getStringVectorSetting("priProducts");
+  for(uint ppIdx=0;ppIdx<priProducts.size();ppIdx++){
+    string pp                      = priProducts[ppIdx];
+    double a                       = MTHREAD->MD->getProdData("a",regId,pp,DATA_NOW,tp);
+    double transformationEmissions =  MTHREAD->MD->getProdData("transformationEmissions",regId,pp,DATA_NOW,tp);
+    if (transformationEmissions > 0) {
+      addSavedEmissions(-value*transformationEmissions,regId,EM_TRANS); // transformationEmissions are per unit of TRANSFORMED product, I don't need to multiply by a.. Negative as I am not saving emission, I am emitting emissions (the map of "emissions" stores positive value)
+    }
+  }
+}
+
+
+
+void
+Carbon::registerTransports(const double &distQ, const int & regId){
+  // units:
+  // distQ: km*Mm^3
+  // transportEmissionsCoeff:  [Kg CO2 / (km*m^3) ]
+  // desidered output: Mt CO2
+  // ==> I must divide by 1000
+  double transportEmissionsCoeff = MTHREAD->MD->getDoubleSetting("transportEmissionsCoeff",DATA_NOW);
+  addSavedEmissions(-transportEmissionsCoeff*distQ/1000,regId,EM_FOROP);
+}
+
+void
+Carbon::HWP_eol2energy(){
+
+  int currentYear = MTHREAD->SCD->getYear();
+  int initialYear = MTHREAD->MD->getIntSetting("initialYear");
+  vector <string> priProducts = MTHREAD->MD->getStringVectorSetting("priProducts");
+  vector <string> secProducts = MTHREAD->MD->getStringVectorSetting("secProducts");
+  vector <string> allProducts = priProducts;
+  allProducts.insert( allProducts.end(), secProducts.begin(), secProducts.end() );
+
+  vector<int> regIds = MTHREAD->MD->getRegionIds(2);
+  for (uint r=0;r<regIds.size();r++){
+    double regId = regIds[r];
+    for(uint i=0;i<allProducts.size();i++){
+      string pr = allProducts[i];
+      double life  = MTHREAD->MD->getProdData("avgLife_products",regId,pr,DATA_NOW,"");
+      double eol2e_share      = MTHREAD->MD->getProdData("eol2e_share",regId,pr,DATA_NOW,"");
+      double subEnergyCoeff   = MTHREAD->MD->getProdData("co2sub_energy",regId,pr,DATA_NOW,"");
+      if(eol2e_share > 0 && subEnergyCoeff>0){
+        for(int y=(initialYear-100);y<currentYear;y++){ // notice the minor operator and not minor equal: energy substitution for products produced this year assigned to the following year, otherwise double counring in the process of making dicrete the exponential function
+          iiskey key(y,regId,pr);
+          double originalStock = findMap(products,key,MSG_NO_MSG,0.0);
+          double remainingStockLastYear = getRemainingStock(originalStock,life,currentYear-y-1);
+          double remainingStockThisYear = getRemainingStock(originalStock,life,currentYear-y);
+          double eofThisYear = remainingStockLastYear-remainingStockThisYear;
+          addSavedEmissions(subEnergyCoeff*eofThisYear*eol2e_share/1000,regId,EM_ENSUB);
+        }
+      }
+    }
+  }
+
+}
+
+
+// ################# UTILITY (PRIVATE) FUNCTIONS ################
+
+void
+Carbon::addSavedEmissions(const double & value, const int & regId, const int & em_type){
+  switch (em_type){
+    case EM_ENSUB:
+      incrMapValue(cumSubstitutedEnergy, regId, value);
+      break;
+    case EM_MATSUB:
+      incrMapValue(cumSubstitutedMaterial, regId, value);
+      break;
+    case EM_FOROP:
+      incrMapValue(cumEmittedForOper, regId, -value);
+      break;
+    case EM_TRANS:
+      incrMapValue(cumEmittedHWPTrans, regId, -value);
+    break;
+    default:
+      msgOut(MSG_CRITICAL_ERROR,"Unexpected em_type in function getCumSavedEmissions");
+  }
+}
+
+double
+Carbon::getRemainingStock(const double & initialValue, const double & halfLife, const double & years) const{
+  // // TODO: remove this test
+  //if(years>0) return 0.0;
+  //return initialValue;
+
+  double k  = log(2)/halfLife;
+  return initialValue*exp(-k*years);
+}
+

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxw SYSTEM "grass-gxw.dtd">
+<gxw>
+    <layer_manager dim="65,24,500,600">
+    </layer_manager>
+    <display render="1" mode="0" showCompExtent="0" constrainRes="0" dim="500,24,800,600" extent="2976000.000000,1992000.000000,4512000.000000,3168000.000000">
+        <layer type="raster" name="nuts_lev2_r@PERMANENT" checked="1" opacity="1.000000">
+            <selected />
+            <task name="d.rast">
+                <parameter name="map">
+                    <value>nuts_lev2_r@PERMANENT</value>
+                </parameter>
+                <flag name="o" />
+            </task>
+        </layer>
+        <layer type="raster" name="nuts_lev1_r@PERMANENT" checked="1" opacity="1.000000">
+            <task name="d.rast">
+                <parameter name="map">
+                    <value>nuts_lev1_r@PERMANENT</value>
+                </parameter>
+                <flag name="o" />
+            </task>
+        </layer>
+    </display>
+</gxw>

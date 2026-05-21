@@ -1,0 +1,91 @@
+cmake_minimum_required(VERSION 3.16)
+project(src VERSION 1.0 LANGUAGES CXX)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+# Set up AUTOMOC and some sensible defaults for runtime execution
+# When using Qt 6.3, you can replace the code block below with
+# qt_standard_project_setup()
+set(CMAKE_AUTOMOC ON)
+include(GNUInstallDirs)
+set(CMAKE_AUTOUIC ON)
+
+find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Widgets Xml)
+
+qt_add_executable(src WIN32 MACOSX_BUNDLE
+    Adolc_debugtest.cpp Adolc_debugtest.h
+    BaseClass.cpp BaseClass.h
+    CommonLib.cpp CommonLib.h
+    Gis.cpp Gis.h
+    Init.cpp Init.h
+    InputNode.cpp InputNode.h
+    Ipopt_nlp_problem_debugtest.cpp Ipopt_nlp_problem_debugtest.h
+    MainProgram.cpp MainProgram.h
+    MainWindow.h MainWindow.ui
+    ModelData.cpp ModelData.h
+    ModelRegion.cpp ModelRegion.h
+    main.cpp
+)
+target_include_directories(src PRIVATE
+    ThirdParty/allos/include
+)
+
+target_link_libraries(src PRIVATE
+    Qt::Core
+    Qt::Gui
+    Qt::Widgets
+    Qt::Xml
+)
+
+target_compile_options(src
+    -std=c++0x
+)
+
+
+# Resources:
+set(resources_resource_files
+    "imgs/clear.png"
+    "imgs/exit.png"
+    "imgs/help.png"
+    "imgs/icon.png"
+    "imgs/info.png"
+    "imgs/open.png"
+    "imgs/options.png"
+    "imgs/pause.png"
+    "imgs/play.png"
+    "imgs/save.png"
+    "imgs/saveas.png"
+    "imgs/showHideLogArea.png"
+    "imgs/stop.png"
+    "imgs/view-refresh.png"
+)
+
+qt_add_resources(src "resources"
+    PREFIX
+        "/"
+    FILES
+        ${resources_resource_files}
+)
+
+if(UNIX)
+    target_include_directories(src PRIVATE
+        $(ADDINCFLAGS)
+        --cflags
+        /usr/bin/pkg-config
+        /usr/include/adolc
+        /usr/include/coin
+        /usr/include/coin/ThirdParty
+        `PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig:
+        ipopt`
+    )
+
+    target_link_libraries(src PRIVATE
+        # Remove: -libs
+        /usr/bin/pkg-config
+        `PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig:
+        adolc
+        ipopt`
+        z
+    )
+endif()

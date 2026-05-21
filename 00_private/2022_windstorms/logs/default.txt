@@ -1,0 +1,19 @@
+
+*******************************************************************
+***    !! Welcome to FFSM - The Forest Sector Simulator !!    ***
+***      For info & doc: http://www.ffsm-project.org/doc      ***
+***         Compiled on: Oct 25 2022 - 13:39:30                 ***
+*******************************************************************
+
+Using base directory: /home/bastit/2022_windstorms/data/
+**INFO: Loading input files (this can take a few minutes)...
+*DEBUG: Correctly deleted old temporary data
+*DEBUG: Entering Init state 1
+**INFO: Local time is 16:51:26
+**INFO: ### USING SCENARIO: default ###
+*DEBUG: Loading forest sector data..
+*DEBUG: Loading products data..
+*DEBUG: Loading (but not yet applying) reclassification rules..
+**INFO: Starting regional overriding analysis..
+*DEBUG: Loading forest resource to primary products io matrix..
+**INFO: Creating the space...
