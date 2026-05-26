@@ -252,8 +252,16 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
       for (uint p=0;p<priPr.size();p++){
         bb = gpd("bb",l2r[r1][r2],priPr[p]);
         sigma = gpd("sigma",l2r[r1][r2],priPr[p]);
+        double pol_mktDirInt_s = gpd("pol_mktDirInt_s",l2r[r1][r2],priPr[p]);
         //supCorr2 = gpd("supCorr2",l2r[r1][r2],priPr[p]);
-        obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - bb*pow(mymax(zeromax,x[gix("sc",r1,r2,p)]),((sigma+1)/sigma));
+
+        // Added for carbon project ----------------------
+        double carbonPrice = gpd("carbonPrice",l2r[r1][r2],"",DATA_NOW); //using dummy region until Anto solves issue // Solved and generalised ;-)
+        double intRate     = MTHREAD->MD->getDoubleSetting("ir");
+        double Pct         = carbonPrice*intRate;
+        double omega       = gpd("co2content_products", l2r[r1][r2], priPr[p])/1000;  // Generalised
+
+        obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - (bb*pow(mymax(zeromax,x[gix("sc",r1,r2,p)]),((sigma+1)/sigma))*(1/pol_mktDirInt_s) - x[gix("sc",r1,r2,p)]*omega*Pct );
       }
       //  // trasformations between primary products
       //  + sum ((i,p_pr,p_pr2),
