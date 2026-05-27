@@ -2764,14 +2764,25 @@ ModelCoreSpatial::computeEconomicBalances(){
 
       double gamma              = in>in_1 ? gamma_incr: gamma_decr;
       double polBal_mktDirInt_s = pc * (1-pol_mktDirInt_s) * sc;
-      double surplus_prod       =     pc * sc -
-                                      pc_1
-                                    * pol_mktDirInt_s_1
-                                    * pow(pol_mktDirInt_s,-1)
-                                    * pow(sc_1,-1/sigma)
-                                    * pow(in_1/in,gamma/sigma)
-                                    * (sigma/(sigma+1))
-                                    * pow(sc,(sigma+1)/sigma);
+
+      // Added for carbon project ----------------------
+      double carbonPrice = gpd("carbonPrice",regId,"",DATA_NOW); //using dummy region until Anto solves issue // Solved and generalised ;-)
+      double intRate     = MTHREAD->MD->getDoubleSetting("ir");
+      double Pct         = carbonPrice*intRate;
+      double omega       = gpd("co2content_products", regId, priProducts[p])/1000;  // Generalised
+
+      double bb = gpd("bb",regId,priProducts[p]);
+
+      double surplus_prod       =     pc * sc - (bb*pow(sc,(sigma+1)/sigma) + sc*omega*Pct);
+
+      // double surplus_prod       =     pc * sc -
+      //                                pc_1
+      //                              * pol_mktDirInt_s_1
+      //                              * pow(pol_mktDirInt_s,-1)
+      //                              * pow(sc_1,-1/sigma)
+      //                              * pow(in_1/in,gamma/sigma)
+      //                              * (sigma/(sigma+1))
+      //                              * pow(sc,(sigma+1)/sigma);
 
       spd(polBal_mktDirInt_s,"polBal_mktDirInt_s",regId,priProducts[p],DATA_NOW,true); // M€
       spd(surplus_prod,"surplus_prod",regId,priProducts[p],DATA_NOW,true);
