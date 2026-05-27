@@ -261,7 +261,8 @@ Opt::eval_obj(Index n, const T *x, T& obj_value){
         double Pct         = carbonPrice*intRate;
         double omega       = gpd("co2content_products", l2r[r1][r2], priPr[p])/1000;  // Generalised
 
-        obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - (bb*pow(mymax(zeromax,x[gix("sc",r1,r2,p)]),((sigma+1)/sigma))*(1/pol_mktDirInt_s) - x[gix("sc",r1,r2,p)]*omega*Pct );
+        // the bb term already integrates terms as lagged policy market subsides, lagged carbon price, inventory and dead inventory terms
+        obj_value += x[gix("pc",r1,r2,p)]*x[gix("sc",r1,r2,p)] - (bb*pow(mymax(zeromax,x[gix("sc",r1,r2,p)]),((sigma+1)/sigma)) + x[gix("sc",r1,r2,p)]*omega*Pct );
       }
       //  // trasformations between primary products
       //  + sum ((i,p_pr,p_pr2),
@@ -448,7 +449,8 @@ Opt::eval_constraints(Index n, const T *x, Index m, T* g){
     double omega       = gpd("co2content_products", l2r[r1][r2], priPr[p])/1000;  // Generalised
     // ------------------------------------------------
 
-    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow((x[gix("pc",r1,r2,p)]-omega*Pct)*pol_mktDirInt_s,sigma);
+    // the ff term already integrates terms as current and lagged policy market subsides, lagged carbon price, inventory and dead inventory terms
+    g[cix] = x[gix("sc",r1,r2,p)]-ff*pow((x[gix("pc",r1,r2,p)]-omega*Pct),sigma);
     // -----------------------------------------------
 
     //g[cix] = x[gix("sc",r1,r2,p)]-ff*pow(x[gix("pc",r1,r2,p)]*pol_mktDirInt_s,sigma);

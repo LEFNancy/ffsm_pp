@@ -336,14 +336,18 @@ if (in_d_ratio > 100){
 }
 #endif
 
-      double bb = (sigma/(sigma+1.0))*pc_1*pow(sc_1,-1.0/sigma)*pow(1/in_ratio,gamma/sigma)*pow(1.0,1.0/sigma) * pol_mktDirInt_s_1/pol_mktDirInt_s ;
+      //double bb = (sigma/(sigma+1.0))*pc_1*pow(sc_1,-1.0/sigma)*pow(1/in_ratio,gamma/sigma)*pow(1.0,1.0/sigma) * pol_mktDirInt_s_1/pol_mktDirInt_s ;
 
       /* Old FF (without carbon)
       double ff = sc_1*pow(pc_1*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma); //chi
       */
 
       // Added for carbon project
-      double ff = sc_1*pow((pc_1 - omega * Pct_1)*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma)*pow(in_d_ratio,gamma_d);
+      double ff = sc_1*pow((pc_1 - omega * Pct_1)*pol_mktDirInt_s_1,-sigma)*pow(in_ratio,gamma)*pow(in_d_ratio,gamma_d)*pow(pol_mktDirInt_s,sigma);
+
+      // corrected for maximization (producer surplus)
+      double bb = pow(ff,-1.0/sigma) * (sigma/(sigma+1.0));
+
       // -----------------------------------------------
 
       spd(bb,"bb",r2,priProducts[pp],DATA_NOW,true);
