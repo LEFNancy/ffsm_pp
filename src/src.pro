@@ -10,6 +10,9 @@ QT += widgets
 DESTDIR = ..
 #TARGET = ffsm
 
+GIT_HASH = $$system(git rev-parse --short HEAD)
+DEFINES += GIT_COMMIT_HASH=\\\"$$GIT_HASH\\\"
+
 unix {
      #LIBS += -lipopt
      LIBS += -ladolc
