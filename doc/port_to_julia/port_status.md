@@ -1,0 +1,174 @@
+# FFSM++ → Julia port: status
+
+*Status as of 2026-10-02. The Julia code lives in `ffsmj/`. Validated against the C++ binary built
+from commit `7884375`.*
+
+This document records what the Julia port (`ffsmj/`, package `FFSMj`) covers, how it was checked
+against the C++ model, and above all **what has not been ported yet**, or has been ported but never
+exercised. The feasibility study that preceded the port is in `feasibility.md` in this folder. Usage
+instructions are in `ffsmj/README.md`.
+
+## 1. Summary
+
+- **What runs.** The console model (`ffsm -c`) runs entirely in Julia, from the same input files:
+  the ODS spreadsheet, the GIS XML file and the ASCII grids. It writes the same output files.
+- **How it was checked.** It reproduces the C++ results within the Ipopt tolerance on four
+  scenarios: `debug`, `default`, and `Windstorm_Ref` and `Sto_M` from the 2025 windstorm project.
+  The years before the first optimisation, the random per-pixel values and all the discrete
+  forest-owner choices are identical to C++.
+- **Speed.** It is 2.5–6× faster than C++ and, on the windstorm scenarios, uses less than half the
+  memory.
+- **What is missing.**
+  - Not ported: the GUI and the non-spatial model (`usePixelData = false`).
+  - Ported with different random draws: the `initialRandomShuffle` option (section 3.1).
+  - Ported but never run: several modules and options that none of the available input files turn
+    on (section 4).
+
+## 2. Mapping of the C++ sources
+
+| C++ file(s) | Lines | Status in Julia |
+|---|---|---|
+| `ModelCoreSpatial` | 2,916 | **Ported** (`core.jl`), except `printDebugInitRegionalValues()` (a debug helper that ends the program) |
+| `ModelData`, `ModelRegion` | 2,437 | **Ported** (`modeldata.jl`, `datamap.jl`) |
+| `Opt` | 1,874 | **Rewritten** with JuMP (`market.jl`): same variables, order, bounds, start point, objective, constraints and Ipopt options. The ADOL-C taping, sparsity patterns and index bookkeeping are no longer needed. |
+| `Gis`, `Layers`, `Pixel` | 1,845 | **Ported** (`gis.jl`), except the unused helpers listed in section 3.4 |
+| `Output` | 1,215 | **Ported** (`output.jl`), except the non-spatial debug output (section 3.2) |
+| `Carbon` | 349 | **Ported** (`carbon.jl`) |
+| `Init`, `Scheduler`, `MainProgram`, `main` | 512 | **Ported** (`run.jl`), console mode only |
+| `BaseClass` | 664 | **Ported** where used (`utils.jl`), plus C-compatible helpers: `cmin`/`cmax`, glibc `pow`/`exp`/`log`, `%g` formatting |
+| `<random>` usage | — | **Bit-exact replica** of `std::mt19937`, `generate_canonical` and libstdc++ `normal_distribution` (`rng.jl`) |
+| `InputNode` (QtXml), `unzip`/`zip` | 2,862 | **Replaced** by EzXML and ZipArchives (`odsreader.jl`), with the same traversal rules |
+| `anyoption` | 1,445 | **Replaced** by a small argument parser in `run.jl` |
+| `ModelCore` (non-spatial core) | 938 | **Not ported** |
+| `ThreadManager`, `MainWindow`, `MapBox`, `ScenarioSelectionWidget`, `ui_MainWindow.h`, `resources.qrc` | ~1,700 | **Not ported** (GUI) |
+| `Sandbox`, `Adolc_debugtest`, `Ipopt_nlp_problem_debugtest`, `zipExampleUsage`, `CommonLib` | ~2,900 | **Not ported** (developer tests, examples, empty file) |
+
+## 3. Not ported
+
+### 3.1 Features and options
+
+| Item | What happens in Julia | Notes |
+|---|---|---|
+| **GUI** (map viewer, layer selection, pixel query, live log, pause/resume, scenario dialog, "open results" button) | Not available. `-c` is accepted and ignored. | All the C++ GUI calls (`updateImage`, `refreshGUI`, tree viewer…) are dropped. Only the `Update image …` debug messages are kept, so the logs stay comparable. |
+| **Non-spatial model** (`ModelCore`, `usePixelData = false`) | Critical error at start-up | 938 lines. In the C++ code it is an older, regional-only variant of `ModelCoreSpatial`. |
+| **`initialRandomShuffle = true`** | **Ported, but with Julia's random draws** (`Random.shuffle!` with a `Xoshiro` generator), so the shuffled maps differ from the C++ ones | A sensitivity-only option. After each grid file is read, its values are randomly reassigned among the pixels with data (the no-data mask is kept). As in the C++ code it applies to **every** layer read from file, not only to the integer ones as the setting description says. This includes the region layers `regLev_1`/`regLev_2`, so pixels also change region. As in C++, the permutation is the same at every run unless `newRandomSeed = true`. Tested: one-year run in `Pkg.test()` and a full 100-year `debug` run; not compared with C++, by design. |
+| **Probabilistic map-code reclassification** (`Layers::filterExogenousDataset`, `reclassRulesVector`) | Not ported (identity: the value is kept) | Dead code inherited from RegMAS, where a pixel held a single category and the `<reclassRule>` rules of the GIS XML file split a category at random, pixel by pixel. FFSM replaced it in June 2012 (`e8db114`) with the deterministic forest-type reclassification (`reclRules` sheet, `Gis::applyForestReclassification`, ported), where each pixel holds an area for every forest type. The XML reading of the old rules was removed in 2016 (`ef82f89`), so the rule vector is never filled and the C++ function always returns its input. |
+| **`newRandomSeed = true`** | Supported, but with a different seed | C++ seeds with `time(0)+getpid()`. Julia uses the same formula, but the run time differs, so runs aren't reproducible between versions. They aren't reproducible within C++ either. |
+
+### 3.2 Outputs
+
+| Item | Status |
+|---|---|
+| `debugs/debugOut_*.csv` (`Output::initDebugOutput`/`printDebugOutput`) | Not ported. In the C++ code it is written only by the non-spatial model. |
+| png maps (`outputLevel` ≥ 20) | Ported, written by a small built-in PNG writer (zlib from `Zlib_jll`) instead of Qt's `QImage::save`. The files are **not byte-identical**: there is no Qt metadata and the compression differs. Unlike C++, the last row and column are painted too (section 6). For the France grid they are no-data anyway, so the pixels are identical to the C++ maps. |
+| Order of the layers in `maps/floatListLayers`, `maps/integerListLayers` and in map printing | It can differ. C++ adds the spatial-data layers in `readdir()` (filesystem) order, Julia in alphabetical order. The content is the same. |
+| Console log | Same messages and prefixes, except: the banner (no compile date or commit), `Correctly deleted old temporary data` (no temporary unzip folder in Julia), the Ipopt banner/version, and the Ipopt iteration counts (section 5). |
+| `optimisationLogs` | Same format. Time stamps and iteration counts differ (section 5). |
+
+### 3.3 Developer and debug helpers
+
+None of these is called on the console path of the C++ model:
+
+- `ModelCoreSpatial::printDebugInitRegionalValues()` (prints and calls `exit(0)`).
+- `Sandbox` (`basicTest`, `fullTest`, `testIpopt`, `testAdolc`, thread tests…); `Opt::tempDebug`,
+  `calculateSparsityPatternJ/H`; the ADOL-C tape file `ADOLC-Taylors_*.tap` is no longer produced.
+- `ModelData::addSetting`, `getScenarioIndex`, `getForTypeCounter`, `getFilenameByType`,
+  `regSName2RegId`, `unpackKey*` (only used internally, replaced), `loadDataFromCache` (commented out
+  in C++).
+
+### 3.4 Unused GIS/pixel helpers
+
+These are not ported: `Gis::countItems`, `getAllPlotsByValue` (both overloads), `getRandomPlotByValue`,
+`getDistance`, `getLayerNames`, `getLayerPointers`, `printDebugValues`, `sub2realID`, `swap`,
+`unpack`; `Layers::countMyPixels`, `getCategory`; `Pixel::getPixelsAtDistLevel`,
+`correctInputMultiplier`, `setPastRegArea` (a `TODO` that raises a critical error in C++);
+`ModelRegion::getVolumes` (empty stubs in C++).
+
+`Gis::getAllPlots()` is replaced by its observable effect. In C++ it is called before the pixels are
+assigned to the regions, and its `if(masked = false)` assignment means it always returns an empty set,
+so the `pixelIds` layer stays filled with no-value and a `We can't find any free plot.` warning is
+printed. Julia does exactly that.
+
+## 4. Ported but not yet exercised
+
+None of the validation input files turn these on, so they have been translated line by line but never
+run. **Before relying on any of them, validate them against the C++ binary** with
+`ffsmj/test/compare_outputs.jl`.
+
+| Feature | Setting / input | Code |
+|---|---|---|
+| Pathogen module | `usePathogenModule = true`, `pathRules` sheet, `pathogen_pp#…` layers | `getPathMortality`, pathogen branch of the management module, `totalShareInvadedArea` |
+| Hartman carbon payments | `flagHartman = EXO` or `ENDO` | Carbon part of the expected returns, `getVHaByYear` |
+| Spatially explicit forest types | `useSpExplicitForestTypes = true`, forest types with `memType = 3`, `spInput#vol#…` layers | `loadExogenousForestLayers` |
+| Forest area changes | `forestAreaChangeMethod = relative` or `absolute` | Management module (`fArea_*`) |
+| Natural regeneration by probability of presence | `natRegAllocation = pp` | Management module |
+| Old volume-to-area conversion | `oldVol2AreaMethod = true` | Biological module, `updateMapAreas` |
+| Spatial multipliers proportional to volumes | `useSpatialVarPropToVol = true` | `assignSpMultiplierPropToVols` |
+| Expectations fixed at the initial year | `expType = -1` | `computeCumulativeData` |
+| Scenario settings from a csv file | `settingFile` column of `scenarios` | `setScenarioSettings!` |
+| Pathogen rules overridden by scenario | `pathTable` column of `scenarios` | `setScenarioPathogenRules!` |
+| Output variants | `outputSingleFile`, `outputHumanReadable`, `forestDiamDetailedOutput`, `outStepRange = -1`, `overridenScenarioName`, `mapOutputFormat = 2` | `output.jl` |
+| Cached input tables | `cachedInput/forData.csv` and `prodData.csv` | `odsreader.jl` (see section 6) |
+| HSL linear solvers | `linearSolver = ma27/ma57` | Needs `--hsllib <path>` (e.g. from `HSL_jll`) |
+
+These code paths **are** exercised by the validation scenarios: the market module including
+substitution elasticities and policy terms, the death-timber inventory and its allocation to supply
+(`forToProd` `maxYears` 1 and 4), additional mortality maps (3,121 layers in the windstorm scenarios),
+scenario overrides of settings/prodData/forToProd, regional overriding, debug mode, heterogeneous risk
+aversion, stochastic expectations and spatial variance, the carbon balance, detailed harvest output,
+debug pixel values, and ASCII/png maps.
+
+## 5. Differences that remain by design
+
+- **Market solution.** Same NLP, but solved by Ipopt.jl's Ipopt/MUMPS with JuMP derivatives instead of
+  ADOL-C. The constraint rows may also be ordered differently. The
+  equilibrium therefore agrees within the tolerance (`tol = 1e-6`), not bit-for-bit, and iteration
+  counts differ by a few units.
+- **Small, flat sub-markets.** The Corsican pulpwood market (about 0.0025 Mm³) is only resolved to
+  about 1e-4–5e-3 relative at this tolerance, in **both** versions. Single years can then differ
+  noticeably (2095 in `default`, 2045 in `Sto_M`), before re-converging the next year. Re-solving with
+  `tol = 1e-11` shows that neither default-tolerance solution is exact there. A tighter tolerance can
+  be tested with `runModel(...; ipoptOptions = Dict("tol" => 1e-9))`.
+- **Regional trade flows (`rt`)** are degenerate (several equivalent optima) and differ most in
+  relative terms. Over 100 years of `default` the totals are identical and the sum of absolute
+  differences is 0.0009 Mm³.
+
+## 6. Deliberate deviations from the C++ code
+
+The port reproduces the C++ behaviour, including its quirks (listed in `ffsmj/README.md`). The
+exceptions are cases where the C++ code is broken or has undefined behaviour:
+
+| Case | C++ | Julia |
+|---|---|---|
+| `cachedInput/*.csv` | The base directory is prepended twice, so the files are never found and the tables are empty | The files are read from the intended path |
+| A file without extension in a spatial-data folder | `std::out_of_range` crash in `getFilenamesByDir` | The file is ignored |
+| `getPastRegArea` for a year that is not registered | Error message, then an undefined return value | Error message, returns 0 |
+| `setTimedData` for a year before the initial year | Infinite loop (unsigned arithmetic) | Critical error |
+| png maps: last row and column | Never painted, so always white (the loop in `Layers::printBinMap` stops one short) | The whole map is painted |
+| `initialRandomShuffle = true` | Shuffles the layers with `std::random_shuffle`/`rand()` | Shuffles the layers with Julia's `shuffle!`, so the permutations differ (section 3.1) |
+
+## 7. Validation done
+
+The comparisons use `ffsmj/test/compare_outputs.jl`, on the same inputs:
+
+| Scenario | Years | Files compared | Result |
+|---|---|---|---|
+| `debug` | 2013–2112 | forest/product data, carbon balance, 3.5 M lines of debug pixel values, 47 ASCII maps, 42 png | Objective identical every year (6 digits). Discrete choices (`optDc`, `optFtChosen`, `optDcChosen`) identical. Values within ~1e-5 (last printed digit). 40/47 maps byte-identical, png pixel-identical. |
+| `default` | 2013–2112 | forest/product data, carbon balance | Within 1e-5 until 2094, then a few values up to ~1e-3 (section 5) |
+| `Windstorm_Ref` | 2013–2050 | + detailed harvest by product | Within 1e-5, except some trade flows |
+| `Sto_M` | 2013–2050 | + detailed harvest by product | Within 1e-5, except in 2045 (section 5) |
+
+`ffsmj/test/runtests.jl` (`Pkg.test()`) checks the RNG replica against libstdc++ values, a few C++
+semantics (`minmax_element` ties, conversions, prefix look-ups), a short `debug` run against C++
+reference values, and `initialRandomShuffle` (the layers are permutations of the original ones, with
+the same no-data mask and the same permutation at every run).
+
+## 8. Suggested next steps
+
+1. Validate the features of section 4 that are actually used by current projects, with input files
+   that turn them on (the pathogen module and Hartman payments are the most complex).
+2. Replace `ffsmj/data/` with a symlink to `../data` once the two versions share the inputs.
+3. Decide whether the solver tolerance should be tightened. This affects the C++ model as well
+   (section 5).
+4. If a GUI is ever needed, write it as a separate post-run viewer (see `feasibility.md`), keeping the
+   model free of GUI dependencies.
