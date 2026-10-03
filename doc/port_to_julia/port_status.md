@@ -60,7 +60,7 @@ instructions are in `ffsmj/README.md`.
 | Item | Status |
 |---|---|
 | `debugs/debugOut_*.csv` (`Output::initDebugOutput`/`printDebugOutput`) | Not ported. In the C++ code it is written only by the non-spatial model. |
-| png maps (`outputLevel` ≥ 20) | Ported, written by a small built-in PNG writer (zlib from `Zlib_jll`) instead of Qt's `QImage::save`. The files are **not byte-identical**: there is no Qt metadata and the compression differs. Unlike C++, the last row and column are painted too (section 6). For the France grid they are no-data anyway, so the pixels are identical to the C++ maps. |
+| png maps (`outputLevel` ≥ 20) | Ported, written by a small built-in PNG writer (zlib from `Zlib_jll`) instead of Qt's `QImage::save`. The files are **not byte-identical**: there is no Qt metadata and the compression differs. The pixels are identical to the C++ maps. |
 | Order of the layers in `maps/floatListLayers`, `maps/integerListLayers` and in map printing | It can differ. C++ adds the spatial-data layers in `readdir()` (filesystem) order, Julia in alphabetical order. The content is the same. |
 | Console log | Same messages and prefixes, except: the banner (no compile date or commit), `Correctly deleted old temporary data` (no temporary unzip folder in Julia), the Ipopt banner/version, and the Ipopt iteration counts (section 5). |
 | `optimisationLogs` | Same format. Time stamps and iteration counts differ (section 5). |
@@ -89,25 +89,30 @@ assigned to the regions, and its `if(masked = false)` assignment means it always
 so the `pixelIds` layer stays filled with no-value and a `We can't find any free plot.` warning is
 printed. Julia does exactly that.
 
-## 4. Ported but not yet exercised
+## 4. Features validated only by the test scenarios
 
-None of the validation input files turn these on, so they have been translated line by line but never
-run. **Before relying on any of them, validate them against the C++ binary** with
-`ffsmj/test/compare_outputs.jl`.
+The features below are not turned on by the large validation runs of section 7. They are exercised by the
+test scenarios of `ffsmj/test/data/ffsm_tests.ods` (2 regions, 8 years), whose outputs match the C++ ones
+(`test/exact_tests.jl`; see [tests.md](tests.md)):
+
+| Feature | Setting / input | Test scenario |
+|---|---|---|
+| Pathogen module, pathogen rules overridden by scenario | `usePathogenModule = true`, `pathTable`, `pathogen_pp#…` layers | t_pathogen |
+| Hartman carbon payments, pickling | `flagHartman = EXO` / `ENDO`, `pickling` | t_hartmanExo, t_hartmanEndo, t_pickling |
+| Spatially explicit forest types | `useSpExplicitForestTypes = true`, `memType = 3`, `spInput#vol#…` layers | t_spExplicitFt |
+| Forest area changes | `forestAreaChangeMethod = relative` / `absolute` | t_areaRel, t_areaAbs, t_areaDecr |
+| Natural regeneration by probability of presence | `natRegAllocation = pp` | t_natRegPP |
+| Old volume-to-area conversion | `oldVol2AreaMethod = true` | t_oldVol2Area |
+| Spatial multipliers proportional to volumes | `useSpatialVarPropToVol = true` | t_spPropVol |
+| Expectations fixed at the initial year | `expType = -1` | t_expFixed |
+| Scenario settings from a csv file | `settingFile` column of `scenarios` | t_settingFile |
+| Output variants | `outputSingleFile`, `outputHumanReadable`, `forestDiamDetailedOutput`, `outStepRange = -1`, `overridenScenarioName`, `mapOutputFormat = 2` | t_outHR, t_outSingle |
+| Climate multipliers from maps, availability by forest type | `modifiersFromTable`, `spatialDataSubfolder` | t_ccMaps, t_avalCoefFt |
+
+Still never run:
 
 | Feature | Setting / input | Code |
 |---|---|---|
-| Pathogen module | `usePathogenModule = true`, `pathRules` sheet, `pathogen_pp#…` layers | `getPathMortality`, pathogen branch of the management module, `totalShareInvadedArea` |
-| Hartman carbon payments | `flagHartman = EXO` or `ENDO` | Carbon part of the expected returns, `getVHaByYear` |
-| Spatially explicit forest types | `useSpExplicitForestTypes = true`, forest types with `memType = 3`, `spInput#vol#…` layers | `loadExogenousForestLayers` |
-| Forest area changes | `forestAreaChangeMethod = relative` or `absolute` | Management module (`fArea_*`) |
-| Natural regeneration by probability of presence | `natRegAllocation = pp` | Management module |
-| Old volume-to-area conversion | `oldVol2AreaMethod = true` | Biological module, `updateMapAreas` |
-| Spatial multipliers proportional to volumes | `useSpatialVarPropToVol = true` | `assignSpMultiplierPropToVols` |
-| Expectations fixed at the initial year | `expType = -1` | `computeCumulativeData` |
-| Scenario settings from a csv file | `settingFile` column of `scenarios` | `setScenarioSettings!` |
-| Pathogen rules overridden by scenario | `pathTable` column of `scenarios` | `setScenarioPathogenRules!` |
-| Output variants | `outputSingleFile`, `outputHumanReadable`, `forestDiamDetailedOutput`, `outStepRange = -1`, `overridenScenarioName`, `mapOutputFormat = 2` | `output.jl` |
 | Cached input tables | `cachedInput/forData.csv` and `prodData.csv` | `odsreader.jl` (see section 6) |
 | HSL linear solvers | `linearSolver = ma27/ma57` | Needs `--hsllib <path>` (e.g. from `HSL_jll`) |
 
@@ -144,8 +149,14 @@ exceptions are cases where the C++ code is broken or has undefined behaviour:
 | A file without extension in a spatial-data folder | `std::out_of_range` crash in `getFilenamesByDir` | The file is ignored |
 | `getPastRegArea` for a year that is not registered | Error message, then an undefined return value | Error message, returns 0 |
 | `setTimedData` for a year before the initial year | Infinite loop (unsigned arithmetic) | Critical error |
-| png maps: last row and column | Never painted, so always white (the loop in `Layers::printBinMap` stops one short) | The whole map is painted |
 | `initialRandomShuffle = true` | Shuffles the layers with `std::random_shuffle`/`rand()` | Shuffles the layers with Julia's `shuffle!`, so the permutations differ (section 3.1) |
+
+Bugs found during the port and fixed in **both** versions (the C++ fix is in the same commit as the Julia one):
+
+| Case | Before | Now |
+|---|---|---|
+| png maps (and GUI map images): last row and column | Never painted, so always white (the loops in `Layers::printBinMap` and `Gis::updateImage` stopped one short) | The whole map is painted. No visible change on the France grid, whose border cells are no-data |
+| Spatio-temporal layer of a year before the first layer of its series (`Pixel::getSTData`) | When the searched key was smaller than all the layer names, `upper_bound` returned `begin()` and the first layer of the map was used: the first series in alphabetical order (e.g. `additionalMortality#…`) applied its first layer also to the previous years | No layer: the default value is returned |
 
 ## 7. Validation done
 
@@ -161,12 +172,14 @@ The comparisons use `ffsmj/test/compare_outputs.jl`, on the same inputs:
 `ffsmj/test/runtests.jl` (`Pkg.test()`) checks the RNG replica against libstdc++ values, a few C++
 semantics (`minmax_element` ties, conversions, prefix look-ups), a short `debug` run against C++
 reference values, and `initialRandomShuffle` (the layers are permutations of the original ones, with
-the same no-data mask and the same permutation at every run).
+the same no-data mask and the same permutation at every run). It then runs the 46 test scenarios of
+`test/data/ffsm_tests.ods`: exact comparison with the C++ outputs and behaviour tests (see
+[tests.md](tests.md)).
 
 ## 8. Suggested next steps
 
-1. Validate the features of section 4 that are actually used by current projects, with input files
-   that turn them on (the pathogen module and Hartman payments are the most complex).
+1. Validate on full-size runs the features of section 4 that current projects use (the test scenarios
+   only cover 2 regions and 8 years). Look at the issues of the model found by the tests (tests.md).
 2. Replace `ffsmj/data/` with a symlink to `../data` once the two versions share the inputs.
 3. Decide whether the solver tolerance should be tightened. This affects the C++ model as well
    (section 5).

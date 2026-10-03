@@ -1,0 +1,6 @@
+name;type;region;comment;value_0
+debugFlag;bool;;;TRUE
+simulationYears;int;;;8
+outputLevel;int;;;15
+outDetailedHv;bool;;;TRUE
+mr;double;;;1

@@ -46,6 +46,10 @@ to the folder given by the `outputDirname` setting (`data/output/`).
 | `src/core.jl` | init period and yearly dynamics (market, resources, management) | `ModelCoreSpatial` |
 | `src/output.jl` | csv results, optimisation log, debug values, maps (ASCII grids, png) | `Output`, `Layers::print` |
 | `src/run.jl` | init levels, yearly scheduler, command line | `Init`, `Scheduler`, `ThreadManager`, `main` |
+| `test/runtests.jl` | test suite entry point (see [Tests](#tests)) | |
+| `test/exact_tests.jl`, `test/behaviour_tests.jl` | scenario tests: C++ reproduction, expected effects | |
+| `test/build_test_input.jl`, `test/test_layers.jl` | generators of the test input file and of the synthetic test layers (`test/data/`) | |
+| `test/make_cpp_references.jl`, `test/reference/` | C++ reference outputs of the test scenarios | |
 | `test/compare_outputs.jl` | compares the outputs of two runs (e.g. C++ vs Julia) | |
 
 `data/` is a copy of the git-tracked content of the `data/` folder of the C++ project, without the
@@ -104,6 +108,33 @@ The first run in a fresh Julia session also includes about 30–60 s of compilat
 
 Note: like the C++ code, the `detailedHV_*` file is appended whenever `outDetailedHv` is true, even
 with `outputLevel` below 15 (in that case the file is not re-initialised).
+
+## Tests
+
+```bash
+julia --project=. -e 'using Pkg; Pkg.test()'                       # all (~15 min)
+FFSMJ_SKIP_EXACT=1 julia --project=. -e 'using Pkg; Pkg.test()'    # without the C++ reproduction tests
+FFSMJ_TESTS=t_base,t_pathogen julia --project=. test/behaviour_tests.jl
+```
+
+The scenario tests run the 46 `t_*` scenarios of `test/data/ffsm_tests.ods` (2 regions, 2013–2020, one
+change each: settings, forData/prodData/forToProd/pathRules overrides, GIS layers, output options):
+
+- `exact_tests.jl` compares every output file with the C++ one (`test/reference/`) within the solver
+  tolerance. It documents the "exact port" state and can be disabled with `FFSMJ_SKIP_EXACT=1` once the
+  Julia model evolves;
+- `behaviour_tests.jl` checks the accounting identities and that each change moves the model in the
+  expected direction with a reasonable magnitude. It doesn't depend on C++.
+
+After a change of the scenarios (`test/build_test_input.jl`) or of `data/ffsmInput.ods`:
+
+```bash
+julia --project=. test/build_test_input.jl            # needs zip and LibreOffice (soffice)
+julia --project=. test/make_cpp_references.jl ../ffsm  # path of the C++ binary
+```
+
+See [doc/port_to_julia/tests.md](../doc/port_to_julia/tests.md) for the scenarios, what is checked and the
+issues of the model found while writing the tests.
 
 ## Not ported
 
