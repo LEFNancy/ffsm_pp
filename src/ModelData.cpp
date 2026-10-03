@@ -1487,6 +1487,10 @@ ModelData::getTimedData(const vector<double> &dated_vector, const int& year_h) c
     position = year_h-cached_initialYear;
   }
 
+  if(position < 0 && dated_vector.size() > 0){ // the unsigned comparison below would return the last value
+    msgOut(MSG_WARNING, "getTimedData: year "+i2s(position+cached_initialYear)+" is before the initial year, returning the value of the initial year.");
+    return dated_vector[0];
+  }
   if(dated_vector.size() > position) {
     return dated_vector[position];
   } else if (dated_vector.size() > 0 ){

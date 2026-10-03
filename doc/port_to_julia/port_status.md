@@ -157,6 +157,7 @@ Bugs found during the port and fixed in **both** versions:
 | A file without extension in a spatial-data folder (with an extension filter) | `std::out_of_range` crash in `getFilenamesByDir` | The file is ignored |
 | `getPastRegArea` for a year that is not registered | Error message, then an undefined return value | Error message, returns 0 |
 | `setTimedData` for a year before the initial year | Infinite loop (unsigned arithmetic) | Critical error |
+| `getTimedData` for a year before the initial year | Returned the *last* value (unsigned comparison). Never happens in the current model (checked on all the test scenarios and `debug`/`default`) | Returns the first value, with a warning |
 
 ## 7. Validation done
 

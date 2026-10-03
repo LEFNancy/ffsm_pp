@@ -61,8 +61,9 @@ The aim is to reproduce the C++ results with the same inputs, so the port follow
 closely, including several of its peculiarities:
 
 - **Data look-ups.** Product data asked without `freeDim` are prefix queries over the sorted keys
-  (`getProdData` sums all the matching entries). A year before the first one returns the last value
-  (an unsigned comparison in `getTimedData`). Level-1 queries sum the level-2 children. Missing data
+  (`getProdData` sums all the matching entries). A year after the last one returns the last value,
+  a year before the initial year the first one, with a warning (`getTimedData`; it never happens in the
+  current model). Level-1 queries sum the level-2 children. Missing data
   return 0 with the same messages.
 - **Randomness.** The per-pixel risk aversion, expectation types and spatial modifiers come from a
   bit-exact replica of `std::mt19937(0)` and the libstdc++ `normal_distribution`, including its

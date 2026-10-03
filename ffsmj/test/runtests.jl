@@ -80,6 +80,9 @@ end
     FFSMj.setTimedData!(m, 3.0, v, 2013)
     @test v == [1.0, 2.0, 3.0]
     @test_throws FFSMj.FFSMCriticalError FFSMj.setTimedData!(m, 3.0, v, 2010)
+    # reading a year before the initial year: the first value (with a warning), after the last year: the last one
+    @test FFSMj.getTimedData(m, v, 2005) == 1.0
+    @test FFSMj.getTimedData(m, v, 2030) == 3.0
 
     # initialRandomShuffle: every layer read from file is a permutation of the original one, with the same no-data mask
     ms = runModel(inputFile, "debug"; settings = Dict("simulationYears" => 1, "outputLevel" => 0, "initialRandomShuffle" => true))

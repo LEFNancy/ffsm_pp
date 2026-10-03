@@ -606,10 +606,13 @@ end
 
 function getTimedData(m, v::Vector{Float64}, year_h::Integer)
     position = (year_h == DATA_NOW ? m.SCD.year : year_h) - m.MD.cached_initialYear
-    if position >= 0 && length(v) > position
+    if position < 0 && length(v) > 0
+        msgOut(MSG_WARNING, "getTimedData: year $(position + m.MD.cached_initialYear) is before the initial year, returning the value of the initial year.")
+        return @inbounds v[1]
+    elseif length(v) > position
         return @inbounds v[position+1]
     elseif length(v) > 0
-        return @inbounds v[end]       # also for negative positions, as in the C++ unsigned comparison
+        return @inbounds v[end]       # after the last year: the last available value
     end
     msgOut(MSG_CRITICAL_ERROR, "Error in getTimedData: requested value doesn't have any value, even on the first position(year)!")
     return 0.0
