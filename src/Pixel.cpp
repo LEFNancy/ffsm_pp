@@ -257,10 +257,10 @@ Pixel::getSTData(const string& parName, const string& forName, int year, const s
   // Looking for an exact match in forName
   string search_for = parName+"#"+forName+"#"+d2+"#"+i2s(year);
   map <string,double>::const_iterator i = values.upper_bound(search_for); //return the position always upper to the found one, even if it's an equal match.
-  if(i!= values.begin())  i--; // this rewind the position to the one just before or equal
-  const string& key = i->first;
+  bool hasPrevious = (i != values.begin()); // false if no key is <= search_for (begin() would then be a following year)
+  if(hasPrevious)  i--; // this rewind the position to the one just before or equal
   string search_base = search_for.substr(0,search_for.size()-4);
-  if (key.compare(0, search_base.size(), search_base) == 0){
+  if (hasPrevious && i->first.compare(0, search_base.size(), search_base) == 0){
       //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
       //if(i->second != 1){
       //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
@@ -271,10 +271,10 @@ Pixel::getSTData(const string& parName, const string& forName, int year, const s
       // An exact match in forName has not being found, look for no forName:
       string search_for2 = parName+"#"+"#"+d2+"#"+i2s(year);
       map <string,double>::const_iterator i2 = values.upper_bound(search_for2); //return the position always upper to the found one, even if it's an equal match.
-      if(i2!= values.begin())  i2--; // this rewind the position to the one just before or equal
-      const string& key2 = i2->first;
+      bool hasPrevious2 = (i2 != values.begin()); // false if no key is <= search_for2
+      if(hasPrevious2)  i2--; // this rewind the position to the one just before or equal
       string search_base2 = search_for2.substr(0,search_for2.size()-4);
-      if (key2.compare(0, search_base2.size(), search_base2) == 0){
+      if (hasPrevious2 && i2->first.compare(0, search_base2.size(), search_base2) == 0){
         //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
         //if(i->second != 1){
         //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
@@ -285,10 +285,10 @@ Pixel::getSTData(const string& parName, const string& forName, int year, const s
           // An exact match in forName or noforName has not being found, look for no dc:
           string search_for2 = parName+"#"+forName+"#"+"#"+i2s(year);
           map <string,double>::const_iterator i2 = values.upper_bound(search_for2); //return the position always upper to the found one, even if it's an equal match.
-          if(i2!= values.begin())  i2--; // this rewind the position to the one just before or equal
-          const string& key2 = i2->first;
+          bool hasPrevious2 = (i2 != values.begin()); // false if no key is <= search_for2
+          if(hasPrevious2)  i2--; // this rewind the position to the one just before or equal
           string search_base2 = search_for2.substr(0,search_for2.size()-4);
-          if (key2.compare(0, search_base2.size(), search_base2) == 0){
+          if (hasPrevious2 && i2->first.compare(0, search_base2.size(), search_base2) == 0){
             //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
             //if(i->second != 1){
             //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;
@@ -299,10 +299,10 @@ Pixel::getSTData(const string& parName, const string& forName, int year, const s
               // An exact match, or partial match in forName or dc alones has not being found, look for no forName AND no dc:
               string search_for2 = parName+"#"+"#"+"#"+i2s(year);
               map <string,double>::const_iterator i2 = values.upper_bound(search_for2); //return the position always upper to the found one, even if it's an equal match.
-              if(i2!= values.begin())  i2--; // this rewind the position to the one just before or equal
-              const string& key2 = i2->first;
+              bool hasPrevious2 = (i2 != values.begin()); // false if no key is <= search_for2
+              if(hasPrevious2)  i2--; // this rewind the position to the one just before or equal
               string search_base2 = search_for2.substr(0,search_for2.size()-4);
-              if (key2.compare(0, search_base2.size(), search_base2) == 0){
+              if (hasPrevious2 && i2->first.compare(0, search_base2.size(), search_base2) == 0){
                 //cout << "MATCH: " << search_for <<", "<< i->first << ", " << i->second << endl;
                 //if(i->second != 1){
                 //  cout << "NOT ONE: " << search_for <<", "<< i->first << ", " << i->second << endl;

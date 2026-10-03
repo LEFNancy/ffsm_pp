@@ -366,8 +366,8 @@ Layers::printBinMap(){
 
   QImage image = QImage(subXR-subXL+1, subYB-subYT+1, QImage::Format_RGB32);
   image.fill(qRgb(255, 255, 255));
-  for (int countRow=subYT;countRow<subYB;countRow++){
-    for (int countColumn=subXL;countColumn<subXR;countColumn++){
+  for (int countRow=subYT;countRow<=subYB;countRow++){ // subYB and subXR are included (the image is (subXR-subXL+1) x (subYB-subYT+1))
+    for (int countColumn=subXL;countColumn<=subXR;countColumn++){
       double value = MTHREAD->GIS->getPixel(countRow*xNPixels+countColumn)->getDoubleValue(name);
       QColor color = this->getColor(value);
       image.setPixel(countColumn-subXL,countRow-subYT,color.rgb());

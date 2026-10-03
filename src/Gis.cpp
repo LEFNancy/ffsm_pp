@@ -715,8 +715,8 @@ Gis::updateImage(string layerName_h){
     msgOut(MSG_CRITICAL_ERROR, "Layer not found in Gis::updateImage()");
   }
 
-  for (int countRow=subYT;countRow<subYB;countRow++){
-    for (int countColumn=subXL;countColumn<subXR;countColumn++){      
+  for (int countRow=subYT;countRow<=subYB;countRow++){ // subYB and subXR are included (the image is (subXR-subXL+1) x (subYB-subYT+1))
+    for (int countColumn=subXL;countColumn<=subXR;countColumn++){      
       double value = pxVector.at((countRow*xNPixels+countColumn)).getDoubleValue(layerName_h);
       QColor color = layerVector.at(layerIndex).getColor(value);
       image.setPixel(countColumn-subXL,countRow-subYT,color.rgb());

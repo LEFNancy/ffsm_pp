@@ -172,11 +172,9 @@ function _stResolve(G::Gis, search::String)
     c = get(G.stCache, search, missing)
     c === missing || return c
     ks = _sortedValueKeys(G)
-    i = searchsortedlast(ks, search)   # last key <= search
-    i == 0 && (i = 1)                  # upper_bound returned begin()
-    key = ks[i]
+    i = searchsortedlast(ks, search)   # last key <= search (0: none, i.e. no layer of this series up to this year)
     base = search[1:end-4]
-    res = startswith(key, base) ? key : nothing
+    res = (i > 0 && startswith(ks[i], base)) ? ks[i] : nothing
     G.stCache[search] = res
     return res
 end
