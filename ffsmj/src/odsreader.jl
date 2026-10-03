@@ -176,8 +176,8 @@ end
 """
     loadInput(inputFile, baseDirectory)
 
-Read all the tables of the ODS input file (replacing forData and prodData with the cached csv
-versions in `cachedInput/` if these exist, as in the C++ code).
+Read all the tables of the ODS input file (replacing forData and prodData with their cached csv
+versions `cachedInput/forData.csv` and `cachedInput/prodData.csv` when these exist).
 """
 function loadInput(inputFile::AbstractString, baseDirectory::AbstractString)
     msgOut(MSG_INFO, "Loading input files (this can take a few minutes)...")
@@ -185,13 +185,13 @@ function loadInput(inputFile::AbstractString, baseDirectory::AbstractString)
     zr = ZipReader(read(inputFile))
     content = zip_readentry(zr, "content.xml", String)
     doc = parsexml(content)
-    forDataCached = joinpath(baseDirectory, "cachedInput", "forData.csv")
     tables = LLData[]
     for tEl in findall("//*[local-name()='table']", root(doc))
         tableName = something(_attr(tEl, "name"), "")
-        if (tableName == "forData" || tableName == "prodData") && isfile(forDataCached)
+        cached = joinpath(baseDirectory, "cachedInput", tableName * ".csv")
+        if (tableName == "forData" || tableName == "prodData") && isfile(cached)
             msgOut(MSG_INFO, "Attenction, using cached data (csv) for $tableName")
-            push!(tables, getTableFromFile(tableName, joinpath(baseDirectory, "cachedInput", tableName * ".csv")))
+            push!(tables, getTableFromFile(tableName, cached))
             continue
         end
         t = _parseTable(tEl)

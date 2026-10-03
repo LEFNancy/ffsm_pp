@@ -150,6 +150,7 @@ reference (relative change vs t_base, 2016 if not stated).
 | Scenario | Change | Expected behaviour (tested) | Observed |
 |---|---|---|---|
 | t_base | none | invariants; inventory growing; heterogeneous agents (expType, risk aversion, spatial modifiers vary across pixels); no additional mortality | |
+| t_base (input robustness) | forData/prodData from `cachedInput/*.csv` and a file without extension in the spatial data folder | results identical to the normal t_base run | identical |
 | t_mr0 | `mr` = 0 | all regeneration replants the same forest type: same-type share of the regeneration = 1 | 1.0 |
 | t_mr1 | `mr` = 1 | more forest type changes: same-type share < base in both regions | 0.34/0.53 vs 0.54/0.67 |
 | t_mrTime | `mr` 0.7 → 0.1 from 2016 (time series setting) | same-type share > base and > 0.8 | 0.93/0.95 |

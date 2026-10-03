@@ -617,7 +617,7 @@ end
 
 function setTimedData!(m, value::Float64, v::Vector{Float64}, year_h::Integer, MSG_LEVEL::Integer = MSG_WARNING)
     position = (year_h == DATA_NOW ? m.SCD.year : year_h) - m.MD.cached_initialYear
-    position < 0 && msgOut(MSG_CRITICAL_ERROR, "setTimedData: negative position in time.")
+    position < 0 && msgOut(MSG_CRITICAL_ERROR, "setTimedData: year $(position + m.MD.cached_initialYear) is before the initial year.")
     orig = length(v)
     if orig > position
         v[position+1] = value
@@ -822,7 +822,7 @@ function getFilenamesByDir(dir::AbstractString, filter::AbstractString = "")
     for f in readdir(dir)
         i = findlast('.', f)
         ext = i === nothing ? "" : f[i:end]
-        if (filter != "" && ext == filter) || (filter == "" && i !== nothing && length(f) > i)
+        if (filter != "" && ext == filter) || (filter == "" && (i === nothing || ncodeunits(f) > i))
             push!(files, f)
         end
     end

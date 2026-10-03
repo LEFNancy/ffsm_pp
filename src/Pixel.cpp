@@ -393,6 +393,7 @@ Pixel::getPastRegArea(const int& ft_idx, const int& year){
     return i->second.at(ft_idx);
   } else {
     msgOut(MSG_ERROR, "Asking for a pastRegArea of a not-registered year. I don't have year "+i2s(year)+"!");
+    return 0.0; // the value was undefined (no return)
   }
 }
 

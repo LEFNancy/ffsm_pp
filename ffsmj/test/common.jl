@@ -47,6 +47,28 @@ function prepareTestDataDir(dest)
     return joinpath(dest, TEST_INPUT)
 end
 
+"""
+    prepareRobustnessDataDir(dest)
+
+As `prepareTestDataDir`, plus the forData and prodData tables given as cached csv files
+(`cachedInput/forData.csv`, `cachedInput/prodData.csv`, read instead of the ODS sheets) and a file without
+extension in the spatial data folder (to be ignored). A run must give the same results as the normal one.
+"""
+function prepareRobustnessDataDir(dest)
+    input = prepareTestDataDir(dest)
+    for t in FFSMj.loadInput(input, dest * "/")
+        t.tableName in ("forData", "prodData") || continue
+        open(joinpath(dest, "cachedInput", t.tableName * ".csv"), "w") do io
+            println(io, join(t.headers, ';'))
+            for r in t.records
+                println(io, join(r, ';'))
+            end
+        end
+    end
+    write(joinpath(dest, "gis", "france", "spatialParameters", "README"), "a file without extension\n")
+    return input
+end
+
 "The t_* scenarios of the test input file"
 function testScenarios()
     t = FFSMj.loadInput(joinpath(TEST_SRC, TEST_INPUT), TEST_SRC * "/")

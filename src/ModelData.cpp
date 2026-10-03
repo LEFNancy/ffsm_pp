@@ -1507,6 +1507,10 @@ ModelData::setTimedData(const double& value_h, vector<double> &dated_vector, con
   } else {
     position = year_h-cached_initialYear;
   }
+  if(position < 0){ // would otherwise loop forever (unsigned comparisons below)
+    msgOut(MSG_CRITICAL_ERROR, "setTimedData: year "+i2s(position+cached_initialYear)+" is before the initial year.");
+    return;
+  }
 
   int originalVectorSize = dated_vector.size();
   if(dated_vector.size() > position) {
@@ -1538,8 +1542,6 @@ ModelData::loadInput(){
   int randomNumber = dis(localgen);
 
   QString oDir((MTHREAD->getBaseDirectory()+"tempInput-"+MTHREAD->getScenarioName()+i2s(randomNumber)).c_str());
-  string forDataCachedFilename = MTHREAD->getBaseDirectory()+"cachedInput/forData.csv";
-  string prodDataCachedFilename = MTHREAD->getBaseDirectory()+"cachedInput/prodData.csv";
   
   // removing output directory if exist..
   QDir oQtDir(oDir);
@@ -1590,10 +1592,10 @@ ModelData::loadInput(){
   for(uint i=0;i<tables.size();i++){
     string tableName = tables[i].getStringAttributeByName("name");
     //cout <<tableName<<endl;
-    if( (tableName == "forData" || tableName == "prodData") && QFile::exists(forDataCachedFilename.c_str()) )  {
+    string cachedFileName = "cachedInput/"+tableName+".csv"; // relative to the base directory, as getTableFromFile() expects
+    if( (tableName == "forData" || tableName == "prodData") && QFile::exists((MTHREAD->getBaseDirectory()+cachedFileName).c_str()) )  {
       msgOut(MSG_INFO,"Attenction, using cached data (csv) for "+tableName);
-      string fileName = MTHREAD->getBaseDirectory()+"cachedInput/"+tableName+".csv";
-      LLDataVector.push_back(MTHREAD->MD->getTableFromFile(tableName, fileName));
+      LLDataVector.push_back(MTHREAD->MD->getTableFromFile(tableName, cachedFileName));
       continue;
     }
     LLData data(MTHREAD,tables[i].getStringAttributeByName("name"));
@@ -2019,9 +2021,11 @@ ModelData::getFilenamesByDir (const string & dir, vector<string> &files, const s
   }
   while ((dirp = readdir(dp)) != NULL) {
     string filename = dirp->d_name;
+    size_t dot = filename.find_last_of(".");
+    string ext = (dot == string::npos) ? "" : filename.substr(dot); // ".ext", empty for a file without extension (substr(npos) used to throw)
     if(
-      (filter != "" && filename.substr(filename.find_last_of(".")) == filter) // there is a filter and the last bit of the filename match the filter
-      || (filter == "" && filename.substr(filename.find_last_of(".") + 1) != "") // there isn't any filter but we don't want stuff like ".." or "."
+      (filter != "" && ext == filter) // there is a filter and the last bit of the filename match the filter
+      || (filter == "" && (dot == string::npos || dot+1 < filename.size())) // there isn't any filter but we don't want stuff like ".." or "."
     ) {
       files.push_back(string(dirp->d_name));
     }

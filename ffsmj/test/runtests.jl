@@ -75,6 +75,11 @@ end
     @test getProdData(m, "pl", 11002, "hardWRoundW", 2013) ≈ 109.325 rtol = 1e-5
     @test getProdData(m, "pl", 11002, "softWSawnW", 2014) ≈ 196.064 rtol = 1e-5
     @test getProdData(m, "sl", 11002, "softWSawnW", 2014) ≈ 2.32349 rtol = 1e-5
+    # time series bounds: setting a value before the initial year is an error (was an infinite loop in C++)
+    v = [1.0, 2.0]
+    FFSMj.setTimedData!(m, 3.0, v, 2013)
+    @test v == [1.0, 2.0, 3.0]
+    @test_throws FFSMj.FFSMCriticalError FFSMj.setTimedData!(m, 3.0, v, 2010)
 
     # initialRandomShuffle: every layer read from file is a permutation of the original one, with the same no-data mask
     ms = runModel(inputFile, "debug"; settings = Dict("simulationYears" => 1, "outputLevel" => 0, "initialRandomShuffle" => true))

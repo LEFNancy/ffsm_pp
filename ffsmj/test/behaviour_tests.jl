@@ -443,6 +443,17 @@ end
     end
 
     # --- output options and input mechanisms ---
+    selected("t_base") && @testset "Cached input tables and file without extension" begin
+        # forData/prodData read from cachedInput/*.csv and an extra file without extension in the spatial data
+        # folder (both used to fail in C++): same results as reading the ODS sheets
+        d = mktempdir(; prefix = "ffsmj_robust_")
+        input = prepareRobustnessDataDir(d)
+        log = redirect_stdout(() -> (runModel(input, "t_base"); nothing), devnull)
+        for f in ("forestData_t_base.csv", "productData_t_base.csv", "carbonBalance_t_base.csv")
+            @test read(joinpath(d, "output", "results", f), String) == read(joinpath(outputDir(), "results", f), String)
+        end
+        rm(d; recursive = true)
+    end
     selected("t_outHR") && @testset "t_outHR" begin
         runScenario("t_outHR")
         f = joinpath(outputDir(), "results", "forestData_t_outHR_renamed.csv")

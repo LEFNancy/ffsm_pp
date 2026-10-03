@@ -108,12 +108,12 @@ test scenarios of `ffsmj/test/data/ffsm_tests.ods` (2 regions, 8 years), whose o
 | Scenario settings from a csv file | `settingFile` column of `scenarios` | t_settingFile |
 | Output variants | `outputSingleFile`, `outputHumanReadable`, `forestDiamDetailedOutput`, `outStepRange = -1`, `overridenScenarioName`, `mapOutputFormat = 2` | t_outHR, t_outSingle |
 | Climate multipliers from maps, availability by forest type | `modifiersFromTable`, `spatialDataSubfolder` | t_ccMaps, t_avalCoefFt |
+| Cached input tables, a file without extension in the spatial data folder | `cachedInput/forData.csv` and `prodData.csv` | t_base (behaviour tests: same results as from the ODS sheets; also checked once with the C++ binary) |
 
 Still never run:
 
 | Feature | Setting / input | Code |
 |---|---|---|
-| Cached input tables | `cachedInput/forData.csv` and `prodData.csv` | `odsreader.jl` (see section 6) |
 | HSL linear solvers | `linearSolver = ma27/ma57` | Needs `--hsllib <path>` (e.g. from `HSL_jll`) |
 
 These code paths **are** exercised by the validation scenarios: the market module including
@@ -141,22 +141,22 @@ debug pixel values, and ASCII/png maps.
 ## 6. Deliberate deviations from the C++ code
 
 The port reproduces the C++ behaviour, including its quirks (listed in `ffsmj/README.md`). The
-exceptions are cases where the C++ code is broken or has undefined behaviour:
+exception is:
 
 | Case | C++ | Julia |
 |---|---|---|
-| `cachedInput/*.csv` | The base directory is prepended twice, so the files are never found and the tables are empty | The files are read from the intended path |
-| A file without extension in a spatial-data folder | `std::out_of_range` crash in `getFilenamesByDir` | The file is ignored |
-| `getPastRegArea` for a year that is not registered | Error message, then an undefined return value | Error message, returns 0 |
-| `setTimedData` for a year before the initial year | Infinite loop (unsigned arithmetic) | Critical error |
 | `initialRandomShuffle = true` | Shuffles the layers with `std::random_shuffle`/`rand()` | Shuffles the layers with Julia's `shuffle!`, so the permutations differ (section 3.1) |
 
-Bugs found during the port and fixed in **both** versions (the C++ fix is in the same commit as the Julia one):
+Bugs found during the port and fixed in **both** versions:
 
 | Case | Before | Now |
 |---|---|---|
 | png maps (and GUI map images): last row and column | Never painted, so always white (the loops in `Layers::printBinMap` and `Gis::updateImage` stopped one short) | The whole map is painted. No visible change on the France grid, whose border cells are no-data |
 | Spatio-temporal layer of a year before the first layer of its series (`Pixel::getSTData`) | When the searched key was smaller than all the layer names, `upper_bound` returned `begin()` and the first layer of the map was used: the first series in alphabetical order (e.g. `additionalMortality#…`) applied its first layer also to the previous years | No layer: the default value is returned |
+| `cachedInput/*.csv` | The base directory was prepended twice, so the files were never found and the tables were empty; and `prodData.csv` was looked for whenever `forData.csv` existed | Each table is read from its own csv file when it exists |
+| A file without extension in a spatial-data folder (with an extension filter) | `std::out_of_range` crash in `getFilenamesByDir` | The file is ignored |
+| `getPastRegArea` for a year that is not registered | Error message, then an undefined return value | Error message, returns 0 |
+| `setTimedData` for a year before the initial year | Infinite loop (unsigned arithmetic) | Critical error |
 
 ## 7. Validation done
 
