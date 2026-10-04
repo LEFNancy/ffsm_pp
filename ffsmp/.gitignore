@@ -1,0 +1,23 @@
+# model run outputs and logs (the 00_doNotRemove.txt placeholders are kept)
+logs/*
+data/output/results/*
+data/output/debugs/*
+data/output/optimisationLogs/*
+data/output/tables/*
+data/output/maps/asciiGrids/*
+data/output/maps/bitmaps/*
+data/output/maps/cats/*
+data/output/maps/colr/*
+data/output/maps/floatListLayers/*
+data/output/maps/integerListLayers/*
+data/output/maps/scenarioNames/*
+data/output/charts/png/*.png
+data/output/charts/*.pdf
+data/tempInput-*
+!**/00_doNotRemove.txt
+
+# Python
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/

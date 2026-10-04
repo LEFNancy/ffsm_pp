@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ffsmp"
+version = "0.1.0"
+description = "Python port of FFSM++ (Forest Sector Simulator), console version"
+authors = [{ name = "Antonello Lobianco", email = "antonello@lobianco.org" }]
+requires-python = ">=3.10"
+dependencies = ["pyomo>=6.7"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+ffsmp = "ffsmp.run:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

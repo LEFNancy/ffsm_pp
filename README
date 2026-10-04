@@ -21,3 +21,7 @@ http://ffsm-project.org
 ***********************************************
 
 
+
+*** Ports of the console model ***
+- ffsmj/: Julia port (the main port), see ffsmj/README.md and doc/port_to_julia/
+- ffsmp/: Python port, see doc/port_to_python/
