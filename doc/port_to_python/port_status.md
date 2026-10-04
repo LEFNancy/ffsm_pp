@@ -98,7 +98,7 @@ why these terms are left out.
 
 | Run time (single run) | C++ | Julia | Python |
 |---|---|---|---|
-| `default` (100 years) | 35m17s | 5m12s | 25m01s |
+| `default` (100 years) | 35m17s | 4m28s | 25m01s |
 | a test scenario (2 regions, 8 years) | ~45 s | ~6 s | ~27 s |
 | a test scenario with Hartman carbon payments | ~45 s | ~15–25 s | ~70–80 s |
 

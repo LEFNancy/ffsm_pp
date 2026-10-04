@@ -42,7 +42,7 @@ to the folder given by the `outputDirname` setting (`data/output/`).
 | `src/modeldata.jl` | settings, regions, data access and regional overriding | `ModelData`, `ModelRegion` |
 | `src/gis.jl` | pixels, layers, grid loading, stochastic pixel values | `Gis`, `Layers`, `Pixel` |
 | `src/carbon.jl` | carbon accounting | `Carbon` |
-| `src/market.jl` | yearly market equilibrium (JuMP + Ipopt) | `Opt` (ADOL-C + Ipopt) |
+| `src/market.jl` | yearly market equilibrium (JuMP algebraic model, one constraint family per equation, Ipopt) | `Opt` (ADOL-C + Ipopt) |
 | `src/core.jl` | init period and yearly dynamics (market, resources, management) | `ModelCoreSpatial` |
 | `src/output.jl` | csv results, optimisation log, debug values, maps (ASCII grids, png) | `Output`, `Layers::print` |
 | `src/run.jl` | init levels, yearly scheduler, command line | `Init`, `Scheduler`, `ThreadManager`, `main` |
@@ -89,12 +89,12 @@ same inputs:
 | Scenario | Years | Result |
 |---|---|---|
 | `debug` (2 regions, outputLevel 25) | 2013–2112 | Objective identical every year (6 digits). All discrete pixel choices (optimal dc and forest type) identical. Pre-optimisation years identical. Other values within ~1e-5 relative (the last printed digit). 40/47 ASCII maps byte-identical, the rest differ in a few cells at the last digit; png maps identical. |
-| `default` (whole France) | 2013–2112 | Objective identical every year. Everything within 1e-5 until 2094, then a few values up to ~1e-3 (see below). Regional trade: total identical, sum of absolute differences over the century 0.0009 Mm³. |
+| `default` (whole France) | 2013–2112 | Objective identical every year. Everything within 2.2e-5 until 2097, up to ~3e-3 in 2098 on the Corsican market (see below), within 6e-5 afterwards. Regional trade flows are degenerate (several equivalent optimal flows). Re-validated after the rewrite of the market module as an algebraic model. |
 | `Windstorm_Ref` (2025 windstorm project) | 2013–2050 | Everything within 1e-5 (except some degenerate regional trade flows). |
 | `Sto_M` (2025 windstorm project) | 2013–2050 | Everything within 1e-5 except in 2045 (see below). |
 
 The larger differences come from the very small Corsican pulpwood market (~0.0025 Mm³) in
-single years (2095 in `default`, 2045 in `Sto_M`); the two versions re-converge the following year.
+single years (2098 in `default`, 2045 in `Sto_M`); the two versions re-converge the following year.
 In these flat directions of the objective, `tol = 1e-6` gives only about 1e-4–5e-3 relative accuracy,
 in **both** versions. Re-solving with `tol = 1e-11` shows that neither default-tolerance solution
 is exact there, so these are not porting errors.
@@ -102,7 +102,7 @@ is exact there, so these are not porting errors.
 | Run time (single run) | C++ | Julia |
 |---|---|---|
 | `debug` (100 years, heavy pixel-level debug output) | 6m56s | 2m47s |
-| `default` (100 years) | 32m40s | 5m12s |
+| `default` (100 years) | 32m40s | 4m28s |
 | `Windstorm_Ref` / `Sto_M` (38 years, 3121 additional mortality maps) | 18m40s, 8.1 GB RAM | 2m56s–3m17s, 3.0 GB RAM |
 
 The first run in a fresh Julia session also includes about 30–60 s of compilation.

@@ -51,7 +51,7 @@ modellers, at the cost of an external `ipopt` executable and of rebuilding the m
 
 | | C++ | Julia | Python (Pyomo) |
 |---|---|---|---|
-| `default`, 100 years | 35m17s | 5m12s | 25m01s |
+| `default`, 100 years | 35m17s | 4m28s | 25m01s |
 | test scenario (2 regions, 8 years) | ~45 s | ~6 s | ~27 s |
 | test scenario with Hartman payments | ~45 s | ~15–25 s | ~70–80 s |
 

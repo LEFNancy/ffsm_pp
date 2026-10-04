@@ -30,7 +30,7 @@ instructions are in `ffsmj/README.md`.
 |---|---|---|
 | `ModelCoreSpatial` | 2,916 | **Ported** (`core.jl`), except `printDebugInitRegionalValues()` (a debug helper that ends the program) |
 | `ModelData`, `ModelRegion` | 2,437 | **Ported** (`modeldata.jl`, `datamap.jl`) |
-| `Opt` | 1,874 | **Rewritten** with JuMP (`market.jl`): same variables, order, bounds, start point, objective, constraints and Ipopt options. The ADOL-C taping, sparsity patterns and index bookkeeping are no longer needed. |
+| `Opt` | 1,874 | **Rewritten** with JuMP (`market.jl`) as an algebraic model: variables indexed by region and product (`pl[r, p]`, `rt[r, p, rTo]`, ...) and one family of constraints per market equation, with the C++ names (`mkeq2[r in R, s in SEC]`, ...). Same variables and constraints, in the same order, same bounds, start point, objective and Ipopt options. The ADOL-C taping, sparsity patterns and index bookkeeping are no longer needed. |
 | `Gis`, `Layers`, `Pixel` | 1,845 | **Ported** (`gis.jl`), except the unused helpers listed in section 3.4 |
 | `Output` | 1,215 | **Ported** (`output.jl`), except the non-spatial debug output (section 3.2) |
 | `Carbon` | 349 | **Ported** (`carbon.jl`) |
@@ -131,7 +131,7 @@ debug pixel values, and ASCII/png maps.
   counts differ by a few units.
 - **Small, flat sub-markets.** The Corsican pulpwood market (about 0.0025 Mm³) is only resolved to
   about 1e-4–5e-3 relative at this tolerance, in **both** versions. Single years can then differ
-  noticeably (2095 in `default`, 2045 in `Sto_M`), before re-converging the next year. Re-solving with
+  noticeably (2098 in `default`, 2095 before the rewrite of the market module; 2045 in `Sto_M`), before re-converging the next year. Re-solving with
   `tol = 1e-11` shows that neither default-tolerance solution is exact there. A tighter tolerance can
   be tested with `runModel(...; ipoptOptions = Dict("tol" => 1e-9))`.
 - **Regional trade flows (`rt`)** are degenerate (several equivalent optima) and differ most in
@@ -166,7 +166,7 @@ The comparisons use `ffsmj/test/compare_outputs.jl`, on the same inputs:
 | Scenario | Years | Files compared | Result |
 |---|---|---|---|
 | `debug` | 2013–2112 | forest/product data, carbon balance, 3.5 M lines of debug pixel values, 47 ASCII maps, 42 png | Objective identical every year (6 digits). Discrete choices (`optDc`, `optFtChosen`, `optDcChosen`) identical. Values within ~1e-5 (last printed digit). 40/47 maps byte-identical, png pixel-identical. |
-| `default` | 2013–2112 | forest/product data, carbon balance | Within 1e-5 until 2094, then a few values up to ~1e-3 (section 5) |
+| `default` | 2013–2112 | forest/product data, carbon balance | Within 2.2e-5 until 2097, up to ~3e-3 in 2098 on the Corsican market (section 5), within 6e-5 afterwards |
 | `Windstorm_Ref` | 2013–2050 | + detailed harvest by product | Within 1e-5, except some trade flows |
 | `Sto_M` | 2013–2050 | + detailed harvest by product | Within 1e-5, except in 2045 (section 5) |
 

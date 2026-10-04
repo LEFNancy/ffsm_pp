@@ -24,7 +24,7 @@ mutable struct FFSMModel
     CBAL::Carbon
     DO::OutputState
     core::CoreState
-    market::Union{Nothing,MarketLayout}
+    market::Union{Nothing,MarketSets}
     gen::MT19937
     shuffleRng::Random.Xoshiro     # used only by initialRandomShuffle (rand() in the C++ code)
     cache::RunCache
