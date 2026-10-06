@@ -7,7 +7,7 @@
 
 using Test
 isdefined(@__MODULE__, :runScenario) || include("common.jl")
-using FFSMj: getForTypeIds, getStringVectorSetting, getMultiplier, getDoubleValue, FT_ALL, getStock, STOCK_INV
+using FFSM: getForTypeIds, getStringVectorSetting, getMultiplier, getDoubleValue, FT_ALL, getStock, STOCK_INV
 
 const Y1 = Y_SHOCK + 1   # first year fully affected by the changes introduced in Y_SHOCK
 
@@ -28,8 +28,8 @@ within(x, lo, hi) = lo <= x <= hi
 regPx(m, reg) = regPixels(m, getRegion(m.MD, reg))
 allPx(m) = [px for r in REGIONS for px in regPx(m, r)]
 
-const SELECTED = haskey(ENV, "FFSMJ_TESTS") ? split(ENV["FFSMJ_TESTS"], ',') : nothing
-"Is (one of) the scenario(s) of a test set selected? (FFSMJ_TESTS=t_a,t_b,... selects the scenarios)"
+const SELECTED = haskey(ENV, "FFSM_TESTS") ? split(ENV["FFSM_TESTS"], ',') : nothing
+"Is (one of) the scenario(s) of a test set selected? (FFSM_TESTS=t_a,t_b,... selects the scenarios)"
 selected(name) = SELECTED === nothing || any(in(SELECTED), split(name, '/'))
 
 "Accounting identities that must hold in every scenario"
@@ -446,7 +446,7 @@ end
     selected("t_base") && @testset "Cached input tables and file without extension" begin
         # forData/prodData read from cachedInput/*.csv and an extra file without extension in the spatial data
         # folder (both used to fail in C++): same results as reading the ODS sheets
-        d = mktempdir(; prefix = "ffsmj_robust_")
+        d = mktempdir(; prefix = "ffsm_robust_")
         input = prepareRobustnessDataDir(d)
         log = redirect_stdout(() -> (runModel(input, "t_base"); nothing), devnull)
         for f in ("forestData_t_base.csv", "productData_t_base.csv", "carbonBalance_t_base.csv")

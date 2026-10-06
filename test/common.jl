@@ -1,16 +1,12 @@
-# Shared helpers of the test suite (data preparation, cached scenario runs, output readers).
+# Shared helpers of the test suite (data preparation, cached scenario runs, model quantities).
 
-using FFSMj
-using FFSMj: getForData, getProdData, getRegion, regPixels, DIAM_ALL, vSum
-import FFSMj.Zlib_jll
+using FFSM
+using FFSM: getForData, getProdData, getRegion, regPixels, DIAM_ALL, vSum
 
 const TEST_SRC = joinpath(@__DIR__, "data")                    # ffsm_tests.ods, scenarios/*.csv, gis/tests/
 const MODEL_DATA = normpath(joinpath(@__DIR__, "..", "data"))  # model data folder (gis, output skeleton)
-const REFERENCE_DIR = joinpath(@__DIR__, "reference")          # C++ reference outputs (gzipped)
 const TEST_INPUT = "ffsm_tests.ods"
 
-# scenarios whose outputs are not reproducible between C++ and Julia by construction
-const NOT_EXACT = ["t_newSeed", "t_shuffle"]
 # test years
 const Y_START = 2013
 const Y_END = 2020
@@ -56,7 +52,7 @@ extension in the spatial data folder (to be ignored). A run must give the same r
 """
 function prepareRobustnessDataDir(dest)
     input = prepareTestDataDir(dest)
-    for t in FFSMj.loadInput(input, dest * "/")
+    for t in FFSM.loadInput(input, dest * "/")
         t.tableName in ("forData", "prodData") || continue
         open(joinpath(dest, "cachedInput", t.tableName * ".csv"), "w") do io
             println(io, join(t.headers, ';'))
@@ -71,7 +67,7 @@ end
 
 "The t_* scenarios of the test input file"
 function testScenarios()
-    t = FFSMj.loadInput(joinpath(TEST_SRC, TEST_INPUT), TEST_SRC * "/")
+    t = FFSM.loadInput(joinpath(TEST_SRC, TEST_INPUT), TEST_SRC * "/")
     sc = only(filter(x -> x.tableName == "scenarios", t))
     return [r[1] for r in sc.records if startswith(r[1], "t_")]
 end
@@ -83,7 +79,7 @@ const RUNS = Dict{String,Any}()
 
 function testDataDir()
     if TEST_DATA_DIR[] == ""
-        d = mktempdir(; prefix = "ffsmj_tests_")
+        d = mktempdir(; prefix = "ffsm_tests_")
         prepareTestDataDir(d)
         TEST_DATA_DIR[] = d
     end
@@ -104,28 +100,10 @@ end
 "Output folder of the Julia test runs"
 outputDir() = joinpath(testDataDir(), "output")
 
-# --- readers ---
-
-"Read a (possibly gzipped) text file"
-function readText(path)
-    endswith(path, ".gz") || return read(path, String)
-    gz = ccall((:gzopen, Zlib_jll.libz), Ptr{Cvoid}, (Cstring, Cstring), path, "rb")
-    gz == C_NULL && error("cannot open $path")
-    buf = Vector{UInt8}(undef, 1 << 20)
-    out = IOBuffer()
-    while true
-        n = ccall((:gzread, Zlib_jll.libz), Cint, (Ptr{Cvoid}, Ptr{UInt8}, Cuint), gz, buf, length(buf))
-        n <= 0 && break
-        write(out, view(buf, 1:n))
-    end
-    ccall((:gzclose, Zlib_jll.libz), Cint, (Ptr{Cvoid},), gz)
-    return String(take!(out))
-end
-
 # --- model quantities used by the tests ---
 
 "Sum over the test regions of a forest variable (all forest types and diameter classes)"
-forTot(m, var, year; regions = REGIONS, ft = FFSMj.FT_ALL) = sum(getForData(m, var, r, ft, DIAM_ALL, year) for r in regions)
+forTot(m, var, year; regions = REGIONS, ft = FFSM.FT_ALL) = sum(getForData(m, var, r, ft, DIAM_ALL, year) for r in regions)
 "Sum over the test regions of a product variable"
 prodTot(m, var, prod, year; regions = REGIONS) = sum(getProdData(m, var, r, prod, year) for r in regions)
 "Total forest area of the pixels of a region [ha]"

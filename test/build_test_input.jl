@@ -7,7 +7,7 @@
 # All the t_* scenarios run on the two debug regions (11001, 11002) for 8 years (2013-2020).
 # See doc/port_to_julia/tests.md for the description of each scenario and of what is checked.
 
-using FFSMj, EzXML, ZipArchives, Printf  # ZipArchives only to read the master file
+using FFSM, EzXML, ZipArchives, Printf  # ZipArchives only to read the master file
 
 const ROOT = normpath(joinpath(@__DIR__, ".."))
 const MASTER = joinpath(ROOT, "data", "ffsmInput.ods")
@@ -17,7 +17,7 @@ const OUTDIR = joinpath(@__DIR__, "data")
 # Master tables (read with the model's own reader)
 # ------------------------------------------------------------------------------
 
-const TABLES = FFSMj.loadInput(MASTER, dirname(MASTER) * "/")
+const TABLES = FFSM.loadInput(MASTER, dirname(MASTER) * "/")
 table(name) = only(filter(t -> t.tableName == name, TABLES))
 const SETTING_TYPES = Dict((r[1], r[3]) => r[2] for r in table("settings").records)
 settingType(name) = get(SETTING_TYPES, (name, ""), get(SETTING_TYPES, (name, "11000"), "string"))

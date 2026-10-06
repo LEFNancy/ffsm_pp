@@ -1,5 +1,10 @@
 # FFSMj test suite
 
+> **Note (after v0.2).** The model now uses a `StableRNG` seeded with the `randomSeed` setting instead of the
+> C++-compatible random numbers: the exact tests (`exact_tests.jl`, `make_cpp_references.jl`, `test/reference/`)
+> were removed, and the environment variables are now `FFSM_*`. The behaviour tests below are unchanged. This
+> document describes the test suite as it was built for the port.
+
 The test suite of the Julia port (`ffsmj/test/`) has three layers:
 
 | Layer | File | What it checks | Dependency on C++ |
@@ -10,7 +15,7 @@ The test suite of the Julia port (`ffsmj/test/`) has three layers:
 
 The exact tests document the current "exact port" state. Once the Julia model starts to evolve on its own
 (bug fixes, refactoring, new features) they are expected to fail and can be disabled
-(`FFSMJ_SKIP_EXACT=1`, or by removing the `include("exact_tests.jl")` line of `runtests.jl`).
+(`FFSM_SKIP_EXACT=1`, or by removing the `include("exact_tests.jl")` line of `runtests.jl`).
 The behaviour tests are meant to stay.
 
 ## Running the tests
@@ -18,10 +23,10 @@ The behaviour tests are meant to stay.
 ```bash
 cd ffsmj
 julia --project=. -e 'using Pkg; Pkg.test()'                        # everything (~15-20 minutes)
-FFSMJ_SKIP_EXACT=1 julia --project=. -e 'using Pkg; Pkg.test()'     # no C++ comparison
-FFSMJ_SKIP_SCENARIOS=1 julia --project=. -e 'using Pkg; Pkg.test()' # only unit tests + short run
-FFSMJ_TESTS=t_base,t_windstorm julia --project=. test/behaviour_tests.jl   # selected scenarios
-FFSMJ_TESTS=t_polTrSub julia --project=. test/exact_tests.jl
+FFSM_SKIP_EXACT=1 julia --project=. -e 'using Pkg; Pkg.test()'     # no C++ comparison
+FFSM_SKIP_SCENARIOS=1 julia --project=. -e 'using Pkg; Pkg.test()' # only unit tests + short run
+FFSM_TESTS=t_base,t_windstorm julia --project=. test/behaviour_tests.jl   # selected scenarios
+FFSM_TESTS=t_polTrSub julia --project=. test/exact_tests.jl
 ```
 
 Each scenario is run once per session (`runScenario()` in `common.jl` caches the model object) and is shared

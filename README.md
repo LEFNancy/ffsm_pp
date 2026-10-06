@@ -11,8 +11,8 @@ From this folder:
 
 ```bash
 julia --project=. -e 'using Pkg; Pkg.instantiate()'    # first time only
-julia --project=. ffsmj.jl -s default                  # scenario "default" of data/ffsmInput.ods
-julia --project=. ffsmj.jl -i data/ffsmInput.ods -s debug
+julia --project=. ffsm.jl -s default                  # scenario "default" of data/ffsmInput.ods
+julia --project=. ffsm.jl -i data/ffsmInput.ods -s debug
 ```
 
 The options are those of the C++ binary: `-i` input file (relative to the current directory),
@@ -20,7 +20,7 @@ The options are those of the C++ binary: `-i` input file (relative to the curren
 the console mode is the only one) and `-h`. `--hsllib <path>` gives Ipopt the path to the HSL
 library, to use the `ma27`/`ma57` linear solvers set in the `linearSolver` setting.
 
-From Julia: `using FFSMj; m = runModel("data/ffsmInput.ods", "default")`. The returned object holds
+From Julia: `using FFSM; m = runModel("data/ffsmInput.ods", "default")`. The returned object holds
 the whole model state, which is handy for inspecting the data after a run. Two keyword arguments
 have no C++ equivalent:
 
@@ -35,9 +35,9 @@ to the folder given by the `outputDirname` setting (`data/output/`).
 
 | File | Content | C++ equivalent |
 |---|---|---|
-| `src/FFSMj.jl` | module definition | |
+| `src/FFSM.jl` | module definition | |
 | `src/utils.jl` | messages, conversions and C-compatible helpers | `BaseClass` |
-| `src/rng.jl` | bit-exact replica of `std::mt19937` and libstdc++ `normal_distribution` | `<random>` |
+| `src/rng.jl` | random generator: a `StableRNG` seeded with the `randomSeed` setting (or random with `newRandomSeed`) | `<random>` |
 | `src/odsreader.jl` | ODS (content.xml) reader | `ModelData::loadInput`, `LLData`, `InputNode` |
 | `src/datamap.jl` | the forest/product data maps, including prefix queries | `std::map<string,vector<double>>` |
 | `src/modeldata.jl` | settings, regions, data access and regional overriding | `ModelData`, `ModelRegion` |
@@ -48,9 +48,7 @@ to the folder given by the `outputDirname` setting (`data/output/`).
 | `src/output.jl` | csv results, optimisation log, debug values, maps (ASCII grids, png) | `Output`, `Layers::print` |
 | `src/run.jl` | init levels, yearly scheduler, command line | `Init`, `Scheduler`, `ThreadManager`, `main` |
 | `test/runtests.jl` | test suite entry point (see [Tests](#tests)) | |
-| `test/exact_tests.jl`, `test/behaviour_tests.jl` | scenario tests: C++ reproduction, expected effects | |
 | `test/build_test_input.jl`, `test/test_layers.jl` | generators of the test input file and of the synthetic test layers (`test/data/`) | |
-| `test/make_cpp_references.jl`, `test/reference/` | C++ reference outputs of the test scenarios | |
 | `test/compare_outputs.jl` | compares the outputs of two runs (e.g. C++ vs Julia) | |
 
 `data/` is a copy of the git-tracked content of the `data/` folder of the C++ project, without the
@@ -66,9 +64,14 @@ closely, including several of its peculiarities:
   a year before the initial year the first one, with a warning (`getTimedData`; it never happens in the
   current model). Level-1 queries sum the level-2 children. Missing data
   return 0 with the same messages.
-- **Randomness.** The per-pixel risk aversion, expectation types and spatial modifiers come from a
-  bit-exact replica of `std::mt19937(0)` and the libstdc++ `normal_distribution`, including its
-  cached second value. As in `normSample`, a bound of 0.0 means "no bound".
+- **Randomness.** The per-pixel risk aversion, expectation types and spatial modifiers (and the optional
+  initial shuffle of the layers) are drawn with Distributions.jl from a `StableRNG` (StableRNGs.jl), whose
+  streams don't change between Julia versions, seeded with the `randomSeed` setting: two runs of the same scenario give the
+  same results. With `newRandomSeed = true` the seed is random (and printed in the log). Up to v0.2 the
+  model used a bit-exact replica of the C++ `std::mt19937(0)` and `normal_distribution`, to reproduce the
+  C++ outputs; the results are now statistically equivalent, not identical, to the C++ ones. The
+  expectation types are drawn from a normal truncated to [0, 1]: the C++ `normSample` applied only the upper
+  bound, as it compared the lower bound 0 with `NULL` (no bound), and gave a few slightly negative values.
 - **Arithmetic.** Floating-point expressions keep the C++ evaluation order, `pow`/`exp`/`log` are
   glibc's, and `std::min`/`std::max` keep their NaN behaviour (`cmin`/`cmax`).
 - **Known C++ behaviours that are reproduced:** the `pixelIds` layer stays empty, the end-of-init
@@ -83,6 +86,9 @@ Ipopt/MUMPS are the versions shipped with Ipopt.jl. Results therefore agree with
 tolerance, not bit-for-bit.
 
 ## Validation against the C++ binary
+
+This validation was done up to v0.2, with the C++-compatible random numbers. Since then the model uses
+`StableRNG`: the random draws, and therefore the outputs, differ from the C++ ones as with a change of seed.
 
 Outputs were compared with `test/compare_outputs.jl` against the C++ binary (commit `7884375`) on the
 same inputs:
@@ -114,28 +120,28 @@ with `outputLevel` below 15 (in that case the file is not re-initialised).
 ## Tests
 
 ```bash
-julia --project=. -e 'using Pkg; Pkg.test()'                       # all (~15 min)
-FFSMJ_SKIP_EXACT=1 julia --project=. -e 'using Pkg; Pkg.test()'    # without the C++ reproduction tests
-FFSMJ_TESTS=t_base,t_pathogen julia --project=. test/behaviour_tests.jl
+julia --project=. -e 'using Pkg; Pkg.test()'                       # all (~6 min)
+FFSM_SKIP_SCENARIOS=1 julia --project=. -e 'using Pkg; Pkg.test()' # only the unit tests and the short runs
+FFSM_TESTS=t_base,t_pathogen julia --project=. test/behaviour_tests.jl
 ```
 
-The scenario tests run the 46 `t_*` scenarios of `test/data/ffsm_tests.ods` (2 regions, 2013–2020, one
-change each: settings, forData/prodData/forToProd/pathRules overrides, GIS layers, output options):
+- `runtests.jl`: unit tests of the helpers, short runs of the `debug` scenario, random seeding
+  (`randomSeed`, `newRandomSeed`) and `initialRandomShuffle`;
+- `behaviour_tests.jl`: the 46 `t_*` scenarios of `test/data/ffsm_tests.ods` (2 regions, 2013–2020, one
+  change each: settings, forData/prodData/forToProd/pathRules overrides, GIS layers, output options). It
+  checks the accounting identities and that each change moves the model in the expected direction with a
+  reasonable magnitude.
 
-- `exact_tests.jl` compares every output file with the C++ one (`test/reference/`) within the solver
-  tolerance. It documents the "exact port" state and can be disabled with `FFSMJ_SKIP_EXACT=1` once the
-  Julia model evolves;
-- `behaviour_tests.jl` checks the accounting identities and that each change moves the model in the
-  expected direction with a reasonable magnitude. It doesn't depend on C++.
+The tests that compared the outputs with the C++ binary (`exact_tests.jl` and the reference outputs) were
+removed after v0.2, when the model stopped using the C++-compatible random numbers.
 
 After a change of the scenarios (`test/build_test_input.jl`) or of `data/ffsmInput.ods`:
 
 ```bash
 julia --project=. test/build_test_input.jl            # needs zip and LibreOffice (soffice)
-julia --project=. test/make_cpp_references.jl ../ffsm  # path of the C++ binary
 ```
 
-See [doc/port_to_julia/tests.md](../doc/port_to_julia/tests.md) for the scenarios, what is checked and the
+See [doc/port_to_julia/tests.md](doc/port_to_julia/tests.md) for the scenarios, what is checked and the
 issues of the model found while writing the tests.
 
 

@@ -1,14 +1,16 @@
 """
-    FFSMj
+    FFSM
 
 Julia port of FFSM++ (Forest Sector Simulator), console version.
 
-Run a scenario with `FFSMj.runModel("data/ffsmInput.ods", "scenarioName")` or from the command line
-with `julia --project=. ffsmj.jl -s scenarioName`.
+Run a scenario with `FFSM.runModel("data/ffsmInput.ods", "scenarioName")` or from the command line
+with `julia --project=. ffsm.jl -s scenarioName`.
 """
-module FFSMj
+module FFSM
 
 using Printf, Dates, Libdl, Random
+using StableRNGs: StableRNG
+using Distributions: Normal, truncated
 using EzXML, ZipArchives
 using JuMP, Ipopt
 import Zlib_jll

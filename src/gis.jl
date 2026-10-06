@@ -425,15 +425,14 @@ Layers::randomShuffle(): randomly reassign the values of a layer among its pixel
 no-value mask is kept). Used, for sensitivity analysis only, when `initialRandomShuffle` is true.
 
 As in the C++ code it applies to every layer read from a file (not only to the integer layers, as the
-setting description says), including the region layers `regLev_1`/`regLev_2`. Unlike the other random
-draws of the port it does not replicate the C++ draws (`std::rand()` and `std::random_shuffle()`): it
-uses Julia's `shuffle!` with a dedicated generator (fixed seed, or a random one with `newRandomSeed`).
+setting description says), including the region layers `regLev_1`/`regLev_2`. It uses the generator of the
+model (`randomSeed`/`newRandomSeed`).
 """
 function randomShuffle!(m, L::Layer)
     G = m.GIS
     vals = G.values[L.name]
     idx = [i for i in eachindex(vals) if vals[i] != G.noValue]
-    vals[idx] = shuffle!(m.shuffleRng, vals[idx])
+    vals[idx] = shuffle!(m.rng, vals[idx])
     return nothing
 end
 
@@ -504,9 +503,8 @@ function applySpatialStochasticValues!(m)
             for j in eachindex(fTypes)
                 sStDev = getForData(m, "sStDev", regId, fTypes[j], "")
                 agr = getForData(m, "agr", regId, fTypes[j], "")
-                d = NormalDist(1.0, sStDev / agr)
                 for px in rpx
-                    c = d(m.gen)
+                    c = rand(m.rng, Normal(1.0, sStDev / agr))
                     px.spMods[j] = cmax(0.4, cmin(1.6, c))
                 end
             end
@@ -521,15 +519,15 @@ function applySpatialStochasticValues!(m)
         if avgExpTypesPrices < 0 || avgExpTypesPrices > 1
             msgOut(MSG_CRITICAL_ERROR, "vgExpTypesPrices parameter must be between 1 (expectations) and 0 (adaptative).")
         end
-        exp_distr = NormalDist(avgExpTypes, expTypes_cv * avgExpTypes)
-        expPrices_distr = NormalDist(avgExpTypesPrices, expTypesPrices_cv * avgExpTypesPrices)
+        # the expectation types are drawn from a normal distribution truncated to [0, 1] (the C++ normSample
+        # applied only the upper bound, as it took a bound equal to 0 for "no bound")
         for px in rpx
             if avgExpTypes == -1
                 px.expType = -1
             else
-                px.expType = normSample(exp_distr, m.gen, 0.0, 1.0)
+                px.expType = truncatedNormalDraw(m.rng, avgExpTypes, expTypes_cv * avgExpTypes, 0.0, 1.0)
             end
-            px.expTypePrices = normSample(expPrices_distr, m.gen, 0.0, 1.0)
+            px.expTypePrices = truncatedNormalDraw(m.rng, avgExpTypesPrices, expTypesPrices_cv * avgExpTypesPrices, 0.0, 1.0)
         end
     end
 end
@@ -543,8 +541,7 @@ function applyStochasticRiskAdversion!(m)
             if raEnabled
                 raStDev = getDoubleSetting(m, "riskAversionAgentSd", DATA_NOW, regId)
                 avg = getDoubleSetting(m, "riskAversionAgentAverage", DATA_NOW, regId)
-                d = NormalDist(avg, raStDev)
-                setValue!(m.GIS, px, "ra", d(m.gen))
+                setValue!(m.GIS, px, "ra", rand(m.rng, Normal(avg, raStDev)))
             else
                 setValue!(m.GIS, px, "ra", 0.0)
             end

@@ -25,8 +25,7 @@ mutable struct FFSMModel
     DO::OutputState
     core::CoreState
     market::Union{Nothing,MarketSets}
-    gen::MT19937
-    shuffleRng::Random.Xoshiro     # used only by initialRandomShuffle (rand() in the C++ code)
+    rng::StableRNG                 # the random number generator of the model (see initRng!)
     cache::RunCache
     hsllib::Union{Nothing,String}
     settingsOverrides::Dict{String,Any}
@@ -38,7 +37,7 @@ function FFSMModel(inputFileName::AbstractString, scenarioName::AbstractString =
     inputFileName = abspath(inputFileName)
     baseDirectory = dirname(inputFileName) * "/"
     return FFSMModel(inputFileName, baseDirectory, String(scenarioName), ModelData(baseDirectory), Gis(), SCDState(0, 0),
-        Carbon(), OutputState(), CoreState(), nothing, MT19937(0), Random.Xoshiro(1), RunCache(), hsllib, Dict{String,Any}(settings),
+        Carbon(), OutputState(), CoreState(), nothing, StableRNG(0), RunCache(), hsllib, Dict{String,Any}(settings),
         Dict{String,Any}(ipoptOptions))
 end
 
@@ -65,15 +64,7 @@ function initLevel1!(m::FFSMModel)
     setDefaultSettings!(m, MD)
     setScenarioSettings!(m, MD)
     applySettingsOverrides!(m)
-    if getBoolSetting(m, "newRandomSeed")
-        seed = (round(Int, time()) + getpid()) % UInt32
-        m.gen = MT19937(seed)
-        m.shuffleRng = Random.Xoshiro(seed)   # srand(time(NULL)+getpid()) in the C++ code
-        m.scenarioName = m.scenarioName * "_" * i2s(uniform_int!(m.gen, 1, 1000000))
-    else
-        m.gen = MT19937(0)    # std::mt19937(NULL)
-        m.shuffleRng = Random.Xoshiro(1)      # rand() is never seeded in the C++ code: same shuffle at every run
-    end
+    initRng!(m)
     m.SCD.year = getIntSetting(m, "initialYear")
     cacheSettings!(m, MD)
     createRegions!(m, MD)
@@ -136,6 +127,7 @@ input file is used. Returns the model object.
 `settings` can override (world level) settings after the scenario-specific ones have been applied,
 e.g. `settings = Dict("simulationYears" => 5, "outputLevel" => 10)`.
 `ipoptOptions` are passed to Ipopt after the default ones (e.g. `Dict("tol" => 1e-9)`).
+The random draws are seeded with the `randomSeed` setting, unless `newRandomSeed` is true (see `initRng!`).
 """
 function runModel(inputFile::AbstractString, scenarioName::AbstractString = ""; hsllib = nothing, settings = Dict{String,Any}(),
                   ipoptOptions = Dict{String,Any}())
@@ -154,7 +146,7 @@ function runModel(inputFile::AbstractString, scenarioName::AbstractString = ""; 
 end
 
 const USAGE = """
-*** FFSMj - Forest Sector Simulator (Julia port) ***
+*** FFSM - Forest Sector Simulator ***
 Usage:
 
  -h  --help                          Prints this help
@@ -170,7 +162,7 @@ Notes:
 function main(args::Vector{String} = ARGS)
     println()
     println("*******************************************************************")
-    println("***   !! Welcome to FFSMj - The Forest Sector Simulator !!     ***")
+    println("***   !! Welcome to FFSM - The Forest Sector Simulator !!      ***")
     println("***        (Julia port of FFSM++, console version)             ***")
     println("*******************************************************************")
     println()
