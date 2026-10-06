@@ -1,6 +1,6 @@
 name = "FFSM"
 uuid = "f8c185e1-48da-4171-a226-1c2fb774b2a8"
-version = "0.1.1"
+version = "0.2"
 authors = ["Antonello Lobianco <antonello@lobianco.org>"]
 
 [deps]
