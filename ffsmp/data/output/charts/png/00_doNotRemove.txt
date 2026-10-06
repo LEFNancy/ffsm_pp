@@ -1,2 +1,0 @@
-Please do not remove this folder even if it is empty, as it is used by the model.
-And please do not remove this file as well, as it is used to keep the directory in the revision system (GIT), thanks!

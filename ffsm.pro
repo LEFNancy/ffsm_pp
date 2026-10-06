@@ -1,6 +1,0 @@
-SUBDIRS += src
-TEMPLATE = subdirs
-
-
-
-

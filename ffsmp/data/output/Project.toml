@@ -1,9 +1,0 @@
-[deps]
-CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
-LAJuliaUtils = "1028da5a-b377-5dba-ae12-107a8c503fa8"
-NamedColors = "51fcb6bd-ecd8-522c-95bc-4099d1d03463"
-OdsIO = "56b0d19f-0a74-5872-92bc-f48f9c5431d4"
-StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
-Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"

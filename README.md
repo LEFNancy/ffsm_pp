@@ -1,8 +1,9 @@
-# FFSMj — Julia port of FFSM++ (console version)
+# FFSM — French Forest Sector Model
 
-FFSMj is a port of the FFSM++ forest sector model from C++/Qt to Julia. It runs the same input
-files (the ODS spreadsheet, the GIS XML file and the ASCII grids) and writes the same output files
-as the C++ binary in console mode (`ffsm -c`). There is no GUI.
+
+French Forest Sector Model is a bio-economic model of the forest sector - forest dynamic, forest management and timber markets.
+
+The current version is implemented in Julia (previous versions were in GAMS and C++).
 
 ## Running
 
@@ -137,13 +138,4 @@ julia --project=. test/make_cpp_references.jl ../ffsm  # path of the C++ binary
 See [doc/port_to_julia/tests.md](../doc/port_to_julia/tests.md) for the scenarios, what is checked and the
 issues of the model found while writing the tests.
 
-## Not ported
 
-In short: the GUI and the non-spatial `ModelCore` (`usePixelData = false` stops the run with a
-critical error). `initialRandomShuffle` is ported but uses Julia's own random draws, so its shuffled
-maps differ from the C++ ones. Several modules are ported but not yet exercised
-by any validation input: pathogens, Hartman payments, spatially explicit forest types, forest area
-changes, among others.
-
-The full list, with the unported helper functions, output differences and deliberate deviations
-from the C++ code, is in [`doc/port_to_julia/port_status.md`](../doc/port_to_julia/port_status.md).

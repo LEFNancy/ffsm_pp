@@ -1,21 +1,5 @@
 # ignoring all model results, object files, the pythia executable, qmake/compilation temporary files and any backup files left by editors
-
-*.o
 *~
-ffsm
-ffsm.exe
-ffsm_debug
-ffsm_debug.exe
-*.pro.user
-*.pro.user.*
-Makefile
-src/Makefile
-src/Makefile.Release
-src/Makefile.Debug
-src/moc_*
-src/qrc_resources.cpp
-src/ui_MainWindow.h
-ipopt.out
 *.~lock.*
 *data/output/results/*
 *data/output/maps/asciiGrids/*
@@ -31,8 +15,6 @@ ipopt.out
 *data/output/optimisationLog.txt
 *data/output/debugOut.csv
 logs/*
-callgrind.out.*
-/libadolc-1.dll
-debug/*
-release/*
+data/tempInput-*
+!**/00_doNotRemove.txt
 
